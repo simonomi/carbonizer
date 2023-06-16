@@ -68,5 +68,6 @@ for file in arguments {
 	print("parsing file \(fileUrl.lastPathComponent)")
 	
 	// do something with data
-	print(data)
+	let ndsFile = try! NDSFile(named: fileUrl.lastPathComponent, from: data)
+	print(ndsFile.contents.count)
 }

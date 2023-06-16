@@ -1,5 +1,5 @@
 //
-//  Utils.swift
+//  utilities.swift
 //  
 //
 //  Created by simon pellerin on 2023-06-15.
