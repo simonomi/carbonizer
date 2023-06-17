@@ -19,3 +19,13 @@ extension Collection {
 		indices.contains(index) ? self[index] : nil
 	}
 }
+
+extension Sequence {
+	func min<T: Comparable>(by keyPath: KeyPath<Element, T>) -> Element? {
+		self.min { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
+	}
+	
+	func max<T: Comparable>(by keyPath: KeyPath<Element, T>) -> Element? {
+		self.max { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
+	}
+}

@@ -11,109 +11,116 @@ struct NDSFile: FileObject {
 	var name: String
 	var metadata: [Metadata]
 	
-	var contents: [File]
+	var fileNameTable: FileNameTable
+	var fileAllocationTable: [(startAddress: UInt32, endAddress: UInt32)]
+	var fileData: Data
 	
-	init(named: String, from inputData: Data) throws {
-		name = named
+	struct FileNameTable {
+		var mainTable: [MainEntry]
+		var subTable: [[SubEntry]]
 		
-		let data = Datastream(inputData)
+		var zippedTables: [(MainEntry, [SubEntry])] {
+			Array(zip(mainTable, subTable))
+		}
+		
+		struct MainEntry {
+			var id: UInt16
+			var subTableOffset: UInt32
+			var firstChildId: UInt16
+			var parentId: UInt16 // for first entry, number of folders instead of parent id
+			
+			init(from data: Datastream, id: UInt16) throws {
+				self.id = id
+				
+				subTableOffset = try data.read(UInt32.self)
+				firstChildId =   try data.read(UInt16.self)
+				parentId =       try data.read(UInt16.self)
+			}
+		}
+		
+		struct SubEntry {
+			var type: EntryType
+			var name: String
+			var id: UInt16
+			
+			enum EntryType {
+				case file, folder
+			}
+			
+			init?(from data: Datastream, id: UInt16) throws {
+				let typeData = try data.read(UInt8.self)
+				let nameLength: UInt8
+				switch typeData {
+					case 0x01...0x7F:
+						type = .file
+						nameLength = typeData
+					case 0x81...0xFF:
+						type = .folder
+						nameLength = typeData - 0x80
+					default:
+						return nil
+				}
+				
+				name = try data.readString(length: nameLength)
+				
+				switch type {
+					case .file:
+						self.id = id
+					case .folder:
+						self.id = try data.read(UInt16.self)
+				}
+			}
+		}
+		
+		init(from data: Datastream, nameTableOffset: UInt32) throws {
+			data.seek(to: nameTableOffset)
+			let rootFolder = try MainEntry(from: data, id: 0xF000)
+			let numberOfFolders = rootFolder.parentId
+			
+			mainTable = try [rootFolder] + (1..<numberOfFolders).map {
+				try MainEntry(from: data, id: 0xF000 + $0)
+			}
+			
+			subTable = try mainTable.map { mainEntry in
+				var subEntries = [SubEntry]()
+				var childId = mainEntry.firstChildId
+				data.seek(to: nameTableOffset + mainEntry.subTableOffset)
+				while let child = try SubEntry(from: data, id: childId) {
+					subEntries.append(child)
+					childId += 1
+				}
+				return subEntries
+			}
+		}
+	}
+	
+	init(from binaryFile: BinaryFile) throws {
+		name = binaryFile.name
+		
+		let data = Datastream(binaryFile.contents)
 		
 		let metadata = try NDSMetadata(from: data)
 		self.metadata = [.ndsMetadata(metadata)]
 		
-		contents = try Self.createFolder(named: "", from: data, id: 0xF000, metadata: metadata).children
-	}
-	
-	static func createFolder(
-		named name: String,
-		from data: Datastream,
-		id: UInt16,
-		metadata: NDSMetadata
-	) throws -> Folder {
-		let folderNumber = UInt32(id) - 0xF000
-		data.seek(to: metadata.fileNameTableOffset + (folderNumber * 8))
+		fileNameTable = try FileNameTable(from: data, nameTableOffset: metadata.fileNameTableOffset)
 		
-		let mainEntry = try FNTMainEntry(from: data, id: id)
-		data.seek(to: metadata.fileNameTableOffset + UInt32(mainEntry.subTableOffset))
-		
-		var children = [File]()
-		var childId = mainEntry.firstChildId
-		while let child = try FNTSubEntry(from: data, id: childId) {
-			let offset = data.offset
-			switch child.type {
-				case .file:
-					children.append(.binaryFile(try createFile(named: child.name, from: data, id: child.id, metadata: metadata)))
-				case .folder:
-					children.append(.folder(try createFolder(named: child.name, from: data, id: child.id, metadata: metadata)))
-			}
-			data.seek(to: offset)
-			childId += 1
-		}
-		
-		return Folder(name: name, children: children)
-	}
-	
-	static func createFile(
-		named name: String,
-		from data: Datastream,
-		id: UInt16,
-		metadata: NDSMetadata
-	) throws -> BinaryFile {
 		data.seek(to: metadata.fileAllocationTableOffset)
-		let startAddress = try data.read(UInt32.self)
-		let endAddress = try data.read(UInt32.self)
-		let length = endAddress - startAddress
-		
-		data.seek(to: startAddress)
-		return BinaryFile(name: name, contents: try data.read(length))
-	}
-	
-	struct FNTMainEntry {
-		var id: UInt16
-		var subTableOffset: UInt32
-		var firstChildId: UInt16
-		var parentId: UInt16 // note: for first entry, is number of folders instead
-		
-		init(from data: Datastream, id: UInt16) throws {
-			self.id = id
-			
-			subTableOffset = try data.read(UInt32.self)
-			firstChildId =   try data.read(UInt16.self)
-			parentId =       try data.read(UInt16.self)
-		}
-	}
-	
-	struct FNTSubEntry {
-		var type: EntryType
-		var name: String
-		var id: UInt16
-		
-		enum EntryType {
-			case file, folder
+		let fileAllocationTableCount = metadata.fileAllocationTableLength / 8
+		fileAllocationTable = try (0..<fileAllocationTableCount).map { _ in
+			(try data.read(UInt32.self), try data.read(UInt32.self))
 		}
 		
-		init?(from data: Datastream, id: UInt16) throws {
-			let typeData = try data.read(UInt8.self)
-			let nameLength: UInt8
-			switch typeData {
-				case 0x01...0x7F:
-					type = .file
-					nameLength = typeData
-				case 0x81...0xFF:
-					type = .folder
-					nameLength = typeData - 0x80
-				default:
-					return nil
-			}
+		if let fileDataStartAddress = fileAllocationTable.min(by: \.startAddress)?.startAddress,
+		   let fileDataEndAddress = fileAllocationTable.max(by: \.endAddress)?.endAddress {
+			data.seek(to: fileDataStartAddress)
+			let length = fileDataEndAddress - fileDataStartAddress
+			fileData = try data.read(length)
 			
-			name = try data.readString(length: nameLength)
-			
-			switch type {
-				case .file:
-					self.id = id
-				case .folder:
-					self.id = try data.read(UInt16.self)
+			fileAllocationTable = fileAllocationTable.map {
+				($0.startAddress - fileDataStartAddress, $0.endAddress - fileDataStartAddress)
 			}
+		} else {
+			fileData = Data()
 		}
 	}
 }
@@ -203,5 +210,49 @@ struct NDSMetadata {
 		nintendoLogoCRC =					try data.read(UInt16.self)
 		headerCRC =							try data.read(UInt16.self)
 		debuggerReserved =					try data.read(32)
+	}
+}
+
+//extension BinaryFile {
+//	init(from ndsFile: NDSFile) {
+//
+//	}
+//}
+
+extension Folder {
+	init(from ndsFile: NDSFile) throws {
+		name = ndsFile.name
+		metadata = ndsFile.metadata
+		
+		let rootFolder = try Self.createFolder(named: "", using: ndsFile, id: 0xF000)
+		
+		children = rootFolder.children
+	}
+	
+	fileprivate enum DecodingError: Error {
+		case idNotFound(id: UInt16)
+	}
+	
+	fileprivate static func createFolder(named name: String, using ndsFile: NDSFile, id: UInt16) throws -> Folder {
+		guard let (_, subTable) = ndsFile.fileNameTable.zippedTables.first(where: { $0.0.id == id }) else {
+			throw DecodingError.idNotFound(id: id)
+		}
+		
+		let children = try subTable.map { subEntry in
+			switch subEntry.type {
+				case .file:
+					return File.binaryFile(createFile(named: subEntry.name, using: ndsFile, id: subEntry.id))
+				case .folder:
+					return File.folder(try createFolder(named: subEntry.name, using: ndsFile, id: subEntry.id))
+			}
+		}
+		
+		return Folder(name: name, children: children)
+	}
+	
+	fileprivate static func createFile(named name: String, using ndsFile: NDSFile, id: UInt16) -> BinaryFile {
+		let (startAddress, endAddress) = ndsFile.fileAllocationTable[Int(id)]
+		let data = ndsFile.fileData[startAddress..<endAddress]
+		return BinaryFile(name: name, contents: data)
 	}
 }

@@ -67,7 +67,10 @@ for file in arguments {
 	
 	print("parsing file \(fileUrl.lastPathComponent)")
 	
-	// do something with data
-	let ndsFile = try! NDSFile(named: fileUrl.lastPathComponent, from: data)
-	print(ndsFile.contents.count)
+	let binaryFile = BinaryFile(name: fileUrl.lastPathComponent, contents: data)
+	let ndsFile = try! NDSFile(from: binaryFile)
+	let folder = try! Folder(from: ndsFile)
+	
+	let newBinaryFile = BinaryFile(from: ndsFile)
+	print(binaryFile == newBinaryFile)
 }
