@@ -71,11 +71,13 @@ for file in arguments {
 	let ndsFile = try! NDSFile(from: binaryFile)
 	
 //	let folder = try! Folder(from: ndsFile)
-//	print(folder.children.count)
-	
-//	let newBinaryFile = BinaryFile(from: ndsFile)
+//
+////	let NDSFileFromFolder = try! NDSFile(from: folder)
+////	print(String(reflecting: ndsFile) == String(reflecting: NDSFileFromFolder))
+//
+//	let newBinaryFile = try! BinaryFile(from: ndsFile)
 //	print(binaryFile.contents == newBinaryFile.contents)
 //
-//	let newNdsFile = try! NDSFile(from: newBinaryFile)
-//	print(String(reflecting: ndsFile) == String(reflecting: newNdsFile))
+//	let NDSFileFromBinary = try! NDSFile(from: newBinaryFile)
+//	print(String(reflecting: ndsFile) == String(reflecting: NDSFileFromBinary))
 }

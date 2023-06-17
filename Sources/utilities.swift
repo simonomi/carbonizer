@@ -29,3 +29,10 @@ extension Sequence {
 		self.max { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
 	}
 }
+
+extension JSONEncoder {
+	convenience init(_ formatting: OutputFormatting) {
+		self.init()
+		outputFormatting = formatting
+	}
+}

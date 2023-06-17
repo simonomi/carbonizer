@@ -31,16 +31,16 @@ struct NDSFile {
 		header = try Header(from: data)
 		
 		// arm9
-		data.seek(to: header.arm9RomOffset)
+		data.seek(to: header.arm9Offset)
 		arm9 = try data.read(header.arm9Size)
 		data.seek(to: header.arm9OverlayOffset)
-		arm9Overlay = try data.read(header.arm9OverlayLength)
+		arm9Overlay = try data.read(header.arm9OverlaySize)
 		
 		// arm7
-		data.seek(to: header.arm7RomOffset)
+		data.seek(to: header.arm7Offset)
 		arm7 = try data.read(header.arm7Size)
 		data.seek(to: header.arm7OverlayOffset)
-		arm7Overlay = try data.read(header.arm7OverlayLength)
+		arm7Overlay = try data.read(header.arm7OverlaySize)
 		
 		// icon banner
 		data.seek(to: header.iconBannerOffset)
@@ -55,7 +55,7 @@ struct NDSFile {
 		let fileAllocationTable = try FileAllocationTable(
 			from: data,
 			offset: header.fileAllocationTableOffset,
-			length: header.fileAllocationTableLength
+			length: header.fileAllocationTableSize
 		)
 		
 		let rootFolder = try Self.createFolder(
@@ -66,6 +66,28 @@ struct NDSFile {
 			id: 0xF000
 		)
 		contents = rootFolder.children
+	}
+	
+	init(from folder: Folder) throws {
+		guard case .binaryFile(let headerFile) =		folder.getChild(named: "header.json"),
+			  case .binaryFile(let arm9File) =			folder.getChild(named: "arm9.bin"),
+			  case .binaryFile(let arm9OverlayFile) =	folder.getChild(named: "arm9 overlay.bin"),
+			  case .binaryFile(let arm7File) =			folder.getChild(named: "arm7.bin"),
+			  case .binaryFile(let arm7OverlayFile) =	folder.getChild(named: "arm7 overlay.bin"),
+			  case .binaryFile(let iconBannerFile) =	folder.getChild(named: "icon banner.bin"),
+			  case .folder(let dataFolder) =			folder.getChild(named: "data")
+		else {
+			fatalError()
+		}
+		
+		name = folder.name + ".nds"
+		header = try JSONDecoder().decode(Header.self, from: headerFile.contents)
+		arm9 = arm9File.contents
+		arm9Overlay = arm9OverlayFile.contents
+		arm7 = arm7File.contents
+		arm7Overlay = arm7OverlayFile.contents
+		iconBanner = iconBannerFile.contents
+		contents = dataFolder.children
 	}
 	
 	fileprivate static func createFolder(
@@ -120,48 +142,48 @@ struct NDSFile {
 		return BinaryFile(name: name, contents: contents)
 	}
 	
-	struct Header {
-		let gameTitle: String
-		let gamecode: String
-		let makercode: String
-		let unitcode: UInt8
-		let encryptionSeedSelect: UInt8
-		let deviceCapacity: UInt8
-		let reserved1: Data
-		let gameRevision: UInt16
-		let romVersion: UInt8
-		let internalFlags: UInt8
-		let arm9RomOffset: UInt32
-		let arm9EntryAddress: UInt32
-		let arm9LoadAddress: UInt32
-		let arm9Size: UInt32
-		let arm7RomOffset: UInt32
-		let arm7EntryAddress: UInt32
-		let arm7LoadAddress: UInt32
-		let arm7Size: UInt32
-		let fileNameTableOffset: UInt32
-		let fileNameTableLength: UInt32
-		let fileAllocationTableOffset: UInt32
-		let fileAllocationTableLength: UInt32
-		let arm9OverlayOffset: UInt32
-		let arm9OverlayLength: UInt32
-		let arm7OverlayOffset: UInt32
-		let arm7OverlayLength: UInt32
-		let normalCardControlRegisterSettings: UInt32
-		let secureCardControlRegisterSettings: UInt32
-		let iconBannerOffset: UInt32
-		let secureAreaCRC: UInt16
-		let secureTransferTimeout: UInt16
-		let arm9Autoload: UInt32
-		let arm7Autoload: UInt32
-		let secureDisable: UInt64
-		let ntrRegionROMSize: UInt32
-		let headerSize: UInt32
-		let reserved2: Data
-		let nintendoLogo: Data
-		let nintendoLogoCRC: UInt16
-		let headerCRC: UInt16
-		let debuggerReserved: Data
+	struct Header: Codable {
+		var gameTitle: String
+		var gamecode: String
+		var makercode: String
+		var unitcode: UInt8
+		var encryptionSeedSelect: UInt8
+		var deviceCapacity: UInt8
+		var reserved1: Data
+		var ndsRegion: UInt16
+		var romVersion: UInt8
+		var internalFlags: UInt8
+		var arm9Offset: UInt32
+		var arm9EntryAddress: UInt32
+		var arm9LoadAddress: UInt32
+		var arm9Size: UInt32
+		var arm7Offset: UInt32
+		var arm7EntryAddress: UInt32
+		var arm7LoadAddress: UInt32
+		var arm7Size: UInt32
+		var fileNameTableOffset: UInt32
+		var fileNameTableSize: UInt32
+		var fileAllocationTableOffset: UInt32
+		var fileAllocationTableSize: UInt32
+		var arm9OverlayOffset: UInt32
+		var arm9OverlaySize: UInt32
+		var arm7OverlayOffset: UInt32
+		var arm7OverlaySize: UInt32
+		var normalCardControlRegisterSettings: UInt32
+		var secureCardControlRegisterSettings: UInt32
+		var iconBannerOffset: UInt32
+		var secureAreaCRC: UInt16
+		var secureTransferTimeout: UInt16
+		var arm9Autoload: UInt32
+		var arm7Autoload: UInt32
+		var secureDisable: UInt64
+		var totalROMSize: UInt32
+		var headerSize: UInt32
+		var reserved2: Data
+		var nintendoLogo: Data
+		var nintendoLogoCRC: UInt16
+		var headerCRC: UInt16
+		var debuggerReserved: Data
 		
 		init(from data: Datastream) throws {
 			gameTitle =							try data.readString(length: 12)
@@ -171,25 +193,25 @@ struct NDSFile {
 			encryptionSeedSelect =				try data.read(UInt8.self)
 			deviceCapacity =					try data.read(UInt8.self)
 			reserved1 =							try data.read(7)
-			gameRevision =						try data.read(UInt16.self)
+			ndsRegion =							try data.read(UInt16.self)
 			romVersion =						try data.read(UInt8.self)
 			internalFlags =						try data.read(UInt8.self)
-			arm9RomOffset =						try data.read(UInt32.self)
+			arm9Offset =						try data.read(UInt32.self)
 			arm9EntryAddress =					try data.read(UInt32.self)
 			arm9LoadAddress =					try data.read(UInt32.self)
 			arm9Size =							try data.read(UInt32.self)
-			arm7RomOffset =						try data.read(UInt32.self)
+			arm7Offset =						try data.read(UInt32.self)
 			arm7EntryAddress =					try data.read(UInt32.self)
 			arm7LoadAddress =					try data.read(UInt32.self)
 			arm7Size =							try data.read(UInt32.self)
 			fileNameTableOffset =				try data.read(UInt32.self)
-			fileNameTableLength =				try data.read(UInt32.self)
+			fileNameTableSize =					try data.read(UInt32.self)
 			fileAllocationTableOffset =			try data.read(UInt32.self)
-			fileAllocationTableLength =			try data.read(UInt32.self)
+			fileAllocationTableSize =			try data.read(UInt32.self)
 			arm9OverlayOffset =					try data.read(UInt32.self)
-			arm9OverlayLength =					try data.read(UInt32.self)
+			arm9OverlaySize =					try data.read(UInt32.self)
 			arm7OverlayOffset =					try data.read(UInt32.self)
-			arm7OverlayLength =					try data.read(UInt32.self)
+			arm7OverlaySize =					try data.read(UInt32.self)
 			normalCardControlRegisterSettings =	try data.read(UInt32.self)
 			secureCardControlRegisterSettings =	try data.read(UInt32.self)
 			iconBannerOffset =					try data.read(UInt32.self)
@@ -198,13 +220,101 @@ struct NDSFile {
 			arm9Autoload =						try data.read(UInt32.self)
 			arm7Autoload =						try data.read(UInt32.self)
 			secureDisable =						try data.read(UInt64.self)
-			ntrRegionROMSize =					try data.read(UInt32.self)
+			totalROMSize =						try data.read(UInt32.self)
 			headerSize =						try data.read(UInt32.self)
 			reserved2 =							try data.read(56)
 			nintendoLogo =						try data.read(156)
 			nintendoLogoCRC =					try data.read(UInt16.self)
 			headerCRC =							try data.read(UInt16.self)
 			debuggerReserved =					try data.read(32)
+		}
+		
+		func write(to data: Datawriter) throws {
+			try data.write(gameTitle)
+			try data.write(gamecode)
+			try data.write(makercode)
+			data.write(unitcode)
+			data.write(encryptionSeedSelect)
+			data.write(deviceCapacity)
+			data.write(reserved1)
+			data.write(ndsRegion)
+			data.write(romVersion)
+			data.write(internalFlags)
+			data.write(arm9Offset)
+			data.write(arm9EntryAddress)
+			data.write(arm9LoadAddress)
+			data.write(arm9Size)
+			data.write(arm7Offset)
+			data.write(arm7EntryAddress)
+			data.write(arm7LoadAddress)
+			data.write(arm7Size)
+			data.write(fileNameTableOffset)
+			data.write(fileNameTableSize)
+			data.write(fileAllocationTableOffset)
+			data.write(fileAllocationTableSize)
+			data.write(arm9OverlayOffset)
+			data.write(arm9OverlaySize)
+			data.write(arm7OverlayOffset)
+			data.write(arm7OverlaySize)
+			data.write(normalCardControlRegisterSettings)
+			data.write(secureCardControlRegisterSettings)
+			data.write(iconBannerOffset)
+			data.write(secureAreaCRC)
+			data.write(secureTransferTimeout)
+			data.write(arm9Autoload)
+			data.write(arm7Autoload)
+			data.write(secureDisable)
+			data.write(totalROMSize)
+			data.write(headerSize)
+			data.write(reserved2)
+			data.write(nintendoLogo)
+			data.write(nintendoLogoCRC)
+			data.write(headerCRC)
+			data.write(debuggerReserved)
+		}
+		
+		enum CodingKeys: String, CodingKey {
+			case gameTitle = "Game Title"
+			case gamecode = "Gamecode"
+			case makercode = "Makercode"
+			case unitcode = "Unitcode"
+			case encryptionSeedSelect = "Encryption seed select"
+			case deviceCapacity = "Devicecapacity"
+			case reserved1 = "Reserved (1)"
+			case ndsRegion = "NDS Region"
+			case romVersion = "ROM Version"
+			case internalFlags = "Internal flags, (Bit2: Autostart)"
+			case arm9Offset = "ARM9 offset"
+			case arm9EntryAddress = "ARM9 entry address"
+			case arm9LoadAddress = "ARM9 load address"
+			case arm9Size = "ARM9 size"
+			case arm7Offset = "ARM7 offset"
+			case arm7EntryAddress = "ARM7 entry address"
+			case arm7LoadAddress = "ARM7 load address"
+			case arm7Size = "ARM7 size"
+			case fileNameTableOffset = "File Name Table (FNT) offset"
+			case fileNameTableSize = "File Name Table (FNT) size"
+			case fileAllocationTableOffset = "File Allocation Table (FAT) offset"
+			case fileAllocationTableSize = "File Allocation Table (FAT) size"
+			case arm9OverlayOffset = "ARM9 overlay offset"
+			case arm9OverlaySize = "ARM9 overlay size"
+			case arm7OverlayOffset = "ARM7 overlay offset"
+			case arm7OverlaySize = "ARM7 overlay size"
+			case normalCardControlRegisterSettings = "Normal card control register settings"
+			case secureCardControlRegisterSettings = "Secure card control register settings"
+			case iconBannerOffset = "Icon Banner offset"
+			case secureAreaCRC = "Secure area (2K) CRC"
+			case secureTransferTimeout = "Secure transfer timeout"
+			case arm9Autoload = "ARM9 autoload"
+			case arm7Autoload = "ARM7 autoload"
+			case secureDisable = "Secure disable"
+			case totalROMSize = "Total ROM size"
+			case headerSize = "Header size"
+			case reserved2 = "Reserved (2)"
+			case nintendoLogo = "Nintendo Logo"
+			case nintendoLogoCRC = "Nintendo Logo CRC"
+			case headerCRC = "Header CRC"
+			case debuggerReserved = "Debugger reserved"
 		}
 	}
 	
@@ -263,6 +373,15 @@ struct NDSFile {
 						self.id = try data.read(UInt16.self)
 				}
 			}
+			
+			var byteLength: Int {
+				switch type {
+					case .file:
+						return name.count + 1
+					case .folder:
+						return name.count + 3
+				}
+			}
 		}
 		
 		init(from data: Datastream, offset: UInt32) throws {
@@ -314,14 +433,56 @@ struct NDSFile {
 	}
 }
 
-//extension BinaryFile {
-//	init(from ndsFile: NDSFile) {
-//		
-//	}
-//}
+extension Folder {
+	init(from ndsFile: NDSFile) throws {
+		name = ndsFile.name.replacing(#/\.nds$/#, with: "")
+		
+		let headerData = try JSONEncoder(.prettyPrinted).encode(ndsFile.header)
+		
+		children = [
+			.binaryFile(BinaryFile(name: "header.json", contents: headerData)),
+			.binaryFile(BinaryFile(name: "arm9.bin", contents: ndsFile.arm9)),
+			.binaryFile(BinaryFile(name: "arm9 overlay.bin", contents: ndsFile.arm9Overlay)),
+			.binaryFile(BinaryFile(name: "arm7.bin", contents: ndsFile.arm7)),
+			.binaryFile(BinaryFile(name: "arm7 overlay.bin", contents: ndsFile.arm7Overlay)),
+			.binaryFile(BinaryFile(name: "icon banner.bin", contents: ndsFile.iconBanner)),
+			.folder(Folder(name: "data", children: ndsFile.contents))
+		]
+	}
+}
 
-//extension Folder {
-//	init(from ndsFile: NDSFile) throws {
-//
-//	}
-//}
+extension BinaryFile {
+	init(from ndsFile: NDSFile) throws {
+		var header = ndsFile.header
+		let data = Datawriter()
+		
+		data.seek(to: 0x4000)
+		header.arm9Offset = UInt32(data.offset)
+		header.arm9Size = UInt32(ndsFile.arm9.count)
+		data.write(ndsFile.arm9)
+		
+		data.fourByteAlign()
+		header.arm9OverlayOffset = UInt32(data.offset)
+		header.arm9OverlaySize = UInt32(ndsFile.arm9Overlay.count)
+		data.write(ndsFile.arm9Overlay)
+		
+		data.fourByteAlign()
+		header.arm7Offset = UInt32(data.offset)
+		header.arm7Size = UInt32(ndsFile.arm7.count)
+		data.write(ndsFile.arm7)
+		
+		data.fourByteAlign()
+		header.arm7OverlayOffset = UInt32(data.offset)
+		header.arm7OverlaySize = UInt32(ndsFile.arm7Overlay.count)
+		data.write(ndsFile.arm7Overlay)
+		
+		data.fourByteAlign()
+		header.iconBannerOffset = UInt32(data.offset)
+		data.write(ndsFile.iconBanner)
+		
+		fatalError()
+		
+		data.seek(to: 0)
+		try header.write(to: data)
+	}
+}

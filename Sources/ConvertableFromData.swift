@@ -25,8 +25,18 @@ extension ConvertableFromData {
 		self.init(output)
 	}
 	
-	init?(littleEndian data: Data) {
-		self.init(from: Data(data.reversed()))
+//	init?(swapingEndianness data: Data) {
+//		self.init(from: Data(data.reversed()))
+//	}
+	
+	var asData: Data {
+		var output = Data()
+		
+		for index in 0 ..< Self.numberOfBytes {
+			output.append(UInt8(truncatingIfNeeded: self >> (index * 8)))
+		}
+		
+		return output
 	}
 }
 
