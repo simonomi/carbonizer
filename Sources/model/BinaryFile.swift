@@ -7,9 +7,7 @@
 
 import Foundation
 
-struct BinaryFile: FileObject {
+struct BinaryFile {
 	var name: String
-	var metadata = [Metadata]()
-	
 	var contents: Data
 }

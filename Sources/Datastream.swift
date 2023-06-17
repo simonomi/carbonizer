@@ -38,7 +38,7 @@ class Datastream {
 		let oldOffset = Int(offset)
 		offset += Int(numberOfBytes)
 		
-		if !data.indices.contains(offset - 1) {
+		if offset >= data.count {
 			let context = "file \(file) on line \(line)"
 			throw ReadError.outOfBounds(index: offset, size: data.count, context: context)
 		}
