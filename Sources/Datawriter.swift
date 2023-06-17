@@ -34,14 +34,21 @@ class Datawriter {
 		if offset == data.count {
 			data.append(inputData)
 		} else {
-			let range = offset ..< offset + inputData.count
+			let endIndex = offset + inputData.count
+			
+			if endIndex > data.count {
+				data.append(contentsOf: Array(repeating: 0, count: Int(endIndex) - data.count))
+			}
+			
+			let range = offset ..< endIndex
 			data.replaceSubrange(range, with: inputData)
 		}
+		offset += inputData.count
 	}
 	
 	func seek<T: BinaryInteger>(to offset: T) {
 		self.offset = Int(offset)
-		if data.count < offset {
+		if offset > data.count {
 			data.append(contentsOf: Array(repeating: 0, count: Int(offset) - data.count))
 		}
 	}
@@ -51,6 +58,15 @@ class Datawriter {
 	}
 	
 	func fourByteAlign() {
-		seek(bytes: 4 - (offset % 4))
+		twofiftysixByteAlign()
+//		if !offset.isMultiple(of: 4) {
+//			seek(bytes: 4 - (offset % 4))
+//		}
+	}
+	
+	func twofiftysixByteAlign() {
+		if !offset.isMultiple(of: 0x100) {
+			seek(bytes: 0x100 - (offset % 0x100))
+		}
 	}
 }

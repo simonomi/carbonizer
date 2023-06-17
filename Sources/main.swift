@@ -70,14 +70,15 @@ for file in arguments {
 	let binaryFile = BinaryFile(name: fileUrl.lastPathComponent, contents: data)
 	let ndsFile = try! NDSFile(from: binaryFile)
 	
-//	let folder = try! Folder(from: ndsFile)
-//
-////	let NDSFileFromFolder = try! NDSFile(from: folder)
-////	print(String(reflecting: ndsFile) == String(reflecting: NDSFileFromFolder))
-//
-//	let newBinaryFile = try! BinaryFile(from: ndsFile)
-//	print(binaryFile.contents == newBinaryFile.contents)
-//
-//	let NDSFileFromBinary = try! NDSFile(from: newBinaryFile)
-//	print(String(reflecting: ndsFile) == String(reflecting: NDSFileFromBinary))
+	let folder = try! Folder(from: ndsFile)
+	
+//	let NDSFileFromFolder = try! NDSFile(from: folder)
+//	print(String(reflecting: ndsFile) == String(reflecting: NDSFileFromFolder))
+	
+	let newBinaryFile = try! BinaryFile(from: ndsFile)
+	print(binaryFile.contents == newBinaryFile.contents)
+	
+	try newBinaryFile.contents.write(to: .homeDirectory.appending(components: "Downloads", "ff1", "roms", "reencoded.nds"))
+	
+	let NDSFileFromBinary = try! NDSFile(from: newBinaryFile)
 }

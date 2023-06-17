@@ -30,6 +30,12 @@ extension Sequence {
 	}
 }
 
+extension Sequence where Element: AdditiveArithmetic {
+	func sum() -> Element {
+		reduce(.zero, +)
+	}
+}
+
 extension JSONEncoder {
 	convenience init(_ formatting: OutputFormatting) {
 		self.init()
