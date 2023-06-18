@@ -13,10 +13,12 @@ struct NDSFile {
 	var header: Header
 	
 	var arm9: Data
-	var arm9Overlay: Data
+	var arm9OverlayTable: OverlayTable
+	var arm9Overlays: [BinaryFile]
 	
 	var arm7: Data
-	var arm7Overlay: Data
+	var arm7OverlayTable: OverlayTable
+	var arm7Overlays: [BinaryFile]
 	
 	var iconBanner: Data
 	
@@ -94,6 +96,21 @@ struct NDSFile {
 		struct Entry {
 			var startAddress: UInt32
 			var endAddress: UInt32
+		}
+	}
+	
+	struct OverlayTable: Codable {
+		var entries = [Entry]()
+		
+		struct Entry: Codable {
+			var id: UInt32
+			var loadAddress: UInt32
+			var size: UInt32
+			var bssSize: UInt32
+			var staticInitializerStartAddress: UInt32
+			var staticInitializerEndAddress: UInt32
+			var fileId: UInt32
+			var reserved: UInt32
 		}
 	}
 }

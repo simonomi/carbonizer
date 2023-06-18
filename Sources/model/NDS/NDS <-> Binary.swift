@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CrcSwift
 
 extension NDSFile {
 	init(from binaryFile: BinaryFile) throws {
@@ -20,30 +21,60 @@ extension NDSFile {
 		data.seek(to: header.arm9Offset)
 		arm9 = try data.read(header.arm9Size)
 		data.seek(to: header.arm9OverlayOffset)
-		arm9Overlay = try data.read(header.arm9OverlaySize)
+		arm9OverlayTable = try OverlayTable(
+			from: data,
+			size: header.arm9OverlaySize
+		)
 		
 		// arm7
 		data.seek(to: header.arm7Offset)
 		arm7 = try data.read(header.arm7Size)
 		data.seek(to: header.arm7OverlayOffset)
-		arm7Overlay = try data.read(header.arm7OverlaySize)
+		arm7OverlayTable = try OverlayTable(
+			from: data,
+			size: header.arm7OverlaySize
+		)
 		
 		// icon banner
 		data.seek(to: header.iconBannerOffset)
 		iconBanner = try data.read(0x840) // hardcoded for version 1
 		
-		// contents
+		// file name table
 		let fileNameTable = try FileNameTable(
 			from: data,
 			offset: header.fileNameTableOffset
 		)
 		
+		// file allocation table
+		data.seek(to: header.fileAllocationTableOffset)
 		let fileAllocationTable = try FileAllocationTable(
 			from: data,
-			offset: header.fileAllocationTableOffset,
-			length: header.fileAllocationTableSize
+			size: header.fileAllocationTableSize
 		)
 		
+		// arm9 overlays
+		arm9Overlays = try arm9OverlayTable.entries.map { overlay in
+			let fileName = "overlay \(overlay.fileId).bin"
+			return try Self.createFile(
+				named: fileName,
+				from: data,
+				using: fileAllocationTable,
+				id: UInt16(overlay.fileId)
+			)
+		}.sorted { $0.name < $1.name }
+		
+		// arm7 overlays
+		arm7Overlays = try arm7OverlayTable.entries.map { overlay in
+			let fileName = "overlay \(overlay.fileId).bin"
+			return try Self.createFile(
+				named: fileName,
+				from: data,
+				using: fileAllocationTable,
+				id: UInt16(overlay.fileId)
+			)
+		}.sorted { $0.name < $1.name }
+		
+		// contents
 		let rootFolder = try Self.createFolder(
 			named: "",
 			from: data,
@@ -219,6 +250,63 @@ extension NDSFile.FileNameTable {
 		}
 	}
 	
+	init(from folder: Folder, firstFileId: UInt16) throws {
+		let folderTree = folder.getFolderTree()
+		let folderIds = folderTree.indices.map { $0 + 0xF000 }.map(UInt16.init)
+		let allFolders = Array(zip(folderTree, folderIds))
+		
+		let fntMainTableSize = allFolders.count * 8
+		
+		var fileId = firstFileId
+		for (folder, folderId) in allFolders {
+			let subTableOffset = fntMainTableSize + subTable.flatMap { $0.map(\.byteLength) + [1] }.sum()
+			
+			let parentId: UInt16
+			if mainTable.isEmpty {
+				parentId = UInt16(allFolders.count)
+			} else {
+				if let parentIndex = subTable.firstIndex(where: { $0.contains { $0.id == folderId } }) {
+					parentId = mainTable[parentIndex].id
+				} else {
+					throw Datastream.ReadError.outOfBounds(
+						index: Int(folderId),
+						size: subTable.count,
+						context: "FileNameTable.init"
+					)
+				}
+			}
+			
+			let mainEntry = NDSFile.FileNameTable.MainEntry(
+				id: folderId,
+				subTableOffset: UInt32(subTableOffset),
+				firstChildId: fileId,
+				parentId: parentId
+			)
+			
+			var subTable = [NDSFile.FileNameTable.SubEntry]()
+			for child in folder.children {
+				let subEntry: NDSFile.FileNameTable.SubEntry
+				switch child {
+					case .folder(let folder):
+						// note: not perfect, but i dont think it's ever validated so 🤷🏻‍♀️
+						let subFolderId = allFolders.first {
+							$0.0.name == folder.name && $0.0.children.count == folder.children.count
+						}?.1 ?? UInt16.zero
+						subEntry = NDSFile.FileNameTable.SubEntry(type: .folder, name: folder.name, id: subFolderId)
+					case .binaryFile(let binaryFile):
+						subEntry = NDSFile.FileNameTable.SubEntry(type: .file, name: binaryFile.name, id: fileId)
+						fileId += 1
+					default:
+						continue
+				}
+				subTable.append(subEntry)
+			}
+			
+			mainTable.append(mainEntry)
+			self.subTable.append(subTable)
+		}
+	}
+	
 	func write(to data: Datawriter) throws {
 		mainTable.forEach { $0.write(to: data) }
 		for table in subTable {
@@ -305,9 +393,8 @@ extension NDSFile.FileNameTable.SubEntry {
 }
 
 extension NDSFile.FileAllocationTable {
-	init(from data: Datastream, offset: UInt32, length: UInt32) throws {
-		data.seek(to: offset)
-		let entryCount = length / 8
+	init(from data: Datastream, size: UInt32) throws {
+		let entryCount = size / 8
 		entries = try (0..<entryCount).map { _ in
 			try Entry(from: data)
 		}
@@ -336,6 +423,49 @@ extension NDSFile.FileAllocationTable.Entry {
 	}
 }
 
+extension NDSFile.OverlayTable {
+	init(from data: Datastream, size: UInt32) throws {
+		let entryCount = size / 32
+		entries = try (0..<entryCount).map { _ in
+			try Entry(from: data)
+		}
+	}
+	
+	func write(to data: Datawriter) {
+		for entry in entries {
+			entry.write(to: data)
+		}
+	}
+	
+	var size: Int {
+		entries.count * 32
+	}
+}
+
+extension NDSFile.OverlayTable.Entry {
+	init(from data: Datastream) throws {
+		id =							try data.read(UInt32.self)
+		loadAddress =					try data.read(UInt32.self)
+		size =							try data.read(UInt32.self)
+		bssSize =						try data.read(UInt32.self)
+		staticInitializerStartAddress =	try data.read(UInt32.self)
+		staticInitializerEndAddress =	try data.read(UInt32.self)
+		fileId =						try data.read(UInt32.self)
+		reserved =						try data.read(UInt32.self)
+	}
+	
+	func write(to data: Datawriter) {
+		data.write(id)
+		data.write(loadAddress)
+		data.write(size)
+		data.write(bssSize)
+		data.write(staticInitializerStartAddress)
+		data.write(staticInitializerEndAddress)
+		data.write(fileId)
+		data.write(reserved)
+	}
+}
+
 extension BinaryFile {
 	init(from ndsFile: NDSFile) throws {
 		name = ndsFile.name
@@ -349,11 +479,16 @@ extension BinaryFile {
 		header.arm9Size = UInt32(ndsFile.arm9.count)
 		data.write(ndsFile.arm9)
 		
-		// arm9 overlay
-		data.fourByteAlign()
-		header.arm9OverlayOffset = UInt32(data.offset)
-		header.arm9OverlaySize = UInt32(ndsFile.arm9Overlay.count)
-		data.write(ndsFile.arm9Overlay)
+		// arm9 overlay table
+		if ndsFile.arm9Overlays.isEmpty {
+			header.arm9OverlayOffset = 0
+			header.arm9OverlaySize = 0
+		} else {
+			data.fourByteAlign()
+			header.arm9OverlayOffset = UInt32(data.offset)
+			header.arm9OverlaySize = UInt32(ndsFile.arm9OverlayTable.size)
+			ndsFile.arm9OverlayTable.write(to: data)
+		}
 		
 		// arm7
 		data.fourByteAlign()
@@ -361,70 +496,26 @@ extension BinaryFile {
 		header.arm7Size = UInt32(ndsFile.arm7.count)
 		data.write(ndsFile.arm7)
 		
-		// arm7 overlay
-		data.fourByteAlign()
-		header.arm7OverlayOffset = UInt32(data.offset)
-		header.arm7OverlaySize = UInt32(ndsFile.arm7Overlay.count)
-		data.write(ndsFile.arm7Overlay)
+		// arm7 overlay table
+		if ndsFile.arm7Overlays.isEmpty {
+			header.arm7OverlayOffset = 0
+			header.arm7OverlaySize = 0
+		} else {
+			data.fourByteAlign()
+			header.arm7OverlayOffset = UInt32(data.offset)
+			header.arm7OverlaySize = UInt32(ndsFile.arm7OverlayTable.size)
+			ndsFile.arm7OverlayTable.write(to: data)
+		}
 		
 		// icon banner
 		data.fourByteAlign()
 		header.iconBannerOffset = UInt32(data.offset)
 		data.write(ndsFile.iconBanner)
 		
-		// create file name table TODO: move this into a function on filenametable
+		// create file name table
 		let rootFolder = Folder(name: "", children: ndsFile.contents)
-		let folderTree = rootFolder.getFolderTree()
-		let folderIds = folderTree.indices.map { $0 + 0xF000 }.map(UInt16.init)
-		let allFolders = Array(zip(folderTree, folderIds))
-		
-		let fntMainTableSize = allFolders.count * 8
-		
-		var fileNameTable = NDSFile.FileNameTable()
-		var fileId = UInt16.zero
-		for (folder, folderId) in allFolders {
-			let subTableOffset = fntMainTableSize + fileNameTable.subTable.flatMap { $0.map(\.byteLength) + [1] }.sum()
-			
-			let parentId: UInt16
-			if fileNameTable.mainTable.isEmpty {
-				parentId = UInt16(allFolders.count)
-			} else {
-				if let parentIndex = fileNameTable.subTable.firstIndex(where: { $0.contains { $0.id == folderId } }) {
-					parentId = fileNameTable.mainTable[parentIndex].id
-				} else {
-					fatalError() // TODO: handle
-				}
-			}
-			
-			let mainEntry = NDSFile.FileNameTable.MainEntry(
-				id: folderId,
-				subTableOffset: UInt32(subTableOffset),
-				firstChildId: fileId,
-				parentId: parentId
-			)
-			
-			var subTable = [NDSFile.FileNameTable.SubEntry]()
-			for child in folder.children {
-				let subEntry: NDSFile.FileNameTable.SubEntry
-				switch child {
-					case .folder(let folder):
-						// note: not perfect, but i dont think this is ever validated so 🤷🏻‍♀️
-						let subFolderId = allFolders.first {
-							$0.0.name == folder.name && $0.0.children.count == folder.children.count
-						}?.1 ?? UInt16.zero
-						subEntry = NDSFile.FileNameTable.SubEntry(type: .folder, name: folder.name, id: subFolderId)
-					case .binaryFile(let binaryFile):
-						subEntry = NDSFile.FileNameTable.SubEntry(type: .file, name: binaryFile.name, id: fileId)
-						fileId += 1
-					default:
-						continue
-				}
-				subTable.append(subEntry)
-			}
-			
-			fileNameTable.mainTable.append(mainEntry)
-			fileNameTable.subTable.append(subTable)
-		}
+		let firstFileId = UInt16(ndsFile.arm9Overlays.count + ndsFile.arm7Overlays.count)
+		let fileNameTable = try NDSFile.FileNameTable(from: rootFolder, firstFileId: firstFileId)
 		
 		// write file name table
 		data.fourByteAlign()
@@ -433,7 +524,7 @@ extension BinaryFile {
 		try fileNameTable.write(to: data)
 		
 		// create file allocation table
-		let allFiles = rootFolder.getAllBinaryFiles()
+		let allFiles = ndsFile.arm9Overlays + ndsFile.arm7Overlays + rootFolder.getAllBinaryFiles()
 		
 		data.fourByteAlign()
 		header.fileAllocationTableOffset = UInt32(data.offset)
@@ -442,10 +533,6 @@ extension BinaryFile {
 		data.seek(bytes: header.fileAllocationTableSize)
 		
 		var fileAllocationTable = NDSFile.FileAllocationTable()
-		
-//		fileAllocationTable.entries +=
-		
-		
 		
 		for file in allFiles {
 			data.fourByteAlign()
@@ -460,6 +547,8 @@ extension BinaryFile {
 				)
 			)
 		}
+		
+		header.totalROMSize = UInt32(data.offset)
 		
 		data.seek(to: header.fileAllocationTableOffset)
 		fileAllocationTable.write(to: data)
