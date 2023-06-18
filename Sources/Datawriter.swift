@@ -58,15 +58,8 @@ class Datawriter {
 	}
 	
 	func fourByteAlign() {
-		twofiftysixByteAlign()
-//		if !offset.isMultiple(of: 4) {
-//			seek(bytes: 4 - (offset % 4))
-//		}
-	}
-	
-	func twofiftysixByteAlign() {
-		if !offset.isMultiple(of: 0x100) {
-			seek(bytes: 0x100 - (offset % 0x100))
+		if !offset.isMultiple(of: 4) {
+			seek(bytes: 4 - (offset % 4))
 		}
 	}
 }

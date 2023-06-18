@@ -7,14 +7,20 @@
 
 extension MARArchive {
 	init(from folder: Folder) throws {
-		name = folder.name
-		contents = folder.children
+		name = folder.name.replacing(#/\.mar$/#, with: "")
+		contents = folder.children.compactMap {
+			if case .binaryFile(let binaryFile) = $0 {
+				return binaryFile
+			} else {
+				return nil
+			}
+		}
 	}
 }
 
 extension Folder {
 	init(from marArchive: MARArchive) throws {
-		name = marArchive.name + ".mar" // TODO: ?
-		children = marArchive.contents
+		name = marArchive.name + ".mar"
+		children = marArchive.contents.map { .binaryFile($0) }
 	}
 }

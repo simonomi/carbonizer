@@ -113,4 +113,24 @@ struct NDSFile {
 			var reserved: UInt32
 		}
 	}
+	
+	func carbonized() throws -> FSFile {
+		let carbonizedContents = NDSFile(
+			name: name,
+			header: header,
+			arm9: arm9,
+			arm9OverlayTable: arm9OverlayTable,
+			arm9Overlays: arm9Overlays,
+			arm7: arm7,
+			arm7OverlayTable: arm7OverlayTable,
+			arm7Overlays: arm7Overlays,
+			iconBanner: iconBanner,
+			contents: try contents.map { try $0.carbonized().asFile }
+		)
+		return .binaryFile(try BinaryFile(from: carbonizedContents))
+	}
+	
+	func uncarbonized() throws -> FSFile {
+		try Folder(from: self).uncarbonized()
+	}
 }

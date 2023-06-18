@@ -31,4 +31,27 @@ struct Folder {
 			}
 		}
 	}
+	
+	func carbonized() throws -> FSFile {
+		let carbonizedChildren = Folder(
+			name: name,
+			children: try children.map { try $0.carbonized().asFile }
+		)
+		
+		if getChild(named: "header.json") != nil {
+			return try NDSFile(from: carbonizedChildren).carbonized()
+		} else if name.hasSuffix(".mar") {
+			return try MARArchive(from: carbonizedChildren).carbonized()
+		}
+		
+		return .folder(carbonizedChildren)
+	}
+	
+	func uncarbonized() throws -> FSFile {
+		let uncarbonizedChildren = Folder(
+			name: name,
+			children: try children.map { try $0.uncarbonized().asFile }
+		)
+		return .folder(uncarbonizedChildren)
+	}
 }

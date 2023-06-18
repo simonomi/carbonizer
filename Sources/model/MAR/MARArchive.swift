@@ -7,7 +7,7 @@
 
 struct MARArchive {
 	var name: String
-	var contents: [File]
+	var contents: [BinaryFile]
 	
 	struct FileIndexTable {
 		var entries: [Entry]
@@ -16,5 +16,28 @@ struct MARArchive {
 			var offset: UInt32
 			var decompressedSize: UInt32
 		}
+	}
+	
+	func carbonized() throws -> FSFile {
+		let carbonizedContents = MARArchive(
+			name: name,
+			contents: try contents.compactMap {
+				if case .binaryFile(let binaryFile) = try $0.carbonized() {
+					return binaryFile
+				} else {
+					return nil
+				}
+			}
+		)
+		return try BinaryFile(from: carbonizedContents).carbonized()
+	}
+	
+	func uncarbonized() throws -> FSFile {
+		if contents.count == 1 {
+			var onlyChild = contents[0]
+			onlyChild.name = name
+			return try onlyChild.uncarbonized()
+		}
+		return try Folder(from: self).uncarbonized()
 	}
 }
