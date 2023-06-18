@@ -8,4 +8,13 @@
 struct MARArchive {
 	var name: String
 	var contents: [File]
+	
+	struct FileIndexTable {
+		var entries: [Entry]
+		
+		struct Entry {
+			var offset: UInt32
+			var decompressedSize: UInt32
+		}
+	}
 }

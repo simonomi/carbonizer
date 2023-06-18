@@ -35,15 +35,21 @@ class Datastream {
 	func read<T: BinaryInteger>(
 		_ numberOfBytes: T, file: String = #file, line: Int = #line
 	) throws -> Data {
-		let oldOffset = Int(offset)
-		offset += Int(numberOfBytes)
+		try read(to: offset + Int(numberOfBytes))
+	}
+	
+	func read<T: BinaryInteger>(
+		to endOffset: T, file: String = #file, line: Int = #line
+	) throws -> Data {
+		let oldOffset = offset
+		offset = Int(endOffset)
 		
 		if offset > data.count {
 			let context = "file \(file) on line \(line)"
 			throw ReadError.outOfBounds(index: offset, size: data.count, context: context)
 		}
 		
-		return data.subdata(in: oldOffset ..< Int(offset))
+		return data.subdata(in: oldOffset ..< offset)
 	}
 	
 	func readString<T: BinaryInteger>(

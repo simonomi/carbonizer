@@ -10,7 +10,7 @@ import Foundation
 var arguments = CommandLine.arguments.dropFirst()
 
 #if DEBUG
-//arguments.append("~/Fossil Fighters.nds")
+arguments.append("~/Fossil Fighters.nds")
 //arguments.append("~/Fossil Fighters carbon")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters/data/auto_battle/auto_battle")
@@ -45,11 +45,12 @@ for file in arguments {
 	if fileType == .folder {
 		print("Processing folder \(fileUrl.lastPathComponent)")
 		
+		// TODO: handle
 		let folder = try Folder(from: fileUrl)
 		
 		// TODO: do other things
-		let ndsFile = try NDSFile(from: folder)
-		let binaryFile = try BinaryFile(from: ndsFile)
+		let ndsFile = try! NDSFile(from: folder)
+		let binaryFile = try! BinaryFile(from: ndsFile)
 		
 		let outputPath = fileUrl.deletingLastPathComponent()
 		try binaryFile.save(in: outputPath)
@@ -67,10 +68,13 @@ for file in arguments {
 		let binaryFile = BinaryFile(name: fileUrl.lastPathComponent, contents: data)
 		
 		// TODO: do other things
-		let ndsFile = try NDSFile(from: binaryFile)
-		let folder = try Folder(from: ndsFile)
+		let ndsFile = try! NDSFile(from: binaryFile)
+		let folder = try! Folder(from: ndsFile)
 		
-		let outputPath = fileUrl.deletingLastPathComponent()
-		try folder.save(in: outputPath)
+		let arc = folder.getAllBinaryFiles().first { $0.name == "arc" }!
+		print(try MARArchive(from: arc))
+		
+//		let outputPath = fileUrl.deletingLastPathComponent()
+//		try folder.save(in: outputPath)
 	}
 }
