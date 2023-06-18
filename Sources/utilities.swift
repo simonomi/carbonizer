@@ -11,6 +11,25 @@ extension FileManager {
 	func contentsOfDirectory(at url: URL) throws -> [URL] {
 		try contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
 	}
+	
+	enum FileType {
+		case file, folder, other
+	}
+	
+	static func type(of file: URL) throws -> FileType {
+		guard let typeString = try FileManager.default.attributesOfItem(atPath: file.path(percentEncoded: false))[.type] as? String else {
+			return .other
+		}
+		
+		switch typeString {
+			case "NSFileTypeRegular":
+				return .file
+			case "NSFileTypeDirectory":
+				return .folder
+			default:
+				return .other
+		}
+	}
 }
 
 extension Collection {
@@ -21,6 +40,10 @@ extension Collection {
 }
 
 extension Sequence {
+	func sorted<T: Comparable>(by keyPath: KeyPath<Element, T>) -> [Element] {
+		sorted { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
+	}
+	
 	func min<T: Comparable>(by keyPath: KeyPath<Element, T>) -> Element? {
 		self.min { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
 	}

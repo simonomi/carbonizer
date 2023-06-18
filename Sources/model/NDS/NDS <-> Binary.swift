@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import CrcSwift
 
 extension NDSFile {
 	init(from binaryFile: BinaryFile) throws {
@@ -61,7 +60,7 @@ extension NDSFile {
 				using: fileAllocationTable,
 				id: UInt16(overlay.fileId)
 			)
-		}.sorted { $0.name < $1.name }
+		}.sorted(by: \.name)
 		
 		// arm7 overlays
 		arm7Overlays = try arm7OverlayTable.entries.map { overlay in
@@ -72,7 +71,7 @@ extension NDSFile {
 				using: fileAllocationTable,
 				id: UInt16(overlay.fileId)
 			)
-		}.sorted { $0.name < $1.name }
+		}.sorted(by: \.name)
 		
 		// contents
 		let rootFolder = try Self.createFolder(

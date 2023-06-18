@@ -151,4 +151,8 @@ extension Folder {
 			children.append(.folder(Folder(name: "arm7 overlays", children: arm7OverlayFiles)))
 		}
 	}
+	
+	func getChild(named name: String) -> File? {
+		children.first { $0.name == name }
+	}
 }
