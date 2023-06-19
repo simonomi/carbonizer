@@ -10,8 +10,8 @@ import Foundation
 var arguments = CommandLine.arguments.dropFirst()
 
 #if DEBUG
-//arguments.append("~/Fossil Fighters.nds")
-//arguments.append("~/Fossil Fighters carbon")
+arguments.append("~/Fossil Fighters.nds")
+//arguments.append("~/Fossil Fighters")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters/data/auto_battle/auto_battle")
 #endif
@@ -55,7 +55,7 @@ for file in arguments {
 		
 		// TODO: do this differently
 		let outputPath = fileUrl.deletingLastPathComponent()
-		try folder.carbonized().save(in: outputPath)
+		try! folder.carbonized().save(in: outputPath)
 	} else {
 		print("Processing file \(fileUrl.lastPathComponent)")
 		
@@ -69,6 +69,6 @@ for file in arguments {
 		
 		// TODO: do this differently
 		let outputPath = fileUrl.deletingLastPathComponent()
-		try binaryFile.uncarbonized().save(in: outputPath)
+		try! binaryFile.uncarbonized().save(in: outputPath)
 	}
 }

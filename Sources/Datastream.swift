@@ -35,7 +35,7 @@ class Datastream {
 	func read<T: BinaryInteger>(
 		_ numberOfBytes: T, file: String = #file, line: Int = #line
 	) throws -> Data {
-		try read(to: offset + Int(numberOfBytes))
+		try read(to: offset + Int(numberOfBytes), file: file, line: line)
 	}
 	
 	func read<T: BinaryInteger>(

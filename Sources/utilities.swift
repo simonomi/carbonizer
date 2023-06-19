@@ -59,6 +59,12 @@ extension Sequence where Element: AdditiveArithmetic {
 	}
 }
 
+extension Collection where Element: Equatable {
+	func isAllTheSame() -> Bool {
+		allSatisfy { $0 == first }
+	}
+}
+
 extension JSONEncoder {
 	convenience init(_ formatting: OutputFormatting) {
 		self.init()

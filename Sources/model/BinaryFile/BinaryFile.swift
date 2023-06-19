@@ -24,11 +24,12 @@ struct BinaryFile {
 	}
 	
 	func carbonized() throws -> FSFile {
-		switch fileExtension {
-			case ".mar":
-				return try MARArchive(from: self).carbonized()
-			default: break
-		}
+		// TODO: re-enable once mcmfile has carbonization
+//		switch fileExtension {
+//			case "mcm":
+//				return try MCMFile(from: self).carbonized()
+//			default: break
+//		}
 		
 		return .binaryFile(self)
 	}
@@ -44,6 +45,9 @@ struct BinaryFile {
 //		switch magicId {
 //			case "MAR\0":
 //				return try MARArchive(from: self).uncarbonized()
+		// TODO: enable once mcmfile has carbonization
+//			case "MCM\0":
+//				return try MCMFile(from: self).uncarbonized()
 //			default: break
 //		}
 		
