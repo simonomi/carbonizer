@@ -8,73 +8,125 @@
 import Foundation
 
 enum File {
-	case folder(Folder)
 	case binaryFile(BinaryFile)
 	case ndsFile(NDSFile)
 	case marArchive(MARArchive)
-//	case mcmFile(MCMFile)
 //	case dtxFile(DTXFile)
 //	case mm3File(MM3File)
 	
+	init(from path: URL) throws {
+		let data = try Data(contentsOf: path)
+		try self.init(named: path.lastPathComponent, from: data)
+	}
+	
+	init(named name: String, from data: Data) throws {
+		let fileExtension: String?
+		if name.contains(".") {
+			fileExtension = name.split(separator: ".").last.map(String.init)
+		} else {
+			fileExtension = nil
+		}
+		
+		let magicId = String(bytes: data.prefix(4), encoding: .utf8)
+		
+		switch fileExtension {
+			case "nds":
+				self = .ndsFile(try NDSFile(named: name, from: data))
+				return
+			default: break
+		}
+		
+		switch magicId {
+			case "MAR\0":
+				self = .marArchive(try MARArchive(named: name, from: data))
+				return
+			default: break
+		}
+		
+		self = .binaryFile(BinaryFile(named: name, contents: data))
+	}
+	
+	func save(in path: URL, carbonized: Bool) throws {
+		switch self {
+			case .binaryFile(let binaryFile):
+				try binaryFile.save(in: path, carbonized: carbonized)
+			case .ndsFile(let ndsFile):
+				try ndsFile.save(in: path, carbonized: carbonized)
+			case .marArchive(let marArchive):
+				try marArchive.save(in: path, carbonized: carbonized)
+		}
+	}
+	
 	var name: String {
 		switch self {
-			case .folder(let folder):
-				return folder.name
 			case .binaryFile(let binaryFile):
 				return binaryFile.name
-			case .ndsFile(let nDSFile):
-				return nDSFile.name
-			case .marArchive(let mARArchive):
-				return mARArchive.name
+			case .ndsFile(let ndsFile):
+				return ndsFile.name
+			case .marArchive(let marArchive):
+				return marArchive.name
 		}
 	}
 	
-	func carbonized() throws -> FSFile {
+	func renamed(to newName: String) -> File {
 		switch self {
-			case .folder(let folder):
-				return try folder.carbonized()
-			case .binaryFile(let binaryFile):
-				return try binaryFile.carbonized()
-			case .ndsFile(let nDSFile):
-				return try nDSFile.carbonized()
-			case .marArchive(let mARArchive):
-				return try mARArchive.carbonized()
-		}
-	}
-	
-	func uncarbonized() throws -> FSFile {
-		switch self {
-			case .folder(let folder):
-				return try folder.uncarbonized()
-			case .binaryFile(let binaryFile):
-				return try binaryFile.uncarbonized()
-			case .ndsFile(let nDSFile):
-				return try nDSFile.uncarbonized()
-			case .marArchive(let mARArchive):
-				return try mARArchive.uncarbonized()
+			case .binaryFile(var binaryFile):
+				binaryFile.name = newName
+				return .binaryFile(binaryFile)
+			case .ndsFile(var ndsFile):
+				ndsFile.name = newName
+				return .ndsFile(ndsFile)
+			case .marArchive(var marArchive):
+				marArchive.name = newName
+				return .marArchive(marArchive)
 		}
 	}
 }
 
 enum FSFile {
-	case binaryFile(BinaryFile)
 	case folder(Folder)
+	case file(File)
 	
-	var asFile: File {
-		switch self {
-			case .binaryFile(let binaryFile):
-				return .binaryFile(binaryFile)
-			case .folder(let folder):
-				return .folder(folder)
+	init?(from path: URL) throws {
+		switch try FileManager.type(of: path) {
+			case .file:
+				self = .file(try File(from: path))
+			case .folder:
+				self = .folder(try Folder(from: path))
+			case .other:
+				print("warning: trying to read from an abnormal filetype: \(path)")
+				return nil
 		}
 	}
 	
-	func save(in path: URL) throws {
+	func save(in path: URL, carbonized: Bool) throws {
 		switch self {
-			case .binaryFile(let binaryFile):
-				try binaryFile.save(in: path)
+			case .file(let file):
+				try file.save(in: path, carbonized: carbonized)
 			case .folder(let folder):
-				try folder.save(in: path)
+				try folder.save(in: path, carbonized: carbonized)
+		}
+	}
+	
+	var name: String {
+		switch self {
+			case .folder(let folder):
+				return folder.name
+			case .file(let file):
+				return file.name
+		}
+	}
+}
+
+extension Data {
+	init(from file: File) throws {
+		switch file {
+			case .binaryFile(let binaryFile):
+				self = binaryFile.contents
+			case .ndsFile(let ndsFile):
+				self = try Data(from: ndsFile)
+			case .marArchive(let marArchive):
+				self = try Data(from: marArchive)
 		}
 	}
 }

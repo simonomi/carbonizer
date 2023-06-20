@@ -13,13 +13,13 @@ extension NDSFile {
 	}
 	
 	init(from folder: Folder) throws {
-		guard case .binaryFile(let headerFile) =			folder.getChild(named: "header.json"),
-			  case .binaryFile(let arm9File) =				folder.getChild(named: "arm9.bin"),
-			  case .binaryFile(let arm9OverlayTableFile) =	folder.getChild(named: "arm9 overlay table.bin"),
-			  case .binaryFile(let arm7File) =				folder.getChild(named: "arm7.bin"),
-			  case .binaryFile(let arm7OverlayTableFile) =	folder.getChild(named: "arm7 overlay table.bin"),
-			  case .binaryFile(let iconBannerFile) =		folder.getChild(named: "icon banner.bin"),
-			  case .folder(let dataFolder) =				folder.getChild(named: "data")
+		guard case .file(.binaryFile(let headerFile)) =				folder.getChild(named: "header.json"),
+			  case .file(.binaryFile(let arm9File)) =				folder.getChild(named: "arm9.bin"),
+			  case .file(.binaryFile(let arm9OverlayTableFile)) =	folder.getChild(named: "arm9 overlay table.bin"),
+			  case .file(.binaryFile(let arm7File)) =				folder.getChild(named: "arm7.bin"),
+			  case .file(.binaryFile(let arm7OverlayTableFile)) =	folder.getChild(named: "arm7 overlay table.bin"),
+			  case .file(.binaryFile(let iconBannerFile)) =			folder.getChild(named: "icon banner.bin"),
+			  case .folder(let dataFolder) =						folder.getChild(named: "data")
 		else {
 			throw DecodingError.folderNotFound(name: folder.children.map(\.name).joined(separator: ", "))
 		}
@@ -35,7 +35,7 @@ extension NDSFile {
 			guard case .folder(let arm9OverlaysFolder) = folder.getChild(named: "arm9 overlays") else {
 				throw DecodingError.folderNotFound(name: "arm9 overlays")
 			}
-			arm9Overlays = arm9OverlaysFolder.getAllBinaryFiles()
+			arm9Overlays = arm9OverlaysFolder.getAllFiles()
 		}
 		
 		arm7 = arm7File.contents
@@ -46,7 +46,7 @@ extension NDSFile {
 			guard case .folder(let arm7OverlaysFolder) = folder.getChild(named: "arm7 overlays") else {
 				throw DecodingError.folderNotFound(name: "arm7 overlays")
 			}
-			arm7Overlays = arm7OverlaysFolder.getAllBinaryFiles()
+			arm7Overlays = arm7OverlaysFolder.getAllFiles()
 		}
 		
 		iconBanner = iconBannerFile.contents
@@ -132,27 +132,27 @@ extension Folder {
 		let arm7OverlayTableData = try JSONEncoder(.prettyPrinted).encode(ndsFile.arm7OverlayTable)
 		
 		children = [
-			.binaryFile(BinaryFile(name: "header.json", contents: headerData)),
-			.binaryFile(BinaryFile(name: "arm9.bin", contents: ndsFile.arm9)),
-			.binaryFile(BinaryFile(name: "arm9 overlay table.bin", contents: arm9OverlayTableData)),
-			.binaryFile(BinaryFile(name: "arm7.bin", contents: ndsFile.arm7)),
-			.binaryFile(BinaryFile(name: "arm7 overlay table.bin", contents: arm7OverlayTableData)),
-			.binaryFile(BinaryFile(name: "icon banner.bin", contents: ndsFile.iconBanner)),
-			.folder(Folder(name: "data", children: ndsFile.contents))
+			.file(.binaryFile(BinaryFile(named: "header.json", contents: headerData))),
+			.file(.binaryFile(BinaryFile(named: "arm9.bin", contents: ndsFile.arm9))),
+			.file(.binaryFile(BinaryFile(named: "arm9 overlay table.bin", contents: arm9OverlayTableData))),
+			.file(.binaryFile(BinaryFile(named: "arm7.bin", contents: ndsFile.arm7))),
+			.file(.binaryFile(BinaryFile(named: "arm7 overlay table.bin", contents: arm7OverlayTableData))),
+			.file(.binaryFile(BinaryFile(named: "icon banner.bin", contents: ndsFile.iconBanner))),
+			.folder(Folder(named: "data", children: ndsFile.contents))
 		]
 		
 		if !ndsFile.arm9Overlays.isEmpty {
-			let arm9OverlayFiles = ndsFile.arm9Overlays.map { File.binaryFile($0) }
-			children.append(.folder(Folder(name: "arm9 overlays", children: arm9OverlayFiles)))
+			let arm9OverlayFiles = ndsFile.arm9Overlays.map { FSFile.file($0) }
+			children.append(.folder(Folder(named: "arm9 overlays", children: arm9OverlayFiles)))
 		}
 		
 		if !ndsFile.arm7Overlays.isEmpty {
-			let arm7OverlayFiles = ndsFile.arm7Overlays.map { File.binaryFile($0) }
-			children.append(.folder(Folder(name: "arm7 overlays", children: arm7OverlayFiles)))
+			let arm7OverlayFiles = ndsFile.arm7Overlays.map { FSFile.file($0) }
+			children.append(.folder(Folder(named: "arm7 overlays", children: arm7OverlayFiles)))
 		}
 	}
 	
-	func getChild(named name: String) -> File? {
+	func getChild(named name: String) -> FSFile? {
 		children.first { $0.name == name }
 	}
 }

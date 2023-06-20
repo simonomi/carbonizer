@@ -8,9 +8,15 @@
 extension MARArchive {
 	init(from folder: Folder) throws {
 		name = folder.name.replacing(#/\.mar$/#, with: "")
-		contents = folder.children.compactMap {
-			if case .binaryFile(let binaryFile) = $0 {
-				return binaryFile
+		contents = folder.children.enumerated().compactMap { index, child in
+			if case .file(let file) = child {
+				// TODO: get compression/maxchunksize
+				return MCMFile(
+					index: index,
+					compression: (.none, .none),
+					maxChunkSize: 0x2000,
+					content: file
+				)
 			} else {
 				return nil
 			}
@@ -21,6 +27,7 @@ extension MARArchive {
 extension Folder {
 	init(from marArchive: MARArchive) throws {
 		name = marArchive.name + ".mar"
-		children = marArchive.contents.map { .binaryFile($0) }
+		// TODO: save compression/maxchunksize
+		children = marArchive.contents.map { .file($0.content) }
 	}
 }

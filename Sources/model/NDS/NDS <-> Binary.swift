@@ -8,10 +8,10 @@
 import Foundation
 
 extension NDSFile {
-	init(from binaryFile: BinaryFile) throws {
-		name = binaryFile.name
+	init(named name: String, from inputData: Data) throws {
+		self.name = name
 		
-		let data = Datastream(binaryFile.contents)
+		let data = Datastream(inputData)
 		
 		// header
 		header = try Header(from: data)
@@ -102,14 +102,14 @@ extension NDSFile {
 		let children = try subTable.map { subEntry in
 			switch subEntry.type {
 				case .file:
-					return File.binaryFile(try createFile(
+					return FSFile.file(try createFile(
 						named: subEntry.name,
 						from: data,
 						using: fileAllocationTable,
 						id: subEntry.id
 					))
 				case .folder:
-					return File.folder(try createFolder(
+					return FSFile.folder(try createFolder(
 						named: subEntry.name,
 						from: data,
 						using: fileNameTable,
@@ -119,7 +119,7 @@ extension NDSFile {
 			}
 		}
 		
-		return Folder(name: name, children: children)
+		return Folder(named: name, children: children)
 	}
 	
 	fileprivate static func createFile(
@@ -127,13 +127,13 @@ extension NDSFile {
 		from data: Datastream,
 		using fileAllocationTable: FileAllocationTable,
 		id: UInt16
-	) throws -> BinaryFile {
+	) throws -> File {
 		let fatEntry = fileAllocationTable.entries[Int(id)]
 		
 		data.seek(to: fatEntry.startAddress)
 		let contents = try data.read(fatEntry.length)
 		
-		return BinaryFile(name: name, contents: contents)
+		return try File(named: name, from: contents)
 	}
 }
 
@@ -292,11 +292,9 @@ extension NDSFile.FileNameTable {
 							$0.0.name == folder.name && $0.0.children.count == folder.children.count
 						}?.1 ?? UInt16.zero
 						subEntry = NDSFile.FileNameTable.SubEntry(type: .folder, name: folder.name, id: subFolderId)
-					case .binaryFile(let binaryFile):
-						subEntry = NDSFile.FileNameTable.SubEntry(type: .file, name: binaryFile.name, id: fileId)
+					case .file(let file):
+						subEntry = NDSFile.FileNameTable.SubEntry(type: .file, name: file.name, id: fileId)
 						fileId += 1
-					default:
-						continue
 				}
 				subTable.append(subEntry)
 			}
@@ -465,10 +463,8 @@ extension NDSFile.OverlayTable.Entry {
 	}
 }
 
-extension BinaryFile {
+extension Data {
 	init(from ndsFile: NDSFile) throws {
-		name = ndsFile.name
-		
 		var header = ndsFile.header
 		let data = Datawriter()
 		
@@ -512,7 +508,7 @@ extension BinaryFile {
 		data.write(ndsFile.iconBanner)
 		
 		// create file name table
-		let rootFolder = Folder(name: "", children: ndsFile.contents)
+		let rootFolder = Folder(named: "", children: ndsFile.contents)
 		let firstFileId = UInt16(ndsFile.arm9Overlays.count + ndsFile.arm7Overlays.count)
 		let fileNameTable = try NDSFile.FileNameTable(from: rootFolder, firstFileId: firstFileId)
 		
@@ -523,7 +519,7 @@ extension BinaryFile {
 		try fileNameTable.write(to: data)
 		
 		// create file allocation table
-		let allFiles = ndsFile.arm9Overlays + ndsFile.arm7Overlays + rootFolder.getAllBinaryFiles()
+		let allFiles = ndsFile.arm9Overlays + ndsFile.arm7Overlays + rootFolder.getAllFiles()
 		
 		data.fourByteAlign()
 		header.fileAllocationTableOffset = UInt32(data.offset)
@@ -537,7 +533,7 @@ extension BinaryFile {
 			data.fourByteAlign()
 			
 			let startAddress = data.offset
-			data.write(file.contents)
+			data.write(try Data(from: file))
 			
 			fileAllocationTable.entries.append(
 				NDSFile.FileAllocationTable.Entry(
@@ -555,6 +551,6 @@ extension BinaryFile {
 		data.seek(to: 0)
 		try header.write(to: data)
 		
-		contents = data.data
+		self = data.data
 	}
 }

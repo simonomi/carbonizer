@@ -5,9 +5,11 @@
 //  Created by simon pellerin on 2023-06-16.
 //
 
+import Foundation
+
 struct MARArchive {
 	var name: String
-	var contents: [BinaryFile]
+	var contents: [MCMFile]
 	
 	struct FileIndexTable {
 		var entries: [Entry]
@@ -18,26 +20,17 @@ struct MARArchive {
 		}
 	}
 	
-	func carbonized() throws -> FSFile {
-		let carbonizedContents = MARArchive(
-			name: name,
-			contents: try contents.compactMap {
-				if case .binaryFile(let binaryFile) = try $0.carbonized() {
-					return binaryFile
-				} else {
-					return nil
-				}
+	func save(in path: URL, carbonized: Bool) throws {
+		if carbonized {
+			try Data(from: self).write(to: path.appending(component: name))
+		} else {
+			if contents.count == 1 {
+				// TODO: save compression/maxchunksize
+				let file = contents[0].content.renamed(to: name)
+				try file.save(in: path, carbonized: carbonized)
+			} else {
+				try Folder(from: self).save(in: path, carbonized: carbonized)
 			}
-		)
-		return try BinaryFile(from: carbonizedContents).carbonized()
-	}
-	
-	func uncarbonized() throws -> FSFile {
-		if contents.count == 1 {
-			var onlyChild = contents[0]
-			onlyChild.name = name
-			return try onlyChild.uncarbonized()
 		}
-		return try Folder(from: self).uncarbonized()
 	}
 }

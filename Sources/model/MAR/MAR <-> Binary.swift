@@ -5,11 +5,13 @@
 //  Created by simon pellerin on 2023-06-18.
 //
 
+import Foundation
+
 extension MARArchive {
-	init(from binaryFile: BinaryFile) throws {
-		name = binaryFile.name
+	init(named name: String, from data: Data) throws {
+		self.name = name
 		
-		let data = Datastream(binaryFile.contents)
+		let data = Datastream(data)
 		
 		data.seek(bytes: 4)
 		let numberOfFiles = try data.read(UInt32.self)
@@ -24,7 +26,7 @@ extension MARArchive {
 		for (index, (entry, endOffset)) in zip(fileIndexTable.entries, endOffsets).enumerated() {
 			data.seek(to: entry.offset)
 			let fileData = try data.read(to: endOffset)
-			contents.append(BinaryFile(name: String(index), contents: fileData))
+			contents.append(try MCMFile(index: index, data: fileData))
 		}
 	}
 }
@@ -36,11 +38,11 @@ extension MARArchive.FileIndexTable {
 		}
 	}
 	
-	init(files: [BinaryFile]) {
+	init(files: [Data]) {
 		var currentOffset = 8 + (files.count * 8)
 		entries = files.map { file in
 			let oldOffset = currentOffset
-			currentOffset += file.contents.count
+			currentOffset += file.count
 			
 			if !currentOffset.isMultiple(of: 4) {
 				currentOffset += 4 - (currentOffset % 4)
@@ -48,7 +50,7 @@ extension MARArchive.FileIndexTable {
 			
 			return Entry(
 				offset: UInt32(oldOffset),
-				decompressedSize: UInt32(file.contents.count)
+				decompressedSize: UInt32(file.count)
 			)
 		}
 	}
@@ -72,24 +74,24 @@ extension MARArchive.FileIndexTable.Entry {
 	}
 }
 
-extension BinaryFile {
+extension Data {
 	init(from marArchive: MARArchive) throws {
-		name = marArchive.name
-		
 		let data = Datawriter()
 		
 		try data.write("MAR\0")
 		
 		data.write(UInt32(marArchive.contents.count))
 		
-		let fileIndexTable = MARArchive.FileIndexTable(files: marArchive.contents)
+		let compressedFiles = try marArchive.contents.map(Data.init)
+		
+		let fileIndexTable = MARArchive.FileIndexTable(files: compressedFiles)
 		fileIndexTable.write(to: data)
 		
-		for file in marArchive.contents {
-			data.write(file.contents)
+		for file in compressedFiles {
+			data.write(file)
 			data.fourByteAlign()
 		}
 		
-		contents = data.data
+		self = data.data
 	}
 }

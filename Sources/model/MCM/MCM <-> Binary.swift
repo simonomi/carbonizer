@@ -8,14 +8,15 @@
 import Foundation
 
 extension MCMFile {
-	init(from binaryFile: BinaryFile) throws {
-		name = binaryFile.name + ".mcm"
+	init(index: Int, data inputData: Data) throws {
+		self.index = index
 		
-		let data = Datastream(binaryFile.contents)
+		let data = Datastream(inputData)
 		
 		data.seek(to: 8)
 		
-		maxChunkSize = try data.read(UInt32.self)
+		let maxChunkSize = try data.read(UInt32.self)
+		self.maxChunkSize = maxChunkSize
 		
 		let numberOfChunks = try data.read(UInt32.self)
 		
@@ -26,34 +27,32 @@ extension MCMFile {
 		let chunkOffsets = try (0..<numberOfChunks).map { _ in
 			try data.read(UInt32.self)
 		}
-		data.seek(bytes: 4)
+		let endOfFile = try data.read(UInt32.self)
+		let chunkEndOffsets = chunkOffsets.dropFirst() + [endOfFile]
 		
-		content = Data()
-		content = Data(
-			try chunkOffsets
-				.map {
-					data.seek(to: $0)
-					return try data.read(to: min($0 + maxChunkSize, UInt32(data.data.count)))
-				}
-				.map(compression.0.decompress)
-				.map(compression.1.decompress)
-				.joined()
+		content = try File(
+			named: String(index),
+			from: Data(
+				try zip(chunkOffsets, chunkEndOffsets)
+					.map {
+						data.seek(to: $0)
+						return try data.read(to: $1)
+					}
+					.map(compression.0.decompress)
+					.map(compression.1.decompress)
+					.joined()
+			)
 		)
 	}
 }
 
 extension MCMFile.CompressionType {
 	init(from data: Datastream) throws {
-		switch try data.read(UInt8.self) {
-			case 1:
-				self = .runLengthEncoding
-			case 2:
-				self = .lzss
-			case 3:
-				self = .huffman
-			default:
-				self = .none
-		}
+		self = Self(rawValue: try data.read(UInt8.self)) ?? .none
+	}
+	
+	func write(to data: Datawriter) {
+		data.write(rawValue)
 	}
 	
 	func compress(_ data: Data) throws -> Data {
@@ -83,8 +82,43 @@ extension MCMFile.CompressionType {
 	}
 }
 
-//extension BinaryFile {
-//	init(from mcmFile: MCMFile) throws {
-//		
-//	}
-//}
+extension Data {
+	init(from mcmFile: MCMFile) throws {
+		let data = Datawriter()
+		
+		try data.write("MCM\0")
+		
+		let uncompressedData = try Data(from: mcmFile.content)
+		
+		data.write(UInt32(uncompressedData.count))
+		
+		data.write(mcmFile.maxChunkSize)
+		
+		let numberOfChunks = UInt32((Double(uncompressedData.count) / Double(mcmFile.maxChunkSize)).rounded(.up))
+		data.write(numberOfChunks)
+		
+		mcmFile.compression.0.write(to: data)
+		mcmFile.compression.1.write(to: data)
+
+		data.fourByteAlign()
+		
+		let chunkedData = try uncompressedData
+			.chunked(into: Int(mcmFile.maxChunkSize))
+			.map(mcmFile.compression.1.compress)
+			.map(mcmFile.compression.0.compress)
+		
+		var currentChunkOffset = UInt32(data.offset + 4 * (chunkedData.count + 1))
+		data.write(currentChunkOffset)
+		chunkedData.forEach {
+			currentChunkOffset += UInt32($0.count)
+			data.write(currentChunkOffset)
+		}
+		
+		chunkedData.forEach {
+			data.write($0)
+		}
+		
+		self = data.data
+		// TODO: maybe 4-byte align?
+	}
+}

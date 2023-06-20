@@ -51,11 +51,23 @@ extension Sequence {
 	func max<T: Comparable>(by keyPath: KeyPath<Element, T>) -> Element? {
 		self.max { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
 	}
+	
+	func map<T>(_ transform: (Element) throws -> () -> T) rethrows -> [T] {
+		try map(transform).map { $0() }
+	}
 }
 
 extension Sequence where Element: AdditiveArithmetic {
 	func sum() -> Element {
 		reduce(.zero, +)
+	}
+}
+
+extension Collection where Index == Int {
+	func chunked(into size: Int) -> [SubSequence] {
+		stride(from: startIndex, to: index(after: endIndex), by: size).map {
+			self[$0 ..< Swift.min($0 + size, index(after: endIndex))]
+		}
 	}
 }
 

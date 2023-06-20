@@ -8,12 +8,12 @@
 import Foundation
 
 struct MCMFile {
-	var name: String
+	var index: Int
 	var compression: (CompressionType, CompressionType)
 	var maxChunkSize: UInt32
-	var content: Data
+	var content: File
 	
-	enum CompressionType {
+	enum CompressionType: UInt8 {
 		case none, runLengthEncoding, lzss, huffman
 	}
 }

@@ -10,8 +10,9 @@ import Foundation
 var arguments = CommandLine.arguments.dropFirst()
 
 #if DEBUG
-arguments.append("~/Fossil Fighters.nds")
+//arguments.append("~/Fossil Fighters.nds")
 //arguments.append("~/Fossil Fighters")
+//arguments.append("~/Fossil Fighters carbon")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters/data/auto_battle/auto_battle")
 #endif
@@ -54,21 +55,22 @@ for file in arguments {
 		}
 		
 		// TODO: do this differently
+		let ndsFile = try! NDSFile(from: folder)
 		let outputPath = fileUrl.deletingLastPathComponent()
-		try! folder.carbonized().save(in: outputPath)
+		try! ndsFile.save(in: outputPath, carbonized: true)
 	} else {
 		print("Processing file \(fileUrl.lastPathComponent)")
 		
-		let binaryFile: BinaryFile
+		let file: File
 		do {
-			binaryFile = try BinaryFile(from: fileUrl)
+			file = try File(from: fileUrl)
 		} catch {
-			print("Error: could not read file: \(fileUrl.lastPathComponent)")
+			print("Error: could not read file: \(fileUrl.lastPathComponent), \(error)")
 			continue
 		}
 		
 		// TODO: do this differently
 		let outputPath = fileUrl.deletingLastPathComponent()
-		try! binaryFile.uncarbonized().save(in: outputPath)
+		try! file.save(in: outputPath, carbonized: false)
 	}
 }
