@@ -16,19 +16,8 @@ extension FileManager {
 		case file, folder, other
 	}
 	
-	static func type(of file: URL) throws -> FileType {
-		guard let typeString = try FileManager.default.attributesOfItem(atPath: file.path(percentEncoded: false))[.type] as? String else {
-			return .other
-		}
-		
-		switch typeString {
-			case "NSFileTypeRegular":
-				return .file
-			case "NSFileTypeDirectory":
-				return .folder
-			default:
-				return .other
-		}
+	static func type(of file: URL) throws -> FileAttributeType {
+		(try FileManager.default.attributesOfItem(atPath: file.path)[.type] as? FileAttributeType) ?? .typeUnknown
 	}
 }
 
@@ -81,5 +70,12 @@ extension JSONEncoder {
 	convenience init(_ formatting: OutputFormatting) {
 		self.init()
 		outputFormatting = formatting
+	}
+}
+
+// for windows 🙄
+extension URL {
+	static var homeDirectory: URL {
+		FileManager.default.homeDirectoryForCurrentUser
 	}
 }

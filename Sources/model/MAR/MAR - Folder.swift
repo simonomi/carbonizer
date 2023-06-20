@@ -7,7 +7,7 @@
 
 extension MARArchive {
 	init(from folder: Folder) throws {
-		name = folder.name.replacing(#/\.mar$/#, with: "")
+		name = String(folder.name.dropLast(4)) // remove .mar
 		contents = folder.children.enumerated().compactMap { index, child in
 			if case .file(let file) = child {
 				// TODO: get compression/maxchunksize

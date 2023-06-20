@@ -125,7 +125,7 @@ extension NDSFile.OverlayTable.Entry {
 
 extension Folder {
 	init(from ndsFile: NDSFile) throws {
-		name = ndsFile.name.replacing(#/\.nds$/#, with: "")
+		name = String(ndsFile.name.dropLast(4)) // remove .nds
 		
 		let headerData = try JSONEncoder(.prettyPrinted).encode(ndsFile.header)
 		let arm9OverlayTableData = try JSONEncoder(.prettyPrinted).encode(ndsFile.arm9OverlayTable)

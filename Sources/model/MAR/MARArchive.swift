@@ -22,7 +22,7 @@ struct MARArchive {
 	
 	func save(in path: URL, carbonized: Bool) throws {
 		if carbonized {
-			try Data(from: self).write(to: path.appending(component: name))
+			try Data(from: self).write(to: path.appendingPathComponent(name))
 		} else {
 			// TODO: re-enable once mcm files have metadata
 //			if contents.count == 1 {

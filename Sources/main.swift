@@ -24,17 +24,17 @@ if arguments.isEmpty {
 for file in arguments {
 	let fileUrl: URL
 	if file.hasPrefix("~") {
-		fileUrl = URL.homeDirectory.appending(component: file.dropFirst(2))
+		fileUrl = URL.homeDirectory.appendingPathComponent(String(file.dropFirst(2)))
 	} else {
-		fileUrl = URL(filePath: file)
+		fileUrl = URL(fileURLWithPath: file)
 	}
 	
-	if !FileManager.default.fileExists(atPath: fileUrl.path(percentEncoded: false)) {
+	if !FileManager.default.fileExists(atPath: fileUrl.path) {
 		print("Error: file or folder does not exist: \(fileUrl.lastPathComponent)")
 		continue
 	}
 	
-	let fileType: FileManager.FileType
+	let fileType: FileAttributeType
 	do {
 		fileType = try FileManager.type(of: fileUrl)
 	} catch {
@@ -42,7 +42,7 @@ for file in arguments {
 		continue
 	}
 	
-	if fileType == .folder {
+	if fileType == .typeDirectory {
 		print("Processing folder \(fileUrl.lastPathComponent)")
 		
 		let folder: FSFile

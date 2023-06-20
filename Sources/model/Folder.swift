@@ -25,7 +25,7 @@ struct Folder {
 	}
 	
 	func save(in parentPath: URL, carbonized: Bool) throws {
-		let path = parentPath.appending(component: name)
+		let path = parentPath.appendingPathComponent(name)
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
 		for child in children {
 			switch child {

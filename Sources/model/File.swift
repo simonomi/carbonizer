@@ -93,9 +93,7 @@ enum FSFile {
 	
 	init(from path: URL) throws {
 		switch try FileManager.type(of: path) {
-			case .file:
-				self = .file(try File(from: path))
-			case .folder:
+			case .typeDirectory:
 				let folder = try Folder(from: path)
 				if folder.name.hasSuffix(".mar") {
 					self = .file(.marArchive(try MARArchive(from: folder)))
@@ -104,8 +102,8 @@ enum FSFile {
 				} else {
 					self = .folder(folder)
 				}
-			case .other:
-				throw FileError.abnormalFiletype(path)
+			default:
+				self = .file(try File(from: path))
 		}
 	}
 	

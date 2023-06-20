@@ -3,9 +3,6 @@ import PackageDescription
 
 let package = Package(
     name: "carbonizer",
-	platforms: [
-		.macOS(.v13)
-	],
     targets: [
         .executableTarget(
             name: "carbonizer",

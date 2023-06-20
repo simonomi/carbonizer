@@ -17,6 +17,6 @@ struct BinaryFile {
 	}
 	
 	func save(in path: URL, carbonized: Bool) throws {
-		try contents.write(to: path.appending(component: name))
+		try contents.write(to: path.appendingPathComponent(name))
 	}
 }

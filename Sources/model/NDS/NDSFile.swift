@@ -116,7 +116,7 @@ struct NDSFile {
 	
 	func save(in path: URL, carbonized: Bool) throws {
 		if carbonized {
-			try Data(from: self).write(to: path.appending(component: name))
+			try Data(from: self).write(to: path.appendingPathComponent(name))
 		} else {
 			try Folder(from: self).save(in: path, carbonized: carbonized)
 		}
