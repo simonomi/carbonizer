@@ -11,7 +11,6 @@ var arguments = CommandLine.arguments.dropFirst()
 
 #if DEBUG
 //arguments.append("~/Fossil Fighters.nds")
-//arguments.append("~/Fossil Fighters")
 //arguments.append("~/Fossil Fighters carbon")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters/data/auto_battle/auto_battle")
@@ -46,24 +45,23 @@ for file in arguments {
 	if fileType == .folder {
 		print("Processing folder \(fileUrl.lastPathComponent)")
 		
-		let folder: Folder
+		let folder: FSFile
 		do {
-			folder = try Folder(from: fileUrl)
+			folder = try FSFile(from: fileUrl)
 		} catch {
-			print("Error: could not read folder: \(fileUrl.lastPathComponent)")
+			print("Error: could not read folder: \(fileUrl.lastPathComponent), \(error)")
 			continue
 		}
 		
 		// TODO: do this differently
-		let ndsFile = try! NDSFile(from: folder)
 		let outputPath = fileUrl.deletingLastPathComponent()
-		try! ndsFile.save(in: outputPath, carbonized: true)
+		try! folder.save(in: outputPath, carbonized: true)
 	} else {
 		print("Processing file \(fileUrl.lastPathComponent)")
 		
-		let file: File
+		let file: FSFile
 		do {
-			file = try File(from: fileUrl)
+			file = try FSFile(from: fileUrl)
 		} catch {
 			print("Error: could not read file: \(fileUrl.lastPathComponent), \(error)")
 			continue

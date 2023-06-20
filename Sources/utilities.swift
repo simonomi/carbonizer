@@ -65,8 +65,8 @@ extension Sequence where Element: AdditiveArithmetic {
 
 extension Collection where Index == Int {
 	func chunked(into size: Int) -> [SubSequence] {
-		stride(from: startIndex, to: index(after: endIndex), by: size).map {
-			self[$0 ..< Swift.min($0 + size, index(after: endIndex))]
+		stride(from: 0, to: count, by: size).map {
+			self[$0 ..< Swift.min($0 + size, count)]
 		}
 	}
 }

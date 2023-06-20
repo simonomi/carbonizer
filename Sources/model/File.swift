@@ -87,15 +87,25 @@ enum FSFile {
 	case folder(Folder)
 	case file(File)
 	
-	init?(from path: URL) throws {
+	enum FileError: Error {
+		case abnormalFiletype(URL)
+	}
+	
+	init(from path: URL) throws {
 		switch try FileManager.type(of: path) {
 			case .file:
 				self = .file(try File(from: path))
 			case .folder:
-				self = .folder(try Folder(from: path))
+				let folder = try Folder(from: path)
+				if folder.name.hasSuffix(".mar") {
+					self = .file(.marArchive(try MARArchive(from: folder)))
+				} else if folder.getChild(named: "header.json") != nil {
+					self = .file(.ndsFile(try NDSFile(from: folder)))
+				} else {
+					self = .folder(folder)
+				}
 			case .other:
-				print("warning: trying to read from an abnormal filetype: \(path)")
-				return nil
+				throw FileError.abnormalFiletype(path)
 		}
 	}
 	

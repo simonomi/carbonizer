@@ -24,13 +24,13 @@ struct MARArchive {
 		if carbonized {
 			try Data(from: self).write(to: path.appending(component: name))
 		} else {
-			if contents.count == 1 {
-				// TODO: save compression/maxchunksize
-				let file = contents[0].content.renamed(to: name)
-				try file.save(in: path, carbonized: carbonized)
-			} else {
+			// TODO: re-enable once mcm files have metadata
+//			if contents.count == 1 {
+//				let file = contents[0].content.renamed(to: name)
+//				try file.save(in: path, carbonized: carbonized)
+//			} else {
 				try Folder(from: self).save(in: path, carbonized: carbonized)
-			}
+//			}
 		}
 	}
 }

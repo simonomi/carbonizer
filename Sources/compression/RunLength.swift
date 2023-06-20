@@ -11,7 +11,7 @@ enum RunLength {
 	static func compress(_ data: Data) throws -> Data {
 		let outputData = Datawriter()
 		
-		let header = Header(reserved: 0, type: 3, decompressedSize: UInt32(data.count))
+		let header = CompressionHeader(type: .runLength, decompressedSize: UInt32(data.count))
 		header.write(to: outputData)
 		
 		var index = data.startIndex
@@ -33,11 +33,17 @@ enum RunLength {
 				outputData.write(uncompressedBytes)
 			}
 			
-			let compressedBytes = data[index...].prefix { $0 == data[index] }
+			var compressedBytes = data[index...].prefix { $0 == data[index] }
 			let maxCompressedLength = Int(UInt8.max) / 2 + 3
 			for index in stride(from: compressedBytes.startIndex, to: compressedBytes.endIndex, by: maxCompressedLength) {
 				let endIndex = min(index + maxCompressedLength, compressedBytes.endIndex)
 				let smallerCompressedBytes = compressedBytes[index ..< endIndex]
+				
+				if smallerCompressedBytes.count < 3 {
+					compressedBytes = compressedBytes.dropLast(smallerCompressedBytes.count)
+					break
+				}
+				
 				let compressedFlag = Flag(type: .compressed, length: UInt8(smallerCompressedBytes.count - 3))
 				compressedFlag.write(to: outputData)
 				outputData.write(smallerCompressedBytes[index])
@@ -56,7 +62,7 @@ enum RunLength {
 		let inputData = Datastream(data)
 		let outputData = Datawriter()
 		
-		let header = try Header(from: inputData)
+		let header = try CompressionHeader(from: inputData)
 		
 		while outputData.offset < header.decompressedSize {
 			let flag = try Flag(from: inputData)
@@ -69,31 +75,6 @@ enum RunLength {
 		}
 		
 		return outputData.data
-	}
-	
-	struct Header {
-		var reserved: UInt8 // 4 bits
-		var type: UInt8 // 4 bits, should be 3 for run-length
-		var decompressedSize: UInt32 // 24 bits
-		
-		init(reserved: UInt8, type: UInt8, decompressedSize: UInt32) {
-			self.reserved = reserved
-			self.type = type
-			self.decompressedSize = decompressedSize
-		}
-		
-		init(from data: Datastream) throws {
-			let headerData = try data.read(UInt32.self)
-			
-			reserved = UInt8(headerData & 0b1111)
-			type = UInt8((headerData >> 4) & 0b1111)
-			decompressedSize = headerData >> 8
-		}
-		
-		func write(to data: Datawriter) {
-			let headerData = UInt32(reserved) | UInt32(type << 4) | (decompressedSize << 8)
-			data.write(headerData)
-		}
 	}
 	
 	struct Flag {

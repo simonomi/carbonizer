@@ -31,7 +31,7 @@ extension MCMFile {
 		let chunkEndOffsets = chunkOffsets.dropFirst() + [endOfFile]
 		
 		content = try File(
-			named: String(index),
+			named: String(format: "%04d", index),
 			from: Data(
 				try zip(chunkOffsets, chunkEndOffsets)
 					.map {
@@ -43,6 +43,9 @@ extension MCMFile {
 					.joined()
 			)
 		)
+		
+		// TODO: remove once re-compression is added
+		compression = (.none, .none)
 	}
 }
 
@@ -119,6 +122,5 @@ extension Data {
 		}
 		
 		self = data.data
-		// TODO: maybe 4-byte align?
 	}
 }
