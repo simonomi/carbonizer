@@ -14,6 +14,7 @@ class Datastream {
 	enum ReadError: Error {
 		case outOfBounds(index: Int, size: Int, context: String)
 		case invalidUTF8(value: [UInt8], context: String)
+		case invalidCString
 	}
 	
 	init(_ data: Data) {
@@ -62,6 +63,14 @@ class Datastream {
 			let context = "file \(file) on line \(line)"
 			throw ReadError.invalidUTF8(value: [UInt8](bytes), context: context)
 		}
+	}
+	
+	func readCString(file: String = #file, line: Int = #line) throws -> String {
+		guard let endIndex = data[offset...].firstIndex(of: 0) else {
+			throw ReadError.invalidCString
+		}
+		let length = endIndex - offset
+		return try readString(length: length, file: file, line: line)
 	}
 	
 	func seek<T: BinaryInteger>(to offset: T) {

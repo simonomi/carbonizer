@@ -10,12 +10,12 @@ import Foundation
 var arguments = CommandLine.arguments.dropFirst()
 var inputIsCarbonized = false
 
-//#if DEBUG
+#if DEBUG
 //arguments.append("~/Fossil Fighters.nds")
 //arguments.append("~/Fossil Fighters carbon")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters/data/auto_battle/auto_battle")
-//#endif
+#endif
 
 func waitToExit() {
 	print("Press Enter to continue...", terminator: "")

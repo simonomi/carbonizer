@@ -11,7 +11,7 @@ enum File {
 	case binaryFile(BinaryFile)
 	case ndsFile(NDSFile)
 	case marArchive(MARArchive)
-//	case dtxFile(DTXFile)
+	case dtxFile(DTXFile)
 //	case mm3File(MM3File)
 	
 	init(from path: URL) throws {
@@ -34,6 +34,10 @@ enum File {
 				inputIsCarbonized = true
 				self = .ndsFile(try NDSFile(named: name, from: data))
 				return
+			case "dtx":
+				inputIsCarbonized = false
+				self = .dtxFile(try DTXFile(named: name, json: data))
+				return
 			default: break
 		}
 		
@@ -41,6 +45,10 @@ enum File {
 			case "MAR\0":
 				inputIsCarbonized = true
 				self = .marArchive(try MARArchive(named: name, from: data))
+				return
+			case "DTX\0":
+				inputIsCarbonized = true
+				self = .dtxFile(try DTXFile(named: name, from: data))
 				return
 			default: break
 		}
@@ -56,6 +64,8 @@ enum File {
 				try ndsFile.save(in: path, carbonized: carbonized, with: metadata)
 			case .marArchive(let marArchive):
 				try marArchive.save(in: path, carbonized: carbonized, with: metadata)
+			case .dtxFile(let dtxFile):
+				try dtxFile.save(in: path, carbonized: carbonized, with: metadata)
 		}
 	}
 	
@@ -67,6 +77,8 @@ enum File {
 				return ndsFile.name
 			case .marArchive(let marArchive):
 				return marArchive.name
+			case .dtxFile(let dtxFile):
+				return dtxFile.name
 		}
 	}
 	
@@ -81,6 +93,9 @@ enum File {
 			case .marArchive(var marArchive):
 				marArchive.name = newName
 				return .marArchive(marArchive)
+			case .dtxFile(var dtxFile):
+				dtxFile.name = newName
+				return .dtxFile(dtxFile)
 		}
 	}
 }
@@ -110,8 +125,9 @@ enum FSFile {
 				let metadata = try FileManager.getCreationDate(of: path).flatMap(MCMFile.Metadata.init)
 				if let metadata, metadata.standalone {
 					inputIsCarbonized = false
-					let mcmFile = MCMFile(from: try File(from: path), with: metadata)
-					self = .file(.marArchive(MARArchive(name: path.lastPathComponent, contents: [mcmFile])), nil)
+					let file = try File(from: path)
+					let mcmFile = MCMFile(from: file, with: metadata)
+					self = .file(.marArchive(MARArchive(name: file.name, contents: [mcmFile])), nil)
 				} else {
 					self = .file(try File(from: path), metadata)
 				}
@@ -146,6 +162,8 @@ extension Data {
 				self = try Data(from: ndsFile)
 			case .marArchive(let marArchive):
 				self = try Data(from: marArchive)
+			case .dtxFile(let dtxFile):
+				self = try Data(from: dtxFile)
 		}
 	}
 }

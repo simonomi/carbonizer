@@ -26,6 +26,10 @@ class Datawriter {
 		}
 	}
 	
+	func writeCString(_ string: String, file: String = #file, line: Int = #line) throws {
+		try write(string + "\0", file: file, line: line)
+	}
+	
 	func write<T: ConvertableFromData>(_ int: T) {
 		write(int.asData)
 	}
