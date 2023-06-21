@@ -31,6 +31,7 @@ enum File {
 		
 		switch fileExtension {
 			case "nds":
+				inputIsCarbonized = true
 				self = .ndsFile(try NDSFile(named: name, from: data))
 				return
 			default: break
@@ -38,6 +39,7 @@ enum File {
 		
 		switch magicId {
 			case "MAR\0":
+				inputIsCarbonized = true
 				self = .marArchive(try MARArchive(named: name, from: data))
 				return
 			default: break
@@ -96,8 +98,10 @@ enum FSFile {
 			case .typeDirectory:
 				let folder = try Folder(from: path)
 				if folder.name.hasSuffix(".mar") {
+					inputIsCarbonized = false
 					self = .file(.marArchive(try MARArchive(from: folder)), nil)
 				} else if folder.getChild(named: "header.json") != nil {
+					inputIsCarbonized = false
 					self = .file(.ndsFile(try NDSFile(from: folder)), nil)
 				} else {
 					self = .folder(folder)
@@ -105,6 +109,7 @@ enum FSFile {
 			default:
 				let metadata = try FileManager.getCreationDate(of: path).flatMap(MCMFile.Metadata.init)
 				if let metadata, metadata.standalone {
+					inputIsCarbonized = false
 					let mcmFile = MCMFile(from: try File(from: path), with: metadata)
 					self = .file(.marArchive(MARArchive(name: path.lastPathComponent, contents: [mcmFile])), nil)
 				} else {

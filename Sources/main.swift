@@ -8,6 +8,7 @@
 import Foundation
 
 var arguments = CommandLine.arguments.dropFirst()
+var inputIsCarbonized = false
 
 //#if DEBUG
 //arguments.append("~/Fossil Fighters.nds")
@@ -16,8 +17,14 @@ var arguments = CommandLine.arguments.dropFirst()
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters/data/auto_battle/auto_battle")
 //#endif
 
+func waitToExit() {
+	print("Press Enter to continue...", terminator: "")
+	let _ = readLine()
+}
+
 if arguments.isEmpty {
 	print("Please provide at least one file or folder as input")
+	waitToExit()
 	exit(EXIT_FAILURE)
 }
 
@@ -34,41 +41,23 @@ for file in arguments {
 		continue
 	}
 	
-	let fileType: FileAttributeType
+	print("Processing \(fileUrl.lastPathComponent)")
+	
+	let file: FSFile
 	do {
-		fileType = try FileManager.type(of: fileUrl)
+		file = try FSFile(from: fileUrl)
 	} catch {
-		print("Error: could not get type of file or folder: \(fileUrl.lastPathComponent)")
+		print("Error: could not read file: \(fileUrl.lastPathComponent), \(error)")
 		continue
 	}
 	
-	if fileType == .typeDirectory {
-		print("Processing folder \(fileUrl.lastPathComponent)")
-		
-		let folder: FSFile
-		do {
-			folder = try FSFile(from: fileUrl)
-		} catch {
-			print("Error: could not read folder: \(fileUrl.lastPathComponent), \(error)")
-			continue
-		}
-		
-		// TODO: do this differently
-		let outputPath = fileUrl.deletingLastPathComponent()
-		try! folder.save(in: outputPath, carbonized: true)
-	} else {
-		print("Processing file \(fileUrl.lastPathComponent)")
-		
-		let file: FSFile
-		do {
-			file = try FSFile(from: fileUrl)
-		} catch {
-			print("Error: could not read file: \(fileUrl.lastPathComponent), \(error)")
-			continue
-		}
-		
-		// TODO: do this differently
-		let outputPath = fileUrl.deletingLastPathComponent()
-		try! file.save(in: outputPath, carbonized: false)
+	let outputPath = fileUrl.deletingLastPathComponent()
+	do {
+		try file.save(in: outputPath, carbonized: !inputIsCarbonized)
+	} catch {
+		print("Error: could not save file: \(fileUrl.lastPathComponent), \(error)")
+		continue
 	}
 }
+
+waitToExit()
