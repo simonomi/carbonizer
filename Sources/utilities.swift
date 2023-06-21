@@ -19,6 +19,14 @@ extension FileManager {
 	static func type(of file: URL) throws -> FileAttributeType {
 		(try FileManager.default.attributesOfItem(atPath: file.path)[.type] as? FileAttributeType) ?? .typeUnknown
 	}
+	
+	static func getCreationDate(of file: URL) throws -> Date? {
+		try FileManager.default.attributesOfItem(atPath: file.path)[.creationDate] as? Date
+	}
+	
+	static func setCreationDate(of file: URL, to date: Date) throws {
+		try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: file.path)
+	}
 }
 
 extension Collection {

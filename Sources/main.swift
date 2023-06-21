@@ -9,12 +9,12 @@ import Foundation
 
 var arguments = CommandLine.arguments.dropFirst()
 
-#if DEBUG
+//#if DEBUG
 //arguments.append("~/Fossil Fighters.nds")
 //arguments.append("~/Fossil Fighters carbon")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters")
 //arguments.append("~/Downloads/ff1/roms/Fossil Fighters/data/auto_battle/auto_battle")
-#endif
+//#endif
 
 if arguments.isEmpty {
 	print("Please provide at least one file or folder as input")

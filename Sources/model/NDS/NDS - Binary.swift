@@ -107,7 +107,7 @@ extension NDSFile {
 						from: data,
 						using: fileAllocationTable,
 						id: subEntry.id
-					))
+					), nil)
 				case .folder:
 					return FSFile.folder(try createFolder(
 						named: subEntry.name,
@@ -292,7 +292,7 @@ extension NDSFile.FileNameTable {
 							$0.0.name == folder.name && $0.0.children.count == folder.children.count
 						}?.1 ?? UInt16.zero
 						subEntry = NDSFile.FileNameTable.SubEntry(type: .folder, name: folder.name, id: subFolderId)
-					case .file(let file):
+					case .file(let file, _):
 						subEntry = NDSFile.FileNameTable.SubEntry(type: .file, name: file.name, id: fileId)
 						fileId += 1
 				}

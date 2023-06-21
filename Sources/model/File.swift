@@ -46,14 +46,14 @@ enum File {
 		self = .binaryFile(BinaryFile(named: name, contents: data))
 	}
 	
-	func save(in path: URL, carbonized: Bool) throws {
+	func save(in path: URL, carbonized: Bool, with metadata: MCMFile.Metadata?) throws {
 		switch self {
 			case .binaryFile(let binaryFile):
-				try binaryFile.save(in: path, carbonized: carbonized)
+				try binaryFile.save(in: path, carbonized: carbonized, with: metadata)
 			case .ndsFile(let ndsFile):
-				try ndsFile.save(in: path, carbonized: carbonized)
+				try ndsFile.save(in: path, carbonized: carbonized, with: metadata)
 			case .marArchive(let marArchive):
-				try marArchive.save(in: path, carbonized: carbonized)
+				try marArchive.save(in: path, carbonized: carbonized, with: metadata)
 		}
 	}
 	
@@ -85,7 +85,7 @@ enum File {
 
 enum FSFile {
 	case folder(Folder)
-	case file(File)
+	case file(File, MCMFile.Metadata?)
 	
 	enum FileError: Error {
 		case abnormalFiletype(URL)
@@ -96,21 +96,27 @@ enum FSFile {
 			case .typeDirectory:
 				let folder = try Folder(from: path)
 				if folder.name.hasSuffix(".mar") {
-					self = .file(.marArchive(try MARArchive(from: folder)))
+					self = .file(.marArchive(try MARArchive(from: folder)), nil)
 				} else if folder.getChild(named: "header.json") != nil {
-					self = .file(.ndsFile(try NDSFile(from: folder)))
+					self = .file(.ndsFile(try NDSFile(from: folder)), nil)
 				} else {
 					self = .folder(folder)
 				}
 			default:
-				self = .file(try File(from: path))
+				let metadata = try FileManager.getCreationDate(of: path).flatMap(MCMFile.Metadata.init)
+				if let metadata, metadata.standalone {
+					let mcmFile = MCMFile(from: try File(from: path), with: metadata)
+					self = .file(.marArchive(MARArchive(name: path.lastPathComponent, contents: [mcmFile])), nil)
+				} else {
+					self = .file(try File(from: path), metadata)
+				}
 		}
 	}
 	
 	func save(in path: URL, carbonized: Bool) throws {
 		switch self {
-			case .file(let file):
-				try file.save(in: path, carbonized: carbonized)
+			case .file(let file, let metadata):
+				try file.save(in: path, carbonized: carbonized, with: metadata)
 			case .folder(let folder):
 				try folder.save(in: path, carbonized: carbonized)
 		}
@@ -120,7 +126,7 @@ enum FSFile {
 		switch self {
 			case .folder(let folder):
 				return folder.name
-			case .file(let file):
+			case .file(let file, _):
 				return file.name
 		}
 	}

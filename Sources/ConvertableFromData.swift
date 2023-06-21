@@ -11,7 +11,6 @@ protocol ConvertableFromData: BinaryInteger {
 	static var numberOfBytes: Int { get }
 }
 
-// TODO: what about big-endian systems? data.reversed()?
 extension ConvertableFromData {
 	init?(from data: Data) {
 		guard data.count == Self.numberOfBytes else { return nil }

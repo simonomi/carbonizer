@@ -114,9 +114,13 @@ struct NDSFile {
 		}
 	}
 	
-	func save(in path: URL, carbonized: Bool) throws {
+	func save(in path: URL, carbonized: Bool, with metadata: MCMFile.Metadata?) throws {
 		if carbonized {
-			try Data(from: self).write(to: path.appendingPathComponent(name))
+			let filePath = path.appendingPathComponent(name)
+			try Data(from: self).write(to: filePath)
+			if let metadata {
+				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())
+			}
 		} else {
 			try Folder(from: self).save(in: path, carbonized: carbonized)
 		}

@@ -16,7 +16,11 @@ struct BinaryFile {
 		self.contents = contents
 	}
 	
-	func save(in path: URL, carbonized: Bool) throws {
-		try contents.write(to: path.appendingPathComponent(name))
+	func save(in path: URL, carbonized: Bool, with metadata: MCMFile.Metadata?) throws {
+		let filePath = path.appendingPathComponent(name)
+		try contents.write(to: filePath)
+		if let metadata {
+			try FileManager.setCreationDate(of: filePath, to: metadata.asDate())
+		}
 	}
 }

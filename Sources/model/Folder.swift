@@ -31,8 +31,8 @@ struct Folder {
 			switch child {
 				case .folder(let folder):
 					try folder.save(in: path, carbonized: carbonized)
-				case .file(let file):
-					try file.save(in: path, carbonized: carbonized)
+				case .file(let file, let metadata):
+					try file.save(in: path, carbonized: carbonized, with: metadata)
 			}
 		}
 	}
@@ -52,7 +52,7 @@ struct Folder {
 			switch $0 {
 				case .folder(let folder):
 					return folder.getAllFiles()
-				case .file(let file):
+				case .file(let file, _):
 					return [file]
 			}
 		}
