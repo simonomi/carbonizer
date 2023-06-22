@@ -38,6 +38,7 @@ for file in arguments {
 	
 	if !FileManager.default.fileExists(atPath: fileUrl.path) {
 		print("Error: file or folder does not exist: \(fileUrl.lastPathComponent)")
+		waitToExit()
 		continue
 	}
 	
@@ -48,6 +49,7 @@ for file in arguments {
 		file = try FSFile(from: fileUrl)
 	} catch {
 		print("Error: could not read file: \(fileUrl.lastPathComponent), \(error)")
+		waitToExit()
 		continue
 	}
 	
@@ -56,8 +58,7 @@ for file in arguments {
 		try file.save(in: outputPath, carbonized: !inputIsCarbonized)
 	} catch {
 		print("Error: could not save file: \(fileUrl.lastPathComponent), \(error)")
+		waitToExit()
 		continue
 	}
 }
-
-waitToExit()
