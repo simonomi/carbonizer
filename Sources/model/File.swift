@@ -14,6 +14,7 @@ enum File {
 	case dtxFile(DTXFile)
 	case dmgFile(DMGFile)
 	case mm3File(MM3File)
+	case dmsFile(DMSFile)
 	
 	init(from path: URL) throws {
 		let data = try Data(contentsOf: path)
@@ -47,6 +48,10 @@ enum File {
 				inputIsCarbonized = false
 				self = .mm3File(try MM3File(named: name, json: data))
 				return
+			case "dms":
+				inputIsCarbonized = false
+				self = .dmsFile(try DMSFile(named: name, json: data))
+				return
 			default: break
 		}
 		
@@ -66,6 +71,10 @@ enum File {
 			case "MM3\0":
 				inputIsCarbonized = true
 				self = .mm3File(try MM3File(named: name, from: data))
+				return
+			case "DMS\0":
+				inputIsCarbonized = true
+				self = .dmsFile(try DMSFile(named: name, from: data))
 				return
 			default: break
 		}
@@ -87,6 +96,8 @@ enum File {
 				try dmgFile.save(in: path, carbonized: carbonized, with: metadata)
 			case .mm3File(let mm3File):
 				try mm3File.save(in: path, carbonized: carbonized, with: metadata)
+			case .dmsFile(let dmsFile):
+				try dmsFile.save(in: path, carbonized: carbonized, with: metadata)
 		}
 	}
 	
@@ -104,6 +115,8 @@ enum File {
 				return dmgFile.name
 			case .mm3File(let mm3File):
 				return mm3File.name
+			case .dmsFile(let dmsFile):
+				return dmsFile.name
 		}
 	}
 	
@@ -127,6 +140,9 @@ enum File {
 			case .mm3File(var mm3File):
 				mm3File.name = newName
 				return .mm3File(mm3File)
+			case .dmsFile(var dmsFile):
+				dmsFile.name = newName
+				return .dmsFile(dmsFile)
 		}
 	}
 }
@@ -199,6 +215,8 @@ extension Data {
 				self = try Data(from: dmgFile)
 			case .mm3File(let mm3File):
 				self = try Data(from: mm3File)
+			case .dmsFile(let dmsFile):
+				self = try Data(from: dmsFile)
 		}
 	}
 }
