@@ -48,16 +48,10 @@ extension Data {
 		let table1NameOffset = UInt32(0x1c)
 		
 		let table1NameLength = UInt32(mm3File.tableNames.0.count) + 1
-		var table2NameOffset = table1NameOffset + table1NameLength
-		if !table2NameOffset.isMultiple(of: 4) {
-			table2NameOffset = table2NameOffset + 4 - (table2NameOffset % 4)
-		}
+		let table2NameOffset = (table1NameOffset + table1NameLength).toNearestMultiple(of: 4)
 		
 		let table2NameLength = UInt32(mm3File.tableNames.1.count) + 1
-		var table3NameOffset = table2NameOffset + table2NameLength
-		if !table3NameOffset.isMultiple(of: 4) {
-			table3NameOffset = table3NameOffset + 4 - (table3NameOffset % 4)
-		}
+		let table3NameOffset = (table2NameOffset + table2NameLength).toNearestMultiple(of: 4)
 		
 		data.write(mm3File.indexes.0)
 		data.write(table1NameOffset)

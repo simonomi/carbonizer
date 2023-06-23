@@ -44,9 +44,7 @@ extension MARArchive.FileIndexTable {
 			let oldOffset = currentOffset
 			currentOffset += file.count
 			
-			if !currentOffset.isMultiple(of: 4) {
-				currentOffset += 4 - (currentOffset % 4)
-			}
+			currentOffset = currentOffset.toNearestMultiple(of: 4)
 			
 			// hacky :/
 			let decompressedSize = UInt32(from: file[4..<8])!

@@ -62,8 +62,6 @@ class Datawriter {
 	}
 	
 	func fourByteAlign() {
-		if !offset.isMultiple(of: 4) {
-			seek(bytes: 4 - (offset % 4))
-		}
+		seek(to: offset.toNearestMultiple(of: 4))
 	}
 }

@@ -97,6 +97,16 @@ extension JSONEncoder {
 	}
 }
 
+extension BinaryInteger {
+	func toNearestMultiple(of number: Self) -> Self {
+		if isMultiple(of: number) {
+			return self
+		} else {
+			return self + number - (self % number)
+		}
+	}
+}
+
 // for windows 🙄
 extension URL {
 	static var homeDirectory: URL {
