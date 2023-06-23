@@ -53,9 +53,16 @@ for file in arguments {
 		continue
 	}
 	
+	let processedFile: FSFile
+	if inputIsCarbonized {
+		processedFile = file.postProcessed(with: nameClarifier)
+	} else {
+		processedFile = file.postProcessed(with: nameObfuscator)
+	}
+	
 	let outputPath = fileUrl.deletingLastPathComponent()
 	do {
-		try file.save(in: outputPath, carbonized: !inputIsCarbonized)
+		try processedFile.save(in: outputPath, carbonized: !inputIsCarbonized)
 	} catch {
 		print("Error: could not save file: \(fileUrl.lastPathComponent), \(error)")
 		waitToExit()

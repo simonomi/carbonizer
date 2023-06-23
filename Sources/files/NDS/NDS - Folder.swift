@@ -132,22 +132,22 @@ extension Folder {
 		let arm7OverlayTableData = try JSONEncoder(.prettyPrinted).encode(ndsFile.arm7OverlayTable)
 		
 		children = [
-			.file(.binaryFile(BinaryFile(named: "header.json",				contents: headerData)), nil),
-			.file(.binaryFile(BinaryFile(named: "arm9.bin",					contents: ndsFile.arm9)), nil),
-			.file(.binaryFile(BinaryFile(named: "arm9 overlay table.bin",	contents: arm9OverlayTableData)), nil),
-			.file(.binaryFile(BinaryFile(named: "arm7.bin",					contents: ndsFile.arm7)), nil),
-			.file(.binaryFile(BinaryFile(named: "arm7 overlay table.bin",	contents: arm7OverlayTableData)), nil),
-			.file(.binaryFile(BinaryFile(named: "icon banner.bin",			contents: ndsFile.iconBanner)), nil),
+			.file(.binaryFile(BinaryFile(named: "header.json",				contents: headerData))),
+			.file(.binaryFile(BinaryFile(named: "arm9.bin",					contents: ndsFile.arm9))),
+			.file(.binaryFile(BinaryFile(named: "arm9 overlay table.bin",	contents: arm9OverlayTableData))),
+			.file(.binaryFile(BinaryFile(named: "arm7.bin",					contents: ndsFile.arm7))),
+			.file(.binaryFile(BinaryFile(named: "arm7 overlay table.bin",	contents: arm7OverlayTableData))),
+			.file(.binaryFile(BinaryFile(named: "icon banner.bin",			contents: ndsFile.iconBanner))),
 			.folder(Folder(named: "data", children: ndsFile.contents))
 		]
 		
 		if !ndsFile.arm9Overlays.isEmpty {
-			let arm9OverlayFiles = ndsFile.arm9Overlays.map { FSFile.file($0, nil) }
+			let arm9OverlayFiles = ndsFile.arm9Overlays.map { FSFile.file($0) }
 			children.append(.folder(Folder(named: "arm9 overlays", children: arm9OverlayFiles)))
 		}
 		
 		if !ndsFile.arm7Overlays.isEmpty {
-			let arm7OverlayFiles = ndsFile.arm7Overlays.map { FSFile.file($0, nil) }
+			let arm7OverlayFiles = ndsFile.arm7Overlays.map { FSFile.file($0) }
 			children.append(.folder(Folder(named: "arm7 overlays", children: arm7OverlayFiles)))
 		}
 	}

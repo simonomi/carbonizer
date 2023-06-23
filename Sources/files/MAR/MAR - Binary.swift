@@ -48,9 +48,12 @@ extension MARArchive.FileIndexTable {
 				currentOffset += 4 - (currentOffset % 4)
 			}
 			
+			// hacky :/
+			let decompressedSize = UInt32(from: file[4..<8])!
+			
 			return Entry(
 				offset: UInt32(oldOffset),
-				decompressedSize: UInt32(file.count)
+				decompressedSize: UInt32(decompressedSize)
 			)
 		}
 	}

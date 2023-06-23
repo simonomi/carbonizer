@@ -73,18 +73,18 @@ enum File {
 				inputIsCarbonized = true
 				self = .dmgFile(try DMGFile(named: name, from: data))
 				return
-			case "MM3\0":
-				inputIsCarbonized = true
-				self = .mm3File(try MM3File(named: name, from: data))
-				return
+//			case "MM3\0": // cant load save
+//				inputIsCarbonized = true
+//				self = .mm3File(try MM3File(named: name, from: data))
+//				return
 			case "DMS\0":
 				inputIsCarbonized = true
 				self = .dmsFile(try DMSFile(named: name, from: data))
 				return
-			case "MPM\0":
-				inputIsCarbonized = true
-				self = .mpmFile(try MPMFile(named: name, from: data))
-				return
+//			case "MPM\0": // doesnt start
+//				inputIsCarbonized = true
+//				self = .mpmFile(try MPMFile(named: name, from: data))
+//				return
 			default: break
 		}
 		
@@ -159,59 +159,6 @@ enum File {
 			case .mpmFile(var mpmFile):
 				mpmFile.name = newName
 				return .mpmFile(mpmFile)
-		}
-	}
-}
-
-enum FSFile {
-	case folder(Folder)
-	case file(File, MCMFile.Metadata?)
-	
-	enum FileError: Error {
-		case abnormalFiletype(URL)
-	}
-	
-	init(from path: URL) throws {
-		switch try FileManager.type(of: path) {
-			case .typeDirectory:
-				let folder = try Folder(from: path)
-				if folder.name.hasSuffix(".mar") {
-					inputIsCarbonized = false
-					self = .file(.marArchive(try MARArchive(from: folder)), nil)
-				} else if folder.getChild(named: "header.json") != nil {
-					inputIsCarbonized = false
-					self = .file(.ndsFile(try NDSFile(from: folder)), nil)
-				} else {
-					self = .folder(folder)
-				}
-			default:
-				let metadata = try FileManager.getCreationDate(of: path).flatMap(MCMFile.Metadata.init)
-				if let metadata, metadata.standalone {
-					inputIsCarbonized = false
-					let file = try File(from: path)
-					let mcmFile = MCMFile(from: file, with: metadata)
-					self = .file(.marArchive(MARArchive(name: file.name, contents: [mcmFile])), nil)
-				} else {
-					self = .file(try File(from: path), metadata)
-				}
-		}
-	}
-	
-	func save(in path: URL, carbonized: Bool) throws {
-		switch self {
-			case .file(let file, let metadata):
-				try file.save(in: path, carbonized: carbonized, with: metadata)
-			case .folder(let folder):
-				try folder.save(in: path, carbonized: carbonized)
-		}
-	}
-	
-	var name: String {
-		switch self {
-			case .folder(let folder):
-				return folder.name
-			case .file(let file, _):
-				return file.name
 		}
 	}
 }

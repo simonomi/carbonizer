@@ -107,7 +107,7 @@ extension NDSFile {
 						from: data,
 						using: fileAllocationTable,
 						id: subEntry.id
-					), nil)
+					))
 				case .folder:
 					return FSFile.folder(try createFolder(
 						named: subEntry.name,

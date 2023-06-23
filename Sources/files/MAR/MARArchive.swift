@@ -28,13 +28,21 @@ struct MARArchive {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())
 			}
 		} else {
-			if contents.count == 1 {
-				let file = contents[0].content.renamed(to: name)
-				let metadata = contents[0].metadata(standalone: true)
+			if let onlyChild {
+				let file = onlyChild.content.renamed(to: name)
+				let metadata = onlyChild.metadata(standalone: true)
 				try file.save(in: path, carbonized: carbonized, with: metadata)
 			} else {
 				try Folder(from: self).save(in: path, carbonized: carbonized)
 			}
+		}
+	}
+	
+	var onlyChild: MCMFile? {
+		if contents.count == 1 {
+			return contents.first
+		} else {
+			return nil
 		}
 	}
 }

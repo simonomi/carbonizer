@@ -30,8 +30,8 @@ enum Huffman {
 		while outputData.offset < header.decompressedSize {
 			let nodeBits = try inputData.read(UInt32.self)
 			
-			(0..<32).reversed().forEach {
-				let bit = nodeBits >> $0 & 1
+			for bitOffset in (0..<32).reversed() {
+				let bit = nodeBits >> bitOffset & 1
 				guard case .tree(let left, let right) = currentNode else {
 					fatalError("this will never occur")
 				}
@@ -54,6 +54,10 @@ enum Huffman {
 						outputData.write(byte)
 					}
 					currentNode = rootNode
+					
+					if outputData.offset >= header.decompressedSize {
+						break
+					}
 				}
 			}
 		}
