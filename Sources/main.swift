@@ -11,15 +11,14 @@ var arguments = CommandLine.arguments.dropFirst()
 var inputIsCarbonized = false
 
 #if DEBUG
-//arguments.append("~/Fossil Fighters.nds")
-//arguments.append("~/Fossil Fighters carbon")
-//arguments.append("~/Downloads/ff1/roms/Fossil Fighters")
-//arguments.append("~/Downloads/ff1/roms/Fossil Fighters/data/auto_battle/auto_battle")
+//arguments.append("fast")
+arguments.append("~/Fossil Fighters.nds")
+arguments.append("~/Fossil Fighters carbon")
 #endif
 
-func waitToExit() {
-	print("Press Enter to continue...", terminator: "")
-	let _ = readLine()
+let fastMode = arguments.first == "fast"
+if fastMode {
+	arguments.removeFirst()
 }
 
 if arguments.isEmpty {
@@ -44,7 +43,11 @@ for file in arguments {
 	
 	print("Processing \(fileUrl.lastPathComponent)")
 	
+#if DEBUG
+	var file: FSFile
+#else
 	let file: FSFile
+#endif
 	do {
 		file = try FSFile(from: fileUrl)
 	} catch {
@@ -52,6 +55,15 @@ for file in arguments {
 		waitToExit()
 		continue
 	}
+	
+#if DEBUG
+	if case .file(let ndsFile, _) = file, ndsFile.name == "Fossil Fighters" {
+		file = .file(ndsFile.renamed(to: "Fossil Fighters carbon"))
+		
+		try? FileManager.default.removeItem(at: .homeDirectory.appendingPathComponent("Fossil Fighters carbon"))
+		try? FileManager.default.removeItem(at: .homeDirectory.appendingPathComponent("Fossil Fighters carbon.nds"))
+	}
+#endif
 	
 	let processedFile: FSFile
 	if inputIsCarbonized {

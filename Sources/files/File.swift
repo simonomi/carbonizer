@@ -62,9 +62,11 @@ enum File {
 		
 		switch magicId {
 			case "MAR\0":
-				inputIsCarbonized = true
-				self = .marArchive(try MARArchive(named: name, from: data))
-				return
+				if !fastMode {
+					inputIsCarbonized = true
+					self = .marArchive(try MARArchive(named: name, from: data))
+					return
+				}
 			case "DTX\0":
 				inputIsCarbonized = true
 				self = .dtxFile(try DTXFile(named: name, from: data))

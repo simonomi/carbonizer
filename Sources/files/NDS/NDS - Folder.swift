@@ -24,7 +24,7 @@ extension NDSFile {
 			throw DecodingError.folderNotFound(name: folder.children.map(\.name).joined(separator: ", "))
 		}
 		
-		name = folder.name + ".nds"
+		name = folder.name
 		header = try JSONDecoder().decode(Header.self, from: headerFile.contents)
 		
 		arm9 = arm9File.contents
@@ -125,7 +125,7 @@ extension NDSFile.OverlayTable.Entry {
 
 extension Folder {
 	init(from ndsFile: NDSFile) throws {
-		name = String(ndsFile.name.dropLast(4)) // remove .nds
+		name = ndsFile.name
 		
 		let headerData = try JSONEncoder(.prettyPrinted).encode(ndsFile.header)
 		let arm9OverlayTableData = try JSONEncoder(.prettyPrinted).encode(ndsFile.arm9OverlayTable)

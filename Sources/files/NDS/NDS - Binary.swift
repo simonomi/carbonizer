@@ -9,7 +9,7 @@ import Foundation
 
 extension NDSFile {
 	init(named name: String, from inputData: Data) throws {
-		self.name = name
+		self.name = String(name.dropLast(4)) // remove .nds
 		
 		let data = Datastream(inputData)
 		

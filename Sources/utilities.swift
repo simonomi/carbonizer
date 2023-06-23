@@ -107,6 +107,11 @@ extension BinaryInteger {
 	}
 }
 
+func waitToExit() {
+	print("Press Enter to continue...", terminator: "")
+	let _ = readLine()
+}
+
 // for windows 🙄
 extension URL {
 	static var homeDirectory: URL {
