@@ -73,18 +73,18 @@ enum File {
 				inputIsCarbonized = true
 				self = .dmgFile(try DMGFile(named: name, from: data))
 				return
-//			case "MM3\0": // cant load save
-//				inputIsCarbonized = true
-//				self = .mm3File(try MM3File(named: name, from: data))
-//				return
+			case "MM3\0":
+				inputIsCarbonized = true
+				self = .mm3File(try MM3File(named: name, from: data))
+				return
 			case "DMS\0":
 				inputIsCarbonized = true
 				self = .dmsFile(try DMSFile(named: name, from: data))
 				return
-//			case "MPM\0": // doesnt start
-//				inputIsCarbonized = true
-//				self = .mpmFile(try MPMFile(named: name, from: data))
-//				return
+			case "MPM\0":
+				inputIsCarbonized = true
+				self = .mpmFile(try MPMFile(named: name, from: data))
+				return
 			default: break
 		}
 		
