@@ -19,7 +19,7 @@ struct DTXFile {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())
 			}
 		} else {
-			let filePath = path.appendingPathComponent(name + ".dtx")
+			let filePath = path.appendingPathComponent(name + ".dtx.json")
 			try jsonData().write(to: filePath)
 			if let metadata {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())

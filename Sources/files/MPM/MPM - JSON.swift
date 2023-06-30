@@ -9,7 +9,7 @@ import Foundation
 
 extension MPMFile {
 	init(named name: String, json: Data) throws {
-		self.name = String(name.dropLast(4)) // remove .mpm
+		self.name = String(name.dropLast(9)) // remove .mpm.json
 		let data = try JSONDecoder().decode(JSONData.self, from: json)
 		unknown1 = data.unknown1
 		unknown2 = data.unknown2

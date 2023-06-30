@@ -25,7 +25,9 @@ enum File {
 	
 	init(named name: String, from data: Data) throws {
 		let fileExtension: String?
-		if name.contains(".") {
+		if name.hasSuffix(".json") {
+			fileExtension = name.dropLast(5).split(separator: ".").last.map(String.init) ?? ".json"
+		} else if name.contains(".") {
 			fileExtension = name.split(separator: ".").last.map(String.init)
 		} else {
 			fileExtension = nil

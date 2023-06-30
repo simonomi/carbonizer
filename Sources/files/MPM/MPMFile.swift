@@ -32,7 +32,7 @@ struct MPMFile {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())
 			}
 		} else {
-			let filePath = path.appendingPathComponent(name + ".mpm")
+			let filePath = path.appendingPathComponent(name + ".mpm.json")
 			try jsonData().write(to: filePath)
 			if let metadata {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())

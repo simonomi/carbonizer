@@ -19,7 +19,7 @@ struct DMSFile {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())
 			}
 		} else {
-			let filePath = path.appendingPathComponent(name + ".dms")
+			let filePath = path.appendingPathComponent(name + ".dms.json")
 			try jsonData().write(to: filePath)
 			if let metadata {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())

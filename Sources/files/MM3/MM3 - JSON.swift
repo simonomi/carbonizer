@@ -9,7 +9,7 @@ import Foundation
 
 extension MM3File {
 	init(named name: String, json: Data) throws {
-		self.name = String(name.dropLast(4)) // remove .mm3
+		self.name = String(name.dropLast(9)) // remove .mm3.json
 		let data = try JSONDecoder().decode(JSONData.self, from: json)
 		indexes = data.indexes
 		tableNames = data.tableNames

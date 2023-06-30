@@ -9,7 +9,7 @@ import Foundation
 
 extension DTXFile {
 	init(named name: String, json: Data) throws {
-		self.name = String(name.dropLast(4)) // remove .dtx
+		self.name = String(name.dropLast(9)) // remove .dtx.json
 		contents = try JSONDecoder().decode([String].self, from: json)
 	}
 	

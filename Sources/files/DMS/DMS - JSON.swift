@@ -9,7 +9,7 @@ import Foundation
 
 extension DMSFile {
 	init(named name: String, json: Data) throws {
-		self.name = String(name.dropLast(4)) // remove .dms
+		self.name = String(name.dropLast(9)) // remove .dms.json
 		maxId = try JSONDecoder().decode(UInt32.self, from: json)
 	}
 	

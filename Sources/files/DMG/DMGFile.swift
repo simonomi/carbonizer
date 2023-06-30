@@ -24,7 +24,7 @@ struct DMGFile {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())
 			}
 		} else {
-			let filePath = path.appendingPathComponent(name + ".dmg")
+			let filePath = path.appendingPathComponent(name + ".dmg.json")
 			try jsonData().write(to: filePath)
 			if let metadata {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())

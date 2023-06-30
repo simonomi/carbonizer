@@ -20,7 +20,7 @@ struct MM3File {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())
 			}
 		} else {
-			let filePath = path.appendingPathComponent(name + ".mm3")
+			let filePath = path.appendingPathComponent(name + ".mm3.json")
 			try jsonData().write(to: filePath)
 			if let metadata {
 				try FileManager.setCreationDate(of: filePath, to: metadata.asDate())

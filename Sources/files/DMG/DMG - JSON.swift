@@ -9,7 +9,7 @@ import Foundation
 
 extension DMGFile {
 	init(named name: String, json: Data) throws {
-		self.name = String(name.dropLast(4)) // remove .dmg
+		self.name = String(name.dropLast(9)) // remove .dmg.json
 		contents = try JSONDecoder().decode([Line].self, from: json)
 	}
 	
