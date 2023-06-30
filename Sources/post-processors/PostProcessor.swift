@@ -5,18 +5,18 @@
 //  Created by simon pellerin on 2023-06-22.
 //
 
-typealias PostProcessor = (_ file: File, _ parent: Folder) -> [FSFile]
+typealias PostProcessor = (_ file: File, _ parent: Folder) throws -> [FSFile]
 
 extension Folder {
-	func postProcessed(with postProcessor: PostProcessor) -> Folder {
+	func postProcessed(with postProcessor: PostProcessor) rethrows -> Folder {
 		Folder(
 			named: name,
-			children: children.flatMap {
+			children: try children.flatMap {
 				switch $0 {
 					case .folder(let folder):
-						return [FSFile.folder(folder.postProcessed(with: postProcessor))]
+						return [FSFile.folder(try folder.postProcessed(with: postProcessor))]
 					case .file(let file, _):
-						return postProcessor(file, self)
+						return try postProcessor(file, self)
 				}
 			}
 		)
@@ -24,7 +24,7 @@ extension Folder {
 }
 
 extension NDSFile {
-	func postProcessed(with postProcessor: PostProcessor) -> NDSFile {
+	func postProcessed(with postProcessor: PostProcessor) rethrows -> NDSFile {
 		NDSFile(
 			name: name,
 			header: header,
@@ -35,9 +35,9 @@ extension NDSFile {
 			arm7OverlayTable: arm7OverlayTable,
 			arm7Overlays: arm7Overlays,
 			iconBanner: iconBanner,
-			contents: contents.map {
+			contents: try contents.map {
 				if case .folder(let folder) = $0 {
-					return .folder(folder.postProcessed(with: postProcessor))
+					return .folder(try folder.postProcessed(with: postProcessor))
 				} else {
 					return $0
 				}
@@ -47,11 +47,11 @@ extension NDSFile {
 }
 
 extension FSFile {
-	func postProcessed(with postProcessor: PostProcessor) -> FSFile {
+	func postProcessed(with postProcessor: PostProcessor) rethrows -> FSFile {
 		if case .folder(let folder) = self {
-			return .folder(folder.postProcessed(with: postProcessor))
+			return .folder(try folder.postProcessed(with: postProcessor))
 		} else if case .file(.ndsFile(let ndsFile), let metadata) = self {
-			return .file(.ndsFile(ndsFile.postProcessed(with: postProcessor)), metadata)
+			return .file(.ndsFile(try ndsFile.postProcessed(with: postProcessor)), metadata)
 		} else {
 			return self
 		}

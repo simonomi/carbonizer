@@ -43,11 +43,7 @@ for file in arguments {
 	
 	print("Processing \(fileUrl.lastPathComponent)")
 	
-#if DEBUG
 	var file: FSFile
-#else
-	let file: FSFile
-#endif
 	do {
 		file = try FSFile(from: fileUrl)
 	} catch {
@@ -65,16 +61,18 @@ for file in arguments {
 	}
 #endif
 	
-	let processedFile: FSFile
+//	let _ = try! file.postProcessed(with: textureLabeler)
+//	file = try! file.postProcessed(with: textureParser)
+	
 	if inputIsCarbonized {
-		processedFile = file.postProcessed(with: nameClarifier)
+		file = file.postProcessed(with: nameClarifier)
 	} else {
-		processedFile = file.postProcessed(with: nameObfuscator)
+		file = file.postProcessed(with: nameObfuscator)
 	}
 	
 	let outputPath = fileUrl.deletingLastPathComponent()
 	do {
-		try processedFile.save(in: outputPath, carbonized: !inputIsCarbonized)
+		try file.save(in: outputPath, carbonized: !inputIsCarbonized)
 	} catch {
 		print("Error: could not save file: \(fileUrl.lastPathComponent), \(error)")
 		waitToExit()

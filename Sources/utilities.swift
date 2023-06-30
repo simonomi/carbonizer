@@ -64,10 +64,6 @@ extension Sequence {
 	func max<T: Comparable>(by keyPath: KeyPath<Element, T>) -> Element? {
 		self.max { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
 	}
-	
-	func map<T>(_ transform: (Element) throws -> () -> T) rethrows -> [T] {
-		try map(transform).map { $0() }
-	}
 }
 
 extension Sequence where Element: AdditiveArithmetic {
@@ -104,6 +100,13 @@ extension BinaryInteger {
 		} else {
 			return self + number - (self % number)
 		}
+	}
+}
+
+func zip<T, U, V>(_ sequence1: [T], _ sequence2: [U], _ sequence3: [V]) -> [(T, U, V)] {
+	zip(sequence1, zip(sequence2, sequence3)).map { item1, items23 in
+		let (item2, item3) = items23
+		return (item1, item2, item3)
 	}
 }
 

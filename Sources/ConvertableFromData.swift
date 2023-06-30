@@ -47,6 +47,10 @@ extension UInt32: ConvertableFromData {
 	static let numberOfBytes = 4
 }
 
+extension Int32: ConvertableFromData {
+	static let numberOfBytes = 4
+}
+
 extension UInt64: ConvertableFromData {
 	static let numberOfBytes = 8
 }

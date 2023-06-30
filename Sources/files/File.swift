@@ -16,6 +16,7 @@ enum File {
 	case mm3File(MM3File)
 	case dmsFile(DMSFile)
 	case mpmFile(MPMFile)
+	case textureFile(TextureFile)
 	
 	init(from path: URL) throws {
 		let data = try Data(contentsOf: path)
@@ -111,6 +112,8 @@ enum File {
 				try dmsFile.save(in: path, carbonized: carbonized, with: metadata)
 			case .mpmFile(let mpmFile):
 				try mpmFile.save(in: path, carbonized: carbonized, with: metadata)
+			case .textureFile(let textureFile):
+				try textureFile.save(in: path, carbonized: carbonized, with: metadata)
 		}
 	}
 	
@@ -132,6 +135,8 @@ enum File {
 				return dmsFile.name
 			case .mpmFile(let mpmFile):
 				return mpmFile.name
+			case .textureFile(let textureFile):
+				return textureFile.name
 		}
 	}
 	
@@ -161,6 +166,9 @@ enum File {
 			case .mpmFile(var mpmFile):
 				mpmFile.name = newName
 				return .mpmFile(mpmFile)
+			case .textureFile(var textureFile):
+				textureFile.name = newName
+				return .textureFile(textureFile)
 		}
 	}
 }
@@ -184,6 +192,8 @@ extension Data {
 				self = try Data(from: dmsFile)
 			case .mpmFile(let mpmFile):
 				self = try Data(from: mpmFile)
+			case .textureFile:
+				fatalError("unable to save a TextureFile as data")
 		}
 	}
 }
