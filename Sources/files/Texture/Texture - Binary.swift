@@ -76,6 +76,7 @@ extension TextureFile.Palette {
 		} catch {
 			// in model/fieldmap/arc/0369, one of the palette names is malformed
 			// the first 4 characters are valid so, so just fall back to reading those
+			data.seek(to: initialOffset)
 			name = try data.readString(length: 4)
 		}
 		data.seek(to: initialOffset + 16)

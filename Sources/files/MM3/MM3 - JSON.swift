@@ -16,7 +16,7 @@ extension MM3File {
 	}
 	
 	func jsonData() throws -> Data {
-		return try JSONEncoder([.prettyPrinted, .sortedKeys]).encode(JSONData(from: self))
+		return try JSONEncoder(.prettyPrinted, .sortedKeys).encode(JSONData(from: self))
 	}
 	
 	struct JSONData: Codable {

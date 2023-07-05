@@ -87,9 +87,9 @@ extension Collection where Element: Equatable {
 }
 
 extension JSONEncoder {
-	convenience init(_ formatting: OutputFormatting) {
+	convenience init(_ formatting: OutputFormatting...) {
 		self.init()
-		outputFormatting = formatting
+		outputFormatting = OutputFormatting(formatting)
 	}
 }
 

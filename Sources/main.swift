@@ -63,6 +63,7 @@ for file in arguments {
 	
 //	let _ = try! file.postProcessed(with: textureLabeler)
 //	file = try! file.postProcessed(with: textureParser)
+//	inputIsCarbonized = true
 	
 	if inputIsCarbonized {
 		file = file.postProcessed(with: nameClarifier)

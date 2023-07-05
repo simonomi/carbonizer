@@ -17,6 +17,7 @@ enum File {
 	case dmsFile(DMSFile)
 	case mpmFile(MPMFile)
 	case textureFile(TextureFile)
+	case rlsFile(RLSFile)
 	
 	init(from path: URL) throws {
 		let data = try Data(contentsOf: path)
@@ -60,6 +61,10 @@ enum File {
 				inputIsCarbonized = false
 				self = .mpmFile(try MPMFile(named: name, json: data))
 				return
+			case "rls":
+				inputIsCarbonized = false
+				self = .rlsFile(try RLSFile(named: name, json: data))
+				return
 			default: break
 		}
 		
@@ -90,6 +95,10 @@ enum File {
 				inputIsCarbonized = true
 				self = .mpmFile(try MPMFile(named: name, from: data))
 				return
+			case "RLS\0":
+				inputIsCarbonized = true
+				self = .rlsFile(try RLSFile(named: name, from: data))
+				return
 			default: break
 		}
 		
@@ -116,6 +125,8 @@ enum File {
 				try mpmFile.save(in: path, carbonized: carbonized, with: metadata)
 			case .textureFile(let textureFile):
 				try textureFile.save(in: path, carbonized: carbonized, with: metadata)
+			case .rlsFile(let rlsFile):
+				try rlsFile.save(in: path, carbonized: carbonized, with: metadata)
 		}
 	}
 	
@@ -139,6 +150,8 @@ enum File {
 				return mpmFile.name
 			case .textureFile(let textureFile):
 				return textureFile.name
+			case .rlsFile(let rlsFile):
+				return rlsFile.name
 		}
 	}
 	
@@ -171,6 +184,9 @@ enum File {
 			case .textureFile(var textureFile):
 				textureFile.name = newName
 				return .textureFile(textureFile)
+			case .rlsFile(var rlsFile):
+				rlsFile.name = newName
+				return .rlsFile(rlsFile)
 		}
 	}
 }
@@ -196,6 +212,8 @@ extension Data {
 				self = try Data(from: mpmFile)
 			case .textureFile:
 				fatalError("unable to save a TextureFile as data")
+			case .rlsFile(let rlsFile):
+				self = try Data(from: rlsFile)
 		}
 	}
 }
