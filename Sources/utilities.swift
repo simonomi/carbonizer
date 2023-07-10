@@ -72,6 +72,13 @@ extension Sequence where Element: AdditiveArithmetic {
 	}
 }
 
+extension Array where Element: BinaryInteger {
+	func toLengths(withEndOffset endOffset: Element) -> [Element] {
+		let endOffsets = dropFirst() + [endOffset]
+		return zip(self, endOffsets).map { $1 - $0 }
+	}
+}
+
 extension Collection where Index == Int {
 	func chunked(into size: Int) -> [SubSequence] {
 		stride(from: 0, to: count, by: size).map {

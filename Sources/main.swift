@@ -52,6 +52,8 @@ for file in arguments {
 		continue
 	}
 	
+//	break
+	
 #if DEBUG
 	if case .file(let ndsFile, _) = file, ndsFile.name == "Fossil Fighters" {
 		file = .file(ndsFile.renamed(to: "Fossil Fighters carbon"))
