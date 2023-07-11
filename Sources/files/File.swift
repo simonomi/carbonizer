@@ -29,6 +29,8 @@ enum File {
 		let fileExtension: String?
 		if name.hasSuffix(".json") {
 			fileExtension = name.dropLast(5).split(separator: ".").last.map(String.init) ?? ".json"
+		} else if name.hasSuffix(".txt") {
+			fileExtension = name.dropLast(4).split(separator: ".").last.map(String.init) ?? ".txt"
 		} else if name.contains(".") {
 			fileExtension = name.split(separator: ".").last.map(String.init)
 		} else {
@@ -68,7 +70,7 @@ enum File {
 				return
 			case "dex":
 				inputIsCarbonized = false
-				self = .dexFile(try DEXFile(named: name, json: data))
+				self = .dexFile(try DEXFile(named: name, text: data))
 				return
 			default: break
 		}

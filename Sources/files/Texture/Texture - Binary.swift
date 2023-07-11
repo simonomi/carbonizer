@@ -22,8 +22,7 @@ extension TextureFile {
 		}
 		
 		let startBitmapOffsets = paletteHeaders.map(\.bitmapOffset)
-		let endBitmapOffsets = startBitmapOffsets.dropFirst() + [bitmapLength]
-		let bitmapLengths = zip(startBitmapOffsets, endBitmapOffsets).map { $1 - $0 }
+		let bitmapLengths = startBitmapOffsets.toLengths(withEndOffset: bitmapLength)
 		
 		let bitmapData = try bitmapLengths.map {
 			try data.read($0)

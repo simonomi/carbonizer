@@ -13,7 +13,7 @@ var inputIsCarbonized = false
 #if DEBUG
 //arguments.append("fast")
 arguments.append("~/Fossil Fighters.nds")
-arguments.append("~/Fossil Fighters carbon")
+//arguments.append("~/Fossil Fighters carbon")
 #endif
 
 let fastMode = arguments.first == "fast"

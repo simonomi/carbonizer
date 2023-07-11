@@ -21,8 +21,7 @@ extension RLSFile {
 		let offsets = try (0 ..< kasekiCount).map { _ in
 			try data.read(UInt32.self)
 		}
-		let endOffsets = offsets.dropFirst() + [UInt32(data.data.count)]
-		let lengths = zip(offsets, endOffsets).map { $1 - $0 }
+		let lengths = offsets.toLengths(withEndOffset: UInt32(data.data.count))
 		
 		kasekis = try lengths.enumerated().map {
 			try Kaseki(from: data, index: $0, length: $1)

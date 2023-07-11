@@ -64,7 +64,7 @@ extension DEXFile.Command {
 			case 7:
 				self = .spawn(
 					try Character(from: data),
-					try data.read(UInt32.self),
+					try data.read(Int32.self),
 					x: try data.read(Int32.self),
 					y: try data.read(Int32.self),
 					try data.read(Int32.self)
@@ -78,41 +78,41 @@ extension DEXFile.Command {
 			case 32:
 				self = .unownedDialogue(try Dialogue(from: data))
 			case 34:
-				self = .faceDirection(
+				self = .turnTo(
 					try Character(from: data),
 					angle: try data.read(Int32.self)
 				)
 			case 35:
-				self = .faceDirection2(
+				self = .turn1To(
 					try Character(from: data),
 					angle: try data.read(Int32.self),
 					frameCount: try data.read(UInt32.self),
 					try data.read(Int32.self)
 				)
 			case 36:
-				self = .faceCharacter(
+				self = .turnTowards(
 					try Character(from: data),
 					target: try Character(from: data),
 					frameCount: try data.read(UInt32.self),
 					try data.read(Int32.self)
 				)
 			case 37:
-				self = .faceDirection3(
+				self = .turn2To(
 					try Character(from: data),
 					angle: try data.read(Int32.self),
 					frameCount: try data.read(UInt32.self),
 					try data.read(Int32.self)
 				)
 			case 38:
-				self = .faceCharacter2(
+				self = .turnTowards2(
 					try Character(from: data),
 					target: try Character(from: data),
-					try data.read(UInt32.self),
+					try data.read(Int32.self),
 					frameCount: try data.read(UInt32.self),
 					try data.read(Int32.self)
 				)
 			case 43:
-				self = .move(
+				self = .moveTo(
 					try Character(from: data),
 					x: try data.read(Int32.self),
 					y: try data.read(Int32.self),
@@ -120,7 +120,7 @@ extension DEXFile.Command {
 					try data.read(Int32.self)
 				)
 			case 45:
-				self = .moveRelative(
+				self = .moveBy(
 					try Character(from: data),
 					relativeX: try data.read(Int32.self),
 					relativeY: try data.read(Int32.self),
@@ -130,7 +130,7 @@ extension DEXFile.Command {
 			case 56:
 				self = .delay(frameCount: try data.read(UInt32.self))
 			case 58:
-				self = .clean(
+				self = .clean1(
 					try data.read(UInt32.self),
 					try Fossil(from: data)
 				)
@@ -140,7 +140,7 @@ extension DEXFile.Command {
 					try Fossil(from: data)
 				)
 			case 61:
-				self = .moveCamera(
+				self = .angleCamera(
 					fov: try data.read(UInt32.self),
 					xRotation: try data.read(Int32.self),
 					yRotation: try data.read(Int32.self),
@@ -180,26 +180,26 @@ extension DEXFile.Command {
 			case 155:
 				self = .imageSlideIn(
 					try Image(from: data),
-					try data.read(UInt32.self),
+					try data.read(Int32.self),
 					frameCount: try data.read(UInt32.self),
 					try data.read(Int32.self)
 				)
 			case 157:
 				self = .imageFadeIn(
 					try Image(from: data),
-					try data.read(UInt32.self),
+					try data.read(Int32.self),
 					frameCount: try data.read(UInt32.self),
 					try data.read(Int32.self)
 				)
 			case 191:
 				self = .revive(try Vivosaur(from: data))
 			case 200:
-				self = .watch(
+				self = .startTurning(
 					try Character(from: data),
 					target: try Character(from: data)
 				)
 			case 201:
-				self = .stopWatching(try Character(from: data))
+				self = .stopTurning(try Character(from: data))
 			default:
 				self = .unknown(
 					type: type,
@@ -246,13 +246,13 @@ extension DEXFile.Command {
 				data.write(UInt32(1))
 				data.write(UInt32(0xc))
 				dialogue.write(to: data)
-			case .faceDirection(let character, angle: let angle):
+			case .turnTo(let character, angle: let angle):
 				data.write(UInt32(34))
 				data.write(UInt32(2))
 				data.write(UInt32(0xc))
 				character.write(to: data)
 				data.write(angle)
-			case .faceDirection2(let character, angle: let angle, frameCount: let frameCount, let unknown):
+			case .turn1To(let character, angle: let angle, frameCount: let frameCount, let unknown):
 				data.write(UInt32(35))
 				data.write(UInt32(4))
 				data.write(UInt32(0xc))
@@ -260,7 +260,7 @@ extension DEXFile.Command {
 				data.write(angle)
 				data.write(frameCount)
 				data.write(unknown)
-			case .faceCharacter(let character, target: let target, frameCount: let frameCount, let unknown):
+			case .turnTowards(let character, target: let target, frameCount: let frameCount, let unknown):
 				data.write(UInt32(36))
 				data.write(UInt32(4))
 				data.write(UInt32(0xc))
@@ -268,7 +268,7 @@ extension DEXFile.Command {
 				target.write(to: data)
 				data.write(frameCount)
 				data.write(unknown)
-			case .faceDirection3(let character, angle: let angle, frameCount: let frameCount, let unknown):
+			case .turn2To(let character, angle: let angle, frameCount: let frameCount, let unknown):
 				data.write(UInt32(37))
 				data.write(UInt32(4))
 				data.write(UInt32(0xc))
@@ -276,7 +276,7 @@ extension DEXFile.Command {
 				data.write(angle)
 				data.write(frameCount)
 				data.write(unknown)
-			case .faceCharacter2(let character, target: let target, let unknown1, frameCount: let frameCount, let unknown2):
+			case .turnTowards2(let character, target: let target, let unknown1, frameCount: let frameCount, let unknown2):
 				data.write(UInt32(38))
 				data.write(UInt32(5))
 				data.write(UInt32(0xc))
@@ -285,7 +285,7 @@ extension DEXFile.Command {
 				data.write(unknown1)
 				data.write(frameCount)
 				data.write(unknown2)
-			case .move(let character, x: let x, y: let y, frameCount: let frameCount, let unknown):
+			case .moveTo(let character, x: let x, y: let y, frameCount: let frameCount, let unknown):
 				data.write(UInt32(43))
 				data.write(UInt32(5))
 				data.write(UInt32(0xc))
@@ -294,7 +294,7 @@ extension DEXFile.Command {
 				data.write(y)
 				data.write(frameCount)
 				data.write(unknown)
-			case .moveRelative(let character, relativeX: let relativeX, relativeY: let relativeY, frameCount: let frameCount, let unknown):
+			case .moveBy(let character, relativeX: let relativeX, relativeY: let relativeY, frameCount: let frameCount, let unknown):
 				data.write(UInt32(45))
 				data.write(UInt32(5))
 				data.write(UInt32(0xc))
@@ -308,7 +308,7 @@ extension DEXFile.Command {
 				data.write(UInt32(1))
 				data.write(UInt32(0xc))
 				data.write(frameCount)
-			case .clean(let unknown, let fossil):
+			case .clean1(let unknown, let fossil):
 				data.write(UInt32(58))
 				data.write(UInt32(2))
 				data.write(UInt32(0xc))
@@ -320,7 +320,7 @@ extension DEXFile.Command {
 				data.write(UInt32(0xc))
 				data.write(unknown)
 				fossil.write(to: data)
-			case .moveCamera(fov: let fov, xRotation: let xRotation, yRotation: let yRotation, targetDistance: let targetDistance, frameCount: let frameCount, let unknown):
+			case .angleCamera(fov: let fov, xRotation: let xRotation, yRotation: let yRotation, targetDistance: let targetDistance, frameCount: let frameCount, let unknown):
 				data.write(UInt32(61))
 				data.write(UInt32(6))
 				data.write(UInt32(0xc))
@@ -396,13 +396,13 @@ extension DEXFile.Command {
 				data.write(UInt32(1))
 				data.write(UInt32(0xc))
 				vivosaur.write(to: data)
-			case .watch(let character, target: let target):
+			case .startTurning(let character, target: let target):
 				data.write(UInt32(200))
 				data.write(UInt32(2))
 				data.write(UInt32(0xc))
 				character.write(to: data)
 				target.write(to: data)
-			case .stopWatching(let character):
+			case .stopTurning(let character):
 				data.write(UInt32(201))
 				data.write(UInt32(1))
 				data.write(UInt32(0xc))
@@ -449,23 +449,15 @@ extension DEXFile.Command.Fossil {
 extension DEXFile.Command.Effect {
 	init(from data: Datastream) throws {
 		let type = try data.read(UInt32.self)
-		switch type {
-			case 4:
-				self = .haha
-			case 5:
-				self = .threeWhiteLines
-			case 7:
-				self = .threeRedLines
-			case 8:
-				self = .questionMark
-			case 9:
-				self = .thinking
-			case 22:
-				self = .ellipses
-			case 23:
-				self = .lightBulb
-			default:
-				self = .unknown(type)
+		self = switch type {
+			case 4:  .haha
+			case 5:  .threeWhiteLines
+			case 7:  .threeRedLines
+			case 8:  .questionMark
+			case 9:  .thinking
+			case 22: .ellipses
+			case 23: .lightBulb
+			default: .unknown(type)
 		}
 	}
 	
@@ -494,13 +486,10 @@ extension DEXFile.Command.Effect {
 extension DEXFile.Command.Movement {
 	init(from data: Datastream) throws {
 		let type = try data.read(UInt32.self)
-		switch type {
-			case 1:
-				self = .jump
-			case 8:
-				self = .quake
-			default:
-				self = .unknown(type)
+		self = switch type {
+			case 1:  .jump
+			case 8:  .quake
+			default: .unknown(type)
 		}
 	}
 	
