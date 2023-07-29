@@ -1,5 +1,5 @@
 ## carbonizer
-A Fossil Fighters ROM-hacking tool.
+A pure swift, easy-to-use Fossil Fighters ROM-hacking tool.
 
 ### How it works
 Point carbonizer towards a file or folder, and it'll automatically pack or unpack whatever input it receives.
