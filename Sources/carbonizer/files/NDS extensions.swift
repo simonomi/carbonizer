@@ -54,7 +54,7 @@ extension NDS.Binary.FileNameTable.SubEntry {
 		Self(typeAndNameLength: typeAndNameLength, name: name, id: id)
 	}
 	
-	func createFileSystemObject(files: [Data], fileNameTable: CompleteFNT) throws -> any FileSystemObject {
+	func createFileSystemObject(files: [Datastream], fileNameTable: CompleteFNT) throws -> any FileSystemObject {
 		switch type {
 			case .file: 
 				try File(named: name, data: files[Int(id!)])

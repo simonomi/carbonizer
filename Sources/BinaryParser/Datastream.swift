@@ -8,18 +8,27 @@
 import Foundation
 
 /// Documentation
-public class Datastream {
+final public class Datastream: BinaryConvertible, Codable {
 	public typealias Byte = UInt8
 	
-	var bytes: [Byte]
-	private var offset = 0
+	var bytes: ArraySlice<Byte>
+	private var offset: Int
 	
 	public convenience init(_ data: Data) {
 		self.init([Byte](data))
 	}
 	
-	public init(_ bytes: [Byte]) {
+	public convenience init(_ bytes: [Byte]) {
+		self.init(bytes[...])
+	}
+	
+	public init(_ bytes: ArraySlice<Byte>) {
 		self.bytes = bytes
+		offset = bytes.startIndex
+	}
+	
+	public convenience init(_ datastream: Datastream) {
+		self.init(datastream.bytes[datastream.offset...])
 	}
 	
 	func canRead(bytes count: Int) -> Bool {
@@ -28,6 +37,15 @@ public class Datastream {
 	
 	func canRead(until offset: Int) -> Bool {
 		offset <= bytes.endIndex
+	}
+	
+	// MARK: codable
+	public func encode(to encoder: Encoder) throws {
+		try Data(bytes).encode(to: encoder)
+	}
+	
+	public required convenience init(from decoder: Decoder) throws {
+		self.init(try Data(from: decoder))
 	}
 }
 
@@ -144,40 +162,54 @@ extension Datastream {
 	
 	/// Documentation
 	public func read<T: BinaryInteger>(
-		_ type: Data.Type, length: T
-	) throws -> Data {
-		let length = Int(length)
+		_ type: Datastream.Type, endOffset: T, relativeTo baseOffset: Offset
+	) throws -> Datastream {
+		let endOffset = Int(endOffset) + baseOffset.offest
 		
-		guard canRead(bytes: length) else {
-			throw BinaryParserError.indexOutOfBounds(index: offset + length, expected: bytes.indices, for: Data.self)
+		guard canRead(until: endOffset) else {
+			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: Datastream.self)
 		}
 		
-		defer { offset += length }
-		return Data(bytes[offset..<(offset + length)])
+		defer { offset = endOffset }
+		return Datastream(bytes[offset..<endOffset])
 	}
 	
 	/// Documentation
 	public func read<T: BinaryInteger>(
-		_ type: [Data].Type, offsets: [T], endOffset: T, relativeTo baseOffset: Offset
-	) throws -> [Data] {
+		_ type: Datastream.Type, length: T
+	) throws -> Datastream {
+		let length = Int(length)
+		
+		guard canRead(bytes: length) else {
+			throw BinaryParserError.indexOutOfBounds(index: offset + length, expected: bytes.indices, for: Datastream.self)
+		}
+		
+		defer { offset += length }
+		return Datastream(bytes[offset..<(offset + length)])
+	}
+	
+	/// Documentation
+	public func read<T: BinaryInteger>(
+		_ type: [Datastream].Type, offsets: [T], endOffset: T, relativeTo baseOffset: Offset
+	) throws -> [Datastream] {
 		let offsets = offsets.map { Int($0) + baseOffset.offest }
 		let endOffset = Int(endOffset) + baseOffset.offest
 		
 		guard canRead(until: endOffset) else {
-			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: [Data].self)
+			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: [Datastream].self)
 		}
 		
 		let ranges = zip(offsets, offsets.dropFirst() + [endOffset])
 		defer { offset = endOffset }
 		return ranges.map { start, end in
-			Data(bytes[start..<end])
+			Datastream(bytes[start..<end])
 		}
 	}
 	
 	/// Documentation
 	public func read<T: BinaryInteger>(
-		_ type: [Data].Type, startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
-	) throws -> [Data] {
+		_ type: [Datastream].Type, startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
+	) throws -> [Datastream] {
 		assert(startOffsets.count == endOffsets.count)
 		
 		let startOffsets = startOffsets.map { Int($0) + baseOffset.offest }
@@ -185,13 +217,13 @@ extension Datastream {
 		
 		let endOffset = endOffsets.max() ?? baseOffset.offest
 		guard canRead(until: endOffset) else {
-			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: [Data].self)
+			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: [Datastream].self)
 		}
 		
 		let ranges = zip(startOffsets, endOffsets)
 		defer { offset = endOffset }
 		return ranges.map { start, end in
-			Data(bytes[start..<end])
+			Datastream(bytes[start..<end])
 		}
 	}
 }

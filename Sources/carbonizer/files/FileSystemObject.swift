@@ -89,6 +89,11 @@ struct File: FileSystemObject {
 		data = try createFileData(name: name, extension: fileExtension, data: inputData)
 	}
 	
+	init(named inputName: String, data inputData: Datastream) throws {
+		(name, fileExtension) = split(fileName: inputName)
+		data = try createFileData(name: name, extension: fileExtension, data: inputData)
+	}
+	
 	init(name: String, fileExtension: String, metadata: Metadata? = nil, data: any FileData) {
 		self.name = name
 		self.fileExtension = fileExtension
@@ -106,9 +111,6 @@ func split(fileName: String) -> (name: String, fileExtension: String) {
 }
 
 func createFileData(name: String, extension fileExtension: String, data: Data) throws -> any FileData {
-	let datastream = Datastream(data)
-	let magicBytes = String(bytes: data.prefix(3), encoding: .utf8)
-	
 	do {
 		return try switch fileExtension {
 			case "dex.json": DEX(unpacked: data)
@@ -117,23 +119,38 @@ func createFileData(name: String, extension fileExtension: String, data: Data) t
 			case "dtx.json": DTX(unpacked: data)
 			case "mm3.json": MM3(unpacked: data)
 			case "mpm.json": MPM(unpacked: data)
-			case "nds":      NDS(packed: datastream)
 			case "rls.json": RLS(unpacked: data)
+			default: createFileData(name: name, extension: fileExtension, data: Datastream(data))
+		}
+	} catch {
+		let magicBytes = String(bytes: data.prefix(3), encoding: .utf8) ?? ""
+		throw BinaryParserError.whileReadingFile(name, fileExtension, magicBytes, error)
+	}
+}
+
+func createFileData(name: String, extension fileExtension: String, data: Datastream) throws -> any FileData {
+	let marker = data.placeMarker()
+	let magicBytes = (try? data.read(String.self, length: 3)) ?? ""
+	try! data.jump(to: marker) // should never fail, right?
+	
+	do {
+		return try switch fileExtension {
+			case "nds": NDS(packed: data)
 			default:
 				try switch magicBytes {
-					case "DEX": DEX(packed: datastream)
-					case "DMG": DMG(packed: datastream)
-					case "DMS": DMS(packed: datastream)
-					case "DTX": DTX(packed: datastream)
-					case "MAR": MAR(packed: datastream)
-					case "MM3": MM3(packed: datastream)
-					case "MPM": MPM(packed: datastream)
-					case "RLS": RLS(packed: datastream)
-					default:   data
+					case "DEX": DEX(packed: data)
+					case "DMG": DMG(packed: data)
+					case "DMS": DMS(packed: data)
+					case "DTX": DTX(packed: data)
+					case "MAR": MAR(packed: data)
+					case "MM3": MM3(packed: data)
+					case "MPM": MPM(packed: data)
+					case "RLS": RLS(packed: data)
+					default:    data
 				}
 		}
 	} catch {
-		throw BinaryParserError.whileReadingFile(name, fileExtension, magicBytes ?? "", error)
+		throw BinaryParserError.whileReadingFile(name, fileExtension, magicBytes, error)
 	}
 }
 

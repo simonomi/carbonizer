@@ -54,17 +54,17 @@ func parseBinding(_ binding: PatternBindingSyntax, with attributes: Attributes) 
 			.auto
 		}
 
-	if type == "Data" && attributes.length == nil {
+	if type == "Datastream" && attributes.length == nil && attributes.endOffset == nil {
 		throw PropertyParsingError.missingLength(for: name)
 	}
 	
-	if type == "[Data]" && attributes.endOffset == nil {
+	if type == "[Datastream]" && attributes.endOffset == nil {
 		guard case .givenByPathStartToEnd = attributes.offsets else {
 			throw PropertyParsingError.missingEndOffset(for: name)
 		}
 	}
 	
-	if attributes.length != nil && !["String", "Data"].contains(type) {
+	if attributes.length != nil && !["String", "Datastream"].contains(type) {
 		throw PropertyParsingError.lengthOnNonString(for: name, type)
 	}
 	

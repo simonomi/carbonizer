@@ -17,7 +17,6 @@ struct MCM {
 	var compressedSize: UInt32
 	var decompressedSize: UInt32
 	
-	// TODO: should this be a File??
 	var content: any FileData
 	
 	enum CompressionType: UInt8 {
@@ -36,9 +35,13 @@ struct MCM {
 		@Count(givenBy: \Self.chunkCount)
 		var chunkOffsets: [UInt32]
 		var endOfFileOffset: UInt32
-		@Offsets(givenBy: \Self.chunkOffsets)
+//		@Offsets(givenBy: \Self.chunkOffsets)
+//		@EndOffset(givenBy: \Self.endOfFileOffset)
+//		var chunks: [Datastream]
+		
+		@Offset(givenBy: \Self.chunkOffsets.first!)
 		@EndOffset(givenBy: \Self.endOfFileOffset)
-		var chunks: [Data]
+		var chunks: Datastream
 	}
 }
 
@@ -52,15 +55,16 @@ extension MCM {
 		maxChunkSize = packed.maxChunkSize
 		
 		decompressedSize = packed.decompressedSize
-		compressedSize = packed.compressedSize()
+		compressedSize = packed.compressedSize
 		
-		content = try createFileData(name: "", extension: "", data: Data(packed.chunks.joined()))
+		content = try createFileData(name: "", extension: "", data: packed.chunks)
 	}
 }
 
 extension MCM.Binary {
-	func compressedSize() -> UInt32 {
-		24 + chunkCount * 4 + UInt32(chunks.map(\.count).sum())
+	var compressedSize: UInt32 {
+		guard let firstOffset = chunkOffsets.first else { return 0 }
+		return endOfFileOffset - firstOffset
 	}
 }
 

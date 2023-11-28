@@ -35,9 +35,16 @@ extension Property {
 				""
 			}
 		
+		let endOffsetAndRelativeTo =
+			if let endOffset {
+				", endOffset: \(endOffset.value), relativeTo: \(structName)"
+			} else {
+				""
+			}
+		
 		let dataRead = switch size {
 			case .auto:
-				"\(name) = try data.read(\(type).self\(lengthArgument))"
+				"\(name) = try data.read(\(type).self\(lengthArgument)\(endOffsetAndRelativeTo))"
 			
 			case .count(let count):
 				"\(name) = try data.read(\(type).self, count: \(count.value))"

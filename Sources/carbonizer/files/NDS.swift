@@ -11,15 +11,15 @@ import Foundation
 struct NDS {
 	var header: Binary.Header
 	
-	var arm9: Data
+	var arm9: Datastream
 	var arm9OverlayTable: [Binary.OverlayTableEntry]
 	var arm9Overlays: [File]
 	
-	var arm7: Data
+	var arm7: Datastream
 	var arm7OverlayTable: [Binary.OverlayTableEntry]
 	var arm7Overlays: [File]
 	
-	var iconBanner: Data
+	var iconBanner: Datastream
 	
 	var contents: [any FileSystemObject]
 	
@@ -29,21 +29,21 @@ struct NDS {
 		
 		@Offset(givenBy: \Self.header.arm9Offset)
 		@Length(givenBy: \Self.header.arm9Size)
-		var arm9: Data
+		var arm9: Datastream
 		@Offset(givenBy: \Self.header.arm9OverlayOffset)
 		@Count(givenBy: \Self.header.arm9OverlaySize, .dividedBy(32))
 		var arm9OverlayTable: [OverlayTableEntry]
 		
 		@Offset(givenBy: \Self.header.arm7Offset)
 		@Length(givenBy: \Self.header.arm7Size)
-		var arm7: Data
+		var arm7: Datastream
 		@Offset(givenBy: \Self.header.arm7OverlayOffset)
 		@Count(givenBy: \Self.header.arm7OverlaySize, .dividedBy(32))
 		var arm7OverlayTable: [OverlayTableEntry]
 		
 		@Offset(givenBy: \Self.header.iconBannerOffset)
 		@Length(0x840)
-		var iconBanner: Data
+		var iconBanner: Datastream
 		
 		@Offset(givenBy: \Self.header.fileNameTableOffset)
 		var fileNameTable: FileNameTable
@@ -53,7 +53,7 @@ struct NDS {
 		var fileAllocationTable: [FileAllocationTableEntry]
 		
 		@Offsets(givenBy: \Self.fileAllocationTable, from: \.startAddress, to: \.endAddress)
-		var files: [Data]
+		var files: [Datastream]
 		
 		@BinaryConvertible
 		struct Header: Codable {
@@ -67,7 +67,7 @@ struct NDS {
 			var encryptionSeedSelect: UInt8
 			var deviceCapacity: UInt8
 			@Length(7)
-			var reserved1: Data
+			var reserved1: Datastream
 			var ndsRegion: UInt16
 			var romVersion: UInt8
 			var internalFlags: UInt8
@@ -98,13 +98,13 @@ struct NDS {
 			var totalROMSize: UInt32
 			var headerSize: UInt32
 			@Length(56)
-			var reserved2: Data
+			var reserved2: Datastream
 			@Length(156)
-			var nintendoLogo: Data
+			var nintendoLogo: Datastream
 			var nintendoLogoCRC: UInt16
 			var headerCRC: UInt16
 			@Length(32)
-			var reserved3: Data
+			var reserved3: Datastream
 		}
 		
 		@BinaryConvertible

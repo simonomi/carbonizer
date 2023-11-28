@@ -16,9 +16,3 @@ extension String: BinaryConvertible {
 		self = try data.read(String.self)
 	}
 }
-
-extension Data: BinaryConvertible {
-	public init(_ data: Datastream) throws {
-		self = try data.read(Data.self)
-	}
-}

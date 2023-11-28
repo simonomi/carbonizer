@@ -36,13 +36,6 @@ struct carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
-//		print(compressionMode?.rawValue ?? "auto")
-//		print(fast ? "fast" : "not fast")
-//		print("files: " + filePaths.map(\.absoluteString).joined(separator: ", "))
-//		print("file names: " + filePaths.map(\.lastPathComponent).joined(separator: ", "))
-//		print("file extensions: " + filePaths.map(\.pathExtension).joined(separator: ", "))
-//		print("without file extensions: " + filePaths.map { $0.deletingPathExtension().lastPathComponent }.joined(separator: ", "))
-		
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 		
 		for filePath in filePaths {
