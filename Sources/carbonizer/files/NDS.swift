@@ -141,7 +141,6 @@ struct NDS {
 				var typeAndNameLength: UInt8
 				@Length(givenBy: \Self.typeAndNameLength, .modulo(0x80))
 				var name: String
-//				@If(\Self.typeAndNameLength, is: .greaterThan(0x80))
 				@If(\Self.type, is: .equalTo(.folder))
 				var id: UInt16?
 			}

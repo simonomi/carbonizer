@@ -11,6 +11,9 @@ public enum BinaryParserError: Error {
 	case whileReading(Any.Type, any Error)
 	case whileReading(Any.Type, count: Int, any Error)
 	case whileReading(Any.Type, offsets: [Int], any Error)
+	case whileWriting(Any.Type, any Error)
+	case whileWriting(Any.Type, count: Int, any Error)
+	case whileWriting(Any.Type, offsets: [Int], any Error)
 }
 
 public enum BinaryParserAssertionError<T>: Error {

@@ -251,12 +251,12 @@ extension Datastream {
 // MARK: jump
 extension Datastream {
 	/// Documentation
-	public func jump<T: BinaryInteger>(bytes: T) throws {
+	public func jump<T: BinaryInteger>(bytes: T) {
 		offset += Int(bytes)
 	}
 	
 	/// Documentation
-	public func jump(to offset: Offset) throws {
+	public func jump(to offset: Offset) {
 		self.offset = offset.offest
 	}
 }

@@ -16,6 +16,16 @@ extension [NDS.Binary.FileNameTable.SubEntry]: BinaryConvertible {
 		}
 		removeLast()
 	}
+	
+	public func write(to data: BinaryParser.Datawriter) {
+		forEach(data.write)
+	}
+}
+
+extension Datawriter {
+	func write(_ data: [NDS.Binary.FileNameTable.SubEntry]) {
+		data.write(to: self)
+	}
 }
 
 typealias CompleteFNT = [UInt16 : [NDS.Binary.FileNameTable.SubEntry]]

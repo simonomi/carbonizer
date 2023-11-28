@@ -24,7 +24,6 @@ struct BinaryConvertibleMacro: ExtensionMacro {
 		guard let structDecl = StructDeclSyntax(declaration) else {
 			throw BinaryConvertibleMacroError.invalidType
 		}
-		let structName = structDecl.name.trimmedDescription.lowercased()
 		
 		let variableDecls = structDecl.memberBlock.members
 			.map(\.decl)
@@ -33,22 +32,30 @@ struct BinaryConvertibleMacro: ExtensionMacro {
 		let properties = try parseProperties(variableDecls)
 		
 		let initialization = properties
-			.map { $0.makeInitialization(in: structName) }
+			.map { $0.makeInitialization() }
 			.joined(separator: "\n")
 		
 		let markerDefinition =
-		if initialization.contains("try data.jump(to: \(structName) + ") ||
-		   initialization.contains(", relativeTo: ") {
-				"let \(structName) = data.placeMarker()\n\t\t"
+			if initialization.contains("data.jump(to: base + ") ||
+			   initialization.contains(", relativeTo: ") {
+				"let base = data.placeMarker()\n\t\t"
 			} else {
 				""
 			}
+		
+		let writer = properties
+			.map { $0.makeWriter() }
+			.joined(separator: "\n")
 		
 		return [try ExtensionDeclSyntax(
 			"""
 			extension \(type): BinaryConvertible {
 				public init(_ data: Datastream) throws {
 					\(raw: markerDefinition)\(raw: initialization)
+				}
+				
+				public func write(to data: Datawriter) {
+					\(raw: markerDefinition)\(raw: writer)
 				}
 			}
 			"""

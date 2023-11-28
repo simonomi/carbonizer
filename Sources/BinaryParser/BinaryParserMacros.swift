@@ -6,7 +6,7 @@
 //
 
 /// Documentation
-@attached(extension, conformances: BinaryConvertible, names: named(init))
+@attached(extension, conformances: BinaryConvertible, names: named(init), named(write))
 public macro BinaryConvertible() = #externalMacro(module: "BinaryParserMacros", type: "BinaryConvertibleMacro")
 
 public enum Operator<T> {
