@@ -88,17 +88,6 @@ extension MCM {
 					.map(compression.1.decompress)
 					.joined()
 			)
-			
-//			if decompressedSize == 10072 {
-//				let start = Date.now
-//				content = try packed.chunks
-//					.map(compression.0.decompress)
-//					.map(compression.1.decompress)
-//					.joined()
-//				print(-start.timeIntervalSinceNow)
-//			}
-			
-			content = Datastream([])
 		} catch {
 			throw DecompressionError.whileReading(MCM.self, compression, error)
 		}
