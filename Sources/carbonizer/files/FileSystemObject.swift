@@ -131,7 +131,7 @@ func createFileData(name: String, extension fileExtension: String, data: Data) t
 func createFileData(name: String, extension fileExtension: String, data: Datastream) throws -> any FileData {
 	let marker = data.placeMarker()
 	let magicBytes = (try? data.read(String.self, length: 3)) ?? ""
-	try! data.jump(to: marker) // should never fail, right?
+	data.jump(to: marker)
 	
 	do {
 		return try switch fileExtension {

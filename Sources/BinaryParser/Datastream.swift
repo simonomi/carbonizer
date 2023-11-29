@@ -11,8 +11,8 @@ import Foundation
 final public class Datastream: BinaryConvertible, Codable {
 	public typealias Byte = UInt8
 	
-	var bytes: ArraySlice<Byte>
-	private var offset: Int
+	public private(set) var bytes: ArraySlice<Byte>
+	public private(set) var offset: Int
 	
 	public convenience init(_ data: Data) {
 		self.init([Byte](data))
@@ -92,6 +92,16 @@ extension Datastream {
 
 // MARK: primitives
 extension Datastream {
+	/// Documentation
+	public func read(_ type: UInt8.Type) throws -> UInt8 {
+		guard canRead(bytes: 1) else {
+			throw BinaryParserError.indexOutOfBounds(index: offset + 1, expected: bytes.indices, for: UInt8.self)
+		}
+		
+		defer { offset += 1 }
+		return bytes[offset]
+	}
+	
 	/// Documentation
 	public func read<T: BinaryInteger>(_ type: T.Type) throws -> T {
 		var output = T.zero
@@ -258,5 +268,11 @@ extension Datastream {
 	/// Documentation
 	public func jump(to offset: Offset) {
 		self.offset = offset.offest
+	}
+}
+
+extension [Datastream] {
+	public func joined() -> Datastream {
+		Datastream(ArraySlice(map(\.bytes).joined()))
 	}
 }

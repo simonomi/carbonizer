@@ -10,16 +10,22 @@ import Foundation
 final public class Datawriter {
 	public typealias Byte = UInt8
 	
-	var bytes: ArraySlice<Byte>
-	private var offset: Int
+	public private(set) var bytes: ArraySlice<Byte>
+	public private(set) var offset: Int
 	
 	public init() {
 		bytes = []
 		offset = bytes.endIndex
 	}
 	
-	public func data() -> Data {
-		Data(bytes)
+	public init(capacity: Int) {
+		bytes = []
+		bytes.reserveCapacity(capacity)
+		offset = bytes.endIndex
+	}
+	
+	public func intoDatastream() -> Datastream {
+		Datastream(bytes)
 	}
 }
 
@@ -31,7 +37,7 @@ extension Datawriter {
 	}
 	
 	/// Documentation
-	public func write<T: BinaryConvertible>(_ data: [T]) {
+	public func write<S: Sequence<T>, T: BinaryConvertible>(_ data: S) {
 		data.forEach(write)
 	}
 	
@@ -51,6 +57,12 @@ extension Datawriter {
 // MARK: primitives
 extension Datawriter {
 	/// Documentation
+	public func write(_ byte: Byte) {
+		bytes.insert(byte, at: offset)
+		offset += 1
+	}
+	
+	/// Documentation
 	public func write<T: BinaryInteger>(_ data: T) {
 		let byteWidth = data.bitWidth / 8
 		
@@ -58,12 +70,12 @@ extension Datawriter {
 			.map { (data >> ($0 * 8)) & 0xFF }
 			.map(Byte.init)
 		
-		bytes.insert(contentsOf: newBytes, at: self.offset)
+		bytes.insert(contentsOf: newBytes, at: offset)
 		offset += byteWidth
 	}
 	
 	/// Documentation
-	public func write<T: BinaryInteger>(_ data: [T]) {
+	public func write<S: Sequence<T>, T: BinaryInteger>(_ data: S) {
 		data.forEach(write)
 	}
 	

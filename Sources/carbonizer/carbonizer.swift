@@ -39,18 +39,62 @@ struct carbonizer: ParsableCommand {
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 		
 		for filePath in filePaths {
-//			let file = File(filePath: filePath)
-//			print(file)
-			
-			print("starting")
-			let datastream = Datastream(try Data(contentsOf: filePath))
-			
 			let start = Date.now
-			let nds = try NDS(packed: datastream)
+			let file = try File(filePath: filePath)
 			print(-start.timeIntervalSinceNow)
 			
-			print(nds.contents.count)
-			print(nds.contents.map(\.name))
+//			let nds = file.data as! NDS
+//			let folder = nds.contents.last as! Folder
+//			let english = folder.files.first as! File
+//			let mar = english.data as! MAR
+//			let mcm = mar.files.first!
+//			let data = mcm.content as! Datastream
+//			
+//			print(english.name)
+//			print(mcm)
+			
+//			print(data.bytes.count)
+//			let onceDecompressed = try Huffman.decompress(data)
+//			let decompressed = try LZSS.decompress(onceDecompressed)
+//			print(onceDecompressed.bytes.count)
+			
+//			let dedata = Data(decompressed.bytes)
+//			try dedata.write(to: URL(filePath: "/Users/simonomi/Desktop/out.bin"))
+			
+//			print(
+//				decompressed.bytes
+//					.map { String($0, radix: 16).padded(toLength: 2, with: "0") }
+//					.joined(separator: " ")
+//			)
+			
+//			var filetypes = Set<String>()
+//			
+//			nds.contents.forEach {
+//				$0.forEachFile {
+//					guard let mar = $0.data as? MAR else { return }
+//					mar.files.forEach {
+//						if type(of: $0.content) != Datastream.self {
+//							print($0.content)
+//							filetypes.insert(String(describing: type(of: $0.content)))
+//						}
+//					}
+//				}
+//			}
+//			
+//			print(filetypes)
+		}
+	}
+}
+
+extension FileSystemObject {
+	func forEachFile(_ body: (File) -> Void) {
+		switch self {
+			case let file as File:
+				body(file)
+			case let folder as Folder:
+				folder.files.forEach { $0.forEachFile(body) }
+			default:
+				fatalError()
 		}
 	}
 }

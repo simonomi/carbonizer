@@ -20,7 +20,25 @@ struct MCM {
 	var content: any FileData
 	
 	enum CompressionType: UInt8 {
-		case none, runLengthEncoding, lzss, huffman
+		case none, runLength, lzss, huffman
+		
+		var compress: (Datastream) -> Datastream {
+			switch self {
+				case .none:                identity
+				case .runLength: RunLength.compress
+				case .lzss:           LZSS.compress
+				case .huffman:     Huffman.compress
+			}
+		}
+		
+		var decompress: (Datastream) throws -> Datastream {
+			switch self {
+				case .none:                identity
+				case .runLength: RunLength.decompress
+				case .lzss:           LZSS.decompress
+				case .huffman:     Huffman.decompress
+			}
+		}
 	}
 	
 	@BinaryConvertible
@@ -35,18 +53,22 @@ struct MCM {
 		@Count(givenBy: \Self.chunkCount)
 		var chunkOffsets: [UInt32]
 		var endOfFileOffset: UInt32
-//		@Offsets(givenBy: \Self.chunkOffsets)
-//		@EndOffset(givenBy: \Self.endOfFileOffset)
-//		var chunks: [Datastream]
-		
-		@Offset(givenBy: \Self.chunkOffsets.first!)
+		@Offsets(givenBy: \Self.chunkOffsets)
 		@EndOffset(givenBy: \Self.endOfFileOffset)
-		var chunks: Datastream
+		var chunks: [Datastream]
+		
+//		@Offset(givenBy: \Self.chunkOffsets.first!)
+//		@EndOffset(givenBy: \Self.endOfFileOffset)
+//		var chunks: Datastream
 	}
 }
 
 // MARK: packed
 extension MCM {
+	enum DecompressionError: Error {
+		case whileReading(Any.Type, (CompressionType, CompressionType), any Error)
+	}
+	
 	init(packed: Binary) throws {
 		compression = (
 			CompressionType(rawValue: packed.compressionType1) ?? .none,
@@ -57,7 +79,29 @@ extension MCM {
 		decompressedSize = packed.decompressedSize
 		compressedSize = packed.compressedSize
 		
-		content = try createFileData(name: "", extension: "", data: packed.chunks)
+		do {
+			content = try createFileData(
+				name: "",
+				extension: "",
+				data: packed.chunks
+					.map(compression.0.decompress)
+					.map(compression.1.decompress)
+					.joined()
+			)
+			
+//			if decompressedSize == 10072 {
+//				let start = Date.now
+//				content = try packed.chunks
+//					.map(compression.0.decompress)
+//					.map(compression.1.decompress)
+//					.joined()
+//				print(-start.timeIntervalSinceNow)
+//			}
+			
+			content = Datastream([])
+		} catch {
+			throw DecompressionError.whileReading(MCM.self, compression, error)
+		}
 	}
 }
 

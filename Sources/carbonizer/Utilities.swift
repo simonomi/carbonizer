@@ -13,6 +13,20 @@ extension URL {
 	}
 }
 
+func identity<T>(_ value: T) -> T { value }
+
+//precedencegroup PipePrecedence {
+//	higherThan: AssignmentPrecedence
+//	associativity: left
+//}
+//
+//infix operator |>: PipePrecedence
+
+/// pipe operator
+//func |> <T, U>(lhs: T, rhs: (T) throws -> U) rethrows -> U {
+//	try rhs(lhs)
+//}
+
 func createOffsets(start: UInt32, sizes: [UInt32]) -> [UInt32] {
 	sizes
 		.dropLast()
