@@ -60,3 +60,19 @@ extension MM3.Binary: InitFrom {
 		tableFileName3Offset = tableFileName2Offset + UInt32(tableFileName3.utf8CString.count)
 	}
 }
+
+// MARK: unpacked
+extension MM3 {
+	enum CodingKeys: String, CodingKey {
+		case entry1 = "entry 1"
+		case entry2 = "entry 2"
+		case entry3 = "entry 3"
+	}
+}
+
+extension MM3.TableEntry {
+	enum CodingKeys: String, CodingKey {
+		case index =     "index"
+		case tableName = "table name"
+	}
+}

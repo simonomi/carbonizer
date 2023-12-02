@@ -29,3 +29,14 @@ extension DMS.Binary: InitFrom {
 		value = dms.value
 	}
 }
+
+// MARK: unpacked
+extension DMS {
+	init(from decoder: Decoder) throws {
+		value = try UInt32(from: decoder)
+	}
+	
+	func encode(to encoder: Encoder) throws {
+		try value.encode(to: encoder)
+	}
+}

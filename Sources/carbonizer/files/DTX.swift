@@ -44,3 +44,14 @@ extension DTX.Binary: InitFrom {
 		strings = dtx.strings
 	}
 }
+
+// MARK: unpacked
+extension DTX {
+	init(from decoder: Decoder) throws {
+		strings = try [String](from: decoder)
+	}
+	
+	func encode(to encoder: Encoder) throws {
+		try strings.encode(to: encoder)
+	}
+}

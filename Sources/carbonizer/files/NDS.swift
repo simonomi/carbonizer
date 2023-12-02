@@ -224,8 +224,8 @@ extension NDS {
 			  
 			  let arm7OverlaysFolder =   unpacked.getChild(named: "arm7 overlays") as? Folder,
 			  
-		      let iconFile =             unpacked.getChild(named: "icon") as? File,
-			  let iconData = iconFile.data as? Datastream,
+		      let iconBannerFile =       unpacked.getChild(named: "icon banner") as? File,
+			  let iconBannerData = iconBannerFile.data as? Datastream,
 			  
 			  let dataFolder =           unpacked.getChild(named: "data") as? Folder else {
 			throw UnpackingError.invalidFolderStructure(unpacked.map(\.name))
@@ -241,7 +241,7 @@ extension NDS {
 		arm7OverlayTable = try JSONDecoder().decode([NDS.Binary.OverlayTableEntry].self, from: arm7OverlayTableData)
 		arm7Overlays = arm7OverlaysFolder.files.compactMap { $0 as? File }
 		
-		iconBanner = iconData
+		iconBanner = iconBannerData
 		
 		contents = dataFolder.files
 	}
@@ -259,7 +259,7 @@ extension NDS {
 			File  (name: "arm7",               fileExtension: "bin",  data: arm7),
 			File  (name: "arm7 overlay table", fileExtension: "json", data: arm7OverlayTable),
 			Folder(name: "arm7 overlays",      files: arm7Overlays),
-			File  (name: "icon",        	   fileExtension: "bin",  data: iconBanner),
+			File  (name: "icon banner",        fileExtension: "bin",  data: iconBanner),
 			Folder(name: "data",               files: contents)
 		]
 	}

@@ -168,106 +168,155 @@ extension RLS.Kaseki? {
 	}
 }
 
+// MARK: unpacked
+extension RLS {
+	init(from decoder: Decoder) throws {
+		kasekis = try [Kaseki?](from: decoder)
+	}
+	
+	func encode(to encoder: Encoder) throws {
+		try kasekis.encode(to: encoder)
+	}
+}
+
+extension RLS.Kaseki {
+	enum CodingKeys: String, CodingKey {
+		case _label = "_label"
+		
+		case isEntry =     "is entry"
+		case unknown1 =    "unknown 1"
+		case unbreakable = "unbreakable"
+		case destroyable = "destroyable"
+		
+		case unknown2 = "unknown 2"
+		case unknown3 = "unknown 3"
+		case unknown4 = "unknown 4"
+		case unknown5 = "unknown 5"
+		
+		case fossilImage =  "fossil image"
+		case rockImage =    "rock image"
+		case fossilConfig = "fossil config"
+		case rockConfig =   "rock config"
+		case buyPrice =     "buy price"
+		case sellPrice =    "sell price"
+		
+		case unknown6 =   "unknown 6"
+		case unknown7 =   "unknown 7"
+		case fossilName = "fossil name"
+		case unknown8 =   "unknown 8"
+		
+		case time =         "time"
+		case passingScore = "passing score"
+		
+		case unknown9 =  "unknown 9"
+		case unknown10 = "unknown 10"
+		case unknown11 = "unknown 11"
+		
+		case unknown12 = "unknown 12"
+		case unknown13 = "unknown 13"
+	}
+}
+
 fileprivate let kasekiLabels = [
-	1: "T-Rex Head",
-	2: "T-Rex Body",
-	3: "T-Rex Arms",
-	4: "T-Rex Legs",
-	5: "Daspleto Head",
-	6: "Daspleto Body",
-	7: "Daspleto Arms",
-	8: "Daspleto Legs",
-	9: "Gorgo Head",
-	10: "Gorgo Body",
-	11: "Gorgo Arms",
-	12: "Gorgo Legs",
-	13: "Tarbo Head",
-	14: "Tarbo Body",
-	15: "Tarbo Arms",
-	16: "Tarbo Legs",
-	17: "Alio Head",
-	18: "Alio Body",
-	19: "Alio Arms",
-	20: "Alio Legs",
-	21: "Siamo Head",
-	22: "Siamo Body",
-	23: "Siamo Arms",
-	24: "Siamo Legs",
-	25: "Alectro Head",
-	26: "Alectro Body",
-	27: "Alectro Arms",
-	28: "Alectro Legs",
-	29: "Guan Head",
-	30: "Guan Body",
-	31: "Guan Arms",
-	32: "Guan Legs",
-	33: "Shanshan Head",
-	34: "Shanshan Body",
-	35: "Shanshan Arms",
-	36: "Shanshan Legs",
-	37: "Allo Head",
-	38: "Allo Body",
-	39: "Allo Arms",
-	40: "Allo Legs",
-	41: "Metria Head",
-	42: "Metria Body",
-	43: "Metria Arms",
-	44: "Metria Legs",
-	45: "Megalo Head",
-	46: "Megalo Body",
-	47: "Megalo Arms",
-	48: "Megalo Legs",
-	49: "Venator Head",
-	50: "Venator Body",
-	51: "Venator Arms",
-	52: "Venator Legs",
-	53: "S-Raptor Head",
-	54: "S-Raptor Body",
-	55: "S-Raptor Arms",
-	56: "S-Raptor Legs",
-	57: "Giganto Head",
-	58: "Giganto Body",
-	59: "Giganto Arms",
-	60: "Giganto Legs",
-	61: "Cryo Head",
-	62: "Cryo Body",
-	63: "Cryo Arms",
-	64: "Cryo Legs",
-	65: "Carchar Head",
-	66: "Carchar Body",
-	67: "Carchar Arms",
-	68: "Carchar Legs",
-	69: "Acro Head",
-	70: "Acro Body",
-	71: "Acro Arms",
-	72: "Acro Legs",
-	73: "F-Raptor Head",
-	74: "F-Raptor Body",
-	75: "F-Raptor Arms",
-	76: "F-Raptor Legs",
-	77: "Spinax Head",
-	78: "Spinax Body",
-	79: "Spinax Arms",
-	80: "Spinax Legs",
-	81: "Neo Head",
-	82: "Neo Body",
-	83: "Neo Arms",
-	84: "Neo Legs",
-	85: "Compso Head",
-	86: "Compso Body",
-	87: "Compso Arms",
-	88: "Compso Legs",
-	89: "Sopteryx Head",
-	90: "Sopteryx Body",
-	91: "Sopteryx Arms",
-	92: "Sopteryx Legs",
-	93: "Delta Head",
-	94: "Delta Body",
-	95: "Delta Arms",
-	96: "Delta Legs",
-	97: "Tro Head",
-	98: "Tro Body",
-	99: "Tro Arms",
+	1:   "T-Rex Head",
+	2:   "T-Rex Body",
+	3:   "T-Rex Arms",
+	4:   "T-Rex Legs",
+	5:   "Daspleto Head",
+	6:   "Daspleto Body",
+	7:   "Daspleto Arms",
+	8:   "Daspleto Legs",
+	9:   "Gorgo Head",
+	10:  "Gorgo Body",
+	11:  "Gorgo Arms",
+	12:  "Gorgo Legs",
+	13:  "Tarbo Head",
+	14:  "Tarbo Body",
+	15:  "Tarbo Arms",
+	16:  "Tarbo Legs",
+	17:  "Alio Head",
+	18:  "Alio Body",
+	19:  "Alio Arms",
+	20:  "Alio Legs",
+	21:  "Siamo Head",
+	22:  "Siamo Body",
+	23:  "Siamo Arms",
+	24:  "Siamo Legs",
+	25:  "Alectro Head",
+	26:  "Alectro Body",
+	27:  "Alectro Arms",
+	28:  "Alectro Legs",
+	29:  "Guan Head",
+	30:  "Guan Body",
+	31:  "Guan Arms",
+	32:  "Guan Legs",
+	33:  "Shanshan Head",
+	34:  "Shanshan Body",
+	35:  "Shanshan Arms",
+	36:  "Shanshan Legs",
+	37:  "Allo Head",
+	38:  "Allo Body",
+	39:  "Allo Arms",
+	40:  "Allo Legs",
+	41:  "Metria Head",
+	42:  "Metria Body",
+	43:  "Metria Arms",
+	44:  "Metria Legs",
+	45:  "Megalo Head",
+	46:  "Megalo Body",
+	47:  "Megalo Arms",
+	48:  "Megalo Legs",
+	49:  "Venator Head",
+	50:  "Venator Body",
+	51:  "Venator Arms",
+	52:  "Venator Legs",
+	53:  "S-Raptor Head",
+	54:  "S-Raptor Body",
+	55:  "S-Raptor Arms",
+	56:  "S-Raptor Legs",
+	57:  "Giganto Head",
+	58:  "Giganto Body",
+	59:  "Giganto Arms",
+	60:  "Giganto Legs",
+	61:  "Cryo Head",
+	62:  "Cryo Body",
+	63:  "Cryo Arms",
+	64:  "Cryo Legs",
+	65:  "Carchar Head",
+	66:  "Carchar Body",
+	67:  "Carchar Arms",
+	68:  "Carchar Legs",
+	69:  "Acro Head",
+	70:  "Acro Body",
+	71:  "Acro Arms",
+	72:  "Acro Legs",
+	73:  "F-Raptor Head",
+	74:  "F-Raptor Body",
+	75:  "F-Raptor Arms",
+	76:  "F-Raptor Legs",
+	77:  "Spinax Head",
+	78:  "Spinax Body",
+	79:  "Spinax Arms",
+	80:  "Spinax Legs",
+	81:  "Neo Head",
+	82:  "Neo Body",
+	83:  "Neo Arms",
+	84:  "Neo Legs",
+	85:  "Compso Head",
+	86:  "Compso Body",
+	87:  "Compso Arms",
+	88:  "Compso Legs",
+	89:  "Sopteryx Head",
+	90:  "Sopteryx Body",
+	91:  "Sopteryx Arms",
+	92:  "Sopteryx Legs",
+	93:  "Delta Head",
+	94:  "Delta Body",
+	95:  "Delta Arms",
+	96:  "Delta Legs",
+	97:  "Tro Head",
+	98:  "Tro Body",
+	99:  "Tro Arms",
 	100: "Tro Legs",
 	101: "Nychus Head",
 	102: "Nychus Body",

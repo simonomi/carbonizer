@@ -86,3 +86,16 @@ extension [DEX.Command] {
 		map(\.size).sum()
 	}
 }
+
+// MARK: unpacked
+extension DEX {
+	init(from decoder: Decoder) throws {
+		commands = try [[Command]](from: decoder)
+	}
+	
+	func encode(to encoder: Encoder) throws {
+		try commands.encode(to: encoder)
+	}
+}
+
+// TODO: fancy Command enum?

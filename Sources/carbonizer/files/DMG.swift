@@ -64,3 +64,14 @@ extension DMG.Binary: InitFrom {
 		strings = dmg.strings.map(DMG.Binary.DMGString.init)
 	}
 }
+
+// MARK: unpacked
+extension DMG {
+	init(from decoder: Decoder) throws {
+		strings = try [DMGString](from: decoder)
+	}
+	
+	func encode(to encoder: Encoder) throws {
+		try strings.encode(to: encoder)
+	}
+}

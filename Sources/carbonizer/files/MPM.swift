@@ -106,3 +106,30 @@ extension MPM.Binary: InitFrom {
 		} ?? 0
 	}
 }
+
+// MARK: unpacked
+extension MPM {
+	enum CodingKeys: String, CodingKey {
+		case unknown1 = "unknown 1"
+		case unknown2 = "unknown 2"
+		case unknown3 = "unknown 3"
+		
+		case width =  "width"
+		case height = "height"
+		
+		case unknown4 = "unknown 4"
+		case unknown5 = "unknown 5"
+		case unknown6 = "unknown 6"
+		
+		case entry1 = "entry 1"
+		case entry2 = "entry 2"
+		case entry3 = "entry 3"
+	}
+}
+
+extension MPM.TableEntry {
+	enum CodingKeys: String, CodingKey {
+		case index =     "index"
+		case tableName = "table name"
+	}
+}
