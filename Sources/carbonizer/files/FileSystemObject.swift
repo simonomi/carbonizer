@@ -120,6 +120,7 @@ func createFileData(name: String, extension fileExtension: String, data: Data) t
 			case "mm3.json": MM3(unpacked: data)
 			case "mpm.json": MPM(unpacked: data)
 			case "rls.json": RLS(unpacked: data)
+			case     "json": data
 			default: createFileData(name: name, extension: fileExtension, data: Datastream(data))
 		}
 	} catch {

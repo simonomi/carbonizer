@@ -108,7 +108,7 @@ struct NDS {
 		}
 		
 		@BinaryConvertible
-		struct OverlayTableEntry {
+		struct OverlayTableEntry: Codable {
 			var id: UInt32
 			var loadAddress: UInt32
 			var ramSize: UInt32
@@ -193,12 +193,74 @@ extension NDS.Binary: InitFrom {
 }
 
 // MARK: unpacked
+extension [any FileSystemObject] {
+	fileprivate func getChild(named name: String) -> (any FileSystemObject)? {
+		first { $0.name == name }
+	}
+}
+
 extension NDS {
-	init(unpacked: [FileSystemObject]) {
-		fatalError("TODO:")
+	enum UnpackingError: Error {
+		case invalidFolderStructure([String])
 	}
 	
-	func toUnpacked() -> [FileSystemObject] {
-		fatalError("TODO:")
+	init(unpacked: [any FileSystemObject]) throws {
+		guard let headerFile =           unpacked.getChild(named: "header") as? File,
+			  let headerData = headerFile.data as? Data,
+			  
+			  let arm9File =             unpacked.getChild(named: "arm9") as? File,
+			  let arm9Data = arm9File.data as? Datastream,
+			  
+			  let arm9OverlayTableFile = unpacked.getChild(named: "arm9 overlay table") as? File,
+			  let arm9OverlayTableData = arm9OverlayTableFile.data as? Data,
+			  
+			  let arm9OverlaysFolder =   unpacked.getChild(named: "arm9 overlays") as? Folder,
+			  
+			  let arm7File =             unpacked.getChild(named: "arm7") as? File,
+			  let arm7Data = arm7File.data as? Datastream,
+			  
+			  let arm7OverlayTableFile = unpacked.getChild(named: "arm7 overlay table") as? File,
+			  let arm7OverlayTableData = arm7OverlayTableFile.data as? Data,
+			  
+			  let arm7OverlaysFolder =   unpacked.getChild(named: "arm7 overlays") as? Folder,
+			  
+		      let iconFile =             unpacked.getChild(named: "icon") as? File,
+			  let iconData = iconFile.data as? Datastream,
+			  
+			  let dataFolder =           unpacked.getChild(named: "data") as? Folder else {
+			throw UnpackingError.invalidFolderStructure(unpacked.map(\.name))
+		}
+		
+		header = try JSONDecoder().decode(NDS.Binary.Header.self, from: headerData)
+		
+		arm9 = arm9Data
+		arm9OverlayTable = try JSONDecoder().decode([NDS.Binary.OverlayTableEntry].self, from: arm9OverlayTableData)
+		arm9Overlays = arm9OverlaysFolder.files.compactMap { $0 as? File }
+		
+		arm7 = arm7Data
+		arm7OverlayTable = try JSONDecoder().decode([NDS.Binary.OverlayTableEntry].self, from: arm7OverlayTableData)
+		arm7Overlays = arm7OverlaysFolder.files.compactMap { $0 as? File }
+		
+		iconBanner = iconData
+		
+		contents = dataFolder.files
+	}
+	
+	func toUnpacked() throws -> [any FileSystemObject] {
+		let header = try JSONEncoder().encode(header)
+		let arm9OverlayTable = try JSONEncoder().encode(arm9OverlayTable)
+		let arm7OverlayTable = try JSONEncoder().encode(arm7OverlayTable)
+		
+		return [
+			File  (name: "header",             fileExtension: "json", data: header),
+			File  (name: "arm9",               fileExtension: "bin",  data: arm9),
+			File  (name: "arm9 overlay table", fileExtension: "json", data: arm9OverlayTable),
+			Folder(name: "arm9 overlays",      files: arm9Overlays),
+			File  (name: "arm7",               fileExtension: "bin",  data: arm7),
+			File  (name: "arm7 overlay table", fileExtension: "json", data: arm7OverlayTable),
+			Folder(name: "arm7 overlays",      files: arm7Overlays),
+			File  (name: "icon",        	   fileExtension: "bin",  data: iconBanner),
+			Folder(name: "data",               files: contents)
+		]
 	}
 }

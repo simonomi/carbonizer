@@ -13,8 +13,13 @@ protocol FileData {
 	associatedtype Unpacked = Self
 	init(packed: Packed) throws
 	init(unpacked: Unpacked) throws
-	func toPacked() -> Packed
-	func toUnpacked() -> Unpacked
+	func toPacked() throws -> Packed
+	func toUnpacked() throws -> Unpacked
+}
+
+extension FileData where Packed == Self {
+	init(packed: Self) { self = packed }
+	func toPacked() -> Self { self }
 }
 
 extension FileData where Unpacked == Self {

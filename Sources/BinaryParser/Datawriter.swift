@@ -125,12 +125,6 @@ extension Datawriter {
 			write(item)
 		}
 	}
-	
-	/// Documentation
-//	public func write<T: BinaryInteger>(
-//		_ data: [Datastream], startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
-//	) {
-//	}
 }
 
 // MARK: offset
