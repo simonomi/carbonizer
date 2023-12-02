@@ -153,39 +153,3 @@ func createFileData(name: String, extension fileExtension: String, data: Datastr
 		throw BinaryParserError.whileReadingFile(name, fileExtension, magicBytes, error)
 	}
 }
-
-protocol FileData {
-	associatedtype Packed: BinaryConvertible, InitFrom<Self>
-	associatedtype Unpacked: InitFrom<Self> = Self
-	init(packed: Packed) throws
-	init(unpacked: Unpacked) throws
-}
-
-protocol InitFrom<InitsFrom> {
-	associatedtype InitsFrom
-	init(_: InitsFrom)
-}
-
-extension InitFrom where InitsFrom == Self {
-	init(_ initsFrom: Self) { self = initsFrom }
-}
-
-extension FileData {
-	init(packed bytes: Datastream) throws {
-		self = try Self(packed: try bytes.read(Packed.self))
-	}
-}
-
-extension FileData where Unpacked == Self {
-	init(unpacked: Self) {
-		self = unpacked
-	}
-	
-	func toUnpacked() -> Self { self }
-}
-
-extension FileData where Unpacked: Codable {
-	init(unpacked bytes: Data) throws {
-		self = try Self(unpacked: JSONDecoder().decode(Unpacked.self, from: bytes))
-	}
-}

@@ -40,7 +40,7 @@ struct carbonizer: ParsableCommand {
 		
 		for filePath in filePaths {
 			let start = Date.now
-			let file = try File(filePath: filePath)
+			let _ = try File(filePath: filePath)
 			print(-start.timeIntervalSinceNow)
 			
 //			let nds = file.data as! NDS

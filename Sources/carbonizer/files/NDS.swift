@@ -155,7 +155,7 @@ struct NDS {
 }
 
 // MARK: packed
-extension NDS: FileData, InitFrom {
+extension NDS: FileData {
 	init(packed: Binary) throws {
 		header = packed.header
 		
@@ -194,13 +194,11 @@ extension NDS.Binary: InitFrom {
 
 // MARK: unpacked
 extension NDS {
-	init(unpacked: Folder) {
+	init(unpacked: [FileSystemObject]) {
 		fatalError("TODO:")
 	}
-}
-
-extension Folder: InitFrom {
-	init(_ nds: NDS) {
+	
+	func toUnpacked() -> [FileSystemObject] {
 		fatalError("TODO:")
 	}
 }

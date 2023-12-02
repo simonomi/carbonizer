@@ -37,7 +37,7 @@ struct DMG: Codable {
 }
 
 // MARK: packed
-extension DMG: FileData, InitFrom {
+extension DMG: FileData {
 	init(packed: Binary) {
 		strings = packed.strings.map(DMGString.init)
 	}

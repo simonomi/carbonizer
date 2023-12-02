@@ -18,7 +18,7 @@ struct DMS: Codable {
 }
 
 // MARK: packed
-extension DMS: FileData, InitFrom {
+extension DMS: FileData {
 	init(packed: Binary) {
 		value = packed.value
 	}

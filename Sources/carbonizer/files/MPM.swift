@@ -56,7 +56,7 @@ struct MPM: Codable {
 }
 
 // MARK: packed
-extension MPM: FileData, InitFrom {
+extension MPM: FileData {
 	init(packed: Binary) {
 		unknown1 = packed.unknown1
 		unknown2 = packed.unknown2

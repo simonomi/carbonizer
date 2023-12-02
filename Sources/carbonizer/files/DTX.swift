@@ -24,7 +24,7 @@ struct DTX: Codable {
 }
 
 // MARK: packed
-extension DTX: FileData, InitFrom {
+extension DTX: FileData {
 	init(packed: Binary) {
 		strings = packed.strings
 	}

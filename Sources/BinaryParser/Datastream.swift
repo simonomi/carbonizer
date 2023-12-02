@@ -271,6 +271,7 @@ extension Datastream {
 	}
 }
 
+// MARK: joined
 extension [Datastream] {
 	public func joined() -> Datastream {
 		Datastream(ArraySlice(map(\.bytes).joined()))

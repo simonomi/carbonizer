@@ -55,10 +55,8 @@ extension MAR {
 	init(unpacked: [File]) {
 		files = unpacked.map(MCM.init)
 	}
-}
-
-extension [File]: InitFrom {
-	init(_ mar: MAR) {
-		self = mar.files.enumerated().map(File.init)
+	
+	func toUnpacked() -> [File] {
+		files.enumerated().map(File.init)
 	}
 }

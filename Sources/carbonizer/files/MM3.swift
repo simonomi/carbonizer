@@ -36,7 +36,7 @@ struct MM3: Codable {
 }
 
 // MARK: packed
-extension MM3: FileData, InitFrom {
+extension MM3: FileData {
 	init(packed: Binary) {
 		entry1 = TableEntry(index: packed.index1, tableName: packed.tableFileName1)
 		entry2 = TableEntry(index: packed.index2, tableName: packed.tableFileName2)

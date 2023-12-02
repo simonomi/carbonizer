@@ -100,7 +100,7 @@ struct RLS: Codable {
 }
 
 // MARK: packed
-extension RLS: FileData, InitFrom {
+extension RLS: FileData {
 	init(packed: Binary) {
 		kasekis = packed.kasekis.enumerated().map(Kaseki.init)
 	}

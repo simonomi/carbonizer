@@ -51,7 +51,7 @@ struct DEX: Codable {
 }
 
 // MARK: packed
-extension DEX: FileData, InitFrom {
+extension DEX: FileData {
 	init(packed: Binary) {
 		commands = packed.script
 			.map(\.commands)

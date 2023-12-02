@@ -7,7 +7,7 @@
 
 import BinaryParser
 
-extension Datastream: FileData, InitFrom {
+extension Datastream: FileData {
 	convenience init(packed: Datastream) {
 		self.init(packed)
 	}
@@ -16,5 +16,7 @@ extension Datastream: FileData, InitFrom {
 		self.init(unpacked)
 	}
 	
-	typealias InitsFrom = Datastream
+	func toPacked() -> Datastream { self }
+	
+	func toUnpacked() -> Datastream { self }
 }
