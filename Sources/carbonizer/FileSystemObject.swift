@@ -27,7 +27,7 @@ func CreateFileSystemObject(contentsOf path: URL) throws -> any FileSystemObject
 			if folder.name.hasSuffix(".mar") {
 				return File(
 					name: String(folder.name.dropLast(4)),
-					data: MAR(unpacked: folder.files)
+					data: try MAR(unpacked: folder.files)
 				)
 			} else if folder.files.contains(where: { $0.name == "header" }) {
 				return File(

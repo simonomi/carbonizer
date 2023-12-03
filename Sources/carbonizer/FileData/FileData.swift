@@ -13,7 +13,7 @@ protocol FileData {
 	associatedtype Unpacked: Writeable = Self
 	init(packed: Packed) throws
 	init(unpacked: Unpacked) throws
-	func toPacked() throws -> Packed
+	func toPacked() -> Packed
 	func toUnpacked() throws -> Unpacked
 	static var packedFileExtension: String { get }
 	static var unpackedFileExtension: String { get }

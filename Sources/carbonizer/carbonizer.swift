@@ -46,15 +46,15 @@ struct carbonizer: ParsableCommand {
 	}
 }
 
-extension FileSystemObject {
-	func forEachFile(_ body: (File) -> Void) {
-		switch self {
-			case let file as File:
-				body(file)
-			case let folder as Folder:
-				folder.files.forEach { $0.forEachFile(body) }
-			default:
-				fatalError()
-		}
-	}
-}
+//extension FileSystemObject {
+//	func forEachFile(_ body: (File) -> Void) {
+//		switch self {
+//			case let file as File:
+//				body(file)
+//			case let folder as Folder:
+//				folder.files.forEach { $0.forEachFile(body) }
+//			default:
+//				fatalError()
+//		}
+//	}
+//}

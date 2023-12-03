@@ -277,3 +277,12 @@ extension [Datastream] {
 		Datastream(ArraySlice(map(\.bytes).joined()))
 	}
 }
+
+// MARK: chunked
+extension Datastream {
+	public func chunked(maxSize: Int) -> [Datastream] {
+		stride(from: offset, to: bytes.endIndex, by: maxSize).map {
+			Datastream(bytes[$0..<min($0 + maxSize, bytes.endIndex)])
+		}
+	}
+}

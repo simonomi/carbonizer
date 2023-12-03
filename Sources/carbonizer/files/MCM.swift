@@ -12,11 +12,6 @@ struct MCM {
 	var compression: (CompressionType, CompressionType)
 	var maxChunkSize: UInt32
 	
-	// TODO: should be generated, not cached ?
-	// what if file is modified before being reloaded
-	var compressedSize: UInt32
-	var decompressedSize: UInt32
-	
 	var content: any FileData
 	
 	enum CompressionType: UInt8 {
@@ -72,9 +67,6 @@ extension MCM {
 		)
 		maxChunkSize = packed.maxChunkSize
 		
-		decompressedSize = packed.decompressedSize
-		compressedSize = packed.compressedSize
-		
 		do {
 			content = try createFileData(
 				name: "",
@@ -99,35 +91,51 @@ extension MCM.Binary {
 
 extension MCM.Binary {
 	init(_ mcm: MCM) {
-		decompressedSize = mcm.decompressedSize
 		maxChunkSize = mcm.maxChunkSize
-//		chunkCount =
 		compressionType1 = mcm.compression.0.rawValue
 		compressionType2 = mcm.compression.1.rawValue
-//		chunkOffsets = createOffsets(
-//			start: 16 + chunkCount * 4,
-//			sizes:
-//		)
-//		endOfFileOffset =
-//		chunks =
-		fatalError("TODO:")
+		
+		let data = Datawriter()
+		mcm.content.toPacked().write(to: data)
+		
+		decompressedSize = UInt32(data.offset)
+		
+		chunks = data
+			.intoDatastream()
+			.chunked(maxSize: Int(maxChunkSize))
+		
+		chunkCount = UInt32(chunks.count)
+		
+		// TODO: compression
+		
+		chunkOffsets = createOffsets(
+			start: 20 + chunkCount * 4,
+			sizes: chunks.map(\.bytes.count).map(UInt32.init)
+		)
+		
+		if let lastChunkOffset = chunkOffsets.last,
+		   let lastChunkSize = (chunks.last?.bytes.count).map(UInt32.init) {
+			endOfFileOffset = lastChunkOffset + lastChunkSize
+		} else {
+			endOfFileOffset = 20
+		}
 	}
 }
 
 // MARK: unpacked
 extension MCM {
-	init(unpacked: File) {
+	enum NoMetadataError: Error {
+		case noMetadata(File)
+	}
+	
+	init(unpacked: File) throws {
 		guard let metadata = unpacked.metadata else {
-			fatalError("TODO:")
+			throw NoMetadataError.noMetadata(unpacked)
 		}
 		
 		compression = metadata.compression
 		maxChunkSize = metadata.maxChunkSize
-//		compressedSize =
-//		decompressedSize =
 		content = unpacked.data
-		
-		fatalError("TODO:")
 	}
 }
 

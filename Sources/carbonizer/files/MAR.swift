@@ -42,22 +42,22 @@ extension MAR.Binary: InitFrom {
 	init(_ mar: MAR) {
 		fileCount = UInt32(mar.files.count)
 		
+		files = mar.files.map(MCM.Binary.init)
+		
 		let firstFileIndex = 8 + fileCount * 8
-		let compressedSizes = mar.files.map(\.compressedSize)
+		let compressedSizes = files.map(\.compressedSize)
 		let offsets = createOffsets(start: firstFileIndex, sizes: compressedSizes)
 		
-		let decompressedSizes = mar.files.map(\.decompressedSize)
+		let decompressedSizes = files.map(\.decompressedSize)
 		
 		indexes = zip(offsets, decompressedSizes).map(Index.init)
-		
-		files = mar.files.map(MCM.Binary.init)
 	}
 }
 
 // MARK: unpacked
 extension MAR {
-	init(unpacked: [any FileSystemObject]) {
-		files = unpacked.compactMap(as: File.self).map(MCM.init)
+	init(unpacked: [any FileSystemObject]) throws {
+		files = try unpacked.compactMap(as: File.self).map(MCM.init)
 	}
 	
 	func toUnpacked() -> [any FileSystemObject] {

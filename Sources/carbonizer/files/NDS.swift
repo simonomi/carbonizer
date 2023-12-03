@@ -191,6 +191,21 @@ extension NDS: FileData {
 
 extension NDS.Binary: InitFrom {
 	init(_ nds: NDS) {
+		header = nds.header
+		
+		arm9 = nds.arm9
+		arm9OverlayTable = nds.arm9OverlayTable
+		
+		arm7 = nds.arm7
+		arm7OverlayTable = nds.arm7OverlayTable
+		
+		iconBanner = nds.iconBanner
+		
+//		fileNameTable = nds.fileNameTable
+//		
+//		fileAllocationTable = nds.fileAllocationTable
+//		
+//		files = nds.files
 		fatalError("TODO:")
 	}
 }
