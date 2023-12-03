@@ -7,7 +7,7 @@
 
 import BinaryParser
 
-struct DMG: Codable {
+struct DMG: Codable, Writeable {
 	var strings: [DMGString]
 	
 	struct DMGString: Codable {
@@ -16,7 +16,7 @@ struct DMG: Codable {
 	}
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var magicBytes = "DMG"
 		var stringCount: UInt32
 		var indexesOffset: UInt32 = 0xC
@@ -38,6 +38,9 @@ struct DMG: Codable {
 
 // MARK: packed
 extension DMG: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "dmg.json"
+	
 	init(packed: Binary) {
 		strings = packed.strings.map(DMGString.init)
 	}

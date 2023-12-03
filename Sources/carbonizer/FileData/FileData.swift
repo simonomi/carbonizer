@@ -9,12 +9,14 @@ import BinaryParser
 import Foundation
 
 protocol FileData {
-	associatedtype Packed: BinaryConvertible
-	associatedtype Unpacked = Self
+	associatedtype Packed: BinaryConvertible, Writeable
+	associatedtype Unpacked: Writeable = Self
 	init(packed: Packed) throws
 	init(unpacked: Unpacked) throws
 	func toPacked() throws -> Packed
 	func toUnpacked() throws -> Unpacked
+	static var packedFileExtension: String { get }
+	static var unpackedFileExtension: String { get }
 }
 
 extension FileData where Packed == Self {
@@ -29,12 +31,14 @@ extension FileData where Unpacked == Self {
 
 extension FileData {
 	init(packed bytes: Datastream) throws {
+		// NOTE: add carbonizer state here
 		self = try Self(packed: try bytes.read(Packed.self))
 	}
 }
 
 extension FileData where Unpacked: Codable {
 	init(unpacked bytes: Data) throws {
+		// NOTE: add carbonizer state here
 		self = try Self(unpacked: JSONDecoder().decode(Unpacked.self, from: bytes))
 	}
 }

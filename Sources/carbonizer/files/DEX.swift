@@ -8,7 +8,7 @@
 import BinaryParser
 import Foundation
 
-struct DEX: Codable {
+struct DEX: Codable, Writeable {
 	var commands: [[Command]]
 	
 	struct Command: Codable {
@@ -17,7 +17,7 @@ struct DEX: Codable {
 	}
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var magicBytes = "DEX"
 		var numberOfScenes: UInt32
 		var sceneOffsetsStart: UInt32 = 0xC
@@ -52,6 +52,9 @@ struct DEX: Codable {
 
 // MARK: packed
 extension DEX: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "dex.json"
+	
 	init(packed: Binary) {
 		commands = packed.script
 			.map(\.commands)

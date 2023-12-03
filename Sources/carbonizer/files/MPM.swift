@@ -7,7 +7,7 @@
 
 import BinaryParser
 
-struct MPM: Codable {
+struct MPM: Codable, Writeable {
 	var unknown1: UInt32
 	var unknown2: UInt32
 	var unknown3: UInt32
@@ -29,7 +29,7 @@ struct MPM: Codable {
 	}
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var magicBytes = "MPM"
 		var unknown1: UInt32
 		var unknown2: UInt32
@@ -57,6 +57,9 @@ struct MPM: Codable {
 
 // MARK: packed
 extension MPM: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "mpm.json"
+	
 	init(packed: Binary) {
 		unknown1 = packed.unknown1
 		unknown2 = packed.unknown2
@@ -98,7 +101,6 @@ extension MPM.Binary: InitFrom {
 		tableFileName2 = mpm.entry2.tableName
 		tableFileName3 = mpm.entry3?.tableName
 		
-		// TODO: verify this
 		tableFileName1Offset = 0x1C
 		tableFileName2Offset = tableFileName1Offset + UInt32(tableFileName2.utf8CString.count)
 		tableFileName3Offset = tableFileName3.map { [tableFileName2Offset] in

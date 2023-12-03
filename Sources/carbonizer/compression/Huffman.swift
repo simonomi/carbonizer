@@ -7,8 +7,6 @@
 
 import BinaryParser
 
-import Foundation // TODO: remove
-
 enum Huffman {
 	static func compress(_ data: Datastream) -> Datastream {
 		fatalError("TODO:")

@@ -51,6 +51,10 @@ extension Sequence {
 	func sorted<T: Comparable>(by keyPath: KeyPath<Element, T>) -> [Element] {
 		sorted { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
 	}
+	
+	func compactMap<T>(as type: T.Type) -> [T] {
+		compactMap { $0 as? T }
+	}
 }
 
 extension String {
@@ -75,5 +79,34 @@ extension String {
 extension URL {
 	func getCreationDate() throws -> Date? {
 		try FileManager.default.attributesOfItem(atPath: path)[.creationDate] as? Date
+	}
+	
+	func setCreationDate(to date: Date) throws {
+		// TODO: wont work on windows
+		try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: path(percentEncoded: false))
+	}
+	
+	func contents() throws -> [URL] {
+		try FileManager.default.contentsOfDirectory(at: self, includingPropertiesForKeys: nil)
+	}
+	
+	enum FileType {
+		case file, folder, other(FileAttributeType?)
+	}
+	
+	func type() throws -> FileType {
+		let type = try FileManager.default.attributesOfItem(atPath: self.path(percentEncoded: false))[.type] as? FileAttributeType
+		return switch type {
+			case .some(.typeRegular): .file
+			case .some(.typeDirectory): .folder
+			default: .other(type)
+		}
+	}
+}
+
+extension JSONEncoder {
+	convenience init(_ formatting: OutputFormatting...) {
+		self.init()
+		outputFormatting = OutputFormatting(formatting)
 	}
 }

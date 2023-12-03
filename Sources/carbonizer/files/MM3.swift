@@ -7,7 +7,7 @@
 
 import BinaryParser
 
-struct MM3: Codable {
+struct MM3: Codable, Writeable {
 	var entry1: TableEntry
 	var entry2: TableEntry
 	var entry3: TableEntry
@@ -18,7 +18,7 @@ struct MM3: Codable {
 	}
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var magicBytes = "MM3"
 		var index1: UInt32
 		var tableFileName1Offset: UInt32
@@ -37,6 +37,9 @@ struct MM3: Codable {
 
 // MARK: packed
 extension MM3: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "mm3.json"
+	
 	init(packed: Binary) {
 		entry1 = TableEntry(index: packed.index1, tableName: packed.tableFileName1)
 		entry2 = TableEntry(index: packed.index2, tableName: packed.tableFileName2)
@@ -54,7 +57,6 @@ extension MM3.Binary: InitFrom {
 		tableFileName2 = mm3.entry2.tableName
 		tableFileName3 = mm3.entry3.tableName
 		
-		// TODO: verify this
 		tableFileName1Offset = 0x1C
 		tableFileName2Offset = tableFileName1Offset + UInt32(tableFileName2.utf8CString.count)
 		tableFileName3Offset = tableFileName2Offset + UInt32(tableFileName3.utf8CString.count)

@@ -7,7 +7,7 @@
 
 import BinaryParser
 
-struct RLS: Codable {
+struct RLS: Codable, Writeable {
 	var kasekis: [Kaseki?]
 	
 	struct Kaseki: Codable, Equatable {
@@ -47,7 +47,7 @@ struct RLS: Codable {
 	}
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var magicBytes = "RLS"
 		var kasekiCount: UInt32
 		var offsetsStart: UInt32 = 0xC
@@ -101,6 +101,9 @@ struct RLS: Codable {
 
 // MARK: packed
 extension RLS: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "rls.json"
+	
 	init(packed: Binary) {
 		kasekis = packed.kasekis.enumerated().map(Kaseki.init)
 	}

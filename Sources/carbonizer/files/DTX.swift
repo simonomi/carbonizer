@@ -7,11 +7,11 @@
 
 import BinaryParser
 
-struct DTX: Codable {
+struct DTX: Codable, Writeable {
 	var strings: [String]
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var magicBytes = "DTX"
 		var stringCount: UInt32
 		var indexesOffset: UInt32 = 0xC
@@ -25,6 +25,9 @@ struct DTX: Codable {
 
 // MARK: packed
 extension DTX: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "dtx.json"
+	
 	init(packed: Binary) {
 		strings = packed.strings
 	}

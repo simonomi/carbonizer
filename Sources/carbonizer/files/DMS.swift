@@ -7,11 +7,11 @@
 
 import BinaryParser
 
-struct DMS: Codable {
+struct DMS: Codable, Writeable {
 	var value: UInt32
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var magicBytes = "DMS"
 		var value: UInt32
 	}
@@ -19,6 +19,9 @@ struct DMS: Codable {
 
 // MARK: packed
 extension DMS: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "dms.json"
+	
 	init(packed: Binary) {
 		value = packed.value
 	}

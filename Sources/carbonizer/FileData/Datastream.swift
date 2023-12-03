@@ -6,8 +6,12 @@
 //
 
 import BinaryParser
+import Foundation
 
 extension Datastream: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "bin"
+	
 	convenience init(packed: Datastream) {
 		self.init(packed)
 	}

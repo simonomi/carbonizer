@@ -8,7 +8,10 @@
 import BinaryParser
 import Foundation
 
-extension Data: FileData {
+extension Data: FileData, Writeable {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "bin"
+	
 	init(packed: Datastream) {
 		self = Data(packed.bytes)
 	}

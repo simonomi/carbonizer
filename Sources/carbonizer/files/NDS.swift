@@ -24,7 +24,7 @@ struct NDS {
 	var contents: [any FileSystemObject]
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var header: Header
 		
 		@Offset(givenBy: \Self.header.arm9Offset)
@@ -156,6 +156,9 @@ struct NDS {
 
 // MARK: packed
 extension NDS: FileData {
+	static var packedFileExtension = "nds"
+	static var unpackedFileExtension = ""
+	
 	init(packed: Binary) throws {
 		header = packed.header
 		
@@ -251,15 +254,16 @@ extension NDS {
 		let arm9OverlayTable = try JSONEncoder().encode(arm9OverlayTable)
 		let arm7OverlayTable = try JSONEncoder().encode(arm7OverlayTable)
 		
+		// TODO: give header and overlay tables .json extension
 		return [
-			File  (name: "header",             fileExtension: "json", data: header),
-			File  (name: "arm9",               fileExtension: "bin",  data: arm9),
-			File  (name: "arm9 overlay table", fileExtension: "json", data: arm9OverlayTable),
+			File  (name: "header",             data:  header),
+			File  (name: "arm9",               data:  arm9),
+			File  (name: "arm9 overlay table", data:  arm9OverlayTable),
 			Folder(name: "arm9 overlays",      files: arm9Overlays),
-			File  (name: "arm7",               fileExtension: "bin",  data: arm7),
-			File  (name: "arm7 overlay table", fileExtension: "json", data: arm7OverlayTable),
+			File  (name: "arm7",               data:  arm7),
+			File  (name: "arm7 overlay table", data:  arm7OverlayTable),
 			Folder(name: "arm7 overlays",      files: arm7Overlays),
-			File  (name: "icon banner",        fileExtension: "bin",  data: iconBanner),
+			File  (name: "icon banner",        data:  iconBanner),
 			Folder(name: "data",               files: contents)
 		]
 	}

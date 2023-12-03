@@ -56,10 +56,6 @@ struct MCM {
 		@Offsets(givenBy: \Self.chunkOffsets)
 		@EndOffset(givenBy: \Self.endOfFileOffset)
 		var chunks: [Datastream]
-		
-//		@Offset(givenBy: \Self.chunkOffsets.first!)
-//		@EndOffset(givenBy: \Self.endOfFileOffset)
-//		var chunks: Datastream
 	}
 }
 
@@ -138,7 +134,6 @@ extension MCM {
 extension File {
 	init(index: Int, mcm: MCM) {
 		name = String(index).padded(toLength: 4, with: "0")
-		fileExtension = ""
 		metadata = Metadata(
 			standalone: false,
 			compression: mcm.compression,

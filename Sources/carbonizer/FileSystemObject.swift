@@ -10,18 +10,64 @@ import Foundation
 
 protocol FileSystemObject {
 	var name: String { get }
+	func write(into directory: URL, packed: Bool) throws
+}
+
+enum FileReadError: Error {
+	case invalidFileType(URL, FileAttributeType?)
+}
+
+func CreateFileSystemObject(contentsOf path: URL) throws -> any FileSystemObject {
+	switch try path.type() {
+		case .file:
+			return try File(contentsOf: path)
+		case .folder:
+			let folder = try Folder(contentsOf: path)
+			
+			if folder.name.hasSuffix(".mar") {
+				return File(
+					name: String(folder.name.dropLast(4)),
+					data: MAR(unpacked: folder.files)
+				)
+			} else if folder.files.contains(where: { $0.name == "header" }) {
+				return File(
+					name: folder.name,
+					data: try NDS(unpacked: folder.files)
+				)
+			} else {
+				return folder
+			}
+		case .other(let otherType):
+			throw FileReadError.invalidFileType(path, otherType)
+	}
 }
 
 struct Folder: FileSystemObject {
 	var name: String
 	var files: [any FileSystemObject]
 	
-	// TODO: exceptions for NDS, MAR
+	init(name: String, files: [any FileSystemObject]) {
+		self.name = name
+		self.files = files
+	}
+	
+	init(contentsOf folderPath: URL) throws {
+		name = folderPath.lastPathComponent
+		files = try folderPath.contents()
+			.sorted(by: \.lastPathComponent)
+			.filter { !$0.lastPathComponent.starts(with: ".") }
+			.compactMap(CreateFileSystemObject)
+	}
+	
+	func write(into directory: URL, packed: Bool) throws {
+		let path = directory.appending(component: name)
+		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
+		try files.forEach { try $0.write(into: path, packed: packed) }
+	}
 }
 
 struct File: FileSystemObject {
 	var name: String
-	var fileExtension: String
 	var metadata: Metadata?
 	var data: any FileData
 	
@@ -72,9 +118,16 @@ struct File: FileSystemObject {
 			let outputBits = standaloneBit | compression1Bits << 1 | compression2Bits << 3 | maxChunkSizeBits << 5 | indexBits << 9
 			return Date(timeIntervalSince1970: TimeInterval(outputBits))
 		}
+		
+		func swizzle(_ body: (inout Self) -> Void) -> Self {
+			var mutableSelf = self
+			body(&mutableSelf)
+			return mutableSelf
+		}
 	}
 	
-	init(filePath: URL) throws {
+	init(contentsOf filePath: URL) throws {
+		let fileExtension: String
 		(name, fileExtension) = split(fileName: filePath.lastPathComponent)
 		
 		metadata = try filePath
@@ -85,20 +138,42 @@ struct File: FileSystemObject {
 	}
 	
 	init(named inputName: String, data inputData: Data) throws {
+		let fileExtension: String
 		(name, fileExtension) = split(fileName: inputName)
 		data = try createFileData(name: name, extension: fileExtension, data: inputData)
 	}
 	
 	init(named inputName: String, data inputData: Datastream) throws {
+		let fileExtension: String
 		(name, fileExtension) = split(fileName: inputName)
 		data = try createFileData(name: name, extension: fileExtension, data: inputData)
 	}
 	
-	init(name: String, fileExtension: String, metadata: Metadata? = nil, data: any FileData) {
+	init(name: String, metadata: Metadata? = nil, data: any FileData) {
 		self.name = name
-		self.fileExtension = fileExtension
 		self.metadata = metadata
 		self.data = data
+	}
+	
+	func write(into directory: URL, packed: Bool) throws {
+		let fileExtension =
+			if packed {
+				type(of: data).packedFileExtension
+			} else {
+				type(of: data).unpackedFileExtension
+			}
+		
+		let filePath = directory.appendingPathComponent(name).appendingPathExtension(fileExtension)
+		
+		if packed {
+			try data.toPacked().write(to: filePath)
+		} else {
+			try data.toUnpacked().write(to: filePath)
+		}
+		
+		if let metadata {
+			try filePath.setCreationDate(to: metadata.asDate)
+		}
 	}
 }
 

@@ -6,12 +6,13 @@
 //
 
 import BinaryParser
+import Foundation
 
 struct MAR {
 	var files: [MCM]
 	
 	@BinaryConvertible
-	struct Binary {
+	struct Binary: Writeable {
 		var magicBytes = "MAR"
 		var fileCount: UInt32
 		@Count(givenBy: \Self.fileCount)
@@ -29,6 +30,9 @@ struct MAR {
 
 // MARK: packed
 extension MAR: FileData {
+	static var packedFileExtension = ""
+	static var unpackedFileExtension = "mar"
+	
 	init(packed: Binary) throws {
 		files = try packed.files.map(MCM.init)
 	}
@@ -52,11 +56,11 @@ extension MAR.Binary: InitFrom {
 
 // MARK: unpacked
 extension MAR {
-	init(unpacked: [File]) {
-		files = unpacked.map(MCM.init)
+	init(unpacked: [any FileSystemObject]) {
+		files = unpacked.compactMap(as: File.self).map(MCM.init)
 	}
 	
-	func toUnpacked() -> [File] {
+	func toUnpacked() -> [any FileSystemObject] {
 		files.enumerated().map(File.init)
 	}
 }
