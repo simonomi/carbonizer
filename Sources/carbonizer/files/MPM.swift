@@ -40,7 +40,7 @@ struct MPM: Codable, Writeable {
 		var unknown5: UInt32
 		var unknown6: UInt32
 		var index1: UInt32
-		var tableFileName1Offset: UInt32
+		var tableFileName1Offset: UInt32 = 0x3C
 		var index2: UInt32
 		var tableFileName2Offset: UInt32
 		var index3: UInt32
@@ -101,7 +101,6 @@ extension MPM.Binary: InitFrom {
 		tableFileName2 = mpm.entry2.tableName
 		tableFileName3 = mpm.entry3?.tableName
 		
-		tableFileName1Offset = 0x1C
 		tableFileName2Offset = tableFileName1Offset + UInt32(tableFileName2.utf8CString.count)
 		tableFileName3Offset = tableFileName3.map { [tableFileName2Offset] in
 			tableFileName2Offset + UInt32($0.utf8CString.count)

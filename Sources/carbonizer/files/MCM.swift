@@ -83,17 +83,13 @@ extension MCM {
 }
 
 extension MCM.Binary {
-	var compressedSize: UInt32 {
-		guard let firstOffset = chunkOffsets.first else { return 0 }
-		return endOfFileOffset - firstOffset
-	}
-}
-
-extension MCM.Binary {
 	init(_ mcm: MCM) {
 		maxChunkSize = mcm.maxChunkSize
-		compressionType1 = mcm.compression.0.rawValue
-		compressionType2 = mcm.compression.1.rawValue
+		// TODO: turn back on once compression is implemented
+//		compressionType1 = mcm.compression.0.rawValue
+//		compressionType2 = mcm.compression.1.rawValue
+		compressionType1 = 0
+		compressionType2 = 0
 		
 		let data = Datawriter()
 		mcm.content.toPacked().write(to: data)
@@ -103,13 +99,13 @@ extension MCM.Binary {
 		chunks = data
 			.intoDatastream()
 			.chunked(maxSize: Int(maxChunkSize))
+//			.map(mcm.compression.1.compress)
+//			.map(mcm.compression.0.compress)
 		
 		chunkCount = UInt32(chunks.count)
 		
-		// TODO: compression
-		
 		chunkOffsets = createOffsets(
-			start: 20 + chunkCount * 4,
+			start: 24 + chunkCount * 4,
 			sizes: chunks.map(\.bytes.count).map(UInt32.init)
 		)
 		
@@ -117,7 +113,7 @@ extension MCM.Binary {
 		   let lastChunkSize = (chunks.last?.bytes.count).map(UInt32.init) {
 			endOfFileOffset = lastChunkOffset + lastChunkSize
 		} else {
-			endOfFileOffset = 20
+			endOfFileOffset = 24
 		}
 	}
 }

@@ -157,16 +157,15 @@ extension Datastream {
 	
 	/// Documentation
 	public func read<T: BinaryInteger>(_ type: String.Type, length: T) throws -> String {
-		let length = Int(length)
-		
-		guard canRead(bytes: length) else {
-			throw BinaryParserError.indexOutOfBounds(index: offset + length, expected: bytes.indices, for: String.self)
+		let endOffset = offset + Int(length)
+		guard canRead(until: endOffset) else {
+			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: String.self)
 		}
-		guard let string = String(data: Data(bytes[offset..<(offset + length)]), encoding: .utf8) else {
+		guard let string = String(data: Data(bytes[offset..<endOffset]), encoding: .utf8) else {
 			throw StringParsingError.invalidUTF8
 		}
 		
-		defer { offset += length }
+		defer { offset = endOffset }
 		return string
 	}
 	

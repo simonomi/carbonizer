@@ -73,20 +73,12 @@ extension DEX.Binary: InitFrom {
 	init(_ dex: DEX) {
 		numberOfScenes = UInt32(dex.commands.count)
 		
-//		sceneOffsetsStart = dex.commands.isEmpty ? 0 : 8
+		script = dex.commands.map(Scene.init)
 		
 		sceneOffsets = createOffsets(
 			start: sceneOffsetsStart + numberOfScenes * 4,
-			sizes: dex.commands.map { $0.size() }
+			sizes: script.map { $0.size() }
 		)
-		
-		script = dex.commands.map(Scene.init)
-	}
-}
-
-extension [DEX.Command] {
-	func size() -> UInt32 {
-		map(\.size).sum()
 	}
 }
 

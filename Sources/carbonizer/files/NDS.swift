@@ -182,6 +182,14 @@ extension NDS: FileData {
 		
 		iconBanner = packed.iconBanner
 		
+//		print(
+//			String(describing: packed.fileNameTable)
+//				.replacingOccurrences(of: "carbonizer.", with: "")
+//				.replacingOccurrences(of: "NDS.Binary.FileNameTable.", with: "")
+//				.replacingOccurrences(of: "), MainEntry", with: "),\nMainEntry")
+//				.replacingOccurrences(of: "), SubEntry", with: "),\nSubEntry")
+//		)
+		
 		let completeTable = packed.fileNameTable.completeTable()
 		contents = try completeTable[0xF000]!.map {
 			try $0.createFileSystemObject(files: packed.files, fileNameTable: completeTable)
@@ -201,12 +209,47 @@ extension NDS.Binary: InitFrom {
 		
 		iconBanner = nds.iconBanner
 		
-//		fileNameTable = nds.fileNameTable
-//		
-//		fileAllocationTable = nds.fileAllocationTable
-//		
-//		files = nds.files
-		fatalError("TODO:")
+		let numberOfOverlays = UInt16(arm9OverlayTable.count + arm7OverlayTable.count)
+		fileNameTable = FileNameTable(nds.contents, firstFileId: numberOfOverlays)
+		
+		let allFiles = nds.arm9Overlays + nds.arm7Overlays + nds.contents.getAllFiles()
+		files = allFiles.map {
+			let writer = Datawriter()
+			$0.data.toPacked().write(to: writer)
+			return writer.intoDatastream()
+		}
+		
+		header.arm9Offset =                                                    header.headerSize               .roundedUpToTheNearest(0x100)
+		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)                .roundedUpToTheNearest(0x100)
+		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)         .roundedUpToTheNearest(0x100)
+		header.arm7OverlayOffset =         (header.arm7Offset                + header.arm7Size)                .roundedUpToTheNearest(0x100)
+		header.fileNameTableOffset =       (header.arm7OverlayOffset         + header.arm7OverlaySize)         .roundedUpToTheNearest(0x100)
+		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)       .roundedUpToTheNearest(0x100)
+		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize) .roundedUpToTheNearest(0x100)
+		let filesOffset =                  (header.iconBannerOffset          + 0x840)                          .roundedUpToTheNearest(0x100)
+		
+		// TODO: fix fnt and fat sizes
+		
+		let fileSizes = files.map(\.bytes.count).map(UInt32.init)
+		fileAllocationTable = fileSizes.reduce(into: []) { fat, size in
+			let startAddress = fat.last?.endAddress ?? filesOffset
+			fat.append(
+				FileAllocationTableEntry(
+					startAddress: startAddress,
+					endAddress: startAddress + size
+				)
+			)
+		}
+	}
+}
+
+extension BinaryInteger {
+	fileprivate func roundedUpToTheNearest(_ value: Self) -> Self {
+		if isMultiple(of: value) {
+			self
+		} else {
+			self + (value - self % value)
+		}
 	}
 }
 
@@ -265,11 +308,10 @@ extension NDS {
 	}
 	
 	func toUnpacked() throws -> [any FileSystemObject] {
-		let header = try JSONEncoder().encode(header)
-		let arm9OverlayTable = try JSONEncoder().encode(arm9OverlayTable)
-		let arm7OverlayTable = try JSONEncoder().encode(arm7OverlayTable)
+		let header = try JSONEncoder(.prettyPrinted).encode(header)
+		let arm9OverlayTable = try JSONEncoder(.prettyPrinted).encode(arm9OverlayTable)
+		let arm7OverlayTable = try JSONEncoder(.prettyPrinted).encode(arm7OverlayTable)
 		
-		// TODO: give header and overlay tables .json extension
 		return [
 			File  (name: "header",             data:  header),
 			File  (name: "arm9",               data:  arm9),

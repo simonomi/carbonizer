@@ -169,8 +169,6 @@ func parseOffsets(_ arguments: LabeledExprListSyntax) throws -> Property.Size.Of
 	}
 }
 
-enum Print: Error { case print(Any) }
-
 func parseIfCondition(_ arguments: LabeledExprListSyntax) throws -> String {
 	guard arguments.count == 2 else {
 		fatalError("@If requires two arguments")

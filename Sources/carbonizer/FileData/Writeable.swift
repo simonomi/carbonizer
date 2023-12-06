@@ -26,6 +26,12 @@ extension Encodable where Self: Writeable {
 	}
 }
 
+extension Data {
+	func write(to path: URL) throws {
+		try self.write(to: path, options: [])
+	}
+}
+
 extension Datastream: Writeable {
 	func write(to path: URL) throws {
 		try Data(bytes).write(to: path)

@@ -10,7 +10,7 @@ import Foundation
 
 extension Data: FileData, Writeable {
 	static var packedFileExtension = ""
-	static var unpackedFileExtension = "bin"
+	static var unpackedFileExtension = "json"
 	
 	init(packed: Datastream) {
 		self = Data(packed.bytes)

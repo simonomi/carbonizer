@@ -16,11 +16,15 @@ extension DEX.Binary.Scene {
 		
 		self.commands = commands.map(Command.init)
 	}
+	
+	func size() -> UInt32 {
+		8 + 4 * numberOfCommands + commands.map(\.size).sum()
+	}
 }
 
 extension DEX.Command {
 	var size: UInt32 {
-		4 + UInt32(arguments.count * 4)
+		12 + UInt32(arguments.count * 4)
 	}
 }
 
@@ -29,5 +33,9 @@ extension DEX.Binary.Scene.Command {
 		type = command.type
 		numberOfArguments = UInt32(command.arguments.count)
 		arguments = command.arguments
+	}
+	
+	var size: UInt32 {
+		12 + UInt32(arguments.count * 4)
 	}
 }

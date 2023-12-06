@@ -33,16 +33,26 @@ struct carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
+////		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
+////		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
+//		
+//		for filePath in filePaths {
+//			let start = Date.now
+//			let file = try CreateFileSystemObject(contentsOf: filePath)
+//			print(-start.timeIntervalSinceNow)
+//			
+////			let writeStart = Date.now
+////			try file.write(into: URL(filePath: "/Users/simonomi/ff1/output/"), packed: true)
+////			print(-writeStart.timeIntervalSinceNow)
+//		}
 		
-		for filePath in filePaths {
-			let start = Date.now
-			let file = try CreateFileSystemObject(contentsOf: filePath)
-			print(-start.timeIntervalSinceNow)
-			
-			try file.write(into: URL(filePath: "/Users/simonomi/ff1/outputs/"), packed: false)
-		}
+//		let original = URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds")
+//		let originalFile = try CreateFileSystemObject(contentsOf: original)
+//		try originalFile.write(into: URL(filePath: "/Users/simonomi/ff1/output/"), packed: true)
+		
+		let product = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds")
+		let _ = try CreateFileSystemObject(contentsOf: product)
 	}
 }
 

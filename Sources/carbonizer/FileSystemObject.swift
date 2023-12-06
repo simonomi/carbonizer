@@ -66,6 +66,18 @@ struct Folder: FileSystemObject {
 	}
 }
 
+// technically this isnt correct, but its mostly probably good enough
+extension Folder: Hashable {
+	func hash(into hasher: inout Hasher) {
+		hasher.combine(name)
+		hasher.combine(files.count)
+	}
+	
+	static func == (lhs: Folder, rhs: Folder) -> Bool {
+		lhs.name == rhs.name && lhs.files.count == rhs.files.count
+	}
+}
+
 struct File: FileSystemObject {
 	var name: String
 	var metadata: Metadata?

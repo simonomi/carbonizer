@@ -109,8 +109,9 @@ extension Datawriter {
 	) {
 		let length = Int(length)
 		
-		assert(data.bytes.count >= length)
-		bytes.insert(contentsOf: data.bytes[..<length], at: offset)
+		let endIndex = data.offset + length
+		assert(data.canRead(until: endIndex))
+		bytes.insert(contentsOf: data.bytes[data.offset..<endIndex], at: offset)
 		offset += length
 	}
 	
@@ -121,7 +122,7 @@ extension Datawriter {
 		let offsets = offsets.map { Int($0) + baseOffset.offest }
 		
 		for (offset, item) in zip(offsets, data) {
-			self.offset = offset
+			jump(to: Offset(offset))
 			write(item)
 		}
 	}
@@ -152,11 +153,19 @@ extension Datawriter {
 	/// Documentation
 	public func jump<T: BinaryInteger>(bytes: T) {
 		offset += Int(bytes)
+		
+		if offset > self.bytes.endIndex {
+			self.bytes.append(contentsOf: [Byte](repeating: 0, count: offset - self.bytes.endIndex))
+		}
 	}
 	
 	/// Documentation
 	public func jump(to offset: Offset) {
 		self.offset = offset.offest
+		
+		if self.offset > bytes.endIndex {
+			bytes.append(contentsOf: [Byte](repeating: 0, count: self.offset - bytes.endIndex))
+		}
 	}
 }
 

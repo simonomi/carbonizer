@@ -61,6 +61,7 @@ extension DMG.Binary: InitFrom {
 			start: indexesOffset + stringCount * 4,
 			sizes: dmg.strings
 				.map(\.string.utf8CString.count)
+				.map { $0 + 8 }
 				.map(UInt32.init)
 		)
 		

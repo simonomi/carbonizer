@@ -66,7 +66,7 @@ extension NDS.Binary.FileNameTable.SubEntry {
 	
 	func createFileSystemObject(files: [Datastream], fileNameTable: CompleteFNT) throws -> any FileSystemObject {
 		switch type {
-			case .file: 
+			case .file:
 				try File(named: name, data: files[Int(id!)])
 			case .folder:
 				Folder(
@@ -134,5 +134,96 @@ extension NDS.Binary.OverlayTableEntry {
 		case staticInitializerEndAddress =		"static initialiser end address"
 		case fileId =							"file ID"
 		case reserved =							"reserved"
+	}
+}
+
+extension NDS.Binary.FileNameTable {
+	init(_ files: [any FileSystemObject], firstFileId: UInt16) {
+		let allFolders = files.getAllFolders()
+		let folderIds = Dictionary(uniqueKeysWithValues:
+			allFolders
+				.enumerated()
+				.map { index, folder in
+					(folder, UInt16(index + 0xF001))
+				}
+		)
+		let foldersWithIds = folderIds
+			.sorted(by: \.value)
+			.map { folder, id in (folder: folder, id: id) }
+		
+		var fileId = firstFileId
+		var subTableOffset = (folderIds.count + 1) * 8
+		
+		func createSubEntry(_ fileSystemObject: any FileSystemObject) -> SubEntry {
+			switch fileSystemObject {
+				case let file as File:
+					fileId += 1
+					subTableOffset += file.name.utf8.count + 1
+					return SubEntry(.file, name: file.name)
+				case let folder as Folder:
+					subTableOffset += folder.name.utf8.count + 3
+					return SubEntry(.folder, name: folder.name, id: folderIds[folder]!)
+				default: fatalError()
+			}
+		}
+		
+		rootFolder = MainEntry(
+			subTableOffset: UInt32(subTableOffset),
+			firstChildId: fileId,
+			parentId: UInt16(allFolders.count + 1)
+		)
+		rootSubTable = files.map(createSubEntry) + [.end]
+		subTableOffset += 1
+		
+		mainTable = []
+		subTables = []
+		
+		for folder in allFolders {
+			let parentId = foldersWithIds.first {
+				$0.folder.files
+					.compactMap(as: Folder.self)
+					.contains { $0 == folder }
+			}?.id ?? 0xF000
+			
+			mainTable.append(
+				MainEntry(
+					subTableOffset: UInt32(subTableOffset),
+					firstChildId: fileId,
+					parentId: parentId
+				)
+			)
+			subTables.append(folder.files.map(createSubEntry) + [.end])
+			subTableOffset += 1
+		}
+	}
+}
+
+extension NDS.Binary.FileNameTable.SubEntry {
+	init(_ type: FileOrFolder, name: String, id: UInt16? = nil) {
+		let typeModifier = type == .folder ? 0x80 : 0
+		typeAndNameLength = UInt8(name.utf8.count + typeModifier)
+		self.name = name
+		self.id = id
+	}
+	
+	static let end = Self(.file, name: "")
+}
+
+extension [any FileSystemObject] {
+	func getAllFiles() -> [File] {
+		flatMap {
+			switch $0 {
+				case let file as File:
+					[file]
+				case let folder as Folder:
+					folder.files.getAllFiles()
+				default: fatalError()
+			}
+		}
+	}
+	
+	func getAllFolders() -> [Folder] {
+		compactMap(as: Folder.self)
+			.flatMap { [$0] + $0.files.getAllFolders() }
 	}
 }

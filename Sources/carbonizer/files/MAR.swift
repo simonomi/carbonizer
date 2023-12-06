@@ -45,8 +45,8 @@ extension MAR.Binary: InitFrom {
 		files = mar.files.map(MCM.Binary.init)
 		
 		let firstFileIndex = 8 + fileCount * 8
-		let compressedSizes = files.map(\.compressedSize)
-		let offsets = createOffsets(start: firstFileIndex, sizes: compressedSizes)
+		let mcmSizes = files.map(\.endOfFileOffset)
+		let offsets = createOffsets(start: firstFileIndex, sizes: mcmSizes)
 		
 		let decompressedSizes = files.map(\.decompressedSize)
 		
