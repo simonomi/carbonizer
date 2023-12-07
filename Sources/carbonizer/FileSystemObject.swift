@@ -54,9 +54,9 @@ struct Folder: FileSystemObject {
 	init(contentsOf folderPath: URL) throws {
 		name = folderPath.lastPathComponent
 		files = try folderPath.contents()
-			.sorted(by: \.lastPathComponent)
 			.filter { !$0.lastPathComponent.starts(with: ".") }
 			.compactMap(CreateFileSystemObject)
+			.sorted(by: \.name)
 	}
 	
 	func write(into directory: URL, packed: Bool) throws {

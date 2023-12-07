@@ -28,7 +28,8 @@ struct NDS {
 		var header: Header
 		
 		@Offset(givenBy: \Self.header.arm9Offset)
-		@Length(givenBy: \Self.header.arm9Size)
+		@Length(givenBy: \Self.header.arm9Size, .plus(12))
+//		@Length(givenBy: \Self.header.arm9Size)
 		var arm9: Datastream
 		@Offset(givenBy: \Self.header.arm9OverlayOffset)
 		@Count(givenBy: \Self.header.arm9OverlaySize, .dividedBy(32))
@@ -182,14 +183,6 @@ extension NDS: FileData {
 		
 		iconBanner = packed.iconBanner
 		
-//		print(
-//			String(describing: packed.fileNameTable)
-//				.replacingOccurrences(of: "carbonizer.", with: "")
-//				.replacingOccurrences(of: "NDS.Binary.FileNameTable.", with: "")
-//				.replacingOccurrences(of: "), MainEntry", with: "),\nMainEntry")
-//				.replacingOccurrences(of: "), SubEntry", with: "),\nSubEntry")
-//		)
-		
 		let completeTable = packed.fileNameTable.completeTable()
 		contents = try completeTable[0xF000]!.map {
 			try $0.createFileSystemObject(files: packed.files, fileNameTable: completeTable)
@@ -227,8 +220,6 @@ extension NDS.Binary: InitFrom {
 		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)       .roundedUpToTheNearest(0x100)
 		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize) .roundedUpToTheNearest(0x100)
 		let filesOffset =                  (header.iconBannerOffset          + 0x840)                          .roundedUpToTheNearest(0x100)
-		
-		// TODO: fix fnt and fat sizes
 		
 		let fileSizes = files.map(\.bytes.count).map(UInt32.init)
 		fileAllocationTable = fileSizes.reduce(into: []) { fat, size in

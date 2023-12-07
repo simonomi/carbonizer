@@ -58,7 +58,13 @@ extension Datawriter {
 extension Datawriter {
 	/// Documentation
 	public func write(_ byte: Byte) {
-		bytes.insert(byte, at: offset)
+		if offset == bytes.endIndex {
+			bytes.insert(byte, at: offset)
+		} else {
+			assert(bytes[offset] == fillerByte)
+			bytes[offset] = byte
+		}
+		
 		offset += 1
 	}
 	
@@ -70,7 +76,13 @@ extension Datawriter {
 			.map { (data >> ($0 * 8)) & 0xFF }
 			.map(Byte.init)
 		
-		bytes.insert(contentsOf: newBytes, at: offset)
+		if offset == bytes.endIndex {
+			bytes.insert(contentsOf: newBytes, at: offset)
+		} else {
+			let endIndex = offset + byteWidth
+			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			bytes.replaceSubrange(offset..<endIndex, with: newBytes)
+		}
 		offset += byteWidth
 	}
 	
@@ -82,7 +94,13 @@ extension Datawriter {
 	/// Documentation
 	public func write(_ string: String) {
 		let data = string.utf8CString.map(Byte.init)
-		bytes.insert(contentsOf: data, at: offset)
+		if offset == bytes.endIndex {
+			bytes.insert(contentsOf: data, at: offset)
+		} else {
+			let endIndex = offset + data.count
+			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			bytes.replaceSubrange(offset..<endIndex, with: data)
+		}
 		offset += string.utf8CString.count
 	}
 	
@@ -90,16 +108,31 @@ extension Datawriter {
 	public func write<T: BinaryInteger>(_ string: String, length: T) {
 		let length = Int(length)
 		
-		assert(string.utf8CString.count >= length)
+		var string = string
+		if string.utf8CString.count < length {
+			string = string.padded(toLength: length, with: "\0", from: .trailing)
+		}
 		let data = string.utf8CString[..<length].map(Byte.init)
 		
-		bytes.insert(contentsOf: data, at: offset)
+		if offset == bytes.endIndex {
+			bytes.insert(contentsOf: data, at: offset)
+		} else {
+			let endIndex = offset + data.count
+			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			bytes.replaceSubrange(offset..<endIndex, with: data)
+		}
 		offset += length
 	}
 	
 	/// Documentation
 	public func write(_ data: Datastream) {
-		bytes.insert(contentsOf: data.bytes, at: offset)
+		if offset == bytes.endIndex {
+			bytes.insert(contentsOf: data.bytes[data.offset...], at: offset)
+		} else {
+			let endIndex = offset + data.bytes[data.offset...].count
+			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			bytes.replaceSubrange(offset..<endIndex, with: data.bytes[data.offset...])
+		}
 		offset += data.bytes.count
 	}
 	
@@ -111,7 +144,13 @@ extension Datawriter {
 		
 		let endIndex = data.offset + length
 		assert(data.canRead(until: endIndex))
-		bytes.insert(contentsOf: data.bytes[data.offset..<endIndex], at: offset)
+		if offset == bytes.endIndex {
+			bytes.insert(contentsOf: data.bytes[data.offset..<endIndex], at: offset)
+		} else {
+			let endIndex = offset + data.bytes[data.offset..<endIndex].count
+			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			bytes.replaceSubrange(offset..<endIndex, with: data.bytes[data.offset..<endIndex])
+		}
 		offset += length
 	}
 	
@@ -148,6 +187,7 @@ extension Datawriter {
 	}
 }
 
+fileprivate let fillerByte: UInt8 = .max
 // MARK: jump
 extension Datawriter {
 	/// Documentation
@@ -155,7 +195,7 @@ extension Datawriter {
 		offset += Int(bytes)
 		
 		if offset > self.bytes.endIndex {
-			self.bytes.append(contentsOf: [Byte](repeating: 0, count: offset - self.bytes.endIndex))
+			self.bytes.append(contentsOf: [Byte](repeating: fillerByte, count: offset - self.bytes.endIndex))
 		}
 	}
 	
@@ -164,7 +204,7 @@ extension Datawriter {
 		self.offset = offset.offest
 		
 		if self.offset > bytes.endIndex {
-			bytes.append(contentsOf: [Byte](repeating: 0, count: self.offset - bytes.endIndex))
+			bytes.append(contentsOf: [Byte](repeating: fillerByte, count: self.offset - bytes.endIndex))
 		}
 	}
 }

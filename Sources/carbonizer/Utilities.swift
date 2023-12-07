@@ -35,6 +35,10 @@ func createOffsets(start: UInt32, sizes: [UInt32]) -> [UInt32] {
 		}
 }
 
+func hex<T: BinaryInteger>(_ value: T) -> String {
+	String(value, radix: 16)
+}
+
 extension Sequence where Element: Sequence{
 	func recursiveMap<T>(_ transform: @escaping (Element.Element) throws -> T) rethrows -> [[T]] {
 		try map { try $0.map(transform) }
