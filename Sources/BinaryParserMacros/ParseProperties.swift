@@ -1,10 +1,3 @@
-//
-//  PropertyParser.swift
-//
-//
-//  Created by alice on 2023-11-12.
-//
-
 import SwiftSyntax
 
 enum PropertyParsingError: Error {

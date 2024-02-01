@@ -1,10 +1,3 @@
-//
-//  PropertyParserTests.swift
-//
-//
-//  Created by alice on 2023-11-12.
-//
-
 import XCTest
 import SwiftSyntax
 

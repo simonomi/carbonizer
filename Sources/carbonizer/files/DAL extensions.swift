@@ -1,10 +1,3 @@
-//
-//  DAL extensions.swift
-//
-//
-//  Created by simon pellerin on 2023-12-06.
-//
-
 extension DAL.Binary.Attack.SecondaryEffect {
 	enum Effect: UInt8 {
 		case nothing = 1, transformation, allZoneAttack, stealLPEqualToDamage, stealFP, spiteBlast, powerScale, knockToEZ, unused1, healWholeTeam, sacrifice, lawOfTheJungle, healOneAlly, unused2, cureAllStatuses, swapZones

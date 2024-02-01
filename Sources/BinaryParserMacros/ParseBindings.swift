@@ -1,10 +1,3 @@
-//
-//  ParseBindings.swift
-//
-//
-//  Created by alice on 2023-11-19.
-//
-
 import SwiftSyntax
 
 func parseBindings(_ bindings: PatternBindingListSyntax, with attributes: Attributes) throws -> [Property] {

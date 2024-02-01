@@ -1,10 +1,3 @@
-//
-//  Huffman.swift
-//
-//
-//  Created by alice on 2023-11-28.
-//
-
 import BinaryParser
 
 enum Huffman {

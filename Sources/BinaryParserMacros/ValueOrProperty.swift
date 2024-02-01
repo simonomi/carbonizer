@@ -1,10 +1,3 @@
-//
-//  PossiblyGivenBy.swift
-//
-//
-//  Created by alice on 2023-11-12.
-//
-
 enum ValueOrProperty {
 	case value(Int)
 	case property(String)

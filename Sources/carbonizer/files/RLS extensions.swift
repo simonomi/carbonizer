@@ -1,10 +1,3 @@
-//
-//  RLS extensions.swift
-//
-//
-//  Created by simon pellerin on 2023-11-27.
-//
-
 extension RLS.Binary.Kaseki {
 	init(_ kaseki: RLS.Kaseki?) {
 		guard let kaseki else {

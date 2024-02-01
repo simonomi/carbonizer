@@ -1,10 +1,3 @@
-//
-//  Writeable.swift
-//
-//
-//  Created by alice on 2023-12-02.
-//
-
 import BinaryParser
 import Foundation
 

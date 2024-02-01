@@ -1,10 +1,3 @@
-//
-//  carbonizer.swift
-//
-//
-//  Created by alice on 2023-11-25.
-//
-
 import ArgumentParser
 import Foundation
 

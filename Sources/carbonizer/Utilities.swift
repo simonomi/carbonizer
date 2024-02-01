@@ -1,10 +1,3 @@
-//
-//  Utilities.swift
-//
-//
-//  Created by alice on 2023-11-25.
-//
-
 import Foundation
 
 extension URL {
@@ -14,13 +7,6 @@ extension URL {
 }
 
 func identity<T>(_ value: T) -> T { value }
-
-//precedencegroup PipePrecedence {
-//	higherThan: AssignmentPrecedence
-//	associativity: left
-//}
-//
-//infix operator |>: PipePrecedence
 
 /// pipe operator
 //func |> <T, U>(lhs: T, rhs: (T) throws -> U) rethrows -> U {

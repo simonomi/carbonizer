@@ -1,10 +1,3 @@
-//
-//  BinaryParserMacros.swift
-//
-//
-//  Created by alice on 2023-11-12.
-//
-
 /// Documentation
 @attached(extension, conformances: BinaryConvertible, names: named(init), named(write))
 public macro BinaryConvertible() = #externalMacro(module: "BinaryParserMacros", type: "BinaryConvertibleMacro")

@@ -1,10 +1,3 @@
-//
-//  BinaryConvertibleTests.swift
-//
-//
-//  Created by alice on 2023-11-12.
-//
-
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 import XCTest

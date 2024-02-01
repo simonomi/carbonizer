@@ -1,10 +1,3 @@
-//
-//  Property.swift
-//
-//
-//  Created by alice on 2023-11-11.
-//
-
 struct Property {
 	var name: String
 	var type: String

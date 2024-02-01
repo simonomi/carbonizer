@@ -1,10 +1,3 @@
-//
-//  Datastream.swift
-//  
-//
-//  Created by alice on 2023-11-18.
-//
-
 import Foundation
 
 /// Documentation

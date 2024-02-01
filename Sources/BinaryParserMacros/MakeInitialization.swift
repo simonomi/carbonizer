@@ -1,10 +1,3 @@
-//
-//  MakeInitialization.swift
-//
-//
-//  Created by alice on 2023-11-12.
-//
-
 extension Property {
 	func makeInitialization() -> String {
 		let (ifCheck, endIfCheck) = 

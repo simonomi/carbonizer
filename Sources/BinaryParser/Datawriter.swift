@@ -1,10 +1,3 @@
-//
-//  Datawriter.swift
-//
-//
-//  Created by alice on 2023-11-28.
-//
-
 import Foundation
 
 final public class Datawriter {

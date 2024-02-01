@@ -1,10 +1,3 @@
-//
-//  Utilities.swift
-//  
-//
-//  Created by simon pellerin on 2023-12-06.
-//
-
 extension String {
 	enum Direction {
 		case leading, trailing

@@ -1,10 +1,3 @@
-//
-//  Data.swift
-//  
-//
-//  Created by alice on 2023-12-01.
-//
-
 import BinaryParser
 import Foundation
 

@@ -1,10 +1,3 @@
-//
-//  DEX extensions.swift
-//
-//
-//  Created by simon pellerin on 2023-11-27.
-//
-
 extension DEX.Binary.Scene {
 	init(_ commands: [DEX.Command]) {
 		numberOfCommands = UInt32(commands.count)
