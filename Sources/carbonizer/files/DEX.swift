@@ -14,8 +14,8 @@ struct DEX: Codable, Writeable {
 		var magicBytes = "DEX"
 		var numberOfScenes: UInt32
 		var sceneOffsetsStart: UInt32 = 0xC
-		@Offset(givenBy: \Self.sceneOffsetsStart)
 		@Count(givenBy: \Self.numberOfScenes)
+		@Offset(givenBy: \Self.sceneOffsetsStart)
 		var sceneOffsets: [UInt32]
 		@Offsets(givenBy: \Self.sceneOffsets)
 		var script: [Scene]
@@ -24,8 +24,8 @@ struct DEX: Codable, Writeable {
 		struct Scene {
 			var numberOfCommands: UInt32
 			var offsetsOffset: UInt32 = 0x8
-			@Offset(givenBy: \Self.offsetsOffset)
 			@Count(givenBy: \Self.numberOfCommands)
+			@Offset(givenBy: \Self.offsetsOffset)
 			var commandOffsets: [UInt32]
 			@Offsets(givenBy: \Self.commandOffsets)
 			var commands: [Command]
@@ -35,8 +35,8 @@ struct DEX: Codable, Writeable {
 				var type: UInt32
 				var numberOfArguments: UInt32
 				var argumentsStart: UInt32 = 0xC
-				@Offset(givenBy: \Self.argumentsStart)
 				@Count(givenBy: \Self.numberOfArguments)
+				@Offset(givenBy: \Self.argumentsStart)
 				var arguments: [Int32]
 			}
 		}

@@ -8,8 +8,8 @@ struct DAL {
 		var unknown2: UInt32 = 0x7f4
 		var indexesCount: UInt32
 		var indexesOffset: UInt32
-		@Offset(givenBy: \Self.indexesOffset)
 		@Count(givenBy: \Self.indexesCount)
+		@Offset(givenBy: \Self.indexesOffset)
 		var indexes: [UInt32]
 		@Offsets(givenBy: \Self.indexes)
 		var attacks: [Attack]
@@ -24,8 +24,8 @@ struct DAL {
 			var primaryStatusDataOffset: UInt32
 			var secondaryStatusDataOffset: UInt32
 			var counterProof: UInt32 // 0 for counter-proof, 3 for not
-			@Offset(givenBy: \Self.hitDamagesOffset)
 			@Count(givenBy: \Self.numberOfHits)
+			@Offset(givenBy: \Self.hitDamagesOffset)
 			var hitDamages: [Damage]
 			@Offset(givenBy: \Self.totalDamageOffset)
 			var totalDamage: Damage
@@ -62,8 +62,8 @@ struct DAL {
 				struct Transformation {
 					var vivosaursCount: UInt32
 					var vivosaursOffset: UInt32 = 0xC
-					@Offset(givenBy: \Self.vivosaursOffset, .plus(0x4)) // relative to SecondaryEffect
 					@Count(givenBy: \Self.vivosaursCount)
+					@Offset(givenBy: \Self.vivosaursOffset, .plus(0x4)) // relative to SecondaryEffect
 					var vivosaurs: [UInt8]
 					// NOTE: plus padding to make this 4-byte aligned
 				}

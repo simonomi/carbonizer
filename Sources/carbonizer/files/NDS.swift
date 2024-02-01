@@ -24,15 +24,15 @@ struct NDS {
 		@Length(givenBy: \Self.header.arm9Size, .plus(12))
 //		@Length(givenBy: \Self.header.arm9Size)
 		var arm9: Datastream
-		@Offset(givenBy: \Self.header.arm9OverlayOffset)
 		@Count(givenBy: \Self.header.arm9OverlaySize, .dividedBy(32))
+		@Offset(givenBy: \Self.header.arm9OverlayOffset)
 		var arm9OverlayTable: [OverlayTableEntry]
 		
 		@Offset(givenBy: \Self.header.arm7Offset)
 		@Length(givenBy: \Self.header.arm7Size)
 		var arm7: Datastream
-		@Offset(givenBy: \Self.header.arm7OverlayOffset)
 		@Count(givenBy: \Self.header.arm7OverlaySize, .dividedBy(32))
+		@Offset(givenBy: \Self.header.arm7OverlayOffset)
 		var arm7OverlayTable: [OverlayTableEntry]
 		
 		@Offset(givenBy: \Self.header.iconBannerOffset)
@@ -42,8 +42,8 @@ struct NDS {
 		@Offset(givenBy: \Self.header.fileNameTableOffset)
 		var fileNameTable: FileNameTable
 		
-		@Offset(givenBy: \Self.header.fileAllocationTableOffset)
 		@Count(givenBy: \Self.header.fileAllocationTableSize, .dividedBy(8))
+		@Offset(givenBy: \Self.header.fileAllocationTableOffset)
 		var fileAllocationTable: [FileAllocationTableEntry]
 		
 		@Offsets(givenBy: \Self.fileAllocationTable, from: \.startAddress, to: \.endAddress)

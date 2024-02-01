@@ -193,6 +193,7 @@ func split(fileName: String) -> (name: String, fileExtension: String) {
 func createFileData(name: String, extension fileExtension: String, data: Data) throws -> any FileData {
 	do {
 		return try switch fileExtension {
+//			case "dal.json": DAL(unpacked: data)
 			case "dex.json": DEX(unpacked: data)
 			case "dmg.json": DMG(unpacked: data)
 			case "dms.json": DMS(unpacked: data)
@@ -219,6 +220,7 @@ func createFileData(name: String, extension fileExtension: String, data: Datastr
 			case "nds": NDS(packed: data)
 			default:
 				try switch magicBytes {
+//					case "DAL": DAL(packed: data)
 					case "DEX": DEX(packed: data)
 					case "DMG": DMG(packed: data)
 					case "DMS": DMS(packed: data)

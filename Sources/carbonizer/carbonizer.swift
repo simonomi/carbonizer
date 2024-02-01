@@ -29,18 +29,30 @@ struct carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
-		let dalFilePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/etc/attack_defs.bin")
+//		let rlsFilePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/etc/kaseki_defs.bin")
+//		
+//		let data = Datastream(try Data(contentsOf: rlsFilePath))
+//		
+//		let rls = try data.read(RLS.Binary.self)
+//		print(
+//			Array(Set(rls.kasekis
+//				.map(\.rockConfig)
+//			))
+//			.sorted()
+//			.map {
+//				String($0, radix: 2)
+//					.padded(toLength: 17, with: " ")
+//					.split(separator: "")
+//					.joined(separator: "\t")
+//			}
+//			.joined(separator: "\n")
+//		)
+//		
+//		
+//		return
 		
-		let data = Datastream(try Data(contentsOf: dalFilePath))
-		
-		let dal = try data.read(DAL.Binary.self)
-		print(dal)
-		
-		
-		return
-		
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
+		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 		
 		for filePath in filePaths {
@@ -49,7 +61,7 @@ struct carbonizer: ParsableCommand {
 			print(-start.timeIntervalSinceNow)
 			
 			let writeStart = Date.now
-			try file.write(into: URL(filePath: "/Users/simonomi/ff1/output/"), packed: true)
+			try file.write(into: URL(filePath: "/Users/simonomi/ff1/output/"), packed: false)
 			print(-writeStart.timeIntervalSinceNow)
 		}
 		

@@ -8,8 +8,8 @@ struct DTX: Codable, Writeable {
 		var magicBytes = "DTX"
 		var stringCount: UInt32
 		var indexesOffset: UInt32 = 0xC
-		@Offset(givenBy: \Self.indexesOffset)
 		@Count(givenBy: \Self.stringCount)
+		@Offset(givenBy: \Self.indexesOffset)
 		var indexes: [UInt32]
 		@Offsets(givenBy: \Self.indexes)
 		var strings: [String]

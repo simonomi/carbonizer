@@ -21,7 +21,7 @@ func createOffsets(start: UInt32, sizes: [UInt32]) -> [UInt32] {
 		}
 }
 
-func hex<T: BinaryInteger>(_ value: T) -> String {
+func hex(_ value: some BinaryInteger) -> String {
 	String(value, radix: 16)
 }
 

@@ -32,11 +32,10 @@ struct RLS: Codable, Writeable {
 		var passingScore: UInt32
 		
 		var unknown9: UInt32
-		var unknown10: UInt32
-		var unknown11: UInt32
 		
-		var unknown12: UInt32?
-		var unknown13: UInt32?
+		var unknownsCount: UInt32
+		var unknownsOffset: UInt32
+		var unknowns: [UInt32]
 	}
 	
 	@BinaryConvertible
@@ -44,8 +43,8 @@ struct RLS: Codable, Writeable {
 		var magicBytes = "RLS"
 		var kasekiCount: UInt32
 		var offsetsStart: UInt32 = 0xC
-		@Offset(givenBy: \Self.offsetsStart)
 		@Count(givenBy: \Self.kasekiCount)
+		@Offset(givenBy: \Self.offsetsStart)
 		var offsets: [UInt32]
 		@Offsets(givenBy: \Self.offsets)
 		var kasekis: [Kaseki]
@@ -78,16 +77,20 @@ struct RLS: Codable, Writeable {
 			var passingScore: UInt32
 			
 			var unknown9: UInt32 // same as unknown2
-			var unknown10: UInt32 // isEntry but 2 instead of 1...??????
-			var unknown11: UInt32 = 68 // 68 is length up to here...?
 			
-			@If(\Self.isEntry, is: .equalTo(1))
-			var unknown12: UInt32? // 1638, 2048, 2458
-								   // difference: 410
-			@If(\Self.isEntry, is: .equalTo(1))
-			var unknown13: UInt32? // 2048, 2867
-								   // difference: 819
-								   // only 2867 for goyle
+			var unknownsCount: UInt32
+			var unknownsOffset: UInt32 = 0x44
+			@Count(givenBy: \Self.unknownsCount)
+			@Offset(givenBy: \Self.unknownsOffset)
+			var unknowns: [UInt32]
+			
+			// unknowns[0]:
+			// - 1638, 2048, 2458
+			// - difference: 410
+			// unknowns[1]:
+			// - 2048, 2867
+			// - difference: 819
+			// - only 2867 for goyle
 		}
 	}
 }
@@ -133,11 +136,10 @@ extension RLS.Kaseki {
 		passingScore = kaseki.passingScore
 		
 		unknown9 = kaseki.unknown9
-		unknown10 = kaseki.unknown10
-		unknown11 = kaseki.unknown11
 		
-		unknown12 = kaseki.unknown12
-		unknown13 = kaseki.unknown13
+		unknownsCount = kaseki.unknownsCount
+		unknownsOffset = kaseki.unknownsOffset
+		unknowns = kaseki.unknowns
 	}
 }
 
@@ -205,11 +207,10 @@ extension RLS.Kaseki {
 		case passingScore = "passing score"
 		
 		case unknown9 =  "unknown 9"
-		case unknown10 = "unknown 10"
-		case unknown11 = "unknown 11"
 		
-		case unknown12 = "unknown 12"
-		case unknown13 = "unknown 13"
+		case unknownsCount =  "unknowns count"
+		case unknownsOffset =  "unknowns offset"
+		case unknowns =  "unknowns"
 	}
 }
 
