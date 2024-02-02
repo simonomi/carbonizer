@@ -139,19 +139,33 @@ struct File: FileSystemObject {
 			.getCreationDate()
 			.flatMap(Metadata.init)
 		
-		data = try createFileData(name: name, extension: fileExtension, data: Data(contentsOf: filePath))
+		let leftoverFileExtension: String
+		(data, leftoverFileExtension) = try createFileData(name: name, extension: fileExtension, data: Data(contentsOf: filePath))
+		if !leftoverFileExtension.isEmpty {
+			name += "." + leftoverFileExtension
+		}
 	}
 	
 	init(named inputName: String, data inputData: Data) throws {
 		let fileExtension: String
 		(name, fileExtension) = split(fileName: inputName)
-		data = try createFileData(name: name, extension: fileExtension, data: inputData)
+		
+		let leftoverFileExtension: String
+		(data, leftoverFileExtension) = try createFileData(name: name, extension: fileExtension, data: inputData)
+		if !leftoverFileExtension.isEmpty {
+			name += "." + leftoverFileExtension
+		}
 	}
 	
 	init(named inputName: String, data inputData: Datastream) throws {
 		let fileExtension: String
 		(name, fileExtension) = split(fileName: inputName)
-		data = try createFileData(name: name, extension: fileExtension, data: inputData)
+		
+		let leftoverFileExtension: String
+		(data, leftoverFileExtension) = try createFileData(name: name, extension: fileExtension, data: inputData)
+		if !leftoverFileExtension.isEmpty {
+			name += "." + leftoverFileExtension
+		}
 	}
 	
 	init(name: String, metadata: Metadata? = nil, data: any FileData) {
@@ -190,18 +204,18 @@ func split(fileName: String) -> (name: String, fileExtension: String) {
 	)
 }
 
-func createFileData(name: String, extension fileExtension: String, data: Data) throws -> any FileData {
+func createFileData(name: String, extension fileExtension: String, data: Data) throws -> (any FileData, leftoverFileExtension: String) {
 	do {
 		return try switch fileExtension {
-//			case "dal.json": DAL(unpacked: data)
-			case "dex.json": DEX(unpacked: data)
-			case "dmg.json": DMG(unpacked: data)
-			case "dms.json": DMS(unpacked: data)
-			case "dtx.json": DTX(unpacked: data)
-			case "mm3.json": MM3(unpacked: data)
-			case "mpm.json": MPM(unpacked: data)
-			case "rls.json": RLS(unpacked: data)
-			case     "json": data
+//			case "dal.json": (DAL(unpacked: data), "")
+			case "dex.json": (DEX(unpacked: data), "")
+			case "dmg.json": (DMG(unpacked: data), "")
+			case "dms.json": (DMS(unpacked: data), "")
+			case "dtx.json": (DTX(unpacked: data), "")
+			case "mm3.json": (MM3(unpacked: data), "")
+			case "mpm.json": (MPM(unpacked: data), "")
+			case "rls.json": (RLS(unpacked: data), "")
+			case     "json": (data, "")
 			default: createFileData(name: name, extension: fileExtension, data: Datastream(data))
 		}
 	} catch {
@@ -210,26 +224,26 @@ func createFileData(name: String, extension fileExtension: String, data: Data) t
 	}
 }
 
-func createFileData(name: String, extension fileExtension: String, data: Datastream) throws -> any FileData {
+func createFileData(name: String, extension fileExtension: String, data: Datastream) throws -> (any FileData, leftoverFileExtension: String) {
 	let marker = data.placeMarker()
 	let magicBytes = (try? data.read(String.self, length: 3)) ?? ""
 	data.jump(to: marker)
 	
 	do {
 		return try switch fileExtension {
-			case "nds": NDS(packed: data)
+			case "nds": (NDS(packed: data), "")
 			default:
 				try switch magicBytes {
-//					case "DAL": DAL(packed: data)
-					case "DEX": DEX(packed: data)
-					case "DMG": DMG(packed: data)
-					case "DMS": DMS(packed: data)
-					case "DTX": DTX(packed: data)
-					case "MAR": MAR(packed: data)
-					case "MM3": MM3(packed: data)
-					case "MPM": MPM(packed: data)
-					case "RLS": RLS(packed: data)
-					default:    data
+//					case "DAL": (DAL(packed: data), "")
+					case "DEX": (DEX(packed: data), "")
+					case "DMG": (DMG(packed: data), "")
+					case "DMS": (DMS(packed: data), "")
+					case "DTX": (DTX(packed: data), "")
+//					case "MAR": (MAR(packed: data), "") // something during unpacking/packing is broken
+					case "MM3": (MM3(packed: data), "")
+					case "MPM": (MPM(packed: data), "")
+					case "RLS": (RLS(packed: data), "")
+					default:    (data, fileExtension) // TODO: better way?
 				}
 		}
 	} catch {

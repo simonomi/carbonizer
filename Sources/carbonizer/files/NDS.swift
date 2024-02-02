@@ -21,8 +21,7 @@ struct NDS {
 		var header: Header
 		
 		@Offset(givenBy: \Self.header.arm9Offset)
-		@Length(givenBy: \Self.header.arm9Size, .plus(12))
-//		@Length(givenBy: \Self.header.arm9Size)
+		@Length(givenBy: \Self.header.arm9Size)
 		var arm9: Datastream
 		@Count(givenBy: \Self.header.arm9OverlaySize, .dividedBy(32))
 		@Offset(givenBy: \Self.header.arm9OverlayOffset)
@@ -198,21 +197,22 @@ extension NDS.Binary: InitFrom {
 		let numberOfOverlays = UInt16(arm9OverlayTable.count + arm7OverlayTable.count)
 		fileNameTable = FileNameTable(nds.contents, firstFileId: numberOfOverlays)
 		
-		let allFiles = nds.arm9Overlays + nds.arm7Overlays + nds.contents.getAllFiles()
+		let overlays = nds.arm9Overlays.sorted(by: \.name) + nds.arm7Overlays.sorted(by: \.name)
+		let allFiles = overlays + nds.contents.getAllFiles()
 		files = allFiles.map {
 			let writer = Datawriter()
 			$0.data.toPacked().write(to: writer)
 			return writer.intoDatastream()
 		}
 		
-		header.arm9Offset =                                                    header.headerSize               .roundedUpToTheNearest(0x100)
-		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)                .roundedUpToTheNearest(0x100)
-		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)         .roundedUpToTheNearest(0x100)
-		header.arm7OverlayOffset =         (header.arm7Offset                + header.arm7Size)                .roundedUpToTheNearest(0x100)
-		header.fileNameTableOffset =       (header.arm7OverlayOffset         + header.arm7OverlaySize)         .roundedUpToTheNearest(0x100)
-		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)       .roundedUpToTheNearest(0x100)
-		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize) .roundedUpToTheNearest(0x100)
-		let filesOffset =                  (header.iconBannerOffset          + 0x840)                          .roundedUpToTheNearest(0x100)
+		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(4)
+		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(4)
+		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)        .roundedUpToTheNearest(4)
+		header.arm7OverlayOffset =         (header.arm7Offset                + header.arm7Size)               .roundedUpToTheNearest(4)
+		header.fileNameTableOffset =       (header.arm7OverlayOffset         + header.arm7OverlaySize)        .roundedUpToTheNearest(4)
+		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)      .roundedUpToTheNearest(4)
+		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize).roundedUpToTheNearest(4)
+		let filesOffset =                  (header.iconBannerOffset          + 0x840)                         .roundedUpToTheNearest(4)
 		
 		let fileSizes = files.map(\.bytes.count).map(UInt32.init)
 		fileAllocationTable = fileSizes.reduce(into: []) { fat, size in

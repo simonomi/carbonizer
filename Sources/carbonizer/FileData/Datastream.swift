@@ -3,7 +3,7 @@ import Foundation
 
 extension Datastream: FileData {
 	static var packedFileExtension = ""
-	static var unpackedFileExtension = "bin"
+	static var unpackedFileExtension = ""
 	
 	convenience init(packed: Datastream) {
 		self.init(packed)

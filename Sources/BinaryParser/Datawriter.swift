@@ -180,7 +180,7 @@ extension Datawriter {
 	}
 }
 
-fileprivate let fillerByte: UInt8 = .max
+fileprivate let fillerByte: UInt8 = 0
 // MARK: jump
 extension Datawriter {
 	/// Documentation

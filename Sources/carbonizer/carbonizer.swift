@@ -29,55 +29,36 @@ struct carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
-//		let rlsFilePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/etc/kaseki_defs.bin")
+//		let ndsFilePath = URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds")
+//
+//		let data = Datastream(try Data(contentsOf: ndsFilePath))
+//
+//		let initialNDSBinary = try data.read(NDS.Binary.self)
 //		
-//		let data = Datastream(try Data(contentsOf: rlsFilePath))
+//		let nds = try NDS(packed: initialNDSBinary)
 //		
-//		let rls = try data.read(RLS.Binary.self)
-//		print(
-//			Array(Set(rls.kasekis
-//				.map(\.rockConfig)
-//			))
-//			.sorted()
-//			.map {
-//				String($0, radix: 2)
-//					.padded(toLength: 17, with: " ")
-//					.split(separator: "")
-//					.joined(separator: "\t")
-//			}
-//			.joined(separator: "\n")
-//		)
+//		let remadeNDSBinary = nds.toPacked()
 //		
+////		printAllocations(of: initialNDSBinary)
+//		printAllocations(of: remadeNDSBinary)
 //		
 //		return
 		
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
+		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 		
 		for filePath in filePaths {
 			let start = Date.now
 			let file = try CreateFileSystemObject(contentsOf: filePath)
 			print(-start.timeIntervalSinceNow)
 			
+			let inputWasPacked = filePath.absoluteString.hasSuffix("nds")
+			
 			let writeStart = Date.now
-			try file.write(into: URL(filePath: "/Users/simonomi/ff1/output/"), packed: false)
+			try file.write(into: URL(filePath: "/Users/simonomi/ff1/output/"), packed: !inputWasPacked)
 			print(-writeStart.timeIntervalSinceNow)
 		}
-		
-//		let original = URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds")
-//		let originalFile = try CreateFileSystemObject(contentsOf: original)
-//		try originalFile.write(into: URL(filePath: "/Users/simonomi/ff1/output/"), packed: true)
-		
-//		let datastream = Datastream(try Data(contentsOf: original))
-//		let ndsBinary = try NDS.Binary(datastream)
-//		
-//		let datawriter = Datawriter()
-//		ndsBinary.write(to: datawriter)
-//		
-//		let product = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds")
-//		try datawriter.write(to: product)
-//		let productFile = try CreateFileSystemObject(contentsOf: product)
 	}
 }
 

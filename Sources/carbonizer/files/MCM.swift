@@ -61,7 +61,7 @@ extension MCM {
 		maxChunkSize = packed.maxChunkSize
 		
 		do {
-			content = try createFileData(
+			(content, _) = try createFileData(
 				name: "",
 				extension: "",
 				data: packed.chunks
