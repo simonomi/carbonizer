@@ -1,11 +1,11 @@
 import BinaryParser
 
-struct MM3: Codable, Writeable {
+struct MM3: Writeable {
 	var entry1: TableEntry
 	var entry2: TableEntry
 	var entry3: TableEntry
 	
-	struct TableEntry: Codable {
+	struct TableEntry {
 		var index: UInt32
 		var tableName: String
 	}
@@ -57,7 +57,7 @@ extension MM3.Binary: InitFrom {
 }
 
 // MARK: unpacked
-extension MM3 {
+extension MM3: Codable {
 	enum CodingKeys: String, CodingKey {
 		case entry1 = "entry 1"
 		case entry2 = "entry 2"
@@ -65,7 +65,7 @@ extension MM3 {
 	}
 }
 
-extension MM3.TableEntry {
+extension MM3.TableEntry: Codable {
 	enum CodingKeys: String, CodingKey {
 		case index =     "index"
 		case tableName = "table name"

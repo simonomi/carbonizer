@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct DMG: Codable, Writeable {
+struct DMG: Writeable {
 	var strings: [DMGString]
 	
 	struct DMGString: Codable {
@@ -63,7 +63,7 @@ extension DMG.Binary: InitFrom {
 }
 
 // MARK: unpacked
-extension DMG {
+extension DMG: Codable {
 	init(from decoder: Decoder) throws {
 		strings = try [DMGString](from: decoder)
 	}

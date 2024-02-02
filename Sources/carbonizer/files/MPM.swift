@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct MPM: Codable, Writeable {
+struct MPM: Writeable {
 	var unknown1: UInt32
 	var unknown2: UInt32
 	var unknown3: UInt32
@@ -16,7 +16,7 @@ struct MPM: Codable, Writeable {
 	var entry2: TableEntry
 	var entry3: TableEntry?
 	
-	struct TableEntry: Codable {
+	struct TableEntry {
 		var index: UInt32
 		var tableName: String
 	}
@@ -102,7 +102,7 @@ extension MPM.Binary: InitFrom {
 }
 
 // MARK: unpacked
-extension MPM {
+extension MPM: Codable {
 	enum CodingKeys: String, CodingKey {
 		case unknown1 = "unknown 1"
 		case unknown2 = "unknown 2"
@@ -121,7 +121,7 @@ extension MPM {
 	}
 }
 
-extension MPM.TableEntry {
+extension MPM.TableEntry: Codable {
 	enum CodingKeys: String, CodingKey {
 		case index =     "index"
 		case tableName = "table name"

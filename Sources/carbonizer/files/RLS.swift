@@ -1,9 +1,9 @@
 import BinaryParser
 
-struct RLS: Codable, Writeable {
+struct RLS: Writeable {
 	var kasekis: [Kaseki?]
 	
-	struct Kaseki: Codable, Equatable {
+	struct Kaseki: Equatable {
 		var _label: String?
 		
 		var isEntry: Bool
@@ -167,7 +167,7 @@ extension RLS.Kaseki? {
 }
 
 // MARK: unpacked
-extension RLS {
+extension RLS: Codable {
 	init(from decoder: Decoder) throws {
 		kasekis = try [Kaseki?](from: decoder)
 	}
@@ -177,7 +177,7 @@ extension RLS {
 	}
 }
 
-extension RLS.Kaseki {
+extension RLS.Kaseki: Codable {
 	enum CodingKeys: String, CodingKey {
 		case _label = "_label"
 		

@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct DMS: Codable, Writeable {
+struct DMS: Writeable {
 	var value: UInt32
 	
 	@BinaryConvertible
@@ -27,7 +27,7 @@ extension DMS.Binary: InitFrom {
 }
 
 // MARK: unpacked
-extension DMS {
+extension DMS: Codable {
 	init(from decoder: Decoder) throws {
 		value = try UInt32(from: decoder)
 	}

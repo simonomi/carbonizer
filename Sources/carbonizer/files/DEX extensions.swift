@@ -17,15 +17,14 @@ extension DEX.Binary.Scene {
 
 extension DEX.Command {
 	var size: UInt32 {
-		12 + UInt32(arguments.count * 4)
+		12 + UInt32(typeAndArguments.1.count * 4)
 	}
 }
 
 extension DEX.Binary.Scene.Command {
 	init(_ command: DEX.Command) {
-		type = command.type
-		numberOfArguments = UInt32(command.arguments.count)
-		arguments = command.arguments
+		(type, arguments) = command.typeAndArguments
+		numberOfArguments = UInt32(arguments.count)
 	}
 	
 	var size: UInt32 {

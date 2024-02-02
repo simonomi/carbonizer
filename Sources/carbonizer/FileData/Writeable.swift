@@ -25,6 +25,12 @@ extension Data {
 	}
 }
 
+extension String: Writeable {
+	func write(to path: URL) throws {
+		try data(using: .utf8)!.write(to: path)
+	}
+}
+
 extension Datastream: Writeable {
 	func write(to path: URL) throws {
 		try Data(bytes).write(to: path)

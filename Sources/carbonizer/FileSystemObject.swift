@@ -217,15 +217,15 @@ func split(fileName: String) -> (name: String, fileExtension: String) {
 func createFileData(name: String, extension fileExtension: String, data: Data) throws -> (any FileData, leftoverFileExtension: String) {
 	do {
 		return try switch fileExtension {
-//			case "dal.json": (DAL(unpacked: data), "")
-			case "dex.json": (DEX(unpacked: data), "")
-			case "dmg.json": (DMG(unpacked: data), "")
-			case "dms.json": (DMS(unpacked: data), "")
-			case "dtx.json": (DTX(unpacked: data), "")
-			case "mm3.json": (MM3(unpacked: data), "")
-			case "mpm.json": (MPM(unpacked: data), "")
-			case "rls.json": (RLS(unpacked: data), "")
-			case     "json": (data, "")
+//			case DAL.unpackedFileExtension: (DAL(unpacked: data), "")
+			case DEX.unpackedFileExtension: (DEX(unpacked: data), "")
+			case DMG.unpackedFileExtension: (DMG(unpacked: data), "")
+			case DMS.unpackedFileExtension: (DMS(unpacked: data), "")
+			case DTX.unpackedFileExtension: (DTX(unpacked: data), "")
+			case MM3.unpackedFileExtension: (MM3(unpacked: data), "")
+			case MPM.unpackedFileExtension: (MPM(unpacked: data), "")
+			case RLS.unpackedFileExtension: (RLS(unpacked: data), "")
+			case Data.unpackedFileExtension: (data, "")
 			default: createFileData(name: name, extension: fileExtension, data: Datastream(data))
 		}
 	} catch {
@@ -241,19 +241,19 @@ func createFileData(name: String, extension fileExtension: String, data: Datastr
 	
 	do {
 		return try switch fileExtension {
-			case "nds": (NDS(packed: data), "")
+			case NDS.packedFileExtension: (NDS(packed: data), "")
 			default:
 				try switch magicBytes {
 //					case "DAL": (DAL(packed: data), fileExtension)
-//					case "DEX": (DEX(packed: data), fileExtension)
-//					case "DMG": (DMG(packed: data), fileExtension)
-//					case "DMS": (DMS(packed: data), fileExtension)
-//					case "DTX": (DTX(packed: data), fileExtension)
+					case "DEX": (DEX(packed: data), fileExtension)
+					case "DMG": (DMG(packed: data), fileExtension)
+					case "DMS": (DMS(packed: data), fileExtension)
+					case "DTX": (DTX(packed: data), fileExtension)
 					case "MAR": (MAR(packed: data), fileExtension)
-//					case "MM3": (MM3(packed: data), fileExtension)
-//					case "MPM": (MPM(packed: data), fileExtension)
-//					case "RLS": (RLS(packed: data), fileExtension)
-					default:    (data, fileExtension) // TODO: better way?
+					case "MM3": (MM3(packed: data), fileExtension)
+					case "MPM": (MPM(packed: data), fileExtension)
+					case "RLS": (RLS(packed: data), fileExtension)
+					default: (data, fileExtension)
 				}
 		}
 	} catch {

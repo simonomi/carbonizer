@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct DTX: Codable, Writeable {
+struct DTX: Writeable {
 	var strings: [String]
 	
 	@BinaryConvertible
@@ -42,7 +42,7 @@ extension DTX.Binary: InitFrom {
 }
 
 // MARK: unpacked
-extension DTX {
+extension DTX: Codable {
 	init(from decoder: Decoder) throws {
 		strings = try [String](from: decoder)
 	}
