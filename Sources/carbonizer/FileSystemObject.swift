@@ -144,6 +144,16 @@ struct File: FileSystemObject {
 		if !leftoverFileExtension.isEmpty {
 			name += "." + leftoverFileExtension
 		}
+		
+		if let metadata, metadata.standalone {
+			data = MAR(files: [
+				MCM(
+					compression: metadata.compression,
+					maxChunkSize: metadata.maxChunkSize,
+					content: data
+				)
+			])
+		}
 	}
 	
 	init(named inputName: String, data inputData: Data) throws {
@@ -234,15 +244,15 @@ func createFileData(name: String, extension fileExtension: String, data: Datastr
 			case "nds": (NDS(packed: data), "")
 			default:
 				try switch magicBytes {
-//					case "DAL": (DAL(packed: data), "")
-					case "DEX": (DEX(packed: data), "")
-					case "DMG": (DMG(packed: data), "")
-					case "DMS": (DMS(packed: data), "")
-					case "DTX": (DTX(packed: data), "")
-//					case "MAR": (MAR(packed: data), "") // something during unpacking/packing is broken
-					case "MM3": (MM3(packed: data), "")
-					case "MPM": (MPM(packed: data), "")
-					case "RLS": (RLS(packed: data), "")
+//					case "DAL": (DAL(packed: data), fileExtension)
+//					case "DEX": (DEX(packed: data), fileExtension)
+//					case "DMG": (DMG(packed: data), fileExtension)
+//					case "DMS": (DMS(packed: data), fileExtension)
+//					case "DTX": (DTX(packed: data), fileExtension)
+					case "MAR": (MAR(packed: data), fileExtension)
+//					case "MM3": (MM3(packed: data), fileExtension)
+//					case "MPM": (MPM(packed: data), fileExtension)
+//					case "RLS": (RLS(packed: data), fileExtension)
 					default:    (data, fileExtension) // TODO: better way?
 				}
 		}

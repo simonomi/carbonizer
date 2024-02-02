@@ -205,6 +205,9 @@ extension NDS.Binary: InitFrom {
 			return writer.intoDatastream()
 		}
 		
+		// TODO: doesnt account for FNT or FAT sizes change
+		// crashes if file/folder added while unpacked
+		
 		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(4)
 		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(4)
 		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)        .roundedUpToTheNearest(4)
