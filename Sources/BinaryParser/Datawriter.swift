@@ -41,7 +41,7 @@ extension Datawriter {
 		let offsets = offsets.map { Int($0) + baseOffset.offest }
 		
 		for (offset, item) in zip(offsets, data) {
-			self.offset = offset
+			jump(to: Offset(offset))
 			write(item)
 		}
 	}

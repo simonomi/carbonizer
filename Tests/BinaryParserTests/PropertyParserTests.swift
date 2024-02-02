@@ -210,15 +210,15 @@ final class ParsePropertiesTests: XCTestCase {
 			declarations: #"""
 				var magicBytes = "DTX"
 				var stringCount: UInt32
-				var indexesOffset: UInt32
-				@Offset(givenBy: \Self.indexesOffset) @Count(givenBy: \Self.stringCount) var indexes: [UInt32]
+				var indicesOffset: UInt32
+				@Offset(givenBy: \Self.indicesOffset) @Count(givenBy: \Self.stringCount) var indexes: [UInt32]
 				@Offsets(givenBy: \Self.indexes) var strings: [String]
 				"""#,
 			parseTo: [
 				Property(name: "magicBytes", type: "String", size: .auto, expected: #""DTX""#),
 				Property(name: "stringCount", type: "UInt32", size: .auto),
-				Property(name: "indexesOffset", type: "UInt32", size: .auto),
-				Property(name: "indexes", type: "[UInt32]", size: .count("stringCount"), offset: .property("indexesOffset")),
+				Property(name: "indicesOffset", type: "UInt32", size: .auto),
+				Property(name: "indices", type: "[UInt32]", size: .count("stringCount"), offset: .property("indexesOffset")),
 				Property(name: "strings", type: "[String]", size: .offsets(.givenByPath("indexes")))
 			]
 		)

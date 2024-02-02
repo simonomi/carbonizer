@@ -230,16 +230,6 @@ extension NDS.Binary: InitFrom {
 	}
 }
 
-extension BinaryInteger {
-	fileprivate func roundedUpToTheNearest(_ value: Self) -> Self {
-		if isMultiple(of: value) {
-			self
-		} else {
-			self + (value - self % value)
-		}
-	}
-}
-
 // MARK: unpacked
 extension [any FileSystemObject] {
 	fileprivate func getChild(named name: String) -> (any FileSystemObject)? {

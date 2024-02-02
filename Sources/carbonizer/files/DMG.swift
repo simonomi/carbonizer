@@ -12,11 +12,11 @@ struct DMG: Writeable {
 	struct Binary: Writeable {
 		var magicBytes = "DMG"
 		var stringCount: UInt32
-		var indexesOffset: UInt32 = 0xC
+		var indicesOffset: UInt32 = 0xC
 		@Count(givenBy: \Self.stringCount)
-		@Offset(givenBy: \Self.indexesOffset)
-		var indexes: [UInt32]
-		@Offsets(givenBy: \Self.indexes)
+		@Offset(givenBy: \Self.indicesOffset)
+		var indices: [UInt32]
+		@Offsets(givenBy: \Self.indices)
 		var strings: [DMGString]
 		
 		@BinaryConvertible
@@ -50,12 +50,13 @@ extension DMG.Binary: InitFrom {
 	init(_ dmg: DMG) {
 		stringCount = UInt32(dmg.strings.count)
 		
-		indexes = createOffsets(
-			start: indexesOffset + stringCount * 4,
+		indices = createOffsets(
+			start: indicesOffset + stringCount * 4,
 			sizes: dmg.strings
 				.map(\.string.utf8CString.count)
 				.map { $0 + 8 }
-				.map(UInt32.init)
+				.map(UInt32.init),
+			alignedTo: 4
 		)
 		
 		strings = dmg.strings.map(DMG.Binary.DMGString.init)

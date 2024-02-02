@@ -29,18 +29,14 @@ struct carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
-//		let ndsFilePath = URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds")
+//		let dmgFilePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/msg/msg_0071")
+//		let dmgBinaryFilePath = URL(filePath: "/Users/simonomi/ff1/msg_0071")
 //
-//		let data = Datastream(try Data(contentsOf: ndsFilePath))
+//		let data = Datastream(try Data(contentsOf: dmgFilePath))
 //
-//		let initialNDSBinary = try data.read(NDS.Binary.self)
+//		let dmgBinary = try data.read(DMG.Binary.self)
 //		
-//		let nds = try NDS(packed: initialNDSBinary)
-//		
-//		let remadeNDSBinary = nds.toPacked()
-//		
-////		printAllocations(of: initialNDSBinary)
-//		printAllocations(of: remadeNDSBinary)
+//		try dmgBinary.write(to: dmgBinaryFilePath)
 //		
 //		return
 		

@@ -218,7 +218,7 @@ func createFileData(name: String, extension fileExtension: String, data: Data) t
 	do {
 		return try switch fileExtension {
 //			case DAL.unpackedFileExtension: (DAL(unpacked: data), "")
-			case DEX.unpackedFileExtension: (DEX(unpacked: data), "")
+			case DEX.unpackedFileExtension: (DEX(unpacked: data), "") // TODO: slow! (~11s)
 			case DMG.unpackedFileExtension: (DMG(unpacked: data), "")
 			case DMS.unpackedFileExtension: (DMS(unpacked: data), "")
 			case DTX.unpackedFileExtension: (DTX(unpacked: data), "")

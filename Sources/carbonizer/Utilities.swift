@@ -13,16 +13,26 @@ func identity<T>(_ value: T) -> T { value }
 //	try rhs(lhs)
 //}
 
-func createOffsets(start: UInt32, sizes: [UInt32]) -> [UInt32] {
+func createOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
 	sizes
 		.dropLast()
 		.reduce(into: [start]) { offsets, size in
-			offsets.append(offsets.last! + size)
+			offsets.append((offsets.last! + size).roundedUpToTheNearest(alignment))
 		}
 }
 
 func hex(_ value: some BinaryInteger) -> String {
 	String(value, radix: 16)
+}
+
+extension BinaryInteger {
+	func roundedUpToTheNearest(_ value: Self) -> Self {
+		if isMultiple(of: value) {
+			self
+		} else {
+			self + (value - self % value)
+		}
+	}
 }
 
 extension Sequence where Element: Sequence{
