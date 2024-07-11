@@ -1,6 +1,8 @@
 import BinaryParser
 
 struct MPM: Writeable {
+	// always either 030, 404, or 508
+	// 030 means 8-bit texture with no bgmaps
 	var unknown1: UInt32
 	var unknown2: UInt32
 	var unknown3: UInt32

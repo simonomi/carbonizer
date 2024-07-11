@@ -35,7 +35,13 @@ extension BinaryInteger {
 	}
 }
 
-extension Sequence where Element: Sequence{
+extension Range where Bound: AdditiveArithmetic {
+	init(start: Bound, count: Bound) {
+		self = start..<(start + count)
+	}
+}
+
+extension Sequence where Element: Sequence {
 	func recursiveMap<T>(_ transform: @escaping (Element.Element) throws -> T) rethrows -> [[T]] {
 		try map { try $0.map(transform) }
 	}
@@ -54,6 +60,12 @@ extension Sequence {
 	
 	func compactMap<T>(as type: T.Type) -> [T] {
 		compactMap { $0 as? T }
+	}
+}
+
+extension Sequence where Element: Hashable {
+	func uniqued() -> [Element] {
+		Array(Set(self))
 	}
 }
 
@@ -109,4 +121,47 @@ extension JSONEncoder {
 		self.init()
 		outputFormatting = OutputFormatting(formatting)
 	}
+}
+
+extension FileHandle: TextOutputStream {
+	public func write(_ string: String) {
+		write(Data(string.utf8))
+	}
+}
+
+enum ANSIFontEffect: Int {
+	case normal = 0
+	case bold = 1
+	case underline = 4
+	case black = 30
+	case red = 31
+	case green = 32
+	case yellow = 33
+	case blue = 34
+	case magenta = 35
+	case cyan = 36
+	case white = 37
+	case blackBackground = 40
+	case redBackground = 41
+	case greenBackground = 42
+	case yellowBackground = 43
+	case blueBackground = 44
+	case magentaBackground = 45
+	case cyanBackground = 46
+	case whiteBackground = 47
+}
+
+extension DefaultStringInterpolation {
+	mutating func appendInterpolation(_ fontEffects: ANSIFontEffect...) {
+		let effects = fontEffects
+			.map(\.rawValue)
+			.map(String.init)
+			.joined(separator: ";")
+		appendInterpolation("\u{001B}[\(effects)m")
+	}
+}
+
+func waitForInput() {
+	print("Press Enter to continue...", terminator: "")
+	let _ = readLine()
 }

@@ -4,39 +4,50 @@ import Foundation
 final public class Datastream: BinaryConvertible, Codable {
 	public typealias Byte = UInt8
 	
-	public private(set) var bytes: ArraySlice<Byte>
-	public private(set) var offset: Int
+//	public private(set) var bytes: ArraySlice<Byte>
+	public var bytes: ArraySlice<Byte> // for inlinability
 	
+//	public private(set) var offset: Int
+	public var offset: Int // for inlinability
+	
+	@inlinable
 	public convenience init(_ data: Data) {
 		self.init([Byte](data))
 	}
 	
+	@inlinable
 	public convenience init(_ bytes: [Byte]) {
 		self.init(bytes[...])
 	}
 	
+	@inlinable
 	public init(_ bytes: ArraySlice<Byte>) {
 		self.bytes = bytes
 		offset = bytes.startIndex
 	}
 	
+	@inlinable
 	public convenience init(_ datastream: Datastream) {
 		self.init(datastream.bytes[datastream.offset...])
 	}
 	
+	@inlinable
 	func canRead(bytes count: Int) -> Bool {
 		offset + count <= bytes.endIndex
 	}
 	
+	@inlinable
 	func canRead(until offset: Int) -> Bool {
 		offset <= bytes.endIndex
 	}
 	
 	// MARK: codable
+	@inlinable
 	public func encode(to encoder: Encoder) throws {
 		try Data(bytes).encode(to: encoder)
 	}
 	
+	@inlinable
 	public required convenience init(from decoder: Decoder) throws {
 		self.init(try Data(from: decoder))
 	}
@@ -45,6 +56,7 @@ final public class Datastream: BinaryConvertible, Codable {
 // MARK: read
 extension Datastream {
 	/// Documentation
+	@inlinable
 	public func read<T: BinaryConvertible>(_ type: T.Type) throws -> T {
 		do {
 			return try T(self)
@@ -54,6 +66,7 @@ extension Datastream {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func read<T: BinaryConvertible, U: BinaryInteger>(
 		_ type: [T].Type, count: U
 	) throws -> [T] {
@@ -68,6 +81,7 @@ extension Datastream {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func read<T: BinaryConvertible, U: BinaryInteger>(
 		_ type: [T].Type, offsets: [U], relativeTo baseOffset: Offset
 	) throws -> [T] {
@@ -86,6 +100,7 @@ extension Datastream {
 // MARK: primitives
 extension Datastream {
 	/// Documentation
+	@inlinable
 	public func read(_ type: UInt8.Type) throws -> UInt8 {
 		guard canRead(bytes: 1) else {
 			throw BinaryParserError.indexOutOfBounds(index: offset + 1, expected: bytes.indices, for: UInt8.self)
@@ -95,26 +110,41 @@ extension Datastream {
 		return bytes[offset]
 	}
 	
+	// special case for Int8 so that UInt8 -> Int8 doesnt overflow
+	@inlinable
+	public func read(_ type: Int8.Type) throws -> Int8 {
+		guard canRead(bytes: 1) else {
+			throw BinaryParserError.indexOutOfBounds(index: offset + 1, expected: bytes.indices, for: Int8.self)
+		}
+		
+		defer { offset += 1 }
+		return Int8(bitPattern: bytes[offset])
+	}
+	
 	/// Documentation
-	public func read<T: BinaryInteger>(_ type: T.Type) throws -> T {
-		var output = T.zero
-		let byteWidth = output.bitWidth / 8
-		guard canRead(bytes: byteWidth) else {
-			throw BinaryParserError.indexOutOfBounds(index: offset + byteWidth, expected: bytes.indices, for: T.self)
-		}
-		
-		let range = offset..<(offset + byteWidth)
-		
-		for (index, byte) in bytes[range].enumerated() {
-			output |= T(byte) << (index * 8)
-		}
+	@inlinable
+    public func read<T: FixedWidthInteger>(_ type: T.Type) throws -> T {
+        let byteWidth = T.bitWidth / 8
+        guard canRead(bytes: byteWidth) else {
+            throw BinaryParserError.indexOutOfBounds(index: offset + byteWidth, expected: bytes.indices, for: T.self)
+        }
+        
+        let range = offset..<(offset + byteWidth)
+        
+		let output = bytes[range]
+			.enumerated()
+			.map { (index, byte) in
+				T(byte) << (index * 8)
+			}
+			.reduce(T.zero, |)
 		
 		defer { offset += byteWidth }
 		return output
 	}
 	
 	/// Documentation
-	public func read<T: BinaryInteger, U: BinaryInteger>(
+	@inlinable
+    public func read<T: FixedWidthInteger, U: BinaryInteger>(
 		_ type: [T].Type, count: U
 	) throws -> [T] {
 		let count = Int(count)
@@ -127,12 +157,14 @@ extension Datastream {
 		}
 	}
 	
+	@usableFromInline
 	enum StringParsingError: Error {
 		case unterminated
 		case invalidUTF8
 	}
 	
 	/// Documentation
+	@inlinable
 	public func read(_ type: String.Type) throws -> String {
 		guard let endIndex = bytes[offset...].firstIndex(of: 0) else {
 			throw StringParsingError.unterminated
@@ -149,6 +181,7 @@ extension Datastream {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func read<T: BinaryInteger>(_ type: String.Type, length: T) throws -> String {
 		let endOffset = offset + Int(length)
 		guard canRead(until: endOffset) else {
@@ -163,6 +196,7 @@ extension Datastream {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func read<T: BinaryInteger>(
 		_ type: Datastream.Type, endOffset: T, relativeTo baseOffset: Offset
 	) throws -> Datastream {
@@ -177,6 +211,7 @@ extension Datastream {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func read<T: BinaryInteger>(
 		_ type: Datastream.Type, length: T
 	) throws -> Datastream {
@@ -191,6 +226,7 @@ extension Datastream {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func read<T: BinaryInteger>(
 		_ type: [Datastream].Type, offsets: [T], endOffset: T, relativeTo baseOffset: Offset
 	) throws -> [Datastream] {
@@ -209,6 +245,7 @@ extension Datastream {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func read<T: BinaryInteger>(
 		_ type: [Datastream].Type, startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
 	) throws -> [Datastream] {
@@ -233,18 +270,22 @@ extension Datastream {
 // MARK: offset
 extension Datastream {
 	public struct Offset {
+		@usableFromInline
 		var offest: Int
 		
+		@inlinable
 		init(_ offest: Int) {
 			self.offest = offest
 		}
 		
+		@inlinable
 		public static func + <T: BinaryInteger>(lhs: Offset, rhs: T) -> Offset {
 			Offset(lhs.offest + Int(rhs))
 		}
 	}
 	
 	/// Documentation
+	@inlinable
 	public func placeMarker() -> Offset {
 		Offset(offset)
 	}
@@ -253,11 +294,13 @@ extension Datastream {
 // MARK: jump
 extension Datastream {
 	/// Documentation
+	@inlinable
 	public func jump<T: BinaryInteger>(bytes: T) {
 		offset += Int(bytes)
 	}
 	
 	/// Documentation
+	@inlinable
 	public func jump(to offset: Offset) {
 		self.offset = offset.offest
 	}
@@ -265,6 +308,7 @@ extension Datastream {
 
 // MARK: joined
 extension [Datastream] {
+	@inlinable
 	public func joined() -> Datastream {
 		Datastream(ArraySlice(map(\.bytes).joined()))
 	}
@@ -272,6 +316,7 @@ extension [Datastream] {
 
 // MARK: chunked
 extension Datastream {
+	@inlinable
 	public func chunked(maxSize: Int) -> [Datastream] {
 		stride(from: offset, to: bytes.endIndex, by: maxSize).map {
 			Datastream(bytes[$0..<min($0 + maxSize, bytes.endIndex)])

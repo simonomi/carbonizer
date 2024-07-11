@@ -4,6 +4,8 @@ import Foundation
 protocol FileSystemObject {
 	var name: String { get }
 	func write(into directory: URL, packed: Bool) throws
+	
+	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self
 }
 
 enum FileReadError: Error {
@@ -18,11 +20,13 @@ func CreateFileSystemObject(contentsOf path: URL) throws -> any FileSystemObject
 			let folder = try Folder(contentsOf: path)
 			
 			if folder.name.hasSuffix(".mar") {
+				inputPackedStatus.set(to: .unpacked)
 				return File(
 					name: String(folder.name.dropLast(4)),
 					data: try MAR(unpacked: folder.files)
 				)
 			} else if folder.files.contains(where: { $0.name == "header" }) {
+				inputPackedStatus.set(to: .unpacked)
 				return File(
 					name: folder.name,
 					data: try NDS(unpacked: folder.files)
@@ -46,6 +50,11 @@ struct Folder: FileSystemObject {
 	
 	init(contentsOf folderPath: URL) throws {
 		name = folderPath.lastPathComponent
+		if try folderPath.contents().contains(where: { $0.lastPathComponent == "header.json" }) {
+			// unfortunately, this can't go in CreateFileSystemObject
+			// because it wouldn't be run until too late
+			extractMARs.replaceAuto(with: .never)
+		}
 		files = try folderPath.contents()
 			.filter { !$0.lastPathComponent.starts(with: ".") }
 			.compactMap(CreateFileSystemObject)
@@ -192,16 +201,30 @@ struct File: FileSystemObject {
 				type(of: data).unpackedFileExtension
 			}
 		
-		let filePath = directory.appendingPathComponent(name).appendingPathExtension(fileExtension)
+		let filePathWithoutExtension = directory.appendingPathComponent(name)
+		let filePath = filePathWithoutExtension.appendingPathExtension(fileExtension)
 		
-		if packed {
-			try data.toPacked().write(to: filePath)
-		} else {
-			try data.toUnpacked().write(to: filePath)
+		do {
+			if packed {
+				try data.toPacked().write(to: filePath)
+			} else {
+				try data.toUnpacked().write(to: filePath)
+			}
+		} catch {
+			throw BinaryParserError.whileWriting(type(of: data), error)
 		}
 		
-		if let metadata {
-			try filePath.setCreationDate(to: metadata.asDate)
+		do {
+			if let metadata {
+				// if we are writing a MAR as an unpacked file, it's a standalone,
+				// and thus doesn't have its own file. metadata is handled
+				// by the child's call to `write`
+				if !(fileExtension == "mar" && !packed) {
+					try filePath.setCreationDate(to: metadata.asDate)
+				}
+			}
+		} catch {
+			throw BinaryParserError.whileWriting(Metadata.self, error)
 		}
 	}
 }
@@ -216,17 +239,45 @@ func split(fileName: String) -> (name: String, fileExtension: String) {
 
 func createFileData(name: String, extension fileExtension: String, data: Data) throws -> (any FileData, leftoverFileExtension: String) {
 	do {
-		return try switch fileExtension {
-//			case DAL.unpackedFileExtension: (DAL(unpacked: data), "")
-			case DEX.unpackedFileExtension: (DEX(unpacked: data), "") // TODO: slow! (~11s)
-			case DMG.unpackedFileExtension: (DMG(unpacked: data), "")
-			case DMS.unpackedFileExtension: (DMS(unpacked: data), "")
-			case DTX.unpackedFileExtension: (DTX(unpacked: data), "")
-			case MM3.unpackedFileExtension: (MM3(unpacked: data), "")
-			case MPM.unpackedFileExtension: (MPM(unpacked: data), "")
-			case RLS.unpackedFileExtension: (RLS(unpacked: data), "")
-			case Data.unpackedFileExtension: (data, "")
-			default: createFileData(name: name, extension: fileExtension, data: Datastream(data))
+		switch fileExtension {
+//			case DAL.unpackedFileExtension: 
+//				inputPackedStatus.set(to: .unpacked)
+//				return (try DAL(unpacked: data), "")
+//			case DEX.unpackedFileExtension:
+//				inputPackedStatus.set(to: .unpacked)
+//				return (try DEX(unpacked: data), "") // TODO: slow! (~11s)
+//			case DCL.unpackedFileExtension:
+//				inputPackedStatus.set(to: .unpacked)
+//				return (try DCL(unpacked: data), "")
+			case DMG.unpackedFileExtension:
+				inputPackedStatus.set(to: .unpacked)
+				return (try DMG(unpacked: data), "")
+			case DMS.unpackedFileExtension:
+				inputPackedStatus.set(to: .unpacked)
+				return (try DMS(unpacked: data), "")
+			case DTX.unpackedFileExtension:
+				inputPackedStatus.set(to: .unpacked)
+				return (try DTX(unpacked: data), "")
+			case MM3.unpackedFileExtension:
+				inputPackedStatus.set(to: .unpacked)
+				return (try MM3(unpacked: data), "")
+			case MPM.unpackedFileExtension:
+				inputPackedStatus.set(to: .unpacked)
+				return (try MPM(unpacked: data), "")
+			case RLS.unpackedFileExtension:
+				inputPackedStatus.set(to: .unpacked)
+				return (try RLS(unpacked: data), "")
+			case MMS.unpackedFileExtension, "bin.mms.json": // TODO: broken bad workaround
+				inputPackedStatus.set(to: .unpacked)
+				return (try MMS(unpacked: data), "")
+//			case MFS.unpackedFileExtension:
+//				inputPackedStatus.set(to: .unpacked)
+//				return (try MFS(unpacked: data), "")
+			case Data.unpackedFileExtension:
+				inputPackedStatus.set(to: .unpacked)
+				return (data, "")
+			default:
+				return try createFileData(name: name, extension: fileExtension, data: Datastream(data))
 		}
 	} catch {
 		let magicBytes = String(bytes: data.prefix(3), encoding: .utf8) ?? ""
@@ -239,21 +290,60 @@ func createFileData(name: String, extension fileExtension: String, data: Datastr
 	let magicBytes = (try? data.read(String.self, length: 3)) ?? ""
 	data.jump(to: marker)
 	
+	// TODO: refactor, possibly into one function
+	// at least lift NDS up, right??
 	do {
-		return try switch fileExtension {
-			case NDS.packedFileExtension: (NDS(packed: data), "")
+		switch fileExtension {
+			case NDS.packedFileExtension:
+				inputPackedStatus.set(to: .packed)
+				extractMARs.replaceAuto(with: .never)
+				return (try NDS(packed: data), "")
 			default:
-				try switch magicBytes {
-//					case "DAL": (DAL(packed: data), fileExtension)
-					case "DEX": (DEX(packed: data), fileExtension)
-					case "DMG": (DMG(packed: data), fileExtension)
-					case "DMS": (DMS(packed: data), fileExtension)
-					case "DTX": (DTX(packed: data), fileExtension)
-					case "MAR": (MAR(packed: data), fileExtension)
-					case "MM3": (MM3(packed: data), fileExtension)
-					case "MPM": (MPM(packed: data), fileExtension)
-					case "RLS": (RLS(packed: data), fileExtension)
-					default: (data, fileExtension)
+				switch magicBytes {
+//					case "DAL":
+//						inputPackedStatus.set(to: .packed)
+//						return (try DAL(packed: data), fileExtension)
+//					case "DCL":
+//						inputPackedStatus.set(to: .packed)
+//						return (try DCL(packed: data), fileExtension)
+					case "DEX":
+						inputPackedStatus.set(to: .packed)
+						return (try DEX(packed: data), fileExtension)
+					case "DMG":
+						inputPackedStatus.set(to: .packed)
+						return (try DMG(packed: data), fileExtension)
+					case "DMS":
+						inputPackedStatus.set(to: .packed)
+						return (try DMS(packed: data), fileExtension)
+					case "DTX":
+						inputPackedStatus.set(to: .packed)
+						return (try DTX(packed: data), fileExtension)
+					case "MAR":
+						if extractMARs.shouldExtract {
+							// ignores contradictions because of fast mode
+							inputPackedStatus.set(to: .packed, ignoreContradiction: true)
+							return (try MAR(packed: data), fileExtension)
+						} else {
+							return (data, fileExtension)
+						}
+					case "MM3":
+						inputPackedStatus.set(to: .packed)
+						return (try MM3(packed: data), fileExtension)
+					case "MPM":
+						inputPackedStatus.set(to: .packed)
+						return (try MPM(packed: data), fileExtension)
+					case "RLS":
+						inputPackedStatus.set(to: .packed)
+						return (try RLS(packed: data), fileExtension)
+					case "MMS":
+						inputPackedStatus.set(to: .packed)
+						return (try MMS(packed: data), fileExtension)
+//					case "MFS":
+//						print(name, terminator: "\t")
+//						inputPackedStatus.set(to: .packed)
+//						return (try MFS(packed: data), fileExtension)
+					default:
+						return (data, fileExtension)
 				}
 		}
 	} catch {

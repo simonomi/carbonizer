@@ -7,7 +7,7 @@ enum RunLength {
 	
 	static func decompress(_ inputData: Datastream) throws -> Datastream {
 		let header = try inputData.read(CompressionHeader.self)
-		assert(header.type == .runLength)
+		precondition(header.type == .runLength)
 		
 		let inputData = inputData.bytes[inputData.offset...]
 		var inputOffset = inputData.startIndex
@@ -16,28 +16,35 @@ enum RunLength {
 		outputData.reserveCapacity(Int(header.decompressedSize))
 		
 		while outputData.count < header.decompressedSize {
-			let flag = inputData[inputOffset]
+			let flag = Flag(inputData[inputOffset])
 			inputOffset += 1
 			
-			if flag >> 7 == 0 {
-				// uncompressed
-				let length = flag & 0b01111111 + 1
-				for _ in 0..<length {
-					outputData.append(inputData[inputOffset])
+			switch flag {
+				case .uncompressed(let length):
+					let inputRange = Range(start: inputOffset, count: length)
+					inputOffset += length
+					
+					outputData.append(contentsOf: inputData[inputRange])
+				case .compressed(let length):
+					let byte = inputData[inputOffset]
 					inputOffset += 1
-				}
-			} else {
-				// compressed
-				let byte = inputData[inputOffset]
-				inputOffset += 1
-				
-				let length = flag & 0b01111111 + 3
-				for _ in 0..<length {
-					outputData.append(byte)
-				}
+					
+					outputData.append(contentsOf: Array(repeating: byte, count: length))
 			}
 		}
 		
 		return Datastream(outputData)
+	}
+	
+	enum Flag {
+		case compressed(Int), uncompressed(Int)
+		
+		init(_ byte: UInt8) {
+			self = if byte >> 7 == 0 {
+				.uncompressed(Int(byte & 0b01111111 + 1))
+			} else {
+				.compressed(Int(byte & 0b01111111 + 3))
+			}
+		}
 	}
 }

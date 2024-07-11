@@ -1,8 +1,44 @@
 import ArgumentParser
 import Foundation
 
-// TODO: remove
-import BinaryParser
+var standardError = FileHandle.standardError
+
+var extractMARs: ExtractMARs = .auto
+var inputPackedStatus = InputPackedStatus.unknown
+
+enum ExtractMARs: String, ExpressibleByArgument {
+	case always, never, auto
+	
+	var shouldExtract: Bool {
+		self == .always || self == .auto
+	}
+	
+	mutating func replaceAuto(with newValue: Self) {
+		if self == .auto {
+			self = newValue
+		}
+	}
+}
+
+enum InputPackedStatus {
+	case unknown, packed, unpacked, contradictory
+	
+	var wasPacked: Bool? {
+		switch self {
+			case .packed: true
+			case .unpacked: false
+			default: nil
+		}
+	}
+	
+	mutating func set(to newValue: Self, ignoreContradiction: Bool = false) {
+		if self == .unknown {
+			self = newValue
+		} else if self != newValue && !ignoreContradiction {
+			self = .contradictory
+		}
+	}
+}
 
 @main
 struct carbonizer: ParsableCommand {
@@ -14,10 +50,10 @@ struct carbonizer: ParsableCommand {
 	@Flag(help: "Manually specify compression mode")
 	var compressionMode: CompressionMode?
 	
-	@Flag(name: .shortAndLong, help: "TODO: Fast mode")
-	var fast = false
+	@Option(name: [.short, .customLong("extract-mars")], help: "Whether to extract MAR files. Options are always, never, auto")
+	var extractMARsInput: ExtractMARs = .auto
 	
-	@Argument(help: "The files to pack/unpack.", transform: URL.fromFilePath)
+	@Argument(help: "The files to pack/unpack", transform: URL.fromFilePath)
 	var filePaths = [URL]()
 	
 	enum CompressionMode: String, EnumerableFlag {
@@ -29,44 +65,60 @@ struct carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
-//		let dmgFilePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/msg/msg_0071")
-//		let dmgBinaryFilePath = URL(filePath: "/Users/simonomi/ff1/msg_0071")
-//
-//		let data = Datastream(try Data(contentsOf: dmgFilePath))
-//
-//		let dmgBinary = try data.read(DMG.Binary.self)
-//		
-//		try dmgBinary.write(to: dmgBinaryFilePath)
-//		
-//		return
-		
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
+		
+		extractMARs = extractMARsInput
+		
+		// TODO: document this
+		let recursiveOptionFile = URL.currentDirectory().appending(component: "recursive.txt")
+		if let recursiveOverride = (try? String(contentsOf: recursiveOptionFile))
+			.flatMap(ExtractMARs.init), extractMARs == .auto {
+			extractMARs = recursiveOverride
+		}
+		
+		extractMARs = .always // TODO: debug only
+		
+		if filePaths.isEmpty {
+			print("\(.red, .bold)Error:\(.normal) \(.bold)No files were specified as input\(.normal)", terminator: "\n\n", to: &standardError)
+			print(Self.helpMessage())
+			waitForInput()
+			return
+		}
 		
 		for filePath in filePaths {
-			let start = Date.now
-			let file = try CreateFileSystemObject(contentsOf: filePath)
-			print(-start.timeIntervalSinceNow)
+			inputPackedStatus = .unknown
 			
-			let inputWasPacked = filePath.absoluteString.hasSuffix("nds")
+//			let start = Date.now
+			var file = try CreateFileSystemObject(contentsOf: filePath)
+//			print(-start.timeIntervalSinceNow)
 			
-			let writeStart = Date.now
-			try file.write(into: URL(filePath: "/Users/simonomi/ff1/output/"), packed: !inputWasPacked)
-			print(-writeStart.timeIntervalSinceNow)
+//			file = try file.postProcessed(with: mm3Finder)
+//			file = try file.postProcessed(with: mpmFinder)
+//			file = try file.postProcessed(with: mmsFinder)
+			return
+			
+//			let writeStart = Date.now
+			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
+			
+			inputPackedStatus = .packed // TODO: debug only
+			
+			if let wasPacked = inputPackedStatus.wasPacked {
+				try file.write(into: outputDirectory, packed: !wasPacked)
+			} else {
+				print("Would you like to [P]ack or [U]npack? ")
+				guard let answer = readLine()?.lowercased() else { return }
+				
+				if answer.starts(with: "p") {
+					try file.write(into: outputDirectory, packed: true)
+				} else if answer.starts(with: "u") {
+					try file.write(into: outputDirectory, packed: false)
+				} else {
+					return
+				}
+			}
+//			print(-writeStart.timeIntervalSinceNow)
 		}
 	}
 }
-
-//extension FileSystemObject {
-//	func forEachFile(_ body: (File) -> Void) {
-//		switch self {
-//			case let file as File:
-//				body(file)
-//			case let folder as Folder:
-//				folder.files.forEach { $0.forEachFile(body) }
-//			default:
-//				fatalError()
-//		}
-//	}
-//}

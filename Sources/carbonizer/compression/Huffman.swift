@@ -9,7 +9,8 @@ enum Huffman {
 		let base = inputData.offset
 		
 		let header = try inputData.read(CompressionHeader.self)
-		assert(header.type == .huffman)
+		precondition(header.type == .huffman)
+		precondition(header.decompressedSize > 0)
 		
 		let inputData = inputData.bytes[inputData.offset...]
 		
@@ -23,50 +24,46 @@ enum Huffman {
 		let rootNode = Node(from: inputData, at: 5, relativeTo: base)
 		var currentNode = rootNode
 		
-		var chunkBit = 31
-		var chunk: UInt32!
-		
 		var halfWritten: UInt8?
 		
-		while outputData.count < header.decompressedSize {
-			if chunkBit == 31 {
-				chunk = UInt32(inputData[bitstreamOffset]) |
-				UInt32(inputData[bitstreamOffset + 1]) << 8 |
-				UInt32(inputData[bitstreamOffset + 2]) << 16 |
-				UInt32(inputData[bitstreamOffset + 3]) << 24
-				bitstreamOffset += 4
-			}
+	mainloop:
+		while true {
+			let chunk = UInt32(inputData[bitstreamOffset]) |
+						UInt32(inputData[bitstreamOffset + 1]) << 8 |
+						UInt32(inputData[bitstreamOffset + 2]) << 16 |
+						UInt32(inputData[bitstreamOffset + 3]) << 24
+			bitstreamOffset += 4
 			
-			guard case .tree(let left, let right) = currentNode else {
-				fatalError("this will never occur")
-			}
-			
-			let currentBit = chunk >> chunkBit & 1
-			if currentBit == 0 {
-				currentNode = left
-			} else {
-				currentNode = right
-			}
-			
-			if case .data(let byte) = currentNode {
-				if header.dataSize == 4 {
-					if let nybble = halfWritten {
-						outputData.append(byte << 4 | nybble)
-						halfWritten = nil
-					} else {
-						halfWritten = byte
-					}
-				} else {
-					outputData.append(byte)
+			for chunkBit in (0..<32).reversed() {
+				guard case .tree(let left, let right) = currentNode else {
+					fatalError("this will never occur")
 				}
 				
-				currentNode = rootNode
-			}
-			
-			if chunkBit == 0 {
-				chunkBit = 31
-			} else {
-				chunkBit -= 1
+				let currentBit = chunk >> chunkBit & 1
+				if currentBit == 0 {
+					currentNode = left
+				} else {
+					currentNode = right
+				}
+				
+				if case .data(let byte) = currentNode {
+					if header.dataSize == 4 {
+						if let nybble = halfWritten {
+							outputData.append(byte << 4 | nybble)
+							halfWritten = nil
+						} else {
+							halfWritten = byte
+						}
+					} else {
+						outputData.append(byte)
+					}
+					
+					currentNode = rootNode
+				}
+				
+				guard outputData.count < header.decompressedSize else {
+					break mainloop
+				}
 			}
 		}
 		

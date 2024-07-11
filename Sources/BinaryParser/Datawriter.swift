@@ -3,20 +3,26 @@ import Foundation
 final public class Datawriter {
 	public typealias Byte = UInt8
 	
-	public private(set) var bytes: ArraySlice<Byte>
-	public private(set) var offset: Int
+//	public private(set) var bytes: ArraySlice<Byte>
+	public var bytes: ArraySlice<Byte> // for inlinability
 	
+//	public private(set) var offset: Int
+	public var offset: Int // for inlinability
+	
+	@inlinable
 	public init() {
 		bytes = []
 		offset = bytes.endIndex
 	}
 	
+	@inlinable
 	public init(capacity: Int) {
 		bytes = []
 		bytes.reserveCapacity(capacity)
 		offset = bytes.endIndex
 	}
 	
+	@inlinable
 	public func intoDatastream() -> Datastream {
 		Datastream(bytes)
 	}
@@ -25,16 +31,19 @@ final public class Datawriter {
 // MARK: write
 extension Datawriter {
 	/// Documentation
+	@inlinable
 	public func write<T: BinaryConvertible>(_ data: T) {
 		data.write(to: self)
 	}
 	
 	/// Documentation
+	@inlinable
 	public func write<S: Sequence<T>, T: BinaryConvertible>(_ data: S) {
 		data.forEach(write)
 	}
 	
 	/// Documentation
+	@inlinable
 	public func write<T: BinaryConvertible, U: BinaryInteger>(
 		_ data: [T], offsets: [U], relativeTo baseOffset: Offset
 	) {
@@ -50,6 +59,7 @@ extension Datawriter {
 // MARK: primitives
 extension Datawriter {
 	/// Documentation
+	@inlinable
 	public func write(_ byte: Byte) {
 		if offset == bytes.endIndex {
 			bytes.insert(byte, at: offset)
@@ -62,8 +72,9 @@ extension Datawriter {
 	}
 	
 	/// Documentation
-	public func write<T: BinaryInteger>(_ data: T) {
-		let byteWidth = data.bitWidth / 8
+	@inlinable
+	public func write<T: FixedWidthInteger>(_ data: T) {
+		let byteWidth = T.bitWidth / 8
 		
 		let newBytes = (0..<byteWidth)
 			.map { (data >> ($0 * 8)) & 0xFF }
@@ -80,11 +91,13 @@ extension Datawriter {
 	}
 	
 	/// Documentation
-	public func write<S: Sequence<T>, T: BinaryInteger>(_ data: S) {
+	@inlinable
+	public func write<S: Sequence<T>, T: FixedWidthInteger>(_ data: S) {
 		data.forEach(write)
 	}
 	
 	/// Documentation
+	@inlinable
 	public func write(_ string: String) {
 		let data = string.utf8CString.map(Byte.init)
 		if offset == bytes.endIndex {
@@ -98,6 +111,7 @@ extension Datawriter {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func write<T: BinaryInteger>(_ string: String, length: T) {
 		let length = Int(length)
 		
@@ -118,6 +132,7 @@ extension Datawriter {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func write(_ data: Datastream) {
 		if offset == bytes.endIndex {
 			bytes.insert(contentsOf: data.bytes[data.offset...], at: offset)
@@ -130,6 +145,7 @@ extension Datawriter {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func write<T: BinaryInteger>(
 		_ data: Datastream, length: T
 	) {
@@ -148,6 +164,7 @@ extension Datawriter {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func write<T: BinaryInteger>(
 		_ data: [Datastream], offsets: [T], relativeTo baseOffset: Offset
 	) {
@@ -163,27 +180,35 @@ extension Datawriter {
 // MARK: offset
 extension Datawriter {
 	public struct Offset {
+		@usableFromInline
 		var offest: Int
 		
+		@inlinable
 		init(_ offest: Int) {
 			self.offest = offest
 		}
 		
+		@inlinable
 		public static func + <T: BinaryInteger>(lhs: Offset, rhs: T) -> Offset {
 			Offset(lhs.offest + Int(rhs))
 		}
 	}
 	
 	/// Documentation
+	@inlinable
 	public func placeMarker() -> Offset {
 		Offset(offset)
 	}
 }
 
-fileprivate let fillerByte: UInt8 = 0
+@usableFromInline
+//fileprivate let fillerByte: UInt8 = 0
+internal let fillerByte: UInt8 = 0
+
 // MARK: jump
 extension Datawriter {
 	/// Documentation
+	@inlinable
 	public func jump<T: BinaryInteger>(bytes: T) {
 		offset += Int(bytes)
 		
@@ -193,6 +218,7 @@ extension Datawriter {
 	}
 	
 	/// Documentation
+	@inlinable
 	public func jump(to offset: Offset) {
 		self.offset = offset.offest
 		

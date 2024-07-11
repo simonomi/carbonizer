@@ -1,8 +1,10 @@
 extension String {
+	@usableFromInline
 	enum Direction {
 		case leading, trailing
 	}
 	
+	@inlinable
 	func padded(
 		toLength targetLength: Int,
 		with character: Character,

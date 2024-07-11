@@ -117,7 +117,7 @@ func applyOperator(_ operatorArgument: LabeledExprSyntax, to valueOrProperty: Va
 			default: fatalError("unexpected operator")
 		}
 	
-	return .property(property + operatorSymbol + modifyingValue)
+	return .property("Int(" + property + ")" + operatorSymbol + modifyingValue)
 }
 
 func parseOffsets(_ arguments: LabeledExprListSyntax) throws -> Property.Size.Offsets {

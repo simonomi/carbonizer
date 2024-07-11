@@ -1,9 +1,9 @@
 import BinaryParser
 
 struct MM3: Writeable {
-	var entry1: TableEntry
-	var entry2: TableEntry
-	var entry3: TableEntry
+	var model: TableEntry
+	var animation: TableEntry
+	var texture: TableEntry
 	
 	struct TableEntry {
 		var index: UInt32
@@ -13,18 +13,18 @@ struct MM3: Writeable {
 	@BinaryConvertible
 	struct Binary: Writeable {
 		var magicBytes = "MM3"
-		var index1: UInt32
-		var tableFileName1Offset: UInt32
-		var index2: UInt32
-		var tableFileName2Offset: UInt32
-		var index3: UInt32
-		var tableFileName3Offset: UInt32
-		@Offset(givenBy: \Self.tableFileName1Offset)
-		var tableFileName1: String
-		@Offset(givenBy: \Self.tableFileName2Offset)
-		var tableFileName2: String
-		@Offset(givenBy: \Self.tableFileName3Offset)
-		var tableFileName3: String
+		var modelIndex: UInt32
+		var modelTableNameOffset: UInt32
+		var animationIndex: UInt32
+		var animationTableNameOffset: UInt32
+		var textureIndex: UInt32
+		var textureTableNameOffset: UInt32
+		@Offset(givenBy: \Self.modelTableNameOffset)
+		var modelTableName: String
+		@Offset(givenBy: \Self.animationTableNameOffset)
+		var animationTableName: String
+		@Offset(givenBy: \Self.textureTableNameOffset)
+		var textureTableName: String
 	}
 }
 
@@ -34,34 +34,34 @@ extension MM3: FileData {
 	static var unpackedFileExtension = "mm3.json"
 	
 	init(packed: Binary) {
-		entry1 = TableEntry(index: packed.index1, tableName: packed.tableFileName1)
-		entry2 = TableEntry(index: packed.index2, tableName: packed.tableFileName2)
-		entry3 = TableEntry(index: packed.index3, tableName: packed.tableFileName3)
+		model = TableEntry(index: packed.modelIndex, tableName: packed.modelTableName)
+		animation = TableEntry(index: packed.animationIndex, tableName: packed.animationTableName)
+		texture = TableEntry(index: packed.textureIndex, tableName: packed.textureTableName)
 	}
 }
 
 extension MM3.Binary: InitFrom {
 	init(_ mm3: MM3) {
-		index1 = mm3.entry1.index
-		index2 = mm3.entry2.index
-		index3 = mm3.entry3.index
+		modelIndex = mm3.model.index
+		animationIndex = mm3.animation.index
+		textureIndex = mm3.texture.index
 		
-		tableFileName1 = mm3.entry1.tableName
-		tableFileName2 = mm3.entry2.tableName
-		tableFileName3 = mm3.entry3.tableName
+		modelTableName = mm3.model.tableName
+		animationTableName = mm3.animation.tableName
+		textureTableName = mm3.texture.tableName
 		
-		tableFileName1Offset = 0x1C
-		tableFileName2Offset = tableFileName1Offset + UInt32(tableFileName2.utf8CString.count)
-		tableFileName3Offset = tableFileName2Offset + UInt32(tableFileName3.utf8CString.count)
+		modelTableNameOffset = 0x1C
+		animationTableNameOffset = modelTableNameOffset + UInt32(animationTableName.utf8CString.count)
+		textureTableNameOffset = animationTableNameOffset + UInt32(textureTableName.utf8CString.count)
 	}
 }
 
 // MARK: unpacked
 extension MM3: Codable {
 	enum CodingKeys: String, CodingKey {
-		case entry1 = "entry 1"
-		case entry2 = "entry 2"
-		case entry3 = "entry 3"
+		case model = "model"
+		case animation = "animation"
+		case texture = "texture"
 	}
 }
 
