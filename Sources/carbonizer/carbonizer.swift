@@ -74,7 +74,11 @@ struct carbonizer: ParsableCommand {
 		extractMARs = extractMARsInput
 		
 		// TODO: document this
+#if os(Windows)
+		let extractMARsOptionFile = URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("extract mars.txt")
+#else
 		let extractMARsOptionFile = URL.currentDirectory().appending(component: "extract mars.txt")
+#endif
 		if let extractMARsOverride = (try? String(contentsOf: extractMARsOptionFile))
 			.flatMap(ExtractMARs.init), extractMARs == .auto {
 			extractMARs = extractMARsOverride

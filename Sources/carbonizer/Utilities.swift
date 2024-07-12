@@ -1,8 +1,16 @@
 import Foundation
 
+#if os(Windows)
+import WinSDK
+#endif
+
 extension URL {
 	static func fromFilePath(_ filePath: String) -> URL {
+#if os(Windows)
+		URL(fileURLWithPath: filePath)
+#else
 		URL(filePath: filePath)
+#endif
 	}
 }
 
@@ -94,8 +102,21 @@ extension URL {
 	}
 	
 	func setCreationDate(to date: Date) throws {
-		// TODO: wont work on windows
+#if os(Windows)
+		// try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: path)
+		let pathLength = path.count + 1
+		let windowsFilePath = path.withCString(encodedAs: UTF16.self) {
+			let buffer = UnsafeMutablePointer<UInt16>.allocate(capacity: pathLength)
+			buffer.initialize(from: $0, count: pathLength)
+			return UnsafePointer(buffer)
+		}
+		let hFile = CreateFileW(windowsFilePath, DWORD(GENERIC_WRITE), DWORD(FILE_SHARE_WRITE), nil, DWORD(OPEN_EXISTING), 0, nil)
+		defer { CloseHandle(hFile) }
+		var creationTime = FILETIME(from: time_t(date.timeIntervalSince1970))
+		SetFileTime(hFile, &creationTime, nil, nil)
+#else
 		try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: path(percentEncoded: false))
+#endif
 	}
 	
 	func contents() throws -> [URL] {
@@ -107,7 +128,11 @@ extension URL {
 	}
 	
 	func type() throws -> FileType {
+#if os(Windows)
+		let type = try FileManager.default.attributesOfItem(atPath: self.path)[.type] as? FileAttributeType
+#else
 		let type = try FileManager.default.attributesOfItem(atPath: self.path(percentEncoded: false))[.type] as? FileAttributeType
+#endif
 		return switch type {
 			case .some(.typeRegular): .file
 			case .some(.typeDirectory): .folder

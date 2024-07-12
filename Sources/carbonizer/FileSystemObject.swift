@@ -62,7 +62,11 @@ struct Folder: FileSystemObject {
 	}
 	
 	func write(into directory: URL, packed: Bool) throws {
+#if os(Windows)
+		let path = directory.appendingPathComponent(name)
+#else
 		let path = directory.appending(component: name)
+#endif
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
 		try files.forEach { try $0.write(into: path, packed: packed) }
 	}
