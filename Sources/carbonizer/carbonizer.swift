@@ -65,17 +65,19 @@ struct carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
+		// TODO: debug only
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters changed"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
 		
 		extractMARs = extractMARsInput
 		
 		// TODO: document this
-		let recursiveOptionFile = URL.currentDirectory().appending(component: "recursive.txt")
-		if let recursiveOverride = (try? String(contentsOf: recursiveOptionFile))
+		let extractMARsOptionFile = URL.currentDirectory().appending(component: "extract mars.txt")
+		if let extractMARsOverride = (try? String(contentsOf: extractMARsOptionFile))
 			.flatMap(ExtractMARs.init), extractMARs == .auto {
-			extractMARs = recursiveOverride
+			extractMARs = extractMARsOverride
 		}
 		
 		extractMARs = .always // TODO: debug only
@@ -97,12 +99,13 @@ struct carbonizer: ParsableCommand {
 //			file = try file.postProcessed(with: mm3Finder)
 //			file = try file.postProcessed(with: mpmFinder)
 //			file = try file.postProcessed(with: mmsFinder)
-			return
+//			return
 			
 //			let writeStart = Date.now
-			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
+			let outputDirectory = filePath.deletingLastPathComponent()
+//			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
 			
-			inputPackedStatus = .packed // TODO: debug only
+//			inputPackedStatus = .packed // TODO: debug only
 			
 			if let wasPacked = inputPackedStatus.wasPacked {
 				try file.write(into: outputDirectory, packed: !wasPacked)

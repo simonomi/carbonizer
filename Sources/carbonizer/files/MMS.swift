@@ -2,10 +2,9 @@ import BinaryParser
 
 struct MMS: Writeable {
 	var unknown1: UInt32
-	var unknown2: UInt32
 	var colorPaletteType: SpritePalette.ColorPaletteType
-	var unknown4: UInt32
-	var unknown5: UInt32
+	
+	var unknowns: [UInt64]
 	
 	var animation: TableEntry
 	var colorPalette: TableEntry
@@ -21,13 +20,15 @@ struct MMS: Writeable {
 		var magicBytes = "MMS"
 		var unknown1: UInt32 // 0, 1, 2, 3, 4, 7, 8, 12, 15, 21, 31, 63, 84, 127, 131, 255, 296, 8064
 		var unknown2: UInt32 = 0
+		
 		var colorPaletteType: SpritePalette.ColorPaletteType
 		@Padding(bytes: 3)
-		var unknown4: UInt32 // 0...12, 14...16
-		var unknown5: UInt32 = 60 // header size??
+		
+		var unknownsCount: UInt32 // 0...12, 14...16
+		var unknownsOffset: UInt32 = 60
 		
 		var animationIndexCount: UInt32
-		var animationIndexOffset: UInt32 // NOT always 60
+		var animationIndexOffset: UInt32
 		var animationNameOffset: UInt32
 		
 		var colorPaletteIndexCount: UInt32
@@ -37,6 +38,10 @@ struct MMS: Writeable {
 		var bitmapIndexCount: UInt32
 		var bitmapIndexOffset: UInt32
 		var bitmapNameOffset: UInt32
+		
+		@Count(givenBy: \Self.unknownsCount, .times(2))
+		@Offset(givenBy: \Self.unknownsOffset)
+		var unknowns: [UInt64]
 		
 		@Count(givenBy: \Self.animationIndexCount)
 		@Offset(givenBy: \Self.animationIndexOffset)
@@ -65,10 +70,10 @@ extension MMS: FileData {
 	
 	init(packed: Binary) {
 		unknown1 = packed.unknown1
-		unknown2 = packed.unknown2
+		
 		colorPaletteType = packed.colorPaletteType
-		unknown4 = packed.unknown4
-		unknown5 = packed.unknown5
+		
+		unknowns = packed.unknowns
 		
 		animation = TableEntry(
 			indices: packed.animationIndices,
@@ -86,8 +91,34 @@ extension MMS: FileData {
 }
 
 extension MMS.Binary: InitFrom {
-	init(_ mpm: MMS) {
-		fatalError("TODO")
+	init(_ mms: MMS) {
+		unknown1 = mms.unknown1
+		
+		colorPaletteType = mms.colorPaletteType
+		
+		unknowns = mms.unknowns
+		unknownsCount = UInt32(unknowns.count)
+		
+		animationIndices = mms.animation.indices
+		colorPaletteIndices = mms.colorPalette.indices
+		bitmapIndices = mms.bitmap.indices
+		
+		animationIndexCount = UInt32(animationIndices.count)
+		colorPaletteIndexCount = UInt32(colorPaletteIndices.count)
+		bitmapIndexCount = UInt32(bitmapIndices.count)
+		
+		animationName = mms.animation.tableName
+		colorPaletteName = mms.colorPalette.tableName
+		bitmapName = mms.bitmap.tableName
+		
+		animationIndexOffset = unknownsOffset + unknownsCount * 16
+		animationNameOffset = animationIndexOffset + animationIndexCount * 4
+		
+		colorPaletteIndexOffset = animationNameOffset + UInt32(animationName.utf8CString.count)
+		colorPaletteNameOffset = colorPaletteIndexOffset + colorPaletteIndexCount * 4
+		
+		bitmapIndexOffset = colorPaletteNameOffset + UInt32(colorPaletteName.utf8CString.count)
+		bitmapNameOffset = bitmapIndexOffset + bitmapIndexCount * 4
 	}
 }
 
