@@ -6,3 +6,4 @@ xcuserdata/
 DerivedData/
 .netrc
 .swiftpm/
+Package.resolved
