@@ -23,7 +23,23 @@ See [this wiki](https://github.com/simonomi/FF1_Binary_Formats/wiki) for specifi
 Simply drag the file or folder you want to pack/unpack onto the executable.
 
 #### Commandline
-`carbonizer <file> [more files]`
+```
+OVERVIEW: A Fossil Fighters ROM-hacking tool.
+
+By default, carbonizer automatically determines whether to pack or unpack each input. It does this by looking at file
+extensions, magic bytes, and metadata
+
+USAGE: carbonizer [--pack] [--unpack] [--extract-mars <extract-mars>] [<file-paths> ...]
+
+ARGUMENTS:
+  <file-paths>            The files to pack/unpack
+
+OPTIONS:
+  -p, --pack/-u, --unpack Manually specify compression mode
+  -e, --extract-mars <extract-mars>
+                          Whether to extract MAR files. Options are always, never, auto (default: auto)
+  -h, --help              Show help information.
+```
 
 ### Usage notes
 The easiest way to use carbonizer is to unpack an entire `.nds` file into a folder in the same directory,
