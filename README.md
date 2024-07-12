@@ -22,6 +22,8 @@ See [this wiki](https://github.com/simonomi/FF1_Binary_Formats/wiki) for specifi
 #### Drag-and-drop (Windows only)
 Simply drag the file or folder you want to pack/unpack onto the executable.
 
+Then, edit the files within using a text editor (I recommend [Notepad++](https://notepad-plus-plus.org))
+
 #### Commandline
 ```
 OVERVIEW: A Fossil Fighters ROM-hacking tool.
