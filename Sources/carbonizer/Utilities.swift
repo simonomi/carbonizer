@@ -33,6 +33,13 @@ func hex(_ value: some BinaryInteger) -> String {
 	String(value, radix: 16)
 }
 
+extension Array {
+	subscript(x x: Index, y y: Index, width width: Index) -> Element {
+		get { self[x + y * width] }
+		set { self[x + y * width] = newValue }
+	}
+}
+
 extension BinaryInteger {
 	func roundedUpToTheNearest(_ value: Self) -> Self {
 		if isMultiple(of: value) {
@@ -174,6 +181,22 @@ enum ANSIFontEffect: Int {
 	case magentaBackground = 45
 	case cyanBackground = 46
 	case whiteBackground = 47
+	case brightBlack = 90
+	case brightRed = 91
+	case brightGreen = 92
+	case brightYellow = 93
+	case brightBlue = 94
+	case brightMagenta = 95
+	case brightCyan = 96
+	case brightWhite = 97
+	case brightBlackBackground = 100
+	case brightRedBackground = 101
+	case brightGreenBackground = 102
+	case brightYellowBackground = 103
+	case brightBlueBackground = 104
+	case brightMagentaBackground = 105
+	case brightCyanBackground = 106
+	case brightWhiteBackground = 107
 }
 
 extension DefaultStringInterpolation {

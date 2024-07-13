@@ -13,8 +13,6 @@ struct RLS: Writeable {
 		
 		var unknown2: UInt8
 		var unknown3: UInt8
-		var unknown4: UInt8
-		var unknown5: UInt8
 		
 		var fossilImage: UInt32
 		var rockImage: UInt32
@@ -26,7 +24,6 @@ struct RLS: Writeable {
 		var unknown6: UInt32
 		var unknown7: UInt32
 		var fossilName: UInt32
-		var unknown8: UInt32
 		
 		var time: UInt32
 		var passingScore: UInt32
@@ -117,8 +114,6 @@ extension RLS.Kaseki {
 		
 		unknown2 = kaseki.unknown2
 		unknown3 = kaseki.unknown3
-		unknown4 = kaseki.unknown4
-		unknown5 = kaseki.unknown5
 		
 		fossilImage = kaseki.fossilImage
 		rockImage = kaseki.rockImage
@@ -130,7 +125,6 @@ extension RLS.Kaseki {
 		unknown6 = kaseki.unknown6
 		unknown7 = kaseki.unknown7
 		fossilName = kaseki.fossilName
-		unknown8 = kaseki.unknown8
 		
 		time = kaseki.time
 		passingScore = kaseki.passingScore
@@ -179,38 +173,35 @@ extension RLS: Codable {
 
 extension RLS.Kaseki: Codable {
 	enum CodingKeys: String, CodingKey {
-		case _label = "_label"
+		case _label =         "_label"
 		
-		case isEntry =     "is entry"
-		case unknown1 =    "unknown 1"
-		case unbreakable = "unbreakable"
-		case destroyable = "destroyable"
+		case isEntry =        "is entry"
+		case unknown1 =       "unknown 1"
+		case unbreakable =    "unbreakable"
+		case destroyable =    "destroyable"
 		
-		case unknown2 = "unknown 2"
-		case unknown3 = "unknown 3"
-		case unknown4 = "unknown 4"
-		case unknown5 = "unknown 5"
+		case unknown2 =       "unknown 2"
+		case unknown3 =       "unknown 3"
 		
-		case fossilImage =  "fossil image"
-		case rockImage =    "rock image"
-		case fossilConfig = "fossil config"
-		case rockConfig =   "rock config"
-		case buyPrice =     "buy price"
-		case sellPrice =    "sell price"
+		case fossilImage =    "fossil image"
+		case rockImage =      "rock image"
+		case fossilConfig =   "fossil config"
+		case rockConfig =     "rock config"
+		case buyPrice =       "buy price"
+		case sellPrice =      "sell price"
 		
-		case unknown6 =   "unknown 6"
-		case unknown7 =   "unknown 7"
-		case fossilName = "fossil name"
-		case unknown8 =   "unknown 8"
+		case unknown6 =       "unknown 6"
+		case unknown7 =       "unknown 7"
+		case fossilName =     "fossil name"
 		
-		case time =         "time"
-		case passingScore = "passing score"
+		case time =           "time"
+		case passingScore =   "passing score"
 		
-		case unknown9 =  "unknown 9"
+		case unknown9 =       "unknown 9"
 		
 		case unknownsCount =  "unknowns count"
-		case unknownsOffset =  "unknowns offset"
-		case unknowns =  "unknowns"
+		case unknownsOffset = "unknowns offset"
+		case unknowns =       "unknowns"
 	}
 }
 

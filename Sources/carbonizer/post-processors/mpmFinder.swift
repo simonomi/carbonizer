@@ -10,7 +10,8 @@ func mpmFinder(_ file: consuming File, _ parent: Folder) throws -> [any FileSyst
 	
 	for mpm in mar.files.compactMap({ $0.content as? MPM }) {
 //		guard mpm.entry3 == nil else { continue }
-//		print(file.name)
+		print(file.name)
+		print(mpm.entry3 == nil)
 		
 		let colorPaletteArchive = parent.files.first { $0.name == mpm.entry1.tableName } as! File
 		let colorPaletteMAR = colorPaletteArchive.data as! MAR
@@ -19,7 +20,7 @@ func mpmFinder(_ file: consuming File, _ parent: Folder) throws -> [any FileSyst
 		colorPaletteData.offset = 0 // multiple files use the same palette
 		let palette = try Palette(colorPaletteData)
 		
-//		print(palette.colors.count)
+		print(palette.colors.count)
 		
 //		print(mpm.unknown1, mpm.unknown2, mpm.unknown3)
 		
@@ -35,9 +36,16 @@ func mpmFinder(_ file: consuming File, _ parent: Folder) throws -> [any FileSyst
 		let bitmapFile = Bitmap(
 			width: Int32(mpm.width),
 			height: Int32(mpm.height),
-			contents: bitmapData.bytes.map {
+			contents: bitmapData.bytes.flatMap {
 				// color 0 is transparent, which is indicated by nil
-				$0 == 0 ? nil : palette.colors[Int($0)]
+				if palette.colors.count == 16 {
+					[
+						($0 >> 4) == 0 ? nil : palette.colors[Int($0 >> 4)],
+						($0 & 0b1111) == 0 ? nil : palette.colors[Int($0 & 0b1111)]
+					]
+				} else {
+					[$0 == 0 ? nil : palette.colors[Int($0)]]
+				}
 			}
 		)
 		

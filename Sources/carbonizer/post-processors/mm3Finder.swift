@@ -27,13 +27,13 @@ func mm3Finder(_ file: inout File, _ parent: inout Folder) throws {
 			let modelData = ((arc.data as! MAR).files[Int(mm3.model.index)].content as! Datastream).bytes
 			let model = Datastream(modelData)
 			
-			let modelStart = model.placeMarker()
+			let _modelStart = model.placeMarker()
 			
 			model.jump(bytes: 0x08)
 			
-			let commandsLength = try! model.read(UInt32.self)
-			let boneTableLength = try! model.read(UInt32.self)
-			let modelNamesLength = try! model.read(UInt32.self)
+			let _commandsLength = try! model.read(UInt32.self)
+			let _boneTableLength = try! model.read(UInt32.self)
+			let _modelNamesLength = try! model.read(UInt32.self)
 			
 			let fourteen = try! model.read(UInt32.self)
 			guard fourteen == 3 else { continue }
@@ -47,7 +47,7 @@ func mm3Finder(_ file: inout File, _ parent: inout Folder) throws {
 			let twenty = try! model.read(UInt32.self)
 			guard twenty == 0x3C else { continue }
 			
-			let twentyFour = try! model.read(UInt32.self)
+			let _twentyFour = try! model.read(UInt32.self)
 			
 //			guard file.name.starts(with: "cha01") else { continue }
 			print(file.name, mm3.model.index)

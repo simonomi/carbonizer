@@ -38,6 +38,59 @@ extension SpriteBitmap {
 		}
 	}
 	
+	// NOTE: this uses position as the anchor of the top left, not bottom left
+	func write(
+		to bitmap: inout Bitmap,
+		with palette: SpritePalette,
+		at position: Point<Int16>
+	) {
+		let contents =
+			switch colorPaletteType {
+				case .sixteenColors:
+					colorsIndexes16!.flatMap {[
+						// color 0 is transparent, which is indicated by nil
+						$0 & 0b1111 == 0 ? nil : palette.colors[Int($0 & 0b1111)],
+						$0 >> 4 == 0 ? nil : palette.colors[Int($0 >> 4)]
+					]}
+				case .twoFiftySixColors:
+					colorsIndexes256!.map {
+						// color 0 is transparent, which is indicated by nil
+						$0 == 0 ? nil : palette.colors[Int($0)]
+					}
+			}
+		
+		let xOffset = Int(position.x)
+		let yOffset = Int(position.y)
+		
+		let gridSize = 8
+		
+		var bitmapIndex = 0
+		var gridX = 0
+		var gridY = 0
+		
+		while bitmapIndex < contents.count {
+			for y in 0..<gridSize {
+				for x in 0..<gridSize {
+					if contents[bitmapIndex] != nil {
+						bitmap.contents[
+							x: x + gridX * gridSize + xOffset,
+							y: y + gridY * gridSize + yOffset,
+							width: Int(bitmap.width)
+						] = contents[bitmapIndex]
+					}
+					bitmapIndex += 1
+				}
+			}
+			
+			gridX += 1
+			
+			if (gridX >= Int(width) / gridSize) {
+				gridX = 0
+				gridY += 1
+			}
+		}
+	}
+	
 	func toBitmap(with palette: SpritePalette) -> Bitmap {
 		let contents =
 			switch colorPaletteType {
@@ -65,7 +118,11 @@ extension SpriteBitmap {
 		while bitmapIndex < contents.count {
 			for y in 0..<gridSize {
 				for x in 0..<gridSize {
-					gridContents[x + gridX * gridSize + (y + gridY * gridSize) * Int(width)] = contents[bitmapIndex]
+					gridContents[
+						x: x + gridX * gridSize,
+						y: y + gridY * gridSize,
+						width: Int(width)
+					] = contents[bitmapIndex]
 					bitmapIndex += 1
 				}
 			}
@@ -77,7 +134,6 @@ extension SpriteBitmap {
 				gridY += 1
 			}
 		}
-		
 		
 		return Bitmap(width: width, height: height, contents: gridContents)
 	}

@@ -66,9 +66,9 @@ struct carbonizer: ParsableCommand {
 	
 	mutating func run() throws {
 		// TODO: debug only
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters changed"))
+		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/motion/ui_option/"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
 		
 		extractMARs = extractMARsInput
@@ -101,15 +101,15 @@ struct carbonizer: ParsableCommand {
 //			print(-start.timeIntervalSinceNow)
 			
 //			file = try file.postProcessed(with: mm3Finder)
-//			file = try file.postProcessed(with: mpmFinder)
-//			file = try file.postProcessed(with: mmsFinder)
+//			file = try file.postProcessed(with: mpmFinder) // doesnt work for much
+			file = try file.postProcessed(with: mmsFinder)
 //			return
 			
 //			let writeStart = Date.now
-			let outputDirectory = filePath.deletingLastPathComponent()
-//			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
+//			let outputDirectory = filePath.deletingLastPathComponent()
+			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
 			
-//			inputPackedStatus = .packed // TODO: debug only
+			inputPackedStatus = .packed // TODO: debug only
 			
 			if let wasPacked = inputPackedStatus.wasPacked {
 				try file.write(into: outputDirectory, packed: !wasPacked)

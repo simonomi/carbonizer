@@ -4,7 +4,7 @@ struct MMS: Writeable {
 	var unknown1: UInt32
 	var colorPaletteType: SpritePalette.ColorPaletteType
 	
-	var unknowns: [UInt64]
+	var unknowns: [UInt32]
 	
 	var animation: TableEntry
 	var colorPalette: TableEntry
@@ -39,9 +39,9 @@ struct MMS: Writeable {
 		var bitmapIndexOffset: UInt32
 		var bitmapNameOffset: UInt32
 		
-		@Count(givenBy: \Self.unknownsCount, .times(2))
+		@Count(givenBy: \Self.unknownsCount, .times(4))
 		@Offset(givenBy: \Self.unknownsOffset)
-		var unknowns: [UInt64]
+		var unknowns: [UInt32]
 		
 		@Count(givenBy: \Self.animationIndexCount)
 		@Offset(givenBy: \Self.animationIndexOffset)
@@ -74,6 +74,22 @@ extension MMS: FileData {
 		colorPaletteType = packed.colorPaletteType
 		
 		unknowns = packed.unknowns
+		
+		// unknowns notes:
+		// - always a power of 2 (0 1 2 4 8 16 32 64)
+		// - either the first two, last two, or all 4 bytes are 0
+		// - the first of the two non-zero bytes is always 1
+		
+//		for index in stride(from: 0, to: unknowns.count, by: 4) {
+//			let one = unknowns[index]
+//			let two = unknowns[index + 1]
+//			let three = unknowns[index + 2]
+//			let four = unknowns[index + 3]
+//			
+//			print(two, four)
+//		}
+		
+//		print(unknowns.map(hex)/*.map { $0.padded(toLength: 2, with: "0") }*/.joined(separator: " "))
 		
 		animation = TableEntry(
 			indices: packed.animationIndices,

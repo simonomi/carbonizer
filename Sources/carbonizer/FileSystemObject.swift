@@ -271,9 +271,9 @@ func createFileData(name: String, extension fileExtension: String, data: Data) t
 			case RLS.unpackedFileExtension:
 				inputPackedStatus.set(to: .unpacked)
 				return (try RLS(unpacked: data), "")
-//			case MMS.unpackedFileExtension, "bin.mms.json": // TODO: broken bad workaround
-//				inputPackedStatus.set(to: .unpacked)
-//				return (try MMS(unpacked: data), "")
+			case MMS.unpackedFileExtension, "bin.mms.json": // TODO: broken bad workaround
+				inputPackedStatus.set(to: .unpacked)
+				return (try MMS(unpacked: data), "")
 //			case MFS.unpackedFileExtension:
 //				inputPackedStatus.set(to: .unpacked)
 //				return (try MFS(unpacked: data), "")
@@ -339,9 +339,9 @@ func createFileData(name: String, extension fileExtension: String, data: Datastr
 					case "RLS":
 						inputPackedStatus.set(to: .packed)
 						return (try RLS(packed: data), fileExtension)
-//					case "MMS":
-//						inputPackedStatus.set(to: .packed)
-//						return (try MMS(packed: data), fileExtension)
+					case "MMS":
+						inputPackedStatus.set(to: .packed)
+						return (try MMS(packed: data), fileExtension)
 //					case "MFS":
 //						print(name, terminator: "\t")
 //						inputPackedStatus.set(to: .packed)

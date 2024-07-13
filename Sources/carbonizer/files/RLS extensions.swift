@@ -12,8 +12,6 @@ extension RLS.Binary.Kaseki {
 		
 		unknown2 = kaseki.unknown2
 		unknown3 = kaseki.unknown3
-		unknown4 = kaseki.unknown4
-		unknown5 = kaseki.unknown5
 		
 		fossilImage = kaseki.fossilImage
 		rockImage = kaseki.rockImage
@@ -25,7 +23,6 @@ extension RLS.Binary.Kaseki {
 		unknown6 = kaseki.unknown6
 		unknown7 = kaseki.unknown7
 		fossilName = kaseki.fossilName
-		unknown8 = kaseki.unknown8
 		
 		time = kaseki.time
 		passingScore = kaseki.passingScore

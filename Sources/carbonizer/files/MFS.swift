@@ -49,7 +49,7 @@ struct MFS: Writeable {
 				var length: UInt8
 				@Count(givenBy: \Self.length)
 				var letterData: [UInt8] // if no palette, bitmask one byte per row
-								  // if palette, 4 bits per color
+										// if palette, 4 bits per color
 			}
 		}
 	}
