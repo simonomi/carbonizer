@@ -88,7 +88,7 @@ struct DEX {
 	}
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
+	struct Binary {
 		var magicBytes = "DEX"
 		var numberOfScenes: UInt32
 		var sceneOffsetsStart: UInt32 = 0xC
@@ -123,11 +123,10 @@ struct DEX {
 
 // MARK: packed
 extension DEX: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "dex.txt"
+	static let fileExtension = "dex.txt"
 	
-	init(packed: Binary) {
-		commands = packed.script
+	init(_ binary: Binary) {
+		commands = binary.script
 			.map(\.commands)
 			.recursiveMap(Command.init)
 	}
@@ -285,7 +284,9 @@ extension DEX.Command.Movement {
 	}
 }
 
-extension DEX.Binary: InitFrom {
+extension DEX.Binary: FileData {
+    static let fileExtension = ""
+    
 	init(_ dex: DEX) {
 		numberOfScenes = UInt32(dex.commands.count)
 		
@@ -299,35 +300,56 @@ extension DEX.Binary: InitFrom {
 }
 
 // MARK: unpacked
-extension DEX {
+extension DEX: BinaryConvertible {
 	enum DEXError: Error {
 		case invalidUTF8
 	}
 	
-	init(unpacked bytes: Data) throws {
-		guard let string = String(bytes: bytes, encoding: .utf8) else {
-			throw DEXError.invalidUTF8
-		}
-		try self.init(unpacked: string)
-	}
-	
-	init(unpacked: String) throws {
-		commands = try unpacked
-			.split(separator: "\n\n")
-			.map {
-				try $0.split(separator: "\n")
-					.map(DEX.Command.init)
-			}
-	}
-	
-	func toUnpacked() throws -> String {
-		try commands
-			.map {
-				try $0.map(String.init)
-					.joined(separator: "\n")
-			}
-			.joined(separator: "\n\n")
-	}
+    
+    init(_ data: Datastream) throws {
+        let string = try data.read(String.self) // TODO: null termination?
+        
+        commands = try string
+            .split(separator: "\n\n")
+            .map {
+                try $0.split(separator: "\n")
+                    .map(DEX.Command.init)
+            }
+    }
+    
+    func write(to data: Datawriter) {
+        let string = commands
+            .recursiveMap(String.init)
+            .map { $0.joined(separator: "\n") }
+            .joined(separator: "\n\n")
+        
+        data.write(string) // TODO: null termination?
+    }
+    
+//	init(unpacked bytes: Data) throws {
+//		guard let string = String(bytes: bytes, encoding: .utf8) else {
+//			throw DEXError.invalidUTF8
+//		}
+//		try self.init(unpacked: string)
+//	}
+//	
+//	init(unpacked: String) throws {
+//		commands = try unpacked
+//			.split(separator: "\n\n")
+//			.map {
+//				try $0.split(separator: "\n")
+//					.map(DEX.Command.init)
+//			}
+//	}
+//	
+//	func toUnpacked() throws -> String {
+//		try commands
+//			.map {
+//				try $0.map(String.init)
+//					.joined(separator: "\n")
+//			}
+//			.joined(separator: "\n\n")
+//	}
 }
 
 extension DEX.Command {
@@ -731,7 +753,7 @@ extension DEX.Command {
 }
 
 extension String {
-	init(_ command: DEX.Command) throws {
+	init(_ command: DEX.Command) {
 		self = switch command {
 			case .dialogue(let dialogue):
 				"dialogue \(dialogue)"

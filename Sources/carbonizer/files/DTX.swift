@@ -1,10 +1,10 @@
 import BinaryParser
 
-struct DTX: Writeable {
+struct DTX {
 	var strings: [String]
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
+	struct Binary {
 		var magicBytes = "DTX"
 		var stringCount: UInt32
 		var indexesOffset: UInt32 = 0xC
@@ -18,15 +18,16 @@ struct DTX: Writeable {
 
 // MARK: packed
 extension DTX: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "dtx.json"
+	static let fileExtension = "dtx.json"
 	
-	init(packed: Binary) {
-		strings = packed.strings
+	init(_ binary: Binary) {
+		strings = binary.strings
 	}
 }
 
-extension DTX.Binary: InitFrom {
+extension DTX.Binary: FileData {
+    static let fileExtension = ""
+    
 	init(_ dtx: DTX) {
 		stringCount = UInt32(dtx.strings.count)
 

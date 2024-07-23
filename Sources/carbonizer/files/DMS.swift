@@ -1,10 +1,10 @@
 import BinaryParser
 
-struct DMS: Writeable {
+struct DMS {
 	var value: UInt32
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
+	struct Binary {
 		var magicBytes = "DMS"
 		var value: UInt32
 	}
@@ -12,18 +12,19 @@ struct DMS: Writeable {
 
 // MARK: packed
 extension DMS: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "dms.json"
-	
-	init(packed: Binary) {
-		value = packed.value
-	}
+    static let fileExtension = "dms.json"
+    
+    init(_ binary: Binary) {
+        value = binary.value
+    }
 }
 
-extension DMS.Binary: InitFrom {
-	init(_ dms: DMS) {
-		value = dms.value
-	}
+extension DMS.Binary: FileData {
+    static let fileExtension = ""
+    
+    init(_ dms: DMS) {
+        value = dms.value
+    }
 }
 
 // MARK: unpacked

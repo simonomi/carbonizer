@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct MPM: Writeable {
+struct MPM {
 	// always either 030, 404, or 508
 	// 030 means 8-bit texture with no bgmaps
 	var unknown1: UInt32
@@ -24,7 +24,7 @@ struct MPM: Writeable {
 	}
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
+	struct Binary {
 		var magicBytes = "MPM"
 		var unknown1: UInt32
 		var unknown2: UInt32
@@ -52,10 +52,9 @@ struct MPM: Writeable {
 
 // MARK: packed
 extension MPM: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "mpm.json"
+	static let fileExtension = "mpm.json"
 	
-	init(packed: Binary) {
+	init(_ packed: Binary) {
 		unknown1 = packed.unknown1
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3
@@ -75,7 +74,9 @@ extension MPM: FileData {
 	}
 }
 
-extension MPM.Binary: InitFrom {
+extension MPM.Binary: FileData {
+    static let fileExtension = ""
+    
 	init(_ mpm: MPM) {
 		unknown1 = mpm.unknown1
 		unknown2 = mpm.unknown2

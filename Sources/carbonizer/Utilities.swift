@@ -103,6 +103,13 @@ extension String {
 	}
 }
 
+// TODO: remove bc this is slow
+extension Array where Element: Comparable {
+	func isSorted() -> Bool {
+		self == self.sorted()
+	}
+}
+
 extension URL {
 	func getCreationDate() throws -> Date? {
 		try FileManager.default.attributesOfItem(atPath: path)[.creationDate] as? Date
@@ -125,6 +132,14 @@ extension URL {
 		try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: path(percentEncoded: false))
 #endif
 	}
+    
+    func exists() -> Bool {
+#if os(Windows)
+        FileManager.default.fileExists(atPath: path)
+#else
+        FileManager.default.fileExists(atPath: path(percentEncoded: false))
+#endif
+    }
 	
 	func contents() throws -> [URL] {
 		try FileManager.default.contentsOfDirectory(at: self, includingPropertiesForKeys: nil)
@@ -146,6 +161,16 @@ extension URL {
 			default: .other(type)
 		}
 	}
+    
+#if os(Windows)
+    func currentDirectory() -> URL {
+        URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+    }
+    
+    func appending(component: some StringProtocol) -> URL {
+        appendingPathComponent(String(component))
+    }
+#endif
 }
 
 extension JSONEncoder {
@@ -155,7 +180,7 @@ extension JSONEncoder {
 	}
 }
 
-extension FileHandle: TextOutputStream {
+extension FileHandle: @retroactive TextOutputStream {
 	public func write(_ string: String) {
 		write(Data(string.utf8))
 	}

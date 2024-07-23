@@ -1,6 +1,8 @@
 import BinaryParser
 import Foundation
 
+import Darwin.C // TODO: remove
+
 struct MCM {
 	var compression: (CompressionType, CompressionType)
 	var maxChunkSize: UInt32
@@ -53,18 +55,19 @@ extension MCM {
 		case whileReading(Any.Type, (CompressionType, CompressionType), any Error)
 	}
 	
-	init(packed: Binary) throws {
+	init(_ binary: Binary) throws {
 		compression = (
-			CompressionType(rawValue: packed.compressionType1) ?? .none,
-			CompressionType(rawValue: packed.compressionType2) ?? .none
+			CompressionType(rawValue: binary.compressionType1) ?? .none,
+			CompressionType(rawValue: binary.compressionType2) ?? .none
 		)
-		maxChunkSize = packed.maxChunkSize
+		maxChunkSize = binary.maxChunkSize
+		
+		print(".", terminator: "")
+		fflush(stdout)
 		
 		do {
-			(content, _) = try createFileData(
-				name: "",
-				extension: "",
-				data: packed.chunks
+			content = try createFileData(
+                binary.chunks
 					.map(compression.0.decompress)
 					.map(compression.1.decompress)
 					.joined()
@@ -85,7 +88,7 @@ extension MCM.Binary {
 		compressionType2 = 0
 		
 		let data = Datawriter()
-		mcm.content.toPacked().write(to: data)
+		mcm.content.packed().write(to: data)
 		
 		decompressedSize = UInt32(data.offset)
 		
@@ -114,17 +117,18 @@ extension MCM.Binary {
 // MARK: unpacked
 extension MCM {
 	enum NoMetadataError: Error {
-		case noMetadata(File)
+//        case noMetadata(File)
 	}
 	
-	init(unpacked: File) throws {
-		guard let metadata = unpacked.metadata else {
-			throw NoMetadataError.noMetadata(unpacked)
+	init(_ file: File) throws {
+		guard let metadata = file.metadata else {
+            fatalError("TODO:")
+//			throw NoMetadataError.noMetadata(file)
 		}
 		
 		compression = metadata.compression
 		maxChunkSize = metadata.maxChunkSize
-		content = unpacked.data
+		content = file.data
 	}
 }
 
@@ -139,4 +143,15 @@ extension File {
 		)
 		data = mcm.content
 	}
+    
+    init(name: String, standalone mcm: MCM) {
+        self.name = name
+        metadata = Metadata(
+            standalone: true,
+            compression: mcm.compression,
+            maxChunkSize: mcm.maxChunkSize,
+            index: 0
+        )
+        data = mcm.content
+    }
 }

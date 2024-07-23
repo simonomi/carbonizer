@@ -2,6 +2,7 @@ import BinaryParser
 import Foundation
 
 struct NDS {
+    var name: String
 	var header: Binary.Header
 	
 	var arm9: Datastream
@@ -17,7 +18,7 @@ struct NDS {
 	var contents: [any FileSystemObject]
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
+	struct Binary {
 		var header: Header
 		
 		@Offset(givenBy: \Self.header.arm9Offset)
@@ -147,42 +148,108 @@ struct NDS {
 	}
 }
 
+extension NDS: FileSystemObject {
+    func savePath(in directory: URL) -> URL {
+        Folder(name: name, contents: []).savePath(in: directory)
+    }
+    
+    func write(into directory: URL) throws {
+        let encoder = JSONEncoder(.prettyPrinted)
+        
+        let header           = Datastream(try encoder.encode(header))
+        let arm9OverlayTable = Datastream(try encoder.encode(arm9OverlayTable))
+        let arm7OverlayTable = Datastream(try encoder.encode(arm7OverlayTable))
+        
+        let contents: [any FileSystemObject] = [
+            File  (name: "header.json",             data:     header),
+            File  (name: "arm9",                    data:     arm9),
+            File  (name: "arm9 overlay table.json", data:     arm9OverlayTable),
+            Folder(name: "arm9 overlays",           contents: arm9Overlays),
+            File  (name: "arm7",                    data:     arm7),
+            File  (name: "arm7 overlay table.json", data:     arm7OverlayTable),
+            Folder(name: "arm7 overlays",           contents: arm7Overlays),
+            File  (name: "icon banner",             data:     iconBanner),
+            Folder(name: "data",                    contents: contents)
+        ]
+        
+        try Folder(name: name, contents: contents).write(into: directory)
+    }
+    
+    func packed() -> PackedNDS {
+        PackedNDS(
+            name: name,
+            binary: NDS.Binary(self)
+        )
+    }
+    
+    consuming func unpacked() throws -> Self {
+        contents = try contents.map { try $0.unpacked() }
+        return self
+    }
+}
+
+struct PackedNDS: FileSystemObject {
+    var name: String
+    var binary: NDS.Binary
+    
+    static let fileExtension = "nds"
+    
+    func savePath(in directory: URL) -> URL {
+        directory
+            .appending(component: name)
+            .appendingPathExtension(Self.fileExtension)
+    }
+    
+    func write(into directory: URL) throws {
+        let data = Datawriter()
+        data.write(binary)
+        
+        try File(name: name + ".nds", data: Datastream(data.bytes))
+            .write(into: directory)
+    }
+    
+    func packed() -> Self { self }
+    
+    func unpacked() throws -> NDS {
+        try NDS(name: name, binary: binary).unpacked()
+    }
+}
+
+
 // MARK: packed
-extension NDS: FileData {
-	static var packedFileExtension = "nds"
-	static var unpackedFileExtension = ""
-	
-	init(packed: Binary) throws {
-		header = packed.header
+extension NDS {
+    init(name: String, binary: Binary) throws {
+        self.name = name
+		header = binary.header
 		
-		arm9 = packed.arm9
-		arm9OverlayTable = packed.arm9OverlayTable
-		arm9Overlays = try arm9OverlayTable.map {
-			try File(
-				named: "overlay \($0.fileId).bin",
-				data: packed.files[Int($0.fileId)]
+		arm9 = binary.arm9
+		arm9OverlayTable = binary.arm9OverlayTable
+		arm9Overlays = arm9OverlayTable.map {
+			File(
+				name: "overlay \($0.fileId).bin",
+				data: binary.files[Int($0.fileId)]
 			)
 		}
 		
-		arm7 = packed.arm7
-		arm7OverlayTable = packed.arm7OverlayTable
-		arm7Overlays = try arm7OverlayTable.map {
-			try File(
-				named: "overlay \($0.fileId).bin",
-				data: packed.files[Int($0.fileId)]
+		arm7 = binary.arm7
+		arm7OverlayTable = binary.arm7OverlayTable
+		arm7Overlays = arm7OverlayTable.map {
+			File(
+				name: "overlay \($0.fileId).bin",
+				data: binary.files[Int($0.fileId)]
 			)
 		}
 		
-		iconBanner = packed.iconBanner
-		
-		let completeTable = packed.fileNameTable.completeTable()
+		iconBanner = binary.iconBanner
+        
+		let completeTable = binary.fileNameTable.completeTable()
 		contents = try completeTable[0xF000]!.map {
-			try $0.createFileSystemObject(files: packed.files, fileNameTable: completeTable)
+			try $0.createFileSystemObject(files: binary.files, fileNameTable: completeTable)
 		}
 	}
 }
 
-extension NDS.Binary: InitFrom {
+extension NDS.Binary {
 	init(_ nds: NDS) {
 		header = nds.header
 		
@@ -199,11 +266,20 @@ extension NDS.Binary: InitFrom {
 		
 		let overlays = nds.arm9Overlays.sorted(by: \.name) + nds.arm7Overlays.sorted(by: \.name)
 		let allFiles = overlays + nds.contents.getAllFiles()
-		files = allFiles.map {
-			let writer = Datawriter()
-			$0.data.toPacked().write(to: writer)
-			return writer.intoDatastream()
-		}
+        files = allFiles.map {
+            let writer = Datawriter()
+            switch $0 {
+                case let file as File:
+                    file.data.packed().write(to: writer)
+                case let mar as MAR:
+                    mar.packed().binary.write(to: writer)
+                case let packedMAR as PackedMAR:
+                    packedMAR.binary.write(to: writer)
+                default:
+                    fatalError("unexpected FileSystemObject type: \(type(of: $0))")
+            }
+            return writer.intoDatastream()
+        }
 		
 		// TODO: doesnt account for FNT or FAT sizes change
 		// crashes if file/folder added while unpacked
@@ -242,63 +318,47 @@ extension NDS {
 		case invalidFolderStructure([String])
 	}
 	
-	init(unpacked: [any FileSystemObject]) throws {
-		guard let headerFile =           unpacked.getChild(named: "header") as? File,
-			  let headerData = headerFile.data as? Data,
+    init(name: String, contents: [any FileSystemObject]) throws {
+        self.name = name
+        
+		guard let headerFile =           contents.getChild(named: "header") as? File,
+			  let headerData = headerFile.data as? Datastream,
 			  
-			  let arm9File =             unpacked.getChild(named: "arm9") as? File,
+			  let arm9File =             contents.getChild(named: "arm9") as? File,
 			  let arm9Data = arm9File.data as? Datastream,
 			  
-			  let arm9OverlayTableFile = unpacked.getChild(named: "arm9 overlay table") as? File,
-			  let arm9OverlayTableData = arm9OverlayTableFile.data as? Data,
+			  let arm9OverlayTableFile = contents.getChild(named: "arm9 overlay table") as? File,
+			  let arm9OverlayTableData = arm9OverlayTableFile.data as? Datastream,
 			  
-			  let arm9OverlaysFolder =   unpacked.getChild(named: "arm9 overlays") as? Folder,
+			  let arm9OverlaysFolder =   contents.getChild(named: "arm9 overlays") as? Folder,
 			  
-			  let arm7File =             unpacked.getChild(named: "arm7") as? File,
+			  let arm7File =             contents.getChild(named: "arm7") as? File,
 			  let arm7Data = arm7File.data as? Datastream,
 			  
-			  let arm7OverlayTableFile = unpacked.getChild(named: "arm7 overlay table") as? File,
-			  let arm7OverlayTableData = arm7OverlayTableFile.data as? Data,
+			  let arm7OverlayTableFile = contents.getChild(named: "arm7 overlay table") as? File,
+			  let arm7OverlayTableData = arm7OverlayTableFile.data as? Datastream,
 			  
-			  let arm7OverlaysFolder =   unpacked.getChild(named: "arm7 overlays") as? Folder,
+			  let arm7OverlaysFolder =   contents.getChild(named: "arm7 overlays") as? Folder,
 			  
-		      let iconBannerFile =       unpacked.getChild(named: "icon banner") as? File,
+		      let iconBannerFile =       contents.getChild(named: "icon banner") as? File,
 			  let iconBannerData = iconBannerFile.data as? Datastream,
 			  
-			  let dataFolder =           unpacked.getChild(named: "data") as? Folder else {
-			throw UnpackingError.invalidFolderStructure(unpacked.map(\.name))
+			  let dataFolder =           contents.getChild(named: "data") as? Folder else {
+			throw UnpackingError.invalidFolderStructure(contents.map(\.name))
 		}
 		
-		header = try JSONDecoder().decode(NDS.Binary.Header.self, from: headerData)
+        header = try JSONDecoder().decode(NDS.Binary.Header.self, from: Data(headerData.bytes))
 		
 		arm9 = arm9Data
-		arm9OverlayTable = try JSONDecoder().decode([NDS.Binary.OverlayTableEntry].self, from: arm9OverlayTableData)
-		arm9Overlays = arm9OverlaysFolder.files.compactMap { $0 as? File }
+        arm9OverlayTable = try JSONDecoder().decode([NDS.Binary.OverlayTableEntry].self, from: Data(arm9OverlayTableData.bytes))
+		arm9Overlays = arm9OverlaysFolder.contents.compactMap { $0 as? File }
 		
 		arm7 = arm7Data
-		arm7OverlayTable = try JSONDecoder().decode([NDS.Binary.OverlayTableEntry].self, from: arm7OverlayTableData)
-		arm7Overlays = arm7OverlaysFolder.files.compactMap { $0 as? File }
+        arm7OverlayTable = try JSONDecoder().decode([NDS.Binary.OverlayTableEntry].self, from: Data(arm7OverlayTableData.bytes))
+		arm7Overlays = arm7OverlaysFolder.contents.compactMap { $0 as? File }
 		
 		iconBanner = iconBannerData
 		
-		contents = dataFolder.files
-	}
-	
-	func toUnpacked() throws -> [any FileSystemObject] {
-		let header = try JSONEncoder(.prettyPrinted).encode(header)
-		let arm9OverlayTable = try JSONEncoder(.prettyPrinted).encode(arm9OverlayTable)
-		let arm7OverlayTable = try JSONEncoder(.prettyPrinted).encode(arm7OverlayTable)
-		
-		return [
-			File  (name: "header",             data:  header),
-			File  (name: "arm9",               data:  arm9),
-			File  (name: "arm9 overlay table", data:  arm9OverlayTable),
-			Folder(name: "arm9 overlays",      files: arm9Overlays),
-			File  (name: "arm7",               data:  arm7),
-			File  (name: "arm7 overlay table", data:  arm7OverlayTable),
-			Folder(name: "arm7 overlays",      files: arm7Overlays),
-			File  (name: "icon banner",        data:  iconBanner),
-			Folder(name: "data",               files: contents)
-		]
+        self.contents = dataFolder.contents
 	}
 }

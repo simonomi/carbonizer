@@ -65,6 +65,7 @@ func parseBinding(_ binding: PatternBindingSyntax, with attributes: Attributes) 
 		name: name,
 		type: type,
 		size: size,
+        isStatic: attributes.isStatic,
 		padding: attributes.padding,
 		offset: attributes.offset,
 		expected: expected, 

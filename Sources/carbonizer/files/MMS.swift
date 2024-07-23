@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct MMS: Writeable {
+struct MMS {
 	var unknown1: UInt32
 	var colorPaletteType: SpritePalette.ColorPaletteType
 	
@@ -16,7 +16,7 @@ struct MMS: Writeable {
 	}
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
+	struct Binary {
 		var magicBytes = "MMS"
 		var unknown1: UInt32 // 0, 1, 2, 3, 4, 7, 8, 12, 15, 21, 31, 63, 84, 127, 131, 255, 296, 8064
 		var unknown2: UInt32 = 0
@@ -65,10 +65,9 @@ struct MMS: Writeable {
 
 // MARK: packed
 extension MMS: FileData {
-	static var packedFileExtension = "bin"
-	static var unpackedFileExtension = "mms.json"
+	static let fileExtension = "mms.json"
 	
-	init(packed: Binary) {
+	init(_ packed: Binary) {
 		unknown1 = packed.unknown1
 		
 		colorPaletteType = packed.colorPaletteType
@@ -106,7 +105,9 @@ extension MMS: FileData {
 	}
 }
 
-extension MMS.Binary: InitFrom {
+extension MMS.Binary: FileData {
+    static let fileExtension = "bin"
+    
 	init(_ mms: MMS) {
 		unknown1 = mms.unknown1
 		
