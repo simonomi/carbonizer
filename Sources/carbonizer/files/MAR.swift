@@ -105,10 +105,14 @@ extension MAR {
 	static let fileExtension = "mar"
 	
 	init(name: String, binary: Binary) throws {
-//		logProgress("Decompressing", name + "...")
+		logProgress("Decompressing", name + "...")
 		self.name = name
 		
-		files = try binary.files.map(MCM.init)
+		do {
+			files = try binary.files.map(MCM.init)
+		} catch {
+			throw BinaryParserError.whileReadingFile(name, "mar", "", error)
+		}
 	}
 }
 

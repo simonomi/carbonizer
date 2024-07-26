@@ -26,13 +26,17 @@ extension FileSystemObject {
 }
 
 func createFileSystemObject(contentsOf path: URL) throws -> any FileSystemObject {
-	switch try path.type() {
-		case .folder:
-			try createFolder(contentsOf: path)
-		case .file:
-			try createFile(contentsOf: path)
-		case .other(let otherType):
-			throw FileReadError.invalidFileType(path, otherType)
+	do {
+		return switch try path.type() {
+			case .folder:
+				try createFolder(contentsOf: path)
+			case .file:
+				try createFile(contentsOf: path)
+			case .other(let otherType):
+				throw FileReadError.invalidFileType(path, otherType)
+		}
+	} catch {
+		throw BinaryParserError.whileReadingFile(path.path(percentEncoded: false), "", "", error)
 	}
 }
 

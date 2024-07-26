@@ -115,7 +115,7 @@ extension MCM.Binary {
 // MARK: unpacked
 extension MCM {
 	enum NoMetadataError: Error {
-        case noMetadata
+        case noMetadata(String)
 	}
 	
 	init?(_ file: any FileSystemObject) throws {
@@ -132,7 +132,7 @@ extension MCM {
 		}
 		
 		guard let metadata else {
-			throw NoMetadataError.noMetadata
+			throw NoMetadataError.noMetadata(file.fullName)
 		}
 		
 		compression = metadata.compression

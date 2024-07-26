@@ -16,14 +16,14 @@ func createFile(contentsOf path: URL) throws -> any FileSystemObject {
 		data: data
 	)
 	
-    if metadata?.standalone == true {
-        let fileName = switch file {
+	if metadata?.standalone == true {
+		let fileName = switch file {
 			case is ProprietaryFile: file.name
-            default: file.fullName
-        }
+			default: file.fullName
+		}
 		
 		return MAR(
-            name: fileName,
+			name: fileName,
 			files: [try MCM(file)!] // a file with metadata should always be an MCM
 		)
 	} else {

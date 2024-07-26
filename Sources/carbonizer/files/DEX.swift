@@ -304,13 +304,9 @@ extension DEX.Binary: ProprietaryFileData {
 
 // MARK: unpacked
 extension DEX: BinaryConvertible {
-	enum DEXError: Error {
-		case invalidUTF8
-	}
-	
-    
     init(_ data: Datastream) throws {
-        let string = try data.read(String.self) // TODO: null termination?
+		let fileLength = data.bytes.endIndex - data.offset
+		let string = try data.read(String.self, length: fileLength)
         
         commands = try string
             .split(separator: "\n\n")
