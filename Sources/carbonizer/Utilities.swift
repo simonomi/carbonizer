@@ -33,6 +33,30 @@ func hex(_ value: some BinaryInteger) -> String {
 	String(value, radix: 16)
 }
 
+func logProgress(_ items: Any...) {
+	let message = items
+		.map { String(describing: $0) }
+		.joined(separator: " ")
+	
+	print(String(repeating: " ", count: 100), terminator: "\r")
+	print(message, terminator: "\r")
+	
+    fflush(stdout)
+}
+
+func splitFileName(_ name: String) -> (name: String, fileExtension: String) {
+    let split = name.split(separator: ".", maxSplits: 1)
+    if split.count == 2 {
+        return (String(split[0]), String(split[1]))
+    } else {
+        return (name, "")
+    }
+}
+
+func combineFileName(_ name: String, withExtension fileExtension: String) -> String {
+	URL(filePath: name).appendingPathExtension(fileExtension).lastPathComponent
+}
+
 extension Array {
 	subscript(x x: Index, y y: Index, width width: Index) -> Element {
 		get { self[x + y * width] }
@@ -232,9 +256,16 @@ extension DefaultStringInterpolation {
 			.joined(separator: ";")
 		appendInterpolation("\u{001B}[\(effects)m")
 	}
+	
+	mutating func appendInterpolation(_ number: some BinaryInteger, digits: Int) {
+		precondition(number >= 0)
+		appendInterpolation(String(number).padded(toLength: digits, with: "0"))
+	}
 }
 
 func waitForInput() {
+#if os(Windows)
 	print("Press Enter to continue...", terminator: "")
 	let _ = readLine()
+#endif
 }

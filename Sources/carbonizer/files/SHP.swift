@@ -3,7 +3,8 @@ import BinaryParser
 struct SHP {
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "SHP"
+		@Include
+		static let magicBytes = "SHP"
 		var firstCount: UInt32
 		var firstOffset: UInt32
 		var secondCount: UInt32

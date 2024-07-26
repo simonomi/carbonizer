@@ -5,6 +5,7 @@ struct MFS {
 	
 	@BinaryConvertible
 	struct Binary {
+		@Include
 		static let magicBytes = "MFS"
 		var someCount: UInt32
 		var someOffset: UInt32
@@ -56,8 +57,9 @@ struct MFS {
 }
 
 // MARK: packed
-extension MFS: FileData {
+extension MFS: ProprietaryFileData {
 	static let fileExtension = "mfs.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
 		somethings = []
@@ -93,8 +95,9 @@ func stringToImage(_ string: String, _ length: Int = 8) -> String {
 }
 
 
-extension MFS.Binary: FileData {
+extension MFS.Binary: ProprietaryFileData {
     static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
     
 	init(_ mfs: MFS) {
 		fatalError("TODO")

@@ -18,3 +18,12 @@ extension String {
 		}
 	}
 }
+
+@usableFromInline
+func showInvalidUTF8(in bytes: ArraySlice<UInt8>) -> String {
+	bytes
+		.compactMap(UnicodeScalar.init)
+		.map(\.debugDescription)
+		.map { $0.dropFirst().dropLast() }
+		.joined()
+}

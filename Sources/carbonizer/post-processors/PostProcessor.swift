@@ -1,4 +1,4 @@
-typealias PostProcessor = (consuming File, _ parent: Folder) throws -> [any FileSystemObject]
+typealias PostProcessor = (consuming ProprietaryFile, _ parent: Folder) throws -> [any FileSystemObject]
 
 //extension File {
 //	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self {

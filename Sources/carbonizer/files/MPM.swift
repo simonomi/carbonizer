@@ -25,7 +25,8 @@ struct MPM {
 	
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "MPM"
+		@Include
+		static let magicBytes = "MPM"
 		var unknown1: UInt32
 		var unknown2: UInt32
 		var unknown3: UInt32
@@ -51,8 +52,9 @@ struct MPM {
 }
 
 // MARK: packed
-extension MPM: FileData {
+extension MPM: ProprietaryFileData {
 	static let fileExtension = "mpm.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ packed: Binary) {
 		unknown1 = packed.unknown1
@@ -74,8 +76,9 @@ extension MPM: FileData {
 	}
 }
 
-extension MPM.Binary: FileData {
+extension MPM.Binary: ProprietaryFileData {
     static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
     
 	init(_ mpm: MPM) {
 		unknown1 = mpm.unknown1

@@ -5,7 +5,8 @@ struct DTX {
 	
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "DTX"
+		@Include
+		static let magicBytes = "DTX"
 		var stringCount: UInt32
 		var indexesOffset: UInt32 = 0xC
 		@Count(givenBy: \Self.stringCount)
@@ -17,16 +18,18 @@ struct DTX {
 }
 
 // MARK: packed
-extension DTX: FileData {
+extension DTX: ProprietaryFileData {
 	static let fileExtension = "dtx.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
 		strings = binary.strings
 	}
 }
 
-extension DTX.Binary: FileData {
+extension DTX.Binary: ProprietaryFileData {
     static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
     
 	init(_ dtx: DTX) {
 		stringCount = UInt32(dtx.strings.count)

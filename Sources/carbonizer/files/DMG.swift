@@ -31,8 +31,9 @@ struct DMG {
 }
 
 // MARK: packed
-extension DMG: FileData {
+extension DMG: ProprietaryFileData {
     static let fileExtension = "dmg.json"
+    static let packedStatus: PackedStatus = .unpacked
     
 	init(_ binary: Binary) {
 		strings = binary.strings.map(DMGString.init)
@@ -46,8 +47,9 @@ extension DMG.DMGString {
 	}
 }
 
-extension DMG.Binary: FileData {
+extension DMG.Binary: ProprietaryFileData {
     static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
     
 	init(_ dmg: DMG) {
 		stringCount = UInt32(dmg.strings.count)

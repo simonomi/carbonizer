@@ -60,14 +60,21 @@ extension NDS.Binary.FileNameTable.SubEntry {
 	func createFileSystemObject(files: [Datastream], fileNameTable: CompleteFNT) throws -> any FileSystemObject {
 		switch type {
 			case .file:
-                try createFile(name: name, data: files[Int(id!)])
+				let (name, fileExtension) = splitFileName(name)
+				
+				return try createFile(
+					name: name,
+					fileExtension: fileExtension,
+					metadata: nil,
+					data: files[Int(id!)]
+				)
 			case .folder:
-				Folder(
+				return Folder(
 					name: name,
 					contents: try fileNameTable[id!]!
-                        .map {
-                            try $0.createFileSystemObject(files: files, fileNameTable: fileNameTable)
-                        }
+						.map {
+							try $0.createFileSystemObject(files: files, fileNameTable: fileNameTable)
+						}
 				)
 		}
 	}
@@ -136,11 +143,11 @@ extension NDS.Binary.FileNameTable {
 	init(_ files: [any FileSystemObject], firstFileId: UInt16) {
 		let allFolders = files.getAllFolders()
 		let folderIds = Dictionary(uniqueKeysWithValues:
-			allFolders
-				.enumerated()
-				.map { index, folder in
-					(folder, UInt16(index + 0xF001))
-				}
+									allFolders
+			.enumerated()
+			.map { index, folder in
+				(folder, UInt16(index + 0xF001))
+			}
 		)
 		let foldersWithIds = folderIds
 			.sorted(by: \.value)
@@ -151,15 +158,15 @@ extension NDS.Binary.FileNameTable {
 		
 		func createSubEntry(_ fileSystemObject: any FileSystemObject) -> SubEntry {
 			switch fileSystemObject {
-                case is File, is MAR, is PackedMAR:
+				case is ProprietaryFile, is BinaryFile, is MAR, is PackedMAR:
 					fileId += 1
-                    subTableOffset += fileSystemObject.name.utf8CString.count
-                    return SubEntry(.file, name: fileSystemObject.name)
+					subTableOffset += fileSystemObject.fullName.utf8CString.count
+					return SubEntry(.file, name: fileSystemObject.fullName)
 				case let folder as Folder:
-					subTableOffset += folder.name.utf8CString.count + 2
-					return SubEntry(.folder, name: folder.name, id: folderIds[folder]!)
-                default:
-                    fatalError("unexpected FileSystemObject type: \(type(of: fileSystemObject))")
+					subTableOffset += folder.fullName.utf8CString.count + 2
+					return SubEntry(.folder, name: folder.fullName, id: folderIds[folder]!)
+				default:
+					fatalError("unexpected FileSystemObject type: \(type(of: fileSystemObject))")
 			}
 		}
 		
@@ -206,16 +213,17 @@ extension NDS.Binary.FileNameTable.SubEntry {
 }
 
 extension [any FileSystemObject] {
-    func getAllFiles() -> [any FileSystemObject] {
+	func getAllFiles() -> [any FileSystemObject] {
 		flatMap {
 			switch $0 {
-				case let file as File: [file]
-                case let mar as MAR: [mar]
-                case let packedMAR as PackedMAR: [packedMAR]
+				case let proprietaryFile as ProprietaryFile: [proprietaryFile]
+				case let binaryFile as BinaryFile: [binaryFile]
+				case let mar as MAR: [mar]
+				case let packedMAR as PackedMAR: [packedMAR]
 				case let folder as Folder:
 					folder.contents.getAllFiles()
 				default:
-                    fatalError("unexpected FileSystemObject type: \(type(of: $0))")
+					fatalError("unexpected FileSystemObject type: \(type(of: $0))")
 			}
 		}
 	}

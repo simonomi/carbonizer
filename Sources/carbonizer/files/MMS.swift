@@ -17,7 +17,8 @@ struct MMS {
 	
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "MMS"
+		@Include
+		static let magicBytes = "MMS"
 		var unknown1: UInt32 // 0, 1, 2, 3, 4, 7, 8, 12, 15, 21, 31, 63, 84, 127, 131, 255, 296, 8064
 		var unknown2: UInt32 = 0
 		
@@ -64,8 +65,9 @@ struct MMS {
 }
 
 // MARK: packed
-extension MMS: FileData {
+extension MMS: ProprietaryFileData {
 	static let fileExtension = "mms.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ packed: Binary) {
 		unknown1 = packed.unknown1
@@ -105,8 +107,9 @@ extension MMS: FileData {
 	}
 }
 
-extension MMS.Binary: FileData {
+extension MMS.Binary: ProprietaryFileData {
     static let fileExtension = "bin"
+    static let packedStatus: PackedStatus = .packed
     
 	init(_ mms: MMS) {
 		unknown1 = mms.unknown1

@@ -89,7 +89,8 @@ struct DEX {
 	
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "DEX"
+		@Include
+		static let magicBytes = "DEX"
 		var numberOfScenes: UInt32
 		var sceneOffsetsStart: UInt32 = 0xC
 		@Count(givenBy: \Self.numberOfScenes)
@@ -122,8 +123,9 @@ struct DEX {
 }
 
 // MARK: packed
-extension DEX: FileData {
+extension DEX: ProprietaryFileData {
 	static let fileExtension = "dex.txt"
+    static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
 		commands = binary.script
@@ -284,8 +286,9 @@ extension DEX.Command.Movement {
 	}
 }
 
-extension DEX.Binary: FileData {
+extension DEX.Binary: ProprietaryFileData {
     static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
     
 	init(_ dex: DEX) {
 		numberOfScenes = UInt32(dex.commands.count)
@@ -822,6 +825,88 @@ extension String {
 					"unknown: <\(type)> \(unknowns(arguments, hex: arguments.contains { $0 > UInt16.max }))"
 				}
 		}
+	}
+}
+
+enum CommandType {
+	case dialogue, spawn, despawn, fadeOut, fadeIn, unownedDialogue, turnTo, turn1To, turnTowards, turn2To, turnTowards2, moveTo, moveBy, delay, clean1, clean2, angleCamera, startMusic, fadeMusic, playSound, characterEffect, clearEffects, characterMovement, dialogueChoice, imageFadeOut, imageSlideIn, imageFadeIn, revive, startTurning, stopTurning, unknown
+	
+	init?(_ command: Substring) {
+		let firstSpace = command.firstIndex(where: \.isWhitespace)
+		guard let firstSpace else { return nil }
+		let firstWord = command[..<firstSpace]
+		
+		let possiblySelf: Self? = switch firstWord {
+//			case "dialogue":
+//			case "dialogue":
+			case "spawn": .spawn
+			case "despawn": .despawn
+//			case "fade":
+//			case "fade":
+//			case "fade":
+//			case "fade":
+//			case "fade":
+			case "unowned": .unownedDialogue
+//			case "turn":
+//			case "turn":
+//			case "turn":
+			case "turn1": .turn1To
+			case "turn2": .turn2To
+//			case "move":
+//			case "move":
+			case "delay": .delay
+			case "clean1": .clean1
+			case "clean2": .clean2
+			case "angle": .angleCamera
+//			case "start":
+//			case "start":
+			case "play": .playSound
+			case "effect": .characterEffect
+			case "clear": .clearEffects
+			case "movement": .characterMovement
+			case "slide": .imageSlideIn
+			case "revive": .revive
+			case "stop": .stopTurning
+//			case "unknown":
+//			case "unknown":
+			default: nil
+		}
+		
+		guard let possiblySelf else { return nil }
+		self = possiblySelf
+		
+//		"dialogue \(dialogue)"
+//		"spawn \(character) at \(position(x, y)), unknowns: \(unknowns(unknown1, unknown2))"
+//		"despawn \(character)"
+//		"fade out \(frames(frameCount))"
+//		"fade in \(frames(frameCount))"
+//		"unowned dialogue \(dialogue)"
+//		"turn \(character) to \(degrees(angle))"
+//		"turn1 \(character) to \(degrees(angle)) over \(frames(frameCount)), unknown: <\(unknown)>"
+//		"turn \(character) towards \(target) over \(frames(frameCount)), unknown: <\(unknown)>"
+//		"turn2 \(character) to \(degrees(angle)) over \(frames(frameCount)), unknown: <\(unknown)>"
+//		"turn \(character) towards \(target) over \(frames(frameCount)), unknowns: \(unknowns(unknown1, unknown2))"
+//		"move \(character) to \(position(x, y)) over \(frames(frameCount)), unknown: <\(unknown)>"
+//		"move \(character) by \(position(relativeX, relativeY)) over \(frames(frameCount)), unknown: <\(unknown)>"
+//		"delay \(frames(frameCount))"
+//		"clean1 \(fossil), unknown: <\(unknown)>"
+//		"clean2 \(fossil), unknown: <\(unknown)>"
+//		"angle camera from \(position(xRotation, yRotation)) at distance <\(String(targetDistance, radix: 16))> with fov: <\(fov)> over \(frames(frameCount)), unknown: <\(unknown)>"
+//		"start music <\(id)>"
+//		"fade music \(frames(frameCount))"
+//		"play sound <\(id)>"
+//		"effect \(effect) on \(character)"
+//		"clear effects on \(character)"
+//		"movement \(movement) on \(character)"
+//		"dialogue \(dialogue) with choice \(choices), unknown: <\(unknown)>"
+//		"fade out image over \(frames(frameCount)), unknown: <\(unknown)>"
+//		"slide in image \(image) over \(frames(frameCount)), unknowns: \(unknowns(unknown1, unknown2))"
+//		"fade in image \(image) over \(frames(frameCount)), unknowns: \(unknowns(unknown1, unknown2))"
+//		"revive \(vivosaur)"
+//		"start turning \(character) to follow \(target)"
+//		"stop turning \(character)"
+//		"unknown: <\(type)>"
+//		"unknown: <\(type)> \(unknowns(arguments, hex: arguments.contains { $0 > UInt16.max }))"
 	}
 }
 

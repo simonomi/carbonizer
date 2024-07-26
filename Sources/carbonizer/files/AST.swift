@@ -3,7 +3,8 @@ import BinaryParser
 struct AST {
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "AST"
+		@Include
+		static let magicBytes = "AST"
 		
 		var firstCount: UInt32 = 5
 		var firstOffset: UInt32 = 0x14

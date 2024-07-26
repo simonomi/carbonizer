@@ -16,7 +16,8 @@ struct DCL {
 	
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "DCL"
+		@Include
+		static let magicBytes = "DCL"
 		
 		var unknown1: UInt32
 		var unknown2: UInt32
@@ -24,7 +25,7 @@ struct DCL {
 		var unknown4: UInt32
 		
 		var vivosaurCount: UInt32
-		var indexesOffset: UInt32
+		var indexesOffset: UInt32 = 0x2C
 		
 		var unknown5: UInt32
 		var unknown6: UInt32
@@ -271,8 +272,9 @@ struct DCL {
 }
 
 // MARK: packed
-extension DCL: FileData {
+extension DCL: ProprietaryFileData {
 	static let fileExtension = "dcl.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
 		unknown1 = binary.unknown1
@@ -292,11 +294,31 @@ extension DCL.Vivosaur {
 	init(_ packed: DCL.Binary.Vivosaur) {}
 }
 
-extension DCL.Binary: FileData {
+extension DCL.Binary: ProprietaryFileData {
     static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
     
 	init(_ dcl: DCL) {
+		unknown1 = dcl.unknown1
+		unknown2 = dcl.unknown2
+		unknown3 = dcl.unknown3
+		unknown4 = dcl.unknown4
+		unknown5 = dcl.unknown5
+		unknown6 = dcl.unknown6
+		unknown7 = dcl.unknown7
+		unknown8 = dcl.unknown8
+		
+		vivosaurCount = UInt32(dcl.vivosaurs.count)
+		
+		vivosaurs = dcl.vivosaurs.map(Vivosaur.init)
+		
 		fatalError()
+	}
+}
+
+extension DCL.Binary.Vivosaur {
+	init(_ unpacked: DCL.Vivosaur) {
+		fatalError("TODO:")
 	}
 }
 

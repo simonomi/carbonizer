@@ -1,4 +1,4 @@
-enum InputPackedStatus {
+enum PackedStatus {
 	case unknown, packed, unpacked, contradictory
 	
 	var wasPacked: Bool? {
@@ -10,10 +10,11 @@ enum InputPackedStatus {
 	}
 	
 	func combined(with newValue: Self) -> Self {
-		if self == .unknown || self == newValue {
-			newValue
-		} else {
-			.contradictory
+		switch (self, newValue) {
+			case (.unknown, let other), (let other, .unknown): other
+			case (.packed, .packed): .packed
+			case (.unpacked, .unpacked): .unpacked
+			default: .contradictory
 		}
 	}
 }

@@ -37,7 +37,8 @@ struct RLS {
 	
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "RLS"
+		@Include
+		static let magicBytes = "RLS"
 		var kasekiCount: UInt32
 		var offsetsStart: UInt32 = 0xC
 		@Count(givenBy: \Self.kasekiCount)
@@ -93,8 +94,9 @@ struct RLS {
 }
 
 // MARK: packed
-extension RLS: FileData {
+extension RLS: ProprietaryFileData {
 	static let fileExtension = "rls.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ packed: Binary) {
 		kasekis = packed.kasekis.enumerated().map(Kaseki.init)
@@ -136,8 +138,9 @@ extension RLS.Kaseki {
 	}
 }
 
-extension RLS.Binary: FileData {
+extension RLS.Binary: ProprietaryFileData {
     static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
     
 	init(_ rls: RLS) {
 		kasekiCount = UInt32(rls.kasekis.count)

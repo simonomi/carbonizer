@@ -49,7 +49,7 @@ struct Carbonizer: ParsableCommand {
 	var filePaths = [URL]()
 	
 	enum CompressionMode: String, EnumerableFlag {
-		case pack, unpack
+		case pack, unpack, ask
 		
 		static func name(for value: Self) -> NameSpecification {
 			.shortAndLong
@@ -57,6 +57,15 @@ struct Carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
+		do {
+			try main()
+		} catch {
+			print(error)
+			waitForInput()
+		}
+	}
+	
+	mutating func main() throws {
 //		let filePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/btl_ai/")
 //
 //		let contents = try filePath.contents()
@@ -106,16 +115,18 @@ struct Carbonizer: ParsableCommand {
         
 
         // TODO: debug only
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
+		filePaths.append(URL(filePath: "/Users/simonomi/Downloads/Comrade.nds"))
+		
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters repacked.nds"))
 		
-//        filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters - Champions.nds"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters - Champions.nds"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions.nds"))
 		
 //		await globalMutableState.setExtractMARs(to: extractMARsInput)
-//
+		
 //		await globalMutableState.setExtractMARs(to: .always) // TODO: debug only
 		
 		if filePaths.isEmpty {
@@ -128,56 +139,47 @@ struct Carbonizer: ParsableCommand {
 		
 		for filePath in filePaths {
             // TODO: document this
-			let extractMARsOptionFile = URL.currentDirectory().appending(component: "extract mars.txt")
+//			let extractMARsOptionFile = URL.currentDirectory().appending(component: "extract mars.txt")
 //            if let extractMARsOverride = (try? String(contentsOf: extractMARsOptionFile))
 //                .flatMap(ExtractMARs.init) {
 //                await globalMutableState.replaceAutoExtractMARs(with: extractMARsOverride)
 //            }
             
-//			let start = Date.now
+			logProgress("Reading \(filePath.path(percentEncoded: false))")
 			let file = try createFileSystemObject(contentsOf: filePath)
-//			print(-start.timeIntervalSinceNow)
 			
 //			file = try file.postProcessed(with: mm3Finder)
 //			file = try file.postProcessed(with: mpmFinder) // doesnt work for much
 //			file = try file.postProcessed(with: mmsFinder)
 //			return
 			
-//			let unpackedFile = try file.unpacked()
-			let unpackedFile = file.packed()
-            print() // to clear progress
+			let processedFile: any FileSystemObject
+            switch (compressionMode, file.packedStatus()) {
+                case (.unpack, _), (nil, .packed):
+                    processedFile = try file.unpacked()
+                case (.pack, _), (nil, .unpacked):
+                    processedFile = file.packed()
+                default:
+                    print("Would you like to [p]ack or [u]npack? ")
+                    let answer = readLine()?.lowercased()
+                    
+                    if answer?.starts(with: "p") == true {
+                        processedFile = file.packed()
+                    } else if answer?.starts(with: "u") == true {
+                        processedFile = try file.unpacked()
+                    } else {
+                        print("Skipping file...")
+                        continue
+                    }
+            }
 			
-//			let writeStart = Date.now
 //			let outputDirectory = filePath.deletingLastPathComponent()
 			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
 			
-			let savePath = unpackedFile.savePath(in: outputDirectory)
-			if savePath.exists() {
-				print("file \(savePath.path(percentEncoded: false)) already exists, do you want to replace it?")
-//                try FileManager.default.removeItem(at: savePath) // TODO: dont do this
-				// or possibly just add suffix
-				Self.exit()
-			}
+			let savePath = processedFile.savePath(in: outputDirectory).path(percentEncoded: false)
+			logProgress("Writing to \(savePath)")
 			
-            try unpackedFile.write(into: outputDirectory)
-            
-//			inputPackedStatus = .packed // TODO: debug only
-			
-//			if let wasPacked = inputWasPacked.wasPacked {
-//				try file.write(into: outputDirectory, packed: !wasPacked)
-//			} else {
-//				print("Would you like to [P]ack or [U]npack? ")
-//				guard let answer = readLine()?.lowercased() else { return }
-//				
-//				if answer.starts(with: "p") {
-//					try file.write(into: outputDirectory, packed: true)
-//				} else if answer.starts(with: "u") {
-//					try file.write(into: outputDirectory, packed: false)
-//				} else {
-//					return
-//				}
-//			}
-//			print(-writeStart.timeIntervalSinceNow)
+            try processedFile.write(into: outputDirectory)
 		}
 	}
 }

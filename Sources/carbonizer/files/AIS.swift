@@ -3,7 +3,8 @@ import BinaryParser
 struct AIS {
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "AIS"
+		@Include
+		static let magicBytes = "AIS"
 		
 		var someCount: UInt32
 		var someOffset: UInt32 = 0xC

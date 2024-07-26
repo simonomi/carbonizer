@@ -2,12 +2,12 @@ import BinaryParser
 import Foundation
 
 struct MAR {
-    var name: String
+	var name: String
 	var files: [MCM]
 	
 	@BinaryConvertible
 	struct Binary {
-        @Include
+		@Include
 		static let magicBytes = "MAR"
 		var fileCount: UInt32
 		@Count(givenBy: \Self.fileCount)
@@ -25,63 +25,78 @@ struct MAR {
 
 
 extension MAR: FileSystemObject {
-    func savePath(in directory: URL) -> URL {
-        Folder(name: name, contents: [])
-            .savePath(in: directory)
-    }
-    
-    func write(into directory: URL) throws {
-        if files.count == 1,
-           let file = files.first
-        {
-            try File(name: name, standalone: file)
-                .write(into: directory)
-            
-        } else {
-            try Folder(
-                name: name + ".mar",
-                contents: files.enumerated().map(File.init)
-            ).write(into: directory)
-        }
-    }
-    
-    func packed() -> PackedMAR {
-        PackedMAR(
-            name: name,
-            binary: MAR.Binary(self)
-        )
-    }
-    
-    func unpacked() throws -> Self { self }
+	var fileExtension: String { "mar" }
+	
+	func savePath(in directory: URL) -> URL {
+		Folder(name: name, contents: [])
+			.savePath(in: directory)
+	}
+	
+	func write(into directory: URL) throws {
+		if files.count == 1,
+		   let file = files.first
+		{
+			try ProprietaryFile(name: name, standaloneMCM: file)
+				.write(into: directory)
+		} else {
+			try Folder(
+				name: fullName,
+				contents: files.enumerated().map(ProprietaryFile.init)
+			).write(into: directory)
+		}
+	}
+	
+	func packedStatus() -> PackedStatus { .unpacked }
+	
+	func packed() -> PackedMAR {
+		let (name, fileExtension) = splitFileName(name)
+		
+		return PackedMAR(
+			name: name,
+			fileExtension: fileExtension,
+			binary: MAR.Binary(self)
+		)
+	}
+	
+	func unpacked() throws -> Self { self }
 }
 
 struct PackedMAR: FileSystemObject {
-    var name: String
-    var binary: MAR.Binary
-    
-    func savePath(in directory: URL) -> URL {
-        directory.appending(component: name)
-    }
-    
-    func write(into directory: URL) throws {
-        let writer = Datawriter()
-        writer.write(binary)
-        
-        try File(
-            name: name,
-            data: writer.intoDatastream()
-        )
-        .write(into: directory)
-    }
-    
-    func packed() -> Self { self }
-    
-//    func unpacked() throws -> MAR {
-//        try MAR(name: name, binary: binary)
-//    }
-    
-    // disable mar decompression
-    func unpacked() throws -> Self { self }
+	var name: String
+	var fileExtension: String
+	var binary: MAR.Binary
+	
+	func savePath(in directory: URL) -> URL {
+		BinaryFile(
+			name: name,
+			fileExtension: fileExtension,
+			data: Datastream()
+		)
+		.savePath(in: directory)
+	}
+	
+	func write(into directory: URL) throws {
+		let writer = Datawriter()
+		writer.write(binary)
+		
+		try BinaryFile(
+			name: name,
+			fileExtension: fileExtension,
+			data: writer.intoDatastream()
+		)
+		.write(into: directory)
+	}
+	
+	func packedStatus() -> PackedStatus { .packed }
+	
+	func packed() -> Self { self }
+	
+	func unpacked() throws -> MAR {
+		try MAR(
+			name: combineFileName(name, withExtension: fileExtension),
+			binary: binary
+		)
+	}
 }
 
 
@@ -89,9 +104,10 @@ struct PackedMAR: FileSystemObject {
 extension MAR {
 	static let fileExtension = "mar"
 	
-    init(name: String, binary: Binary) throws {
-        print("\n" + name, terminator: "")
-        self.name = name
+	init(name: String, binary: Binary) throws {
+//		logProgress("Decompressing", name + "...")
+		self.name = name
+		
 		files = try binary.files.map(MCM.init)
 	}
 }
@@ -111,14 +127,3 @@ extension MAR.Binary {
 		indexes = zip(offsets, decompressedSizes).map(Index.init)
 	}
 }
-
-// MARK: unpacked
-//extension MAR {
-//	init(unpacked: [any FileSystemObject]) throws {
-//		files = try unpacked.compactMap(as: File.self).map(MCM.init)
-//	}
-//	
-//	func toUnpacked() -> [any FileSystemObject] {
-//		files.enumerated().map(File.init)
-//	}
-//}

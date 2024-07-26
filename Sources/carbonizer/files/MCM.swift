@@ -7,7 +7,7 @@ struct MCM {
 	var compression: (CompressionType, CompressionType)
 	var maxChunkSize: UInt32
 	
-	var content: any FileData
+	var content: any ProprietaryFileData
 	
 	enum CompressionType: UInt8 {
 		case none, runLength, lzss, huffman
@@ -33,7 +33,8 @@ struct MCM {
 	
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "MCM"
+		@Include
+		static let magicBytes = "MCM"
 		var decompressedSize: UInt32
 		var maxChunkSize: UInt32
 		var chunkCount: UInt32
@@ -62,16 +63,13 @@ extension MCM {
 		)
 		maxChunkSize = binary.maxChunkSize
 		
-		print(".", terminator: "")
-		fflush(stdout)
-		
 		do {
-			content = try createFileData(
-                binary.chunks
-					.map(compression.0.decompress)
-					.map(compression.1.decompress)
-					.joined()
-			)
+			let data = try binary.chunks
+				.map(compression.0.decompress)
+				.map(compression.1.decompress)
+				.joined()
+			
+			content = try createFileData(data, fileExtension: "")?.unpacked() ?? data
 		} catch {
 			throw DecompressionError.whileReading(MCM.self, compression, error)
 		}
@@ -117,22 +115,32 @@ extension MCM.Binary {
 // MARK: unpacked
 extension MCM {
 	enum NoMetadataError: Error {
-//        case noMetadata(File)
+        case noMetadata
 	}
 	
-	init(_ file: File) throws {
-		guard let metadata = file.metadata else {
-            fatalError("TODO:")
-//			throw NoMetadataError.noMetadata(file)
+	init?(_ file: any FileSystemObject) throws {
+		let metadata: Metadata?
+		switch file {
+			case let proprietaryFile as ProprietaryFile:
+				content = proprietaryFile.data
+				metadata = proprietaryFile.metadata
+			case let binaryFile as BinaryFile:
+				content = binaryFile.data
+				metadata = binaryFile.metadata
+			default:
+				return nil
+		}
+		
+		guard let metadata else {
+			throw NoMetadataError.noMetadata
 		}
 		
 		compression = metadata.compression
 		maxChunkSize = metadata.maxChunkSize
-		content = file.data
 	}
 }
 
-extension File {
+extension ProprietaryFile {
 	init(index: Int, mcm: MCM) {
 		name = String(index).padded(toLength: 4, with: "0")
 		metadata = Metadata(
@@ -144,7 +152,7 @@ extension File {
 		data = mcm.content
 	}
     
-    init(name: String, standalone mcm: MCM) {
+    init(name: String, standaloneMCM mcm: MCM) {
         self.name = name
         metadata = Metadata(
             standalone: true,
