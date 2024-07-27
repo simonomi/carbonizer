@@ -322,7 +322,7 @@ extension DEX: BinaryConvertible {
             .map { $0.joined(separator: "\n") }
             .joined(separator: "\n\n")
         
-        data.write(string) // TODO: null termination?
+		data.write(string, length: string.lengthOfBytes(using: .utf8))
     }
     
 //	init(unpacked bytes: Data) throws {
@@ -858,9 +858,9 @@ enum CommandType {
 			case "unowned": .unownedDialogue
 			case "turn":
 				if command.contains("unknowns") {
-					.turnTowards
-				} else if command.contains("unknown") {
 					.turnTowards2
+				} else if command.contains("unknown") {
+					.turnTowards
 				} else {
 					.turnTo
 				}
@@ -889,7 +889,7 @@ enum CommandType {
 			case "slide": .imageSlideIn
 			case "revive": .revive
 			case "stop": .stopTurning
-			case "unknown": .unknown
+			case "unknown:", "unknowns:": .unknown
 			default: nil
 		}
 		

@@ -13,11 +13,7 @@ extension URL {
 	
 	@Sendable
 	static func fromFilePath(_ filePath: String) -> URL {
-//#if os(Windows)
-//		URL(fileURLWithPath: filePath)
-//#else
 		URL(filePath: filePath)
-//#endif
 	}
 }
 
@@ -171,11 +167,7 @@ extension URL {
 	}
     
     func exists() -> Bool {
-//#if os(Windows)
-//        FileManager.default.fileExists(atPath: path)
-//#else
         FileManager.default.fileExists(atPath: path(percentEncoded: false))
-//#endif
     }
 	
 	func contents() throws -> [URL] {
@@ -187,11 +179,7 @@ extension URL {
 	}
 	
 	func type() throws -> FileType {
-//#if os(Windows)
-//		let type = try FileManager.default.attributesOfItem(atPath: self.path)[.type] as? FileAttributeType
-//#else
 		let type = try FileManager.default.attributesOfItem(atPath: self.path(percentEncoded: false))[.type] as? FileAttributeType
-//#endif
 		return switch type {
 			case .some(.typeRegular): .file
 			case .some(.typeDirectory): .folder
