@@ -1,8 +1,6 @@
 import BinaryParser
 import Foundation
 
-import Darwin.C // TODO: remove
-
 struct MCM {
 	var compression: (CompressionType, CompressionType)
 	var maxChunkSize: UInt32
