@@ -8,11 +8,11 @@ struct Attributes {
 	var length: ValueOrProperty?
 	var ifCondition: String?
 	var endOffset: ValueOrProperty?
-    var isStatic: Bool
+	var isStatic: Bool
 	
-    init(from attributes: AttributeListSyntax, isStatic: Bool) throws {
-        self.isStatic = isStatic
-        
+	init(from attributes: AttributeListSyntax, isStatic: Bool) throws {
+		self.isStatic = isStatic
+		
 		for attribute in attributes.compactMap(AttributeSyntax.init) {
 			try parseAttribute(attribute)
 		}

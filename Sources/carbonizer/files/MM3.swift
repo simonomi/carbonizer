@@ -32,7 +32,7 @@ struct MM3 {
 // MARK: packed
 extension MM3: ProprietaryFileData {
 	static let fileExtension = "mm3.json"
-    static let packedStatus: PackedStatus = .unpacked
+	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ packed: Binary) {
 		model = TableEntry(index: packed.modelIndex, tableName: packed.modelTableName)
@@ -42,9 +42,9 @@ extension MM3: ProprietaryFileData {
 }
 
 extension MM3.Binary: ProprietaryFileData {
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .packed
-    
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
 	init(_ mm3: MM3) {
 		modelIndex = mm3.model.index
 		animationIndex = mm3.animation.index

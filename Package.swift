@@ -3,7 +3,7 @@ import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "carbonizer",
+	name: "carbonizer",
 	platforms: [
 		.macOS(.v14), // NOTE: if updating to v15 remove myIndices(of:)
 //		.custom("Windows", versionString: "11")
@@ -12,10 +12,10 @@ let package = Package(
 		.executable(name: "carbonizer", targets: ["carbonizer"])
 	],
 	dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", revision: "510.0.0"),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
+		.package(url: "https://github.com/swiftlang/swift-syntax.git", revision: "510.0.0"),
+		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
 	],
-    targets: [
+	targets: [
 		.macro(
 			name: "BinaryParserMacros",
 			dependencies: [
@@ -41,5 +41,5 @@ let package = Package(
 				.product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
 			]
 		)
-    ]
+	]
 )

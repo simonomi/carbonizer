@@ -96,7 +96,7 @@ struct RLS {
 // MARK: packed
 extension RLS: ProprietaryFileData {
 	static let fileExtension = "rls.json"
-    static let packedStatus: PackedStatus = .unpacked
+	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ packed: Binary) {
 		kasekis = packed.kasekis.enumerated().map(Kaseki.init)
@@ -139,9 +139,9 @@ extension RLS.Kaseki {
 }
 
 extension RLS.Binary: ProprietaryFileData {
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .packed
-    
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
 	init(_ rls: RLS) {
 		kasekiCount = UInt32(rls.kasekis.count)
 		

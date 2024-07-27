@@ -2,7 +2,7 @@ import Foundation
 import BinaryParser
 
 func createFile(contentsOf path: URL) throws -> any FileSystemObject {
-    let (name, fileExtension) = splitFileName(path.lastPathComponent)
+	let (name, fileExtension) = splitFileName(path.lastPathComponent)
 	let data = Datastream(try Data(contentsOf: path))
 	
 	let metadata = try path

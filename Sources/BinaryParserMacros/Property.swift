@@ -2,7 +2,7 @@ struct Property {
 	var name: String
 	var type: String
 	var size: Size
-    var isStatic: Bool
+	var isStatic: Bool
 	var padding: ValueOrProperty?
 	var offset: ValueOrProperty?
 	var expected: String?

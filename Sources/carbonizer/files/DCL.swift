@@ -274,7 +274,7 @@ struct DCL {
 // MARK: packed
 extension DCL: ProprietaryFileData {
 	static let fileExtension = "dcl.json"
-    static let packedStatus: PackedStatus = .unpacked
+	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
 		unknown1 = binary.unknown1
@@ -295,9 +295,9 @@ extension DCL.Vivosaur {
 }
 
 extension DCL.Binary: ProprietaryFileData {
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .packed
-    
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
 	init(_ dcl: DCL) {
 		unknown1 = dcl.unknown1
 		unknown2 = dcl.unknown2

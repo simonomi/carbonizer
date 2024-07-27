@@ -73,7 +73,7 @@ struct EmptyMacro: PeerMacro {
 
 @main
 struct BinaryParserPlugin: CompilerPlugin {
-    let providingMacros: [Macro.Type] = [
+	let providingMacros: [Macro.Type] = [
 		BinaryConvertibleMacro.self,
 		EmptyMacro.self
 	]

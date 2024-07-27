@@ -2,26 +2,26 @@ import BinaryParser
 import Foundation
 
 protocol ProprietaryFileData: BinaryConvertible {
-    static var fileExtension: String { get }
-    
-    static var packedStatus: PackedStatus { get }
-    
-    associatedtype Packed: ProprietaryFileData where Packed.Unpacked == Self
-    init(_ packed: Packed)
-    
-    associatedtype Unpacked: ProprietaryFileData where Unpacked.Packed == Self
-    init(_ unpacked: Unpacked)
+	static var fileExtension: String { get }
+	
+	static var packedStatus: PackedStatus { get }
+	
+	associatedtype Packed: ProprietaryFileData where Packed.Unpacked == Self
+	init(_ packed: Packed)
+	
+	associatedtype Unpacked: ProprietaryFileData where Unpacked.Packed == Self
+	init(_ unpacked: Unpacked)
 }
 
 func createFileData(
-    _ data: Datastream,
-    fileExtension: String
+	_ data: Datastream,
+	fileExtension: String
 ) throws -> (any ProprietaryFileData)? {
 	func decode<D: Decodable>(_: D.Type) throws -> D {
 		try JSONDecoder().decode(D.self, from: Data(data.bytes))
 	}
 	
-    switch fileExtension {
+	switch fileExtension {
 //		case AIS.fileExtension:
 //			return try data.read(AIS.self)
 //		case AST.fileExtension:
@@ -90,26 +90,26 @@ func createFileData(
 }
 
 extension ProprietaryFileData where Self: Codable {
-    init(_ data: Datastream) throws {
-        assert(data.offset == 0) // should only read full files as json (?)
-        self = try JSONDecoder().decode(Self.self, from: Data(data.bytes))
-    }
-    
-    func write(to data: Datawriter) {
-        // TODO: panic bad here?
-        let jsonData = try! JSONEncoder(.prettyPrinted).encode(self)
-        data.write(jsonData)
-    }
+	init(_ data: Datastream) throws {
+		assert(data.offset == 0) // should only read full files as json (?)
+		self = try JSONDecoder().decode(Self.self, from: Data(data.bytes))
+	}
+	
+	func write(to data: Datawriter) {
+		// TODO: panic bad here?
+		let jsonData = try! JSONEncoder(.prettyPrinted).encode(self)
+		data.write(jsonData)
+	}
 }
 
 extension ProprietaryFileData {
-    func packed() -> Packed { Packed(self) }
-    func unpacked() -> Unpacked { Unpacked(self) }
+	func packed() -> Packed { Packed(self) }
+	func unpacked() -> Unpacked { Unpacked(self) }
 }
 
 extension Datastream: ProprietaryFileData {
-    typealias Packed = Datastream
-    typealias Unpacked = Datastream
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .unknown
+	typealias Packed = Datastream
+	typealias Unpacked = Datastream
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .unknown
 }

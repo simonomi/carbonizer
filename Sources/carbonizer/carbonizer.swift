@@ -53,13 +53,13 @@ struct Carbonizer: ParsableCommand {
 		}
 		
 		for filePath in filePaths {
-            // TODO: document this
+			// TODO: document this
 //			let extractMARsOptionFile = URL.currentDirectory().appending(component: "extract mars.txt")
 //            if let extractMARsOverride = (try? String(contentsOf: extractMARsOptionFile))
 //                .flatMap(ExtractMARs.init) {
 //                await globalMutableState.replaceAutoExtractMARs(with: extractMARsOverride)
 //            }
-            
+			
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
 			let file = try createFileSystemObject(contentsOf: filePath)
 			
@@ -71,24 +71,24 @@ struct Carbonizer: ParsableCommand {
 #endif
 			
 			let processedFile: any FileSystemObject
-            switch (compressionMode, file.packedStatus()) {
-                case (.unpack, _), (nil, .packed):
-                    processedFile = try file.unpacked()
-                case (.pack, _), (nil, .unpacked):
-                    processedFile = file.packed()
-                default:
-                    print("Would you like to [p]ack or [u]npack? ")
-                    let answer = readLine()?.lowercased()
-                    
-                    if answer?.starts(with: "p") == true {
-                        processedFile = file.packed()
-                    } else if answer?.starts(with: "u") == true {
-                        processedFile = try file.unpacked()
-                    } else {
-                        print("Skipping file...")
-                        continue
-                    }
-            }
+			switch (compressionMode, file.packedStatus()) {
+				case (.unpack, _), (nil, .packed):
+					processedFile = try file.unpacked()
+				case (.pack, _), (nil, .unpacked):
+					processedFile = file.packed()
+				default:
+					print("Would you like to [p]ack or [u]npack? ")
+					let answer = readLine()?.lowercased()
+					
+					if answer?.starts(with: "p") == true {
+						processedFile = file.packed()
+					} else if answer?.starts(with: "u") == true {
+						processedFile = try file.unpacked()
+					} else {
+						print("Skipping file...")
+						continue
+					}
+			}
 			
 #if IN_CI
 			let outputDirectory = filePath.deletingLastPathComponent()
@@ -99,7 +99,7 @@ struct Carbonizer: ParsableCommand {
 			let savePath = processedFile.savePath(in: outputDirectory).path(percentEncoded: false)
 			logProgress("Writing to \(savePath)")
 			
-            try processedFile.write(into: outputDirectory)
+			try processedFile.write(into: outputDirectory)
 		}
 	}
 }

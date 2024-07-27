@@ -20,7 +20,7 @@ struct DTX {
 // MARK: packed
 extension DTX: ProprietaryFileData {
 	static let fileExtension = "dtx.json"
-    static let packedStatus: PackedStatus = .unpacked
+	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
 		strings = binary.strings
@@ -28,9 +28,9 @@ extension DTX: ProprietaryFileData {
 }
 
 extension DTX.Binary: ProprietaryFileData {
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .packed
-    
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
 	init(_ dtx: DTX) {
 		stringCount = UInt32(dtx.strings.count)
 

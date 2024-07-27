@@ -59,7 +59,7 @@ struct MFS {
 // MARK: packed
 extension MFS: ProprietaryFileData {
 	static let fileExtension = "mfs.json"
-    static let packedStatus: PackedStatus = .unpacked
+	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
 		somethings = []
@@ -96,9 +96,9 @@ func stringToImage(_ string: String, _ length: Int = 8) -> String {
 
 
 extension MFS.Binary: ProprietaryFileData {
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .packed
-    
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
 	init(_ mfs: MFS) {
 		fatalError("TODO")
 	}

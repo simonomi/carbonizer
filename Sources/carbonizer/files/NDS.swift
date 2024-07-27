@@ -2,7 +2,7 @@ import BinaryParser
 import Foundation
 
 struct NDS {
-    var name: String
+	var name: String
 	var header: Binary.Header
 	
 	var arm9: Datastream
@@ -149,62 +149,62 @@ struct NDS {
 }
 
 extension NDS: FileSystemObject {
-    var fileExtension: String { "" }
+	var fileExtension: String { "" }
 	
-    func savePath(in directory: URL) -> URL {
-        Folder(name: name, contents: [])
-            .savePath(in: directory)
-    }
-    
-    func write(into directory: URL) throws {
-        let encoder = JSONEncoder(.prettyPrinted)
-        
-        let header           = Datastream(try encoder.encode(header))
-        let arm9OverlayTable = Datastream(try encoder.encode(arm9OverlayTable))
-        let arm7OverlayTable = Datastream(try encoder.encode(arm7OverlayTable))
-        
-        let contents: [any FileSystemObject] = [
-            Folder(name: "arm9 overlays", contents: arm9Overlays),
-            Folder(name: "arm7 overlays", contents: arm7Overlays),
-            Folder(name: "data",          contents: contents),
-            BinaryFile(name: "arm9",               fileExtension: "",     data: arm9),
-            BinaryFile(name: "arm9 overlay table", fileExtension: "json", data: arm9OverlayTable),
-            BinaryFile(name: "arm7",               fileExtension: "",     data: arm7),
-            BinaryFile(name: "arm7 overlay table", fileExtension: "json", data: arm7OverlayTable),
-            BinaryFile(name: "header",             fileExtension: "json", data: header),
-            BinaryFile(name: "icon banner",        fileExtension: "",     data: iconBanner)
-        ]
-        
-        try Folder(name: name, contents: contents).write(into: directory)
-    }
-    
-    func packedStatus() -> PackedStatus {
-        contents
-            .map { $0.packedStatus() }
-            .reduce(.unpacked) { $0.combined(with: $1) }
-    }
-    
-    func packed() -> PackedNDS {
-        PackedNDS(
-            name: name,
-            binary: NDS.Binary(self)
-        )
-    }
-    
-    consuming func unpacked() throws -> Self {
-        contents = try contents.map { try $0.unpacked() }
-        return self
-    }
+	func savePath(in directory: URL) -> URL {
+		Folder(name: name, contents: [])
+			.savePath(in: directory)
+	}
+	
+	func write(into directory: URL) throws {
+		let encoder = JSONEncoder(.prettyPrinted)
+		
+		let header           = Datastream(try encoder.encode(header))
+		let arm9OverlayTable = Datastream(try encoder.encode(arm9OverlayTable))
+		let arm7OverlayTable = Datastream(try encoder.encode(arm7OverlayTable))
+		
+		let contents: [any FileSystemObject] = [
+			Folder(name: "arm9 overlays", contents: arm9Overlays),
+			Folder(name: "arm7 overlays", contents: arm7Overlays),
+			Folder(name: "data",          contents: contents),
+			BinaryFile(name: "arm9",               fileExtension: "",     data: arm9),
+			BinaryFile(name: "arm9 overlay table", fileExtension: "json", data: arm9OverlayTable),
+			BinaryFile(name: "arm7",               fileExtension: "",     data: arm7),
+			BinaryFile(name: "arm7 overlay table", fileExtension: "json", data: arm7OverlayTable),
+			BinaryFile(name: "header",             fileExtension: "json", data: header),
+			BinaryFile(name: "icon banner",        fileExtension: "",     data: iconBanner)
+		]
+		
+		try Folder(name: name, contents: contents).write(into: directory)
+	}
+	
+	func packedStatus() -> PackedStatus {
+		contents
+			.map { $0.packedStatus() }
+			.reduce(.unpacked) { $0.combined(with: $1) }
+	}
+	
+	func packed() -> PackedNDS {
+		PackedNDS(
+			name: name,
+			binary: NDS.Binary(self)
+		)
+	}
+	
+	consuming func unpacked() throws -> Self {
+		contents = try contents.map { try $0.unpacked() }
+		return self
+	}
 }
 
 struct PackedNDS: FileSystemObject {
-    var name: String
-    var binary: NDS.Binary
-    
-    static let fileExtension = "nds"
+	var name: String
+	var binary: NDS.Binary
+	
+	static let fileExtension = "nds"
 	var fileExtension: String { Self.fileExtension }
-    
-    func savePath(in directory: URL) -> URL {
+	
+	func savePath(in directory: URL) -> URL {
 		let path = directory
 			.appending(component: name)
 			.appendingPathExtension(Self.fileExtension)
@@ -220,11 +220,11 @@ struct PackedNDS: FileSystemObject {
 		}
 		
 		fatalError("unreachable")
-    }
-    
-    func write(into directory: URL) throws {
-        let data = Datawriter()
-        data.write(binary)
+	}
+	
+	func write(into directory: URL) throws {
+		let data = Datawriter()
+		data.write(binary)
 		let filePath = savePath(in: directory)
 		
 		do {
@@ -232,15 +232,15 @@ struct PackedNDS: FileSystemObject {
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
-    }
-    
-    func packedStatus() -> PackedStatus { .packed }
-    
-    func packed() -> Self { self }
-    
-    func unpacked() throws -> NDS {
-        try NDS(name: name, binary: binary).unpacked()
-    }
+	}
+	
+	func packedStatus() -> PackedStatus { .packed }
+	
+	func packed() -> Self { self }
+	
+	func unpacked() throws -> NDS {
+		try NDS(name: name, binary: binary).unpacked()
+	}
 }
 
 
@@ -352,9 +352,9 @@ extension NDS {
 		case invalidFolderStructure([String])
 	}
 	
-    init(name: String, contents: [any FileSystemObject]) throws {
-        self.name = name
-        
+	init(name: String, contents: [any FileSystemObject]) throws {
+		self.name = name
+		
 		guard let headerFile =           contents.getChild(named: "header") as? BinaryFile,
 			  let arm9File =             contents.getChild(named: "arm9") as? BinaryFile,
 			  let arm9OverlayTableFile = contents.getChild(named: "arm9 overlay table") as? BinaryFile,
@@ -362,7 +362,7 @@ extension NDS {
 			  let arm7File =             contents.getChild(named: "arm7") as? BinaryFile,
 			  let arm7OverlayTableFile = contents.getChild(named: "arm7 overlay table") as? BinaryFile,
 			  let arm7OverlaysFolder =   contents.getChild(named: "arm7 overlays") as? Folder,
-		      let iconBannerFile =       contents.getChild(named: "icon banner") as? BinaryFile,
+			  let iconBannerFile =       contents.getChild(named: "icon banner") as? BinaryFile,
 			  let dataFolder =           contents.getChild(named: "data") as? Folder
 		else {
 			throw UnpackingError.invalidFolderStructure(contents.map(\.name))
@@ -395,6 +395,6 @@ extension NDS {
 		
 		iconBanner = iconBannerFile.data
 		
-        self.contents = dataFolder.contents
+		self.contents = dataFolder.contents
 	}
 }

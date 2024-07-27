@@ -13,21 +13,21 @@ struct DMS {
 
 // MARK: packed
 extension DMS: ProprietaryFileData {
-    static let fileExtension = "dms.json"
-    static let packedStatus: PackedStatus = .unpacked
-    
-    init(_ binary: Binary) {
-        value = binary.value
-    }
+	static let fileExtension = "dms.json"
+	static let packedStatus: PackedStatus = .unpacked
+	
+	init(_ binary: Binary) {
+		value = binary.value
+	}
 }
 
 extension DMS.Binary: ProprietaryFileData {
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .packed
-    
-    init(_ dms: DMS) {
-        value = dms.value
-    }
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	init(_ dms: DMS) {
+		value = dms.value
+	}
 }
 
 // MARK: unpacked

@@ -2,7 +2,7 @@ import BinaryParser
 import Foundation
 
 protocol FileSystemObject {
-    var name: String { get }
+	var name: String { get }
 	var fileExtension: String { get }
 	var fullName: String { get }
 	
@@ -20,9 +20,9 @@ protocol FileSystemObject {
 }
 
 extension FileSystemObject {
-    var fullName: String {
-        combineFileName(name, withExtension: fileExtension)
-    }
+	var fullName: String {
+		combineFileName(name, withExtension: fileExtension)
+	}
 }
 
 func createFileSystemObject(contentsOf path: URL) throws -> any FileSystemObject {

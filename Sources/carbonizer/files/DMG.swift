@@ -10,7 +10,7 @@ struct DMG {
 	
 	@BinaryConvertible
 	struct Binary {
-        @Include
+		@Include
 		static let magicBytes = "DMG"
 		var stringCount: UInt32
 		var indicesOffset: UInt32 = 0xC
@@ -32,9 +32,9 @@ struct DMG {
 
 // MARK: packed
 extension DMG: ProprietaryFileData {
-    static let fileExtension = "dmg.json"
-    static let packedStatus: PackedStatus = .unpacked
-    
+	static let fileExtension = "dmg.json"
+	static let packedStatus: PackedStatus = .unpacked
+	
 	init(_ binary: Binary) {
 		strings = binary.strings.map(DMGString.init)
 	}
@@ -48,9 +48,9 @@ extension DMG.DMGString {
 }
 
 extension DMG.Binary: ProprietaryFileData {
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .packed
-    
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
 	init(_ dmg: DMG) {
 		stringCount = UInt32(dmg.strings.count)
 		

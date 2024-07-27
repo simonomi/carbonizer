@@ -126,7 +126,7 @@ extension MCM.Binary {
 // MARK: unpacked
 extension MCM {
 	enum NoMetadataError: Error {
-        case noMetadata(String)
+		case noMetadata(String)
 	}
 	
 	init?(_ file: any FileSystemObject) throws {
@@ -162,15 +162,15 @@ extension ProprietaryFile {
 		)
 		data = mcm.content
 	}
-    
-    init(name: String, standaloneMCM mcm: MCM) {
-        self.name = name
-        metadata = Metadata(
-            standalone: true,
-            compression: mcm.compression,
-            maxChunkSize: mcm.maxChunkSize,
-            index: 0
-        )
-        data = mcm.content
-    }
+	
+	init(name: String, standaloneMCM mcm: MCM) {
+		self.name = name
+		metadata = Metadata(
+			standalone: true,
+			compression: mcm.compression,
+			maxChunkSize: mcm.maxChunkSize,
+			index: 0
+		)
+		data = mcm.content
+	}
 }

@@ -128,14 +128,14 @@ extension Datastream {
 	
 	/// Documentation
 	@inlinable
-    public func read<T: FixedWidthInteger>(_ type: T.Type) throws -> T {
-        let byteWidth = T.bitWidth / 8
-        guard canRead(bytes: byteWidth) else {
-            throw BinaryParserError.indexOutOfBounds(index: offset + byteWidth, expected: bytes.indices, for: T.self)
-        }
-        
-        let range = offset..<(offset + byteWidth)
-        
+	public func read<T: FixedWidthInteger>(_ type: T.Type) throws -> T {
+		let byteWidth = T.bitWidth / 8
+		guard canRead(bytes: byteWidth) else {
+			throw BinaryParserError.indexOutOfBounds(index: offset + byteWidth, expected: bytes.indices, for: T.self)
+		}
+		
+		let range = offset..<(offset + byteWidth)
+		
 		let output = bytes[range]
 			.enumerated()
 			.map { (index, byte) in
@@ -149,7 +149,7 @@ extension Datastream {
 	
 	/// Documentation
 	@inlinable
-    public func read<T: FixedWidthInteger, U: BinaryInteger>(
+	public func read<T: FixedWidthInteger, U: BinaryInteger>(
 		_ type: [T].Type, count: U
 	) throws -> [T] {
 		let count = Int(count)

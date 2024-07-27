@@ -125,7 +125,7 @@ struct DEX {
 // MARK: packed
 extension DEX: ProprietaryFileData {
 	static let fileExtension = "dex.txt"
-    static let packedStatus: PackedStatus = .unpacked
+	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
 		commands = binary.script
@@ -174,7 +174,7 @@ extension DEX.Command {
 	
 	var typeAndArguments: (UInt32, [Int32]) {
 		switch self {
-			case .dialogue(let dialogue): 
+			case .dialogue(let dialogue):
 				(1, [dialogue.id])
 			case .spawn(let character, let unknown1, x: let x, y: let y, let unknown2):
 				(7, [character.id, unknown1, x, y, unknown2])
@@ -287,9 +287,9 @@ extension DEX.Command.Movement {
 }
 
 extension DEX.Binary: ProprietaryFileData {
-    static let fileExtension = ""
-    static let packedStatus: PackedStatus = .packed
-    
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
 	init(_ dex: DEX) {
 		numberOfScenes = UInt32(dex.commands.count)
 		
@@ -304,27 +304,27 @@ extension DEX.Binary: ProprietaryFileData {
 
 // MARK: unpacked
 extension DEX: BinaryConvertible {
-    init(_ data: Datastream) throws {
+	init(_ data: Datastream) throws {
 		let fileLength = data.bytes.endIndex - data.offset
 		let string = try data.read(String.self, length: fileLength)
-        
-        commands = try string
-            .split(separator: "\n\n")
-            .map {
-                try $0.split(separator: "\n")
-                    .map(DEX.Command.init)
-            }
-    }
-    
-    func write(to data: Datawriter) {
-        let string = commands
-            .recursiveMap(String.init)
-            .map { $0.joined(separator: "\n") }
-            .joined(separator: "\n\n")
-        
+		
+		commands = try string
+			.split(separator: "\n\n")
+			.map {
+				try $0.split(separator: "\n")
+					.map(DEX.Command.init)
+			}
+	}
+	
+	func write(to data: Datawriter) {
+		let string = commands
+			.recursiveMap(String.init)
+			.map { $0.joined(separator: "\n") }
+			.joined(separator: "\n\n")
+		
 		data.write(string, length: string.lengthOfBytes(using: .utf8))
-    }
-    
+	}
+	
 //	init(unpacked bytes: Data) throws {
 //		guard let string = String(bytes: bytes, encoding: .utf8) else {
 //			throw DEXError.invalidUTF8

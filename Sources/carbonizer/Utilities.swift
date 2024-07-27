@@ -44,16 +44,16 @@ func logProgress(_ items: Any...) {
 	print(String(repeating: " ", count: 100), terminator: "\r")
 	print(message, terminator: "\r")
 	
-    fflush(stdout)
+	fflush(stdout)
 }
 
 func splitFileName(_ name: String) -> (name: String, fileExtension: String) {
-    let split = name.split(separator: ".", maxSplits: 1)
-    if split.count == 2 {
-        return (String(split[0]), String(split[1]))
-    } else {
-        return (name, "")
-    }
+	let split = name.split(separator: ".", maxSplits: 1)
+	if split.count == 2 {
+		return (String(split[0]), String(split[1]))
+	} else {
+		return (name, "")
+	}
 }
 
 func combineFileName(_ name: String, withExtension fileExtension: String) -> String {
@@ -165,10 +165,10 @@ extension URL {
 		try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: path(percentEncoded: false))
 #endif
 	}
-    
-    func exists() -> Bool {
-        FileManager.default.fileExists(atPath: path(percentEncoded: false))
-    }
+	
+	func exists() -> Bool {
+		FileManager.default.fileExists(atPath: path(percentEncoded: false))
+	}
 	
 	func contents() throws -> [URL] {
 		try FileManager.default.contentsOfDirectory(at: self, includingPropertiesForKeys: nil)
@@ -186,15 +186,15 @@ extension URL {
 			default: .other(type)
 		}
 	}
-    
+	
 #if os(Windows)
-    func currentDirectory() -> URL {
-        URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-    }
-    
-    func appending(component: some StringProtocol) -> URL {
-        appendingPathComponent(String(component))
-    }
+	func currentDirectory() -> URL {
+		URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+	}
+	
+	func appending(component: some StringProtocol) -> URL {
+		appendingPathComponent(String(component))
+	}
 #endif
 }
 
