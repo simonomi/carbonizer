@@ -65,11 +65,12 @@ struct carbonizer: ParsableCommand {
 	}
 	
 	mutating func run() throws {
-		// TODO: debug only
+#if !IN_CI
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/motion/ui_option/"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
+#endif
 		
 		extractMARs = extractMARsInput
 		
@@ -84,7 +85,9 @@ struct carbonizer: ParsableCommand {
 			extractMARs = extractMARsOverride
 		}
 		
-		extractMARs = .always // TODO: debug only
+#if !IN_CI
+		extractMARs = .always
+#endif
 		
 		if filePaths.isEmpty {
 			print("\(.red, .bold)Error:\(.normal) \(.bold)No files were specified as input\(.normal)", terminator: "\n\n", to: &standardError)
@@ -96,20 +99,24 @@ struct carbonizer: ParsableCommand {
 		for filePath in filePaths {
 			inputPackedStatus = .unknown
 			
-//			let start = Date.now
 			var file = try CreateFileSystemObject(contentsOf: filePath)
-//			print(-start.timeIntervalSinceNow)
 			
+#if !IN_CI
 //			file = try file.postProcessed(with: mm3Finder)
 //			file = try file.postProcessed(with: mpmFinder) // doesnt work for much
 			file = try file.postProcessed(with: mmsFinder)
 //			return
+#endif
 			
-//			let writeStart = Date.now
-//			let outputDirectory = filePath.deletingLastPathComponent()
+#if IN_CI
+			let outputDirectory = filePath.deletingLastPathComponent()
+#else
 			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
+#endif
 			
-			inputPackedStatus = .packed // TODO: debug only
+#if !IN_CI
+			inputPackedStatus = .packed
+#endif
 			
 			if let wasPacked = inputPackedStatus.wasPacked {
 				try file.write(into: outputDirectory, packed: !wasPacked)
@@ -125,7 +132,6 @@ struct carbonizer: ParsableCommand {
 					return
 				}
 			}
-//			print(-writeStart.timeIntervalSinceNow)
 		}
 	}
 }
