@@ -1,6 +1,9 @@
 name: Build carbonizer
 
-on: [push]
+on:
+  push:
+    tags:
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -15,13 +18,12 @@ jobs:
         swift-version: "5.10"
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Build
-      run: swift build -c release -Xswiftc -DIN_CI
     - name: Test
       run: swift test -Xswiftc -DIN_CI
+    - name: Build
+      run: swift build -c release -Xswiftc -DIN_CI
     - name: Release
       uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
       with:
         draft: true
         files: /Users/runner/work/carbonizer/carbonizer/.build/*/release/carbonizer
@@ -35,11 +37,12 @@ jobs:
         swift-version: "5.10"
     - name: Checkout
       uses: actions/checkout@v4
+#     - name: Test
+#       run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: swift build -c release -Xswiftc -DIN_CI -Xswiftc -static-executable -Xswiftc -static-stdlib
     - name: Release
       uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
       with:
         draft: true
         files: D:/a/carbonizer/carbonizer/.build/*/release/carbonizer.exe
