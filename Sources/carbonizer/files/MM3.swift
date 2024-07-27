@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct MM3: Writeable {
+struct MM3 {
 	var model: TableEntry
 	var animation: TableEntry
 	var texture: TableEntry
@@ -11,8 +11,9 @@ struct MM3: Writeable {
 	}
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
-		var magicBytes = "MM3"
+	struct Binary {
+		@Include
+		static let magicBytes = "MM3"
 		var modelIndex: UInt32
 		var modelTableNameOffset: UInt32
 		var animationIndex: UInt32
@@ -29,18 +30,21 @@ struct MM3: Writeable {
 }
 
 // MARK: packed
-extension MM3: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "mm3.json"
+extension MM3: ProprietaryFileData {
+	static let fileExtension = "mm3.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
-	init(packed: Binary) {
+	init(_ packed: Binary) {
 		model = TableEntry(index: packed.modelIndex, tableName: packed.modelTableName)
 		animation = TableEntry(index: packed.animationIndex, tableName: packed.animationTableName)
 		texture = TableEntry(index: packed.textureIndex, tableName: packed.textureTableName)
 	}
 }
 
-extension MM3.Binary: InitFrom {
+extension MM3.Binary: ProprietaryFileData {
+    static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
+    
 	init(_ mm3: MM3) {
 		modelIndex = mm3.model.index
 		animationIndex = mm3.animation.index

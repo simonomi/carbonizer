@@ -1,6 +1,21 @@
 import BinaryParser
 import Foundation
 
+#if compiler(>=6)
+extension [NDS.Binary.FileNameTable.SubEntry]: @retroactive BinaryConvertible {
+	public init(_ data: Datastream) throws {
+		self = []
+		while last?.typeAndNameLength != 0 {
+			append(try data.read(NDS.Binary.FileNameTable.SubEntry.self))
+		}
+		removeLast()
+	}
+	
+	public func write(to data: BinaryParser.Datawriter) {
+		forEach(data.write)
+	}
+}
+#else
 extension [NDS.Binary.FileNameTable.SubEntry]: BinaryConvertible {
 	public init(_ data: Datastream) throws {
 		self = []
@@ -14,6 +29,7 @@ extension [NDS.Binary.FileNameTable.SubEntry]: BinaryConvertible {
 		forEach(data.write)
 	}
 }
+#endif
 
 extension Datawriter {
 	func write(_ data: [NDS.Binary.FileNameTable.SubEntry]) {
@@ -60,12 +76,21 @@ extension NDS.Binary.FileNameTable.SubEntry {
 	func createFileSystemObject(files: [Datastream], fileNameTable: CompleteFNT) throws -> any FileSystemObject {
 		switch type {
 			case .file:
-				try File(named: name, data: files[Int(id!)])
-			case .folder:
-				Folder(
+				let (name, fileExtension) = splitFileName(name)
+				
+				return try createFile(
 					name: name,
-					files: try fileNameTable[id!]!
-						.map { try $0.createFileSystemObject(files: files, fileNameTable: fileNameTable) }
+					fileExtension: fileExtension,
+					metadata: nil,
+					data: files[Int(id!)]
+				)
+			case .folder:
+				return Folder(
+					name: name,
+					contents: try fileNameTable[id!]!
+						.map {
+							try $0.createFileSystemObject(files: files, fileNameTable: fileNameTable)
+						}
 				)
 		}
 	}
@@ -119,14 +144,14 @@ extension NDS.Binary.Header {
 
 extension NDS.Binary.OverlayTableEntry {
 	enum CodingKeys: String, CodingKey {
-		case id =								"overlay ID"
-		case loadAddress =						"load address"
-		case ramSize =							"RAM size"
-		case bssSize =							"BSS size"
-		case staticInitializerStartAddress =	"static initialiser start address"
-		case staticInitializerEndAddress =		"static initialiser end address"
-		case fileId =							"file ID"
-		case reserved =							"reserved"
+		case id =                                "overlay ID"
+		case loadAddress =                       "load address"
+		case ramSize =                           "RAM size"
+		case bssSize =                           "BSS size"
+		case staticInitializerStartAddress =     "static initialiser start address"
+		case staticInitializerEndAddress =       "static initialiser end address"
+		case fileId =                            "file ID"
+		case reserved =                          "reserved"
 	}
 }
 
@@ -134,11 +159,11 @@ extension NDS.Binary.FileNameTable {
 	init(_ files: [any FileSystemObject], firstFileId: UInt16) {
 		let allFolders = files.getAllFolders()
 		let folderIds = Dictionary(uniqueKeysWithValues:
-			allFolders
-				.enumerated()
-				.map { index, folder in
-					(folder, UInt16(index + 0xF001))
-				}
+									allFolders
+			.enumerated()
+			.map { index, folder in
+				(folder, UInt16(index + 0xF001))
+			}
 		)
 		let foldersWithIds = folderIds
 			.sorted(by: \.value)
@@ -149,14 +174,15 @@ extension NDS.Binary.FileNameTable {
 		
 		func createSubEntry(_ fileSystemObject: any FileSystemObject) -> SubEntry {
 			switch fileSystemObject {
-				case let file as File:
+				case is ProprietaryFile, is BinaryFile, is MAR, is PackedMAR:
 					fileId += 1
-					subTableOffset += file.name.utf8.count + 1
-					return SubEntry(.file, name: file.name)
+					subTableOffset += fileSystemObject.fullName.utf8CString.count
+					return SubEntry(.file, name: fileSystemObject.fullName)
 				case let folder as Folder:
-					subTableOffset += folder.name.utf8.count + 3
-					return SubEntry(.folder, name: folder.name, id: folderIds[folder]!)
-				default: fatalError()
+					subTableOffset += folder.fullName.utf8CString.count + 2
+					return SubEntry(.folder, name: folder.fullName, id: folderIds[folder]!)
+				default:
+					fatalError("unexpected FileSystemObject type: \(type(of: fileSystemObject))")
 			}
 		}
 		
@@ -173,7 +199,7 @@ extension NDS.Binary.FileNameTable {
 		
 		for folder in allFolders {
 			let parentId = foldersWithIds.first {
-				$0.folder.files
+				$0.folder.contents
 					.compactMap(as: Folder.self)
 					.contains { $0 == folder }
 			}?.id ?? 0xF000
@@ -185,7 +211,7 @@ extension NDS.Binary.FileNameTable {
 					parentId: parentId
 				)
 			)
-			subTables.append(folder.files.map(createSubEntry) + [.end])
+			subTables.append(folder.contents.map(createSubEntry) + [.end])
 			subTableOffset += 1
 		}
 	}
@@ -203,20 +229,23 @@ extension NDS.Binary.FileNameTable.SubEntry {
 }
 
 extension [any FileSystemObject] {
-	func getAllFiles() -> [File] {
+	func getAllFiles() -> [any FileSystemObject] {
 		flatMap {
 			switch $0 {
-				case let file as File:
-					[file]
+				case let proprietaryFile as ProprietaryFile: [proprietaryFile]
+				case let binaryFile as BinaryFile: [binaryFile]
+				case let mar as MAR: [mar]
+				case let packedMAR as PackedMAR: [packedMAR]
 				case let folder as Folder:
-					folder.files.getAllFiles()
-				default: fatalError()
+					folder.contents.getAllFiles()
+				default:
+					fatalError("unexpected FileSystemObject type: \(type(of: $0))")
 			}
 		}
 	}
 	
 	func getAllFolders() -> [Folder] {
 		compactMap(as: Folder.self)
-			.flatMap { [$0] + $0.files.getAllFolders() }
+			.flatMap { [$0] + $0.contents.getAllFolders() }
 	}
 }

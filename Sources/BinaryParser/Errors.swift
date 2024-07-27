@@ -9,6 +9,6 @@ public enum BinaryParserError: Error {
 	case whileWriting(Any.Type, offsets: [Int], any Error)
 }
 
-public enum BinaryParserAssertionError<T>: Error {
+public enum BinaryParserAssertionError<T: Sendable>: Error {
 	case unexpectedValue(actual: T, expected: T)
 }

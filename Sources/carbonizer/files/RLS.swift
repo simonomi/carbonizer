@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct RLS: Writeable {
+struct RLS {
 	var kasekis: [Kaseki?]
 	
 	struct Kaseki: Equatable {
@@ -36,8 +36,9 @@ struct RLS: Writeable {
 	}
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
-		var magicBytes = "RLS"
+	struct Binary {
+		@Include
+		static let magicBytes = "RLS"
 		var kasekiCount: UInt32
 		var offsetsStart: UInt32 = 0xC
 		@Count(givenBy: \Self.kasekiCount)
@@ -93,11 +94,11 @@ struct RLS: Writeable {
 }
 
 // MARK: packed
-extension RLS: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "rls.json"
+extension RLS: ProprietaryFileData {
+	static let fileExtension = "rls.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
-	init(packed: Binary) {
+	init(_ packed: Binary) {
 		kasekis = packed.kasekis.enumerated().map(Kaseki.init)
 	}
 }
@@ -137,7 +138,10 @@ extension RLS.Kaseki {
 	}
 }
 
-extension RLS.Binary: InitFrom {
+extension RLS.Binary: ProprietaryFileData {
+    static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
+    
 	init(_ rls: RLS) {
 		kasekiCount = UInt32(rls.kasekis.count)
 		

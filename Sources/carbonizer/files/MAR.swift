@@ -2,11 +2,13 @@ import BinaryParser
 import Foundation
 
 struct MAR {
+	var name: String
 	var files: [MCM]
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
-		var magicBytes = "MAR"
+	struct Binary {
+		@Include
+		static let magicBytes = "MAR"
 		var fileCount: UInt32
 		@Count(givenBy: \Self.fileCount)
 		var indexes: [Index]
@@ -21,17 +23,100 @@ struct MAR {
 	}
 }
 
-// MARK: packed
-extension MAR: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "mar"
+
+extension MAR: FileSystemObject {
+	var fileExtension: String { "mar" }
 	
-	init(packed: Binary) throws {
-		files = try packed.files.map(MCM.init)
+	func savePath(in directory: URL) -> URL {
+		Folder(name: name, contents: [])
+			.savePath(in: directory)
+	}
+	
+	func write(into directory: URL) throws {
+		if files.count == 1,
+		   let file = files.first
+		{
+			try ProprietaryFile(name: name, standaloneMCM: file)
+				.write(into: directory)
+		} else {
+			try Folder(
+				name: fullName,
+				contents: files.enumerated().map(ProprietaryFile.init)
+			).write(into: directory)
+		}
+	}
+	
+	func packedStatus() -> PackedStatus { .unpacked }
+	
+	func packed() -> PackedMAR {
+		let (name, fileExtension) = splitFileName(name)
+		
+		return PackedMAR(
+			name: name,
+			fileExtension: fileExtension,
+			binary: MAR.Binary(self)
+		)
+	}
+	
+	func unpacked() throws -> Self { self }
+}
+
+struct PackedMAR: FileSystemObject {
+	var name: String
+	var fileExtension: String
+	var binary: MAR.Binary
+	
+	func savePath(in directory: URL) -> URL {
+		BinaryFile(
+			name: name,
+			fileExtension: fileExtension,
+			data: Datastream()
+		)
+		.savePath(in: directory)
+	}
+	
+	func write(into directory: URL) throws {
+		let writer = Datawriter()
+		writer.write(binary)
+		
+		try BinaryFile(
+			name: name,
+			fileExtension: fileExtension,
+			data: writer.intoDatastream()
+		)
+		.write(into: directory)
+	}
+	
+	func packedStatus() -> PackedStatus { .packed }
+	
+	func packed() -> Self { self }
+	
+	func unpacked() throws -> MAR {
+		try MAR(
+			name: combineFileName(name, withExtension: fileExtension),
+			binary: binary
+		)
 	}
 }
 
-extension MAR.Binary: InitFrom {
+
+// MARK: packed
+extension MAR {
+	static let fileExtension = "mar"
+	
+	init(name: String, binary: Binary) throws {
+		logProgress("Decompressing", name + "...")
+		self.name = name
+		
+		do {
+			files = try binary.files.map(MCM.init)
+		} catch {
+			throw BinaryParserError.whileReadingFile(name, "mar", "", error)
+		}
+	}
+}
+
+extension MAR.Binary {
 	init(_ mar: MAR) {
 		fileCount = UInt32(mar.files.count)
 		
@@ -44,16 +129,5 @@ extension MAR.Binary: InitFrom {
 		let decompressedSizes = files.map(\.decompressedSize)
 		
 		indexes = zip(offsets, decompressedSizes).map(Index.init)
-	}
-}
-
-// MARK: unpacked
-extension MAR {
-	init(unpacked: [any FileSystemObject]) throws {
-		files = try unpacked.compactMap(as: File.self).map(MCM.init)
-	}
-	
-	func toUnpacked() -> [any FileSystemObject] {
-		files.enumerated().map(File.init)
 	}
 }

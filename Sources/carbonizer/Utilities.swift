@@ -5,12 +5,19 @@ import WinSDK
 #endif
 
 extension URL {
-	static func fromFilePath(_ filePath: String) -> URL {
 #if os(Windows)
-		URL(fileURLWithPath: filePath)
-#else
-		URL(filePath: filePath)
+	init(filePath: String) {
+		self.init(fileURLWithPath: filePath)
+	}
 #endif
+	
+	@Sendable
+	static func fromFilePath(_ filePath: String) -> URL {
+//#if os(Windows)
+//		URL(fileURLWithPath: filePath)
+//#else
+		URL(filePath: filePath)
+//#endif
 	}
 }
 
@@ -31,6 +38,30 @@ func createOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 =
 
 func hex(_ value: some BinaryInteger) -> String {
 	String(value, radix: 16)
+}
+
+func logProgress(_ items: Any...) {
+	let message = items
+		.map { String(describing: $0) }
+		.joined(separator: " ")
+	
+	print(String(repeating: " ", count: 100), terminator: "\r")
+	print(message, terminator: "\r")
+	
+    fflush(stdout)
+}
+
+func splitFileName(_ name: String) -> (name: String, fileExtension: String) {
+    let split = name.split(separator: ".", maxSplits: 1)
+    if split.count == 2 {
+        return (String(split[0]), String(split[1]))
+    } else {
+        return (name, "")
+    }
+}
+
+func combineFileName(_ name: String, withExtension fileExtension: String) -> String {
+	URL(filePath: name).appendingPathExtension(fileExtension).lastPathComponent
 }
 
 extension Array {
@@ -103,7 +134,20 @@ extension String {
 	}
 }
 
+// TODO: remove bc this is slow
+extension Array where Element: Comparable {
+	func isSorted() -> Bool {
+		self == self.sorted()
+	}
+}
+
 extension URL {
+#if os(Windows)
+	func path(percentEncoded: Bool) -> String {
+		path
+	}
+#endif
+	
 	func getCreationDate() throws -> Date? {
 		try FileManager.default.attributesOfItem(atPath: path)[.creationDate] as? Date
 	}
@@ -125,6 +169,14 @@ extension URL {
 		try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: path(percentEncoded: false))
 #endif
 	}
+    
+    func exists() -> Bool {
+//#if os(Windows)
+//        FileManager.default.fileExists(atPath: path)
+//#else
+        FileManager.default.fileExists(atPath: path(percentEncoded: false))
+//#endif
+    }
 	
 	func contents() throws -> [URL] {
 		try FileManager.default.contentsOfDirectory(at: self, includingPropertiesForKeys: nil)
@@ -135,16 +187,52 @@ extension URL {
 	}
 	
 	func type() throws -> FileType {
-#if os(Windows)
-		let type = try FileManager.default.attributesOfItem(atPath: self.path)[.type] as? FileAttributeType
-#else
+//#if os(Windows)
+//		let type = try FileManager.default.attributesOfItem(atPath: self.path)[.type] as? FileAttributeType
+//#else
 		let type = try FileManager.default.attributesOfItem(atPath: self.path(percentEncoded: false))[.type] as? FileAttributeType
-#endif
+//#endif
 		return switch type {
 			case .some(.typeRegular): .file
 			case .some(.typeDirectory): .folder
 			default: .other(type)
 		}
+	}
+    
+#if os(Windows)
+    func currentDirectory() -> URL {
+        URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+    }
+    
+    func appending(component: some StringProtocol) -> URL {
+        appendingPathComponent(String(component))
+    }
+#endif
+}
+
+// backporting from swift 6 standard library
+// ideally remove once minimum macOS version is > 14
+extension Substring {
+	func myIndices(
+		where predicate: (Element) throws -> Bool
+	) rethrows -> [Range<Index>] {
+		var result: [Range<Index>] = []
+		var end = startIndex
+		while let begin = try self[end...].firstIndex(where: predicate) {
+			end = try self[begin...].prefix(while: predicate).endIndex
+			result.append(begin ..< end)
+			
+			guard end < self.endIndex else {
+				break
+			}
+			self.formIndex(after: &end)
+		}
+		
+		return result
+	}
+	
+	func myIndices(of element: Element) -> [Range<Index>] {
+		myIndices(where: { $0 == element })
 	}
 }
 
@@ -155,11 +243,19 @@ extension JSONEncoder {
 	}
 }
 
+#if compiler(>=6)
+extension FileHandle: @retroactive TextOutputStream {
+	public func write(_ string: String) {
+		write(Data(string.utf8))
+	}
+}
+#else
 extension FileHandle: TextOutputStream {
 	public func write(_ string: String) {
 		write(Data(string.utf8))
 	}
 }
+#endif
 
 enum ANSIFontEffect: Int {
 	case normal = 0
@@ -207,9 +303,16 @@ extension DefaultStringInterpolation {
 			.joined(separator: ";")
 		appendInterpolation("\u{001B}[\(effects)m")
 	}
+	
+	mutating func appendInterpolation(_ number: some BinaryInteger, digits: Int) {
+		precondition(number >= 0)
+		appendInterpolation(String(number).padded(toLength: digits, with: "0"))
+	}
 }
 
 func waitForInput() {
+#if os(Windows)
 	print("Press Enter to continue...", terminator: "")
 	let _ = readLine()
+#endif
 }

@@ -301,7 +301,7 @@ struct SpriteAnimation: BinaryConvertible {
 	}
 }
 
-struct Point<T: BinaryInteger>: AdditiveArithmetic, CustomStringConvertible {
+struct Point<T: BinaryInteger & Sendable>: AdditiveArithmetic, CustomStringConvertible {
 	var x: T
 	var y: T
 	

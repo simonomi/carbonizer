@@ -37,23 +37,29 @@ extension Property {
 				""
 			}
 		
-		let dataRead = 
-			switch size {
-				case .auto:
-					"\(name) = try data.read(\(type).self\(lengthArgument)\(endOffsetAndRelativeTo))"
+		let declarationKeyword = if isStatic {
+			"let "
+		} else {
+			""
+		}
+		
+		let dataRead =
+		switch size {
+			case .auto:
+				"\(declarationKeyword)\(name) = try data.read(\(type).self\(lengthArgument)\(endOffsetAndRelativeTo))"
 				
-				case .count(let count):
-					"\(name) = try data.read(\(type).self, count: \(count.value))"
+			case .count(let count):
+				"\(declarationKeyword)\(name) = try data.read(\(type).self, count: \(count.value))"
 				
-				case .offsets(.givenByPath(let path)):
-					"\(name) = try data.read(\(type).self, offsets: \(path)\(endOffsetArgument), relativeTo: base)"
+			case .offsets(.givenByPath(let path)):
+				"\(declarationKeyword)\(name) = try data.read(\(type).self, offsets: \(path)\(endOffsetArgument), relativeTo: base)"
 				
-				case .offsets(.givenByPathAndSubpath(let path, let subPath)):
-					"\(name) = try data.read(\(type).self, offsets: \(path).map(\(subPath))\(endOffsetArgument), relativeTo: base)"
+			case .offsets(.givenByPathAndSubpath(let path, let subPath)):
+				"\(declarationKeyword)\(name) = try data.read(\(type).self, offsets: \(path).map(\(subPath))\(endOffsetArgument), relativeTo: base)"
 				
-				case .offsets(.givenByPathStartToEnd(let path, let startPath, let endPath)):
-					"\(name) = try data.read(\(type).self, startOffsets: \(path).map(\(startPath)), endOffsets: \(path).map(\(endPath)), relativeTo: base)"
-			}
+			case .offsets(.givenByPathStartToEnd(let path, let startPath, let endPath)):
+				"\(declarationKeyword)\(name) = try data.read(\(type).self, startOffsets: \(path).map(\(startPath)), endOffsets: \(path).map(\(endPath)), relativeTo: base)"
+		}
 		
 		let assertExpected = 
 			if let expected {
@@ -93,17 +99,23 @@ extension Property {
 				""
 			}
 		
+		let selfDot = if isStatic {
+				"Self."
+			} else {
+				"" // could be "self."?
+			}
+		
 		let dataWrite =
 			switch size {
 				case .auto, .count:
-					"data.write(\(name)\(lengthArgument))"
+					"data.write(\(selfDot)\(name)\(lengthArgument))"
 				
 				case .offsets(.givenByPath(let path)):
-					"data.write(\(name), offsets: \(path), relativeTo: base)"
+					"data.write(\(selfDot)\(name), offsets: \(path), relativeTo: base)"
 				
 				case .offsets(.givenByPathAndSubpath(let path, let subPath)),
 					 .offsets(.givenByPathStartToEnd(let path, let subPath, _)):
-					"data.write(\(name), offsets: \(path).map(\(subPath)), relativeTo: base)"
+					"data.write(\(selfDot)\(name), offsets: \(path).map(\(subPath)), relativeTo: base)"
 			}
 		
 		return ifCheck + setOffset + dataWrite + endIfCheck

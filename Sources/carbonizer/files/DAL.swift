@@ -3,7 +3,8 @@ import BinaryParser
 struct DAL {
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "DAL"
+		@Include
+		static let magicBytes = "DAL"
 		var unknown1: UInt32 = 0x659
 		var unknown2: UInt32 = 0x7f4
 		var indexesCount: UInt32

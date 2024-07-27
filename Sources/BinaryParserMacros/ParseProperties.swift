@@ -14,9 +14,16 @@ func parseProperties(_ declarations: [VariableDeclSyntax]) throws -> [Property] 
 }
 
 func parseProperty(_ declaration: VariableDeclSyntax) throws -> [Property] {
-	// ignore static properties
-	if declaration.modifiers.contains(where: { $0.name.trimmedDescription == "static" }) { return [] }
+    let isStatic = declaration.modifiers.contains(where: { $0.name.trimmedDescription == "static" })
+    
+    let hasInclude = declaration.attributes
+        .compactMap(AttributeSyntax.init)
+        .map(\.attributeName.trimmedDescription)
+        .contains("Include")
+    
+    // skip static properties unless they have `@Include`
+    if isStatic, !hasInclude { return [] }
 	
-	let attributes = try Attributes(from: declaration.attributes)
+    let attributes = try Attributes(from: declaration.attributes, isStatic: isStatic)
 	return try parseBindings(declaration.bindings, with: attributes)
 }

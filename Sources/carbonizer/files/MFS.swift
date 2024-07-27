@@ -1,11 +1,12 @@
 import BinaryParser
 
-struct MFS: Writeable {
+struct MFS {
 	var somethings: [Binary.Something]
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
-		var magicBytes = "MFS"
+	struct Binary {
+		@Include
+		static let magicBytes = "MFS"
 		var someCount: UInt32
 		var someOffset: UInt32
 		@Count(givenBy: \Self.someCount)
@@ -56,16 +57,16 @@ struct MFS: Writeable {
 }
 
 // MARK: packed
-extension MFS: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "mfs.json"
+extension MFS: ProprietaryFileData {
+	static let fileExtension = "mfs.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
-	init(packed: Binary) {
+	init(_ binary: Binary) {
 		somethings = []
 		
-		guard packed.someCount == 3 else { return }
+		guard binary.someCount == 3 else { return }
 		
-		let something = packed.noClue.first!
+		let something = binary.noClue.first!
 		
 		guard something.letterLength == 16 else { return }
 		
@@ -94,7 +95,10 @@ func stringToImage(_ string: String, _ length: Int = 8) -> String {
 }
 
 
-extension MFS.Binary: InitFrom {
+extension MFS.Binary: ProprietaryFileData {
+    static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
+    
 	init(_ mfs: MFS) {
 		fatalError("TODO")
 	}

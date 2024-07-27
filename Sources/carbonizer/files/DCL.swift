@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct DCL: Writeable {
+struct DCL {
 	var unknown1: UInt32
 	var unknown2: UInt32
 	var unknown3: UInt32
@@ -15,8 +15,9 @@ struct DCL: Writeable {
 	struct Vivosaur: Codable {}
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
-		var magicBytes = "DCL"
+	struct Binary {
+		@Include
+		static let magicBytes = "DCL"
 		
 		var unknown1: UInt32
 		var unknown2: UInt32
@@ -24,7 +25,7 @@ struct DCL: Writeable {
 		var unknown4: UInt32
 		
 		var vivosaurCount: UInt32
-		var indexesOffset: UInt32
+		var indexesOffset: UInt32 = 0x2C
 		
 		var unknown5: UInt32
 		var unknown6: UInt32
@@ -271,21 +272,21 @@ struct DCL: Writeable {
 }
 
 // MARK: packed
-extension DCL: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "dcl.json"
+extension DCL: ProprietaryFileData {
+	static let fileExtension = "dcl.json"
+    static let packedStatus: PackedStatus = .unpacked
 	
-	init(packed: Binary) {
-		unknown1 = packed.unknown1
-		unknown2 = packed.unknown2
-		unknown3 = packed.unknown3
-		unknown4 = packed.unknown4
-		unknown5 = packed.unknown5
-		unknown6 = packed.unknown6
-		unknown7 = packed.unknown7
-		unknown8 = packed.unknown8
+	init(_ binary: Binary) {
+		unknown1 = binary.unknown1
+		unknown2 = binary.unknown2
+		unknown3 = binary.unknown3
+		unknown4 = binary.unknown4
+		unknown5 = binary.unknown5
+		unknown6 = binary.unknown6
+		unknown7 = binary.unknown7
+		unknown8 = binary.unknown8
 		
-		vivosaurs = packed.vivosaurs.map(Vivosaur.init)
+		vivosaurs = binary.vivosaurs.map(Vivosaur.init)
 	}
 }
 
@@ -293,11 +294,36 @@ extension DCL.Vivosaur {
 	init(_ packed: DCL.Binary.Vivosaur) {}
 }
 
-extension DCL.Binary: InitFrom {
+extension DCL.Binary: ProprietaryFileData {
+    static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
+    
 	init(_ dcl: DCL) {
+		unknown1 = dcl.unknown1
+		unknown2 = dcl.unknown2
+		unknown3 = dcl.unknown3
+		unknown4 = dcl.unknown4
+		unknown5 = dcl.unknown5
+		unknown6 = dcl.unknown6
+		unknown7 = dcl.unknown7
+		unknown8 = dcl.unknown8
+		
+		vivosaurCount = UInt32(dcl.vivosaurs.count)
+		
+//		vivosaurs = dcl.vivosaurs.map(Vivosaur.init)
+		
 		fatalError()
 	}
 }
+
+// triggers a compiler bug in swift 5 mode with @Include
+#if compiler(>=6)
+extension DCL.Binary.Vivosaur {
+	init(_ unpacked: DCL.Vivosaur) {
+		fatalError("TODO:")
+	}
+}
+#endif
 
 // MARK: unpacked
 extension DCL: Codable {

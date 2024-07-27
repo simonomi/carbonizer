@@ -81,15 +81,16 @@ struct DEX {
 		}
 		
 		enum InvalidCommand: Error {
-			case invalidCommand(command: String, fullCommand: Substring)
+			case invalidCommand(Substring)
 			case invalidNumberOfArguments(expected: Int, got: Int, command: Substring)
 			case invalidArgument(argument: Substring, command: Substring)
 		}
 	}
 	
 	@BinaryConvertible
-	struct Binary: Writeable {
-		var magicBytes = "DEX"
+	struct Binary {
+		@Include
+		static let magicBytes = "DEX"
 		var numberOfScenes: UInt32
 		var sceneOffsetsStart: UInt32 = 0xC
 		@Count(givenBy: \Self.numberOfScenes)
@@ -122,12 +123,12 @@ struct DEX {
 }
 
 // MARK: packed
-extension DEX: FileData {
-	static var packedFileExtension = ""
-	static var unpackedFileExtension = "dex.txt"
+extension DEX: ProprietaryFileData {
+	static let fileExtension = "dex.txt"
+    static let packedStatus: PackedStatus = .unpacked
 	
-	init(packed: Binary) {
-		commands = packed.script
+	init(_ binary: Binary) {
+		commands = binary.script
 			.map(\.commands)
 			.recursiveMap(Command.init)
 	}
@@ -285,7 +286,10 @@ extension DEX.Command.Movement {
 	}
 }
 
-extension DEX.Binary: InitFrom {
+extension DEX.Binary: ProprietaryFileData {
+    static let fileExtension = ""
+    static let packedStatus: PackedStatus = .packed
+    
 	init(_ dex: DEX) {
 		numberOfScenes = UInt32(dex.commands.count)
 		
@@ -299,43 +303,60 @@ extension DEX.Binary: InitFrom {
 }
 
 // MARK: unpacked
-extension DEX {
-	enum DEXError: Error {
-		case invalidUTF8
-	}
-	
-	init(unpacked bytes: Data) throws {
-		guard let string = String(bytes: bytes, encoding: .utf8) else {
-			throw DEXError.invalidUTF8
-		}
-		try self.init(unpacked: string)
-	}
-	
-	init(unpacked: String) throws {
-		commands = try unpacked
-			.split(separator: "\n\n")
-			.map {
-				try $0.split(separator: "\n")
-					.map(DEX.Command.init)
-			}
-	}
-	
-	func toUnpacked() throws -> String {
-		try commands
-			.map {
-				try $0.map(String.init)
-					.joined(separator: "\n")
-			}
-			.joined(separator: "\n\n")
-	}
+extension DEX: BinaryConvertible {
+    init(_ data: Datastream) throws {
+		let fileLength = data.bytes.endIndex - data.offset
+		let string = try data.read(String.self, length: fileLength)
+        
+        commands = try string
+            .split(separator: "\n\n")
+            .map {
+                try $0.split(separator: "\n")
+                    .map(DEX.Command.init)
+            }
+    }
+    
+    func write(to data: Datawriter) {
+        let string = commands
+            .recursiveMap(String.init)
+            .map { $0.joined(separator: "\n") }
+            .joined(separator: "\n\n")
+        
+        data.write(string) // TODO: null termination?
+    }
+    
+//	init(unpacked bytes: Data) throws {
+//		guard let string = String(bytes: bytes, encoding: .utf8) else {
+//			throw DEXError.invalidUTF8
+//		}
+//		try self.init(unpacked: string)
+//	}
+//	
+//	init(unpacked: String) throws {
+//		commands = try unpacked
+//			.split(separator: "\n\n")
+//			.map {
+//				try $0.split(separator: "\n")
+//					.map(DEX.Command.init)
+//			}
+//	}
+//	
+//	func toUnpacked() throws -> String {
+//		try commands
+//			.map {
+//				try $0.map(String.init)
+//					.joined(separator: "\n")
+//			}
+//			.joined(separator: "\n\n")
+//	}
 }
 
 extension DEX.Command {
 	init(_ text: Substring) throws {
-		let (command, arguments) = parse(command: text)
+		let (command, arguments) = try parse(command: text)
 		
 		switch command {
-			case "dialogue":
+			case .dialogue:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -343,7 +364,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .dialogue(dialogue)
-			case "spawn at , unknowns:":
+			case .spawn:
 				guard arguments.count == 4 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 4, got: arguments.count, command: text)
 				}
@@ -360,7 +381,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[3], command: text)
 				}
 				self = .spawn(character, unknown1, x: x, y: y, unknown2)
-			case "despawn":
+			case .despawn:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -368,7 +389,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .despawn(character)
-			case "fade out":
+			case .fadeOut:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -376,7 +397,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .fadeOut(frameCount: frameCount)
-			case "fade in":
+			case .fadeIn:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -384,7 +405,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .fadeIn(frameCount: frameCount)
-			case "unowned dialogue":
+			case .unownedDialogue:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -392,7 +413,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .unownedDialogue(dialogue)
-			case "turn to":
+			case .turnTo:
 				guard arguments.count == 2 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 2, got: arguments.count, command: text)
 				}
@@ -403,7 +424,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[1], command: text)
 				}
 				self = .turnTo(character, angle: angle)
-			case "turn1 to over , unknown:":
+			case .turn1To:
 				guard arguments.count == 4 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 4, got: arguments.count, command: text)
 				}
@@ -420,7 +441,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[3], command: text)
 				}
 				self = .turn1To(character, angle: angle, frameCount: frameCount, unknown)
-			case "turn towards over , unknown:":
+			case .turnTowards:
 				guard arguments.count == 4 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 4, got: arguments.count, command: text)
 				}
@@ -437,7 +458,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[3], command: text)
 				}
 				self = .turnTowards(character, target: target, frameCount: frameCount, unknown)
-			case "turn2 to over , unknown:":
+			case .turn2To:
 				guard arguments.count == 4 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 4, got: arguments.count, command: text)
 				}
@@ -454,7 +475,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[3], command: text)
 				}
 				self = .turn2To(character, angle: angle, frameCount: frameCount, unknown)
-			case "turn towards over , unknowns:":
+			case .turnTowards2:
 				guard arguments.count == 5 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 5, got: arguments.count, command: text)
 				}
@@ -474,7 +495,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[4], command: text)
 				}
 				self = .turnTowards2(character, target: target, unknown1, frameCount: frameCount, unknown2)
-			case "move to over , unknown:":
+			case .moveTo:
 				guard arguments.count == 4 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 4, got: arguments.count, command: text)
 				}
@@ -491,7 +512,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[3], command: text)
 				}
 				self = .moveTo(character, x: x, y: y, frameCount: frameCount, unknown)
-			case "move by over , unknown:":
+			case .moveBy:
 				guard arguments.count == 4 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 4, got: arguments.count, command: text)
 				}
@@ -508,7 +529,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[3], command: text)
 				}
 				self = .moveBy(character, relativeX: x, relativeY: y, frameCount: frameCount, unknown)
-			case "delay":
+			case .delay:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -516,7 +537,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .delay(frameCount: frameCount)
-			case "clean1 , unknown:":
+			case .clean1:
 				guard arguments.count == 2 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 2, got: arguments.count, command: text)
 				}
@@ -527,7 +548,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[1], command: text)
 				}
 				self = .clean1(unknown, fossil)
-			case "clean2 , unknown:":
+			case .clean2:
 				guard arguments.count == 2 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 2, got: arguments.count, command: text)
 				}
@@ -538,7 +559,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[1], command: text)
 				}
 				self = .clean2(unknown, fossil)
-			case "angle camera from at distance with fov: over , unknown:":
+			case .angleCamera:
 				guard arguments.count == 5 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 5, got: arguments.count, command: text)
 				}
@@ -558,7 +579,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[4], command: text)
 				}
 				self = .angleCamera(fov: fov, xRotation: x, yRotation: y, targetDistance: distance, frameCount: frameCount, unknown)
-			case "start music":
+			case .startMusic:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -566,7 +587,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .startMusic(id: id)
-			case "fade music":
+			case .fadeMusic:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -574,7 +595,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .fadeMusic(frameCount: frameCount)
-			case "play sound":
+			case .playSound:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -582,7 +603,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .playSound(id: id)
-			case "effect on":
+			case .characterEffect:
 				guard arguments.count == 2 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 2, got: arguments.count, command: text)
 				}
@@ -593,7 +614,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[1], command: text)
 				}
 				self = .characterEffect(character, effect)
-			case "clear effects on":
+			case .clearEffects:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -601,7 +622,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .clearEffects(character)
-			case "movement on":
+			case .characterMovement:
 				guard arguments.count == 2 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 2, got: arguments.count, command: text)
 				}
@@ -612,7 +633,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[1], command: text)
 				}
 				self = .characterMovement(character, movement)
-			case "dialogue with choice , unknown:":
+			case .dialogueChoice:
 				guard arguments.count == 3 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 3, got: arguments.count, command: text)
 				}
@@ -626,7 +647,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[2], command: text)
 				}
 				self = .dialogueChoice(dialogue, unknown, choices: choices)
-			case "fade out image over , unknown:":
+			case .imageFadeOut:
 				guard arguments.count == 2 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 2, got: arguments.count, command: text)
 				}
@@ -637,7 +658,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[1], command: text)
 				}
 				self = .imageFadeOut(frameCount: frameCount, unknown)
-			case "slide in image over , unknowns:":
+			case .imageSlideIn:
 				guard arguments.count == 4 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 4, got: arguments.count, command: text)
 				}
@@ -654,7 +675,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[3], command: text)
 				}
 				self = .imageSlideIn(image, unknown1, frameCount: frameCount, unknown2)
-			case "fade in image over , unknowns:":
+			case .imageFadeIn:
 				guard arguments.count == 4 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 4, got: arguments.count, command: text)
 				}
@@ -671,7 +692,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[3], command: text)
 				}
 				self = .imageFadeIn(image, unknown1, frameCount: frameCount, unknown2)
-			case "revive":
+			case .revive:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -679,7 +700,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .revive(vivosaur)
-			case "start turning to follow":
+			case .startTurning:
 				guard arguments.count == 2 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 2, got: arguments.count, command: text)
 				}
@@ -690,7 +711,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[1], command: text)
 				}
 				self = .startTurning(character, target: target)
-			case "stop turning":
+			case .stopTurning:
 				guard arguments.count == 1 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -698,7 +719,7 @@ extension DEX.Command {
 					throw InvalidCommand.invalidArgument(argument: arguments[0], command: text)
 				}
 				self = .stopTurning(character)
-			case "unknown:":
+			case .unknown:
 				guard arguments.count > 0 else {
 					throw InvalidCommand.invalidNumberOfArguments(expected: 1, got: arguments.count, command: text)
 				}
@@ -724,14 +745,12 @@ extension DEX.Command {
 					}
 				
 				self = .unknown(type: type, arguments: intArguments)
-			default:
-				throw InvalidCommand.invalidCommand(command: command, fullCommand: text)
 		}
 	}
 }
 
 extension String {
-	init(_ command: DEX.Command) throws {
+	init(_ command: DEX.Command) {
 		self = switch command {
 			case .dialogue(let dialogue):
 				"dialogue \(dialogue)"
@@ -803,17 +822,117 @@ extension String {
 	}
 }
 
-fileprivate func parse(command: Substring) -> (String, [Substring]) {
-	let commandRegex = try! Regex(#"(?'command'[^\n<> ]+)|<(?'argument'[\w, -]+)>"#)
-	let matches = command.matches(of: commandRegex)
+enum CommandType {
+	case dialogue, spawn, despawn, fadeOut, fadeIn, unownedDialogue, turnTo, turn1To, turnTowards, turn2To, turnTowards2, moveTo, moveBy, delay, clean1, clean2, angleCamera, startMusic, fadeMusic, playSound, characterEffect, clearEffects, characterMovement, dialogueChoice, imageFadeOut, imageSlideIn, imageFadeIn, revive, startTurning, stopTurning, unknown
 	
-	let commandParts = matches.compactMap { $0["command"]?.substring }
-	let arguments = matches.compactMap { $0["argument"]?.substring }
+	init?(_ command: Substring) {
+		let firstSpace = command.firstIndex(where: \.isWhitespace)
+		guard let firstSpace else { return nil }
+		let firstWord = command[..<firstSpace]
+		
+		let possiblySelf: Self? = switch firstWord {
+			case "dialogue":
+				if command.contains("choice") {
+					.dialogueChoice
+				} else {
+					.dialogue
+				}
+			case "spawn": .spawn
+			case "despawn": .despawn
+			case "fade":
+				if command.contains("image") {
+					if command.contains("in") {
+						.imageFadeIn
+					} else {
+						.imageFadeOut
+					}
+				} else if command.contains("music") {
+					.fadeMusic
+				} else {
+					if command.contains("in") {
+						.fadeIn
+					} else {
+						.fadeOut
+					}
+				}
+			case "unowned": .unownedDialogue
+			case "turn":
+				if command.contains("unknowns") {
+					.turnTowards
+				} else if command.contains("unknown") {
+					.turnTowards2
+				} else {
+					.turnTo
+				}
+			case "turn1": .turn1To
+			case "turn2": .turn2To
+			case "move":
+				if command.contains("to") {
+					.moveTo
+				} else {
+					.moveBy
+				}
+			case "delay": .delay
+			case "clean1": .clean1
+			case "clean2": .clean2
+			case "angle": .angleCamera
+			case "start":
+				if command.contains("music") {
+					.startMusic
+				} else {
+					.startTurning
+				}
+			case "play": .playSound
+			case "effect": .characterEffect
+			case "clear": .clearEffects
+			case "movement": .characterMovement
+			case "slide": .imageSlideIn
+			case "revive": .revive
+			case "stop": .stopTurning
+			case "unknown": .unknown
+			default: nil
+		}
+		
+		guard let possiblySelf else { return nil }
+		self = possiblySelf
+	}
+}
+
+fileprivate func parse(command commandText: Substring) throws -> (CommandType, [Substring]) {
+	guard let command = CommandType(commandText) else {
+		throw DEX.Command.InvalidCommand.invalidCommand(commandText)
+	}
 	
-	return (
-		commandParts.joined(separator: " "),
-		arguments
-	)
+	let argumentStartIndices: [String.Index]
+	let argumentEndIndices: [String.Index]
+	if #available(macOS 15.0, *) {
+#if compiler(>=6)
+		argumentStartIndices = commandText
+			.indices(of: "<")
+			.ranges
+			.map(\.upperBound)
+		argumentEndIndices = commandText
+			.indices(of: ">")
+			.ranges
+			.map(\.lowerBound)
+#else
+		fatalError("tried to run swift 5 on macos 15")
+#endif
+	} else {
+		argumentStartIndices = commandText
+			.myIndices(of: "<")
+			.map(\.upperBound)
+		argumentEndIndices = commandText
+			.myIndices(of: ">")
+			.map(\.lowerBound)
+	}
+	
+	let arguments = zip(argumentStartIndices, argumentEndIndices)
+		.map { startIndex, endIndex in
+			commandText[startIndex..<endIndex]
+		}
+	
+	return (command, arguments)
 }
 
 extension DEX.Command.Dialogue: CustomStringConvertible {

@@ -5,7 +5,7 @@ struct MCM {
 	var compression: (CompressionType, CompressionType)
 	var maxChunkSize: UInt32
 	
-	var content: any FileData
+	var content: any ProprietaryFileData
 	
 	enum CompressionType: UInt8 {
 		case none, runLength, lzss, huffman
@@ -31,7 +31,8 @@ struct MCM {
 	
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "MCM"
+		@Include
+		static let magicBytes = "MCM"
 		var decompressedSize: UInt32
 		var maxChunkSize: UInt32
 		var chunkCount: UInt32
@@ -53,22 +54,28 @@ extension MCM {
 		case whileReading(Any.Type, (CompressionType, CompressionType), any Error)
 	}
 	
-	init(packed: Binary) throws {
+	init(_ binary: Binary) throws {
 		compression = (
-			CompressionType(rawValue: packed.compressionType1) ?? .none,
-			CompressionType(rawValue: packed.compressionType2) ?? .none
+			CompressionType(rawValue: binary.compressionType1) ?? .none,
+			CompressionType(rawValue: binary.compressionType2) ?? .none
 		)
-		maxChunkSize = packed.maxChunkSize
+		maxChunkSize = binary.maxChunkSize
 		
 		do {
-			(content, _) = try createFileData(
-				name: "",
-				extension: "",
-				data: packed.chunks
-					.map(compression.0.decompress)
-					.map(compression.1.decompress)
-					.joined()
-			)
+			let data = try binary.chunks
+				.map(compression.0.decompress)
+				.map(compression.1.decompress)
+				.joined()
+			
+#if compiler(>=6)
+			content = try createFileData(data, fileExtension: "")?.unpacked() ?? data
+#else
+			if let fileData = try createFileData(data, fileExtension: "") {
+				content = fileData.unpacked() as any ProprietaryFileData
+			} else {
+				content = data
+			}
+#endif
 		} catch {
 			throw DecompressionError.whileReading(MCM.self, compression, error)
 		}
@@ -85,7 +92,12 @@ extension MCM.Binary {
 		compressionType2 = 0
 		
 		let data = Datawriter()
-		mcm.content.toPacked().write(to: data)
+#if compiler(>=6)
+		mcm.content.packed().write(to: data)
+#else
+		let packedContent: any ProprietaryFileData = mcm.content.packed()
+		packedContent.write(to: data)
+#endif
 		
 		decompressedSize = UInt32(data.offset)
 		
@@ -114,21 +126,32 @@ extension MCM.Binary {
 // MARK: unpacked
 extension MCM {
 	enum NoMetadataError: Error {
-		case noMetadata(File)
+        case noMetadata(String)
 	}
 	
-	init(unpacked: File) throws {
-		guard let metadata = unpacked.metadata else {
-			throw NoMetadataError.noMetadata(unpacked)
+	init?(_ file: any FileSystemObject) throws {
+		let metadata: Metadata?
+		switch file {
+			case let proprietaryFile as ProprietaryFile:
+				content = proprietaryFile.data
+				metadata = proprietaryFile.metadata
+			case let binaryFile as BinaryFile:
+				content = binaryFile.data
+				metadata = binaryFile.metadata
+			default:
+				return nil
+		}
+		
+		guard let metadata else {
+			throw NoMetadataError.noMetadata(file.fullName)
 		}
 		
 		compression = metadata.compression
 		maxChunkSize = metadata.maxChunkSize
-		content = unpacked.data
 	}
 }
 
-extension File {
+extension ProprietaryFile {
 	init(index: Int, mcm: MCM) {
 		name = String(index).padded(toLength: 4, with: "0")
 		metadata = Metadata(
@@ -139,4 +162,15 @@ extension File {
 		)
 		data = mcm.content
 	}
+    
+    init(name: String, standaloneMCM mcm: MCM) {
+        self.name = name
+        metadata = Metadata(
+            standalone: true,
+            compression: mcm.compression,
+            maxChunkSize: mcm.maxChunkSize,
+            index: 0
+        )
+        data = mcm.content
+    }
 }

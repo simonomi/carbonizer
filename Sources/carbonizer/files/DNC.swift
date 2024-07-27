@@ -3,7 +3,8 @@ import BinaryParser
 struct DNC {
 	@BinaryConvertible
 	struct Binary {
-		var magicBytes = "DNC"
+		@Include
+		static let magicBytes = "DNC"
 		
 		var unknown1: UInt32
 		var unknown2: UInt32 = 0x3C // 60

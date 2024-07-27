@@ -11,6 +11,11 @@ final public class Datastream: BinaryConvertible, Codable {
 	public var offset: Int // for inlinability
 	
 	@inlinable
+	public convenience init() {
+		self.init([])
+	}
+	
+	@inlinable
 	public convenience init(_ data: Data) {
 		self.init([Byte](data))
 	}
@@ -160,7 +165,7 @@ extension Datastream {
 	@usableFromInline
 	enum StringParsingError: Error {
 		case unterminated
-		case invalidUTF8
+		case invalidUTF8(String)
 	}
 	
 	/// Documentation
@@ -173,7 +178,7 @@ extension Datastream {
 			throw BinaryParserError.indexOutOfBounds(index: endIndex, expected: bytes.indices, for: String.self)
 		}
 		guard let string = String(data: Data(bytes[offset..<endIndex]), encoding: .utf8) else {
-			throw StringParsingError.invalidUTF8
+			throw StringParsingError.invalidUTF8(showInvalidUTF8(in: bytes[offset..<endIndex]))
 		}
 		
 		defer { offset += string.utf8CString.count }
@@ -188,7 +193,7 @@ extension Datastream {
 			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: String.self)
 		}
 		guard let string = String(data: Data(bytes[offset..<endOffset]), encoding: .utf8) else {
-			throw StringParsingError.invalidUTF8
+			throw StringParsingError.invalidUTF8(showInvalidUTF8(in: bytes[offset..<endOffset]))
 		}
 		
 		defer { offset = endOffset }
