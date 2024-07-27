@@ -3,21 +3,6 @@ import Foundation
 
 import BinaryParser
 
-//actor GlobalMutableState {
-//    var extractMARs: ExtractMARs = .auto
-//    var inputPackedStatus = InputPackedStatus.unknown
-//    
-//    func setExtractMARs(to newValue: ExtractMARs) {
-//        extractMARs = newValue
-//    }
-//    
-//    func replaceAutoExtractMARs(with newValue: ExtractMARs) {
-//        extractMARs.replaceAuto(with: newValue)
-//    }
-//}
-//
-//let globalMutableState = GlobalMutableState()
-
 enum ExtractMARs: String, ExpressibleByArgument {
 	case always, never, auto
 	
@@ -114,7 +99,7 @@ struct Carbonizer: ParsableCommand {
         
         
 
-        // TODO: debug only
+#if !IN_CI
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
@@ -122,10 +107,7 @@ struct Carbonizer: ParsableCommand {
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters - Champions.nds"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions.nds"))
-		
-//		await globalMutableState.setExtractMARs(to: extractMARsInput)
-		
-//		await globalMutableState.setExtractMARs(to: .always) // TODO: debug only
+#endif
 		
 		if filePaths.isEmpty {
 			var standardError = FileHandle.standardError
@@ -146,10 +128,12 @@ struct Carbonizer: ParsableCommand {
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
 			let file = try createFileSystemObject(contentsOf: filePath)
 			
+#if !IN_CI
 //			file = try file.postProcessed(with: mm3Finder)
 //			file = try file.postProcessed(with: mpmFinder) // doesnt work for much
 //			file = try file.postProcessed(with: mmsFinder)
 //			return
+#endif
 			
 			let processedFile: any FileSystemObject
             switch (compressionMode, file.packedStatus()) {
@@ -171,8 +155,11 @@ struct Carbonizer: ParsableCommand {
                     }
             }
 			
-//			let outputDirectory = filePath.deletingLastPathComponent()
+#if IN_CI
+			let outputDirectory = filePath.deletingLastPathComponent()
+#else
 			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
+#endif
 			
 			let savePath = processedFile.savePath(in: outputDirectory).path(percentEncoded: false)
 			logProgress("Writing to \(savePath)")
