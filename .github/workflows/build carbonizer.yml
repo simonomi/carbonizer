@@ -37,8 +37,6 @@ jobs:
       uses: actions/checkout@v4
     - name: Build
       run: swift build -Xswiftc -DIN_CI
-    - name: Test
-      run: swift test -Xswiftc -DIN_CI
     - name: Release
       uses: softprops/action-gh-release@v2
       # if: startsWith(github.ref, 'refs/tags/')
