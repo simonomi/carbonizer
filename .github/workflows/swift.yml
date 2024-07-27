@@ -5,21 +5,37 @@ on: [push]
 jobs:
   build-macos:
     runs-on: macos-latest
-
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
     - name: Build
-      run: swift build
-    # - name: Run tests
-    #   run: swift test -v
+      run: swift build -Xswiftc -DIN_CI
+    - name: Test
+      run: swift test -Xswiftc -DIN_CI
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      # if: startsWith(github.ref, 'refs/tags/')
+      with:
+        draft: true
+        files: /Users/runner/work/carbonizer/carbonizer/.build/*/debug/carbonizer
+  
   build-windows:
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - uses: compnerd/gha-setup-swift@main
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up Swift
+      uses: compnerd/gha-setup-swift@main
       with:
         branch: swift-5.10.1-release
         tag: 5.10.1-RELEASE
     - name: Build
       run: swift build -Xswiftc -DIN_CI
+    - name: Test
+      run: swift test -Xswiftc -DIN_CI
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      # if: startsWith(github.ref, 'refs/tags/')
+      with:
+        draft: true
+        files: /Users/runner/work/carbonizer/carbonizer/.build/*/debug/carbonizer
