@@ -9,6 +9,10 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
+	- name: Set up Swift
+	  uses: SwiftyLab/setup-swift@latest
+	  with:
+		swift-version: "6.0"
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build
@@ -25,13 +29,12 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
+    - name: Set up Swift
+	  uses: SwiftyLab/setup-swift@latest
+	  with:
+		development: true
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Set up Swift
-      uses: compnerd/gha-setup-swift@main
-      with:
-        branch: swift-6.0-branch
-        tag: 6.0-DEVELOPMENT-SNAPSHOT-2024-07-10-a
     - name: Build
       run: swift build -Xswiftc -DIN_CI
     - name: Test
