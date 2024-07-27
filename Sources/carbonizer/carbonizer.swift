@@ -116,7 +116,7 @@ struct Carbonizer: ParsableCommand {
 
         // TODO: debug only
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
+		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
 		
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters - Champions.nds"))

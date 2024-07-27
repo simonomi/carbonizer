@@ -5,7 +5,7 @@ import CompilerPluginSupport
 let package = Package(
     name: "carbonizer",
 	platforms: [
-		.macOS(.v14),
+		.macOS(.v15),
 //		.custom("Windows", versionString: "11")
 	],
 	products: [
