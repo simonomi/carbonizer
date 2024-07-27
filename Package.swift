@@ -40,6 +40,10 @@ let package = Package(
 				"BinaryParserMacros",
 				.product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
 			]
+		),
+		.testTarget(
+			name: "carbonizerTests",
+			dependencies: ["carbonizer"]
 		)
 	]
 )

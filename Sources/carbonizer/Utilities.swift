@@ -25,11 +25,15 @@ func identity<T>(_ value: T) -> T { value }
 //}
 
 func createOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
-	sizes
-		.dropLast()
-		.reduce(into: [start]) { offsets, size in
-			offsets.append((offsets.last! + size).roundedUpToTheNearest(alignment))
-		}
+	if sizes.isEmpty {
+		[]
+	} else {
+		sizes
+			.dropLast()
+			.reduce(into: [start]) { offsets, size in
+				offsets.append((offsets.last! + size).roundedUpToTheNearest(alignment))
+			}
+	}
 }
 
 func hex(_ value: some BinaryInteger) -> String {
