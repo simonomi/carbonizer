@@ -64,6 +64,21 @@ final class ParsePropertiesTests: XCTestCase {
 		)
 	}
 	
+	func testIgnoresStaticPropertiesUnlessIncluded() {
+		assert(
+			declarations: #"""
+				@Include static var int: UInt32
+				@Include static var string: String
+				@Include static var otherType: OtherType
+				"""#,
+			parseTo: [
+				Property(name: "int", type: "UInt32", size: .auto, isStatic: true),
+				Property(name: "string", type: "String", size: .auto, isStatic: true),
+				Property(name: "otherType", type: "OtherType", size: .auto, isStatic: true)
+			]
+		)
+	}
+	
 	func testIgnoresComputedProperties() {
 		assert(
 			declarations: #"""
@@ -84,10 +99,10 @@ final class ParsePropertiesTests: XCTestCase {
 				var string = "hi"
 				"""#,
 			parseTo: [
-				Property(name: "string", type: "String", size: .auto),
-				Property(name: "string", type: "String", size: .auto, length: 4),
-				Property(name: "string", type: "String", size: .auto, length: "stringLength"),
-				Property(name: "string", type: "String", size: .auto, expected: #""hi""#)
+				Property(name: "string", type: "String", size: .auto, isStatic: false),
+				Property(name: "string", type: "String", size: .auto, isStatic: false, length: 4),
+				Property(name: "string", type: "String", size: .auto, isStatic: false, length: "stringLength"),
+				Property(name: "string", type: "String", size: .auto, isStatic: false, expected: #""hi""#)
 			]
 		)
 	}
@@ -96,7 +111,7 @@ final class ParsePropertiesTests: XCTestCase {
 		assert(
 			declarations: "@Padding(2) var padded: UInt32",
 			parseTo: [
-				Property(name: "padded", type: "UInt32", size: .auto, padding: .value(2))
+				Property(name: "padded", type: "UInt32", size: .auto, isStatic: false, padding: .value(2))
 			]
 		)
 	}
@@ -127,14 +142,14 @@ final class ParsePropertiesTests: XCTestCase {
 				var int64: Int64
 				""",
 			parseTo: [
-				Property(name: "uint8", type: "UInt8", size: .auto),
-				Property(name: "uint16", type: "UInt16", size: .auto),
-				Property(name: "uint32", type: "UInt32", size: .auto),
-				Property(name: "uint64", type: "UInt64", size: .auto),
-				Property(name: "int8", type: "Int8", size: .auto),
-				Property(name: "int16", type: "Int16", size: .auto),
-				Property(name: "int32", type: "Int32", size: .auto),
-				Property(name: "int64", type: "Int64", size: .auto)
+				Property(name: "uint8", type: "UInt8", size: .auto, isStatic: false),
+				Property(name: "uint16", type: "UInt16", size: .auto, isStatic: false),
+				Property(name: "uint32", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "uint64", type: "UInt64", size: .auto, isStatic: false),
+				Property(name: "int8", type: "Int8", size: .auto, isStatic: false),
+				Property(name: "int16", type: "Int16", size: .auto, isStatic: false),
+				Property(name: "int32", type: "Int32", size: .auto, isStatic: false),
+				Property(name: "int64", type: "Int64", size: .auto, isStatic: false)
 			]
 		)
 	}
@@ -146,8 +161,8 @@ final class ParsePropertiesTests: XCTestCase {
 				@Count(\Self.count) var uint32s: [UInt32]
 				"""#,
 			parseTo: [
-				Property(name: "uint32s", type: "[UInt32]", size: .count(10)),
-				Property(name: "uint32s", type: "[UInt32]", size: .count("count"))
+				Property(name: "uint32s", type: "[UInt32]", size: .count(10), isStatic: false),
+				Property(name: "uint32s", type: "[UInt32]", size: .count("count"), isStatic: false)
 			]
 		)
 	}
@@ -179,18 +194,18 @@ final class ParsePropertiesTests: XCTestCase {
 				@If(\Self.test, is: .greaterThanOrEqualTo(1)) var string5: String?
 				"""#,
 			parseTo: [
-				Property(name: "string1", type: "String", size: .auto, ifCondition: "test == 1"),
-				Property(name: "string2", type: "String", size: .auto, ifCondition: "test < 1"),
-				Property(name: "string3", type: "String", size: .auto, ifCondition: "test > 1"),
-				Property(name: "string4", type: "String", size: .auto, ifCondition: "test <= 1"),
-				Property(name: "string5", type: "String", size: .auto, ifCondition: "test >= 1")
+				Property(name: "string1", type: "String", size: .auto, isStatic: false, ifCondition: "test == 1"),
+				Property(name: "string2", type: "String", size: .auto, isStatic: false, ifCondition: "test < 1"),
+				Property(name: "string3", type: "String", size: .auto, isStatic: false, ifCondition: "test > 1"),
+				Property(name: "string4", type: "String", size: .auto, isStatic: false, ifCondition: "test <= 1"),
+				Property(name: "string5", type: "String", size: .auto, isStatic: false, ifCondition: "test >= 1")
 			]
 		)
 	}
 	
 	func testEndOffset() {
 		assert(
-			declaration: "@Count(1) var data: [Data]",
+			declaration: "@Count(1) var data: [Datastream]",
 			throws: PropertyParsingError.missingEndOffset(for: "data")
 		)
 		assert(
@@ -199,8 +214,8 @@ final class ParsePropertiesTests: XCTestCase {
 				@EndOffset(7) @Count(1) var data2: [Data]
 				"""#,
 			parseTo: [
-				Property(name: "data1", type: "[Data]", size: .count(1), endOffset: "endOffset"),
-				Property(name: "data2", type: "[Data]", size: .count(1), endOffset: 7)
+				Property(name: "data1", type: "[Data]", size: .count(1), isStatic: false, endOffset: "endOffset"),
+				Property(name: "data2", type: "[Data]", size: .count(1), isStatic: false, endOffset: 7)
 			]
 		)
 	}
@@ -211,15 +226,15 @@ final class ParsePropertiesTests: XCTestCase {
 				var magicBytes = "DTX"
 				var stringCount: UInt32
 				var indicesOffset: UInt32
-				@Offset(givenBy: \Self.indicesOffset) @Count(givenBy: \Self.stringCount) var indexes: [UInt32]
-				@Offsets(givenBy: \Self.indexes) var strings: [String]
+				@Offset(givenBy: \Self.indicesOffset) @Count(givenBy: \Self.stringCount) var indices: [UInt32]
+				@Offsets(givenBy: \Self.indices) var strings: [String]
 				"""#,
 			parseTo: [
-				Property(name: "magicBytes", type: "String", size: .auto, expected: #""DTX""#),
-				Property(name: "stringCount", type: "UInt32", size: .auto),
-				Property(name: "indicesOffset", type: "UInt32", size: .auto),
-				Property(name: "indices", type: "[UInt32]", size: .count("stringCount"), offset: .property("indexesOffset")),
-				Property(name: "strings", type: "[String]", size: .offsets(.givenByPath("indexes")))
+				Property(name: "magicBytes", type: "String", size: .auto, isStatic: false, expected: #""DTX""#),
+				Property(name: "stringCount", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "indicesOffset", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "indices", type: "[UInt32]", size: .count("stringCount"), isStatic: false, offset: .property("indicesOffset")),
+				Property(name: "strings", type: "[String]", size: .offsets(.givenByPath("indices")), isStatic: false)
 			]
 		)
 	}
@@ -239,16 +254,16 @@ final class ParsePropertiesTests: XCTestCase {
 				@Offset(givenBy: \Self.tableFileName3Offset) var tableFileName3: String
 				"""#,
 			parseTo: [
-				Property(name: "magicBytes", type: "String", size: .auto, expected: #""MM3""#),
-				Property(name: "index1", type: "UInt32", size: .auto),
-				Property(name: "tableFileName1Offset", type: "UInt32", size: .auto),
-				Property(name: "index2", type: "UInt32", size: .auto),
-				Property(name: "tableFileName2Offset", type: "UInt32", size: .auto),
-				Property(name: "index3", type: "UInt32", size: .auto),
-				Property(name: "tableFileName3Offset", type: "UInt32", size: .auto),
-				Property(name: "tableFileName1", type: "String", size: .auto, offset: .property("tableFileName1Offset")),
-				Property(name: "tableFileName2", type: "String", size: .auto, offset: .property("tableFileName2Offset")),
-				Property(name: "tableFileName3", type: "String", size: .auto, offset: .property("tableFileName3Offset"))
+				Property(name: "magicBytes", type: "String", size: .auto, isStatic: false, expected: #""MM3""#),
+				Property(name: "index1", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "tableFileName1Offset", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "index2", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "tableFileName2Offset", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "index3", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "tableFileName3Offset", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "tableFileName1", type: "String", size: .auto, isStatic: false, offset: .property("tableFileName1Offset")),
+				Property(name: "tableFileName2", type: "String", size: .auto, isStatic: false, offset: .property("tableFileName2Offset")),
+				Property(name: "tableFileName3", type: "String", size: .auto, isStatic: false, offset: .property("tableFileName3Offset"))
 			]
 		)
 		assert(
@@ -265,16 +280,16 @@ final class ParsePropertiesTests: XCTestCase {
 				@Offset(givenBy: \Self.tableFileName3Offset) var tableFileName3: String
 				"""#,
 			parseTo: [
-				Property(name: "magicBytes", type: "String", size: .auto, expected: #""MM3""#),
-				Property(name: "index1", type: "UInt32", size: .auto),
-				Property(name: "tableFileName1Offset", type: "UInt32", size: .auto),
-				Property(name: "index2", type: "UInt32", size: .auto),
-				Property(name: "tableFileName2Offset", type: "UInt32", size: .auto),
-				Property(name: "index3", type: "UInt32", size: .auto),
-				Property(name: "tableFileName3Offset", type: "UInt32", size: .auto),
-				Property(name: "tableFileName1", type: "String", size: .auto, offset: .property("tableFileName1Offset")),
-				Property(name: "tableFileName2", type: "String", size: .auto, offset: .property("tableFileName2Offset")),
-				Property(name: "tableFileName3", type: "String", size: .auto, offset: .property("tableFileName3Offset"))
+				Property(name: "magicBytes", type: "String", size: .auto, isStatic: false, expected: #""MM3""#),
+				Property(name: "index1", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "tableFileName1Offset", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "index2", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "tableFileName2Offset", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "index3", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "tableFileName3Offset", type: "UInt32", size: .auto, isStatic: false),
+				Property(name: "tableFileName1", type: "String", size: .auto, isStatic: false, offset: .property("tableFileName1Offset")),
+				Property(name: "tableFileName2", type: "String", size: .auto, isStatic: false, offset: .property("tableFileName2Offset")),
+				Property(name: "tableFileName3", type: "String", size: .auto, isStatic: false, offset: .property("tableFileName3Offset"))
 			]
 		)
 	}
