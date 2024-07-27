@@ -12,7 +12,7 @@ jobs:
     - name: Set up Swift
       uses: SwiftyLab/setup-swift@latest
       with:
-        development: true
+        swift-version: "5.10"
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build
