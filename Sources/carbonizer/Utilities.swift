@@ -5,12 +5,19 @@ import WinSDK
 #endif
 
 extension URL {
-	static func fromFilePath(_ filePath: String) -> URL {
 #if os(Windows)
-		URL(fileURLWithPath: filePath)
-#else
-		URL(filePath: filePath)
+	init(filePath: String) {
+		self.init(fileURLWithPath: filePath)
+	}
 #endif
+	
+	@Sendable
+	static func fromFilePath(_ filePath: String) -> URL {
+//#if os(Windows)
+//		URL(fileURLWithPath: filePath)
+//#else
+		URL(filePath: filePath)
+//#endif
 	}
 }
 
@@ -135,6 +142,12 @@ extension Array where Element: Comparable {
 }
 
 extension URL {
+#if os(Windows)
+	func path(percentEncoded: Bool) -> String {
+		path
+	}
+#endif
+	
 	func getCreationDate() throws -> Date? {
 		try FileManager.default.attributesOfItem(atPath: path)[.creationDate] as? Date
 	}
@@ -158,11 +171,11 @@ extension URL {
 	}
     
     func exists() -> Bool {
-#if os(Windows)
-        FileManager.default.fileExists(atPath: path)
-#else
+//#if os(Windows)
+//        FileManager.default.fileExists(atPath: path)
+//#else
         FileManager.default.fileExists(atPath: path(percentEncoded: false))
-#endif
+//#endif
     }
 	
 	func contents() throws -> [URL] {
@@ -174,11 +187,11 @@ extension URL {
 	}
 	
 	func type() throws -> FileType {
-#if os(Windows)
-		let type = try FileManager.default.attributesOfItem(atPath: self.path)[.type] as? FileAttributeType
-#else
+//#if os(Windows)
+//		let type = try FileManager.default.attributesOfItem(atPath: self.path)[.type] as? FileAttributeType
+//#else
 		let type = try FileManager.default.attributesOfItem(atPath: self.path(percentEncoded: false))[.type] as? FileAttributeType
-#endif
+//#endif
 		return switch type {
 			case .some(.typeRegular): .file
 			case .some(.typeDirectory): .folder
