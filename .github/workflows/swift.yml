@@ -6,12 +6,19 @@ name: Swift
 on: [push]
 
 jobs:
-  build:
-    runs-on: [macos-latest, windows-latest]
+  build-macos:
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      run: swift build -v
+      run: swift build
     # - name: Run tests
     #   run: swift test -v
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: swift build
