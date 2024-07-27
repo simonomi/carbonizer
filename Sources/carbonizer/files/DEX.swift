@@ -903,14 +903,25 @@ fileprivate func parse(command commandText: Substring) throws -> (CommandType, [
 		throw DEX.Command.InvalidCommand.invalidCommand(commandText)
 	}
 	
-	let argumentStartIndices = commandText
-		.indices(of: "<")
-		.ranges
-		.map(\.upperBound)
-	let argumentEndIndices = commandText
-		.indices(of: ">")
-		.ranges
-		.map(\.lowerBound)
+	let argumentStartIndices: [String.Index]
+	let argumentEndIndices: [String.Index]
+	if #available(macOS 15.0, *) {
+		argumentStartIndices = commandText
+			.indices(of: "<")
+			.ranges
+			.map(\.upperBound)
+		argumentEndIndices = commandText
+			.indices(of: ">")
+			.ranges
+			.map(\.lowerBound)
+	} else {
+		argumentStartIndices = commandText
+			.myIndices(of: "<")
+			.map(\.upperBound)
+		argumentEndIndices = commandText
+			.myIndices(of: ">")
+			.map(\.lowerBound)
+	}
 	
 	let arguments = zip(argumentStartIndices, argumentEndIndices)
 		.map { startIndex, endIndex in

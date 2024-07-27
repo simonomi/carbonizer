@@ -197,6 +197,32 @@ extension URL {
 #endif
 }
 
+// backporting from swift 6 standard library
+// ideally remove once minimum macOS version is > 14
+extension Substring {
+	func myIndices(
+		where predicate: (Element) throws -> Bool
+	) rethrows -> [Range<Index>] {
+		var result: [Range<Index>] = []
+		var end = startIndex
+		while let begin = try self[end...].firstIndex(where: predicate) {
+			end = try self[begin...].prefix(while: predicate).endIndex
+			result.append(begin ..< end)
+			
+			guard end < self.endIndex else {
+				break
+			}
+			self.formIndex(after: &end)
+		}
+		
+		return result
+	}
+	
+	func myIndices(of element: Element) -> [Range<Index>] {
+		myIndices(where: { $0 == element })
+	}
+}
+
 extension JSONEncoder {
 	convenience init(_ formatting: OutputFormatting...) {
 		self.init()

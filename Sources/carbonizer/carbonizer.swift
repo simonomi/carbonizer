@@ -3,20 +3,6 @@ import Foundation
 
 import BinaryParser
 
-enum ExtractMARs: String, ExpressibleByArgument {
-	case always, never, auto
-	
-	var shouldExtract: Bool {
-		self == .always || self == .auto
-	}
-	
-	mutating func replaceAuto(with newValue: Self) {
-		if self == .auto {
-			self = newValue
-		}
-	}
-}
-
 @main
 struct Carbonizer: ParsableCommand {
 	static let configuration = CommandConfiguration(
@@ -26,9 +12,6 @@ struct Carbonizer: ParsableCommand {
 	
 	@Flag(help: "Manually specify compression mode")
 	var compressionMode: CompressionMode?
-	
-	@Option(name: [.short, .customLong("extract-mars")], help: "Whether to extract MAR files. Options are always, never, auto")
-	var extractMARsInput: ExtractMARs = .auto
 	
 	@Argument(help: "The files to pack/unpack", transform: URL.fromFilePath)
 	var filePaths = [URL]()
@@ -51,54 +34,6 @@ struct Carbonizer: ParsableCommand {
 	}
 	
 	mutating func main() throws {
-//		let filePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/btl_ai/")
-//
-//		let contents = try filePath.contents()
-//
-//		let someses = try contents.flatMap {
-//			let data = Datastream(try Data(contentsOf: $0))
-//			let ais = try data.read(AIS.Binary.self)
-//			return ais.somes
-//		}
-//
-//		print(someses.map(\.unknown1).uniqued().sorted())
-//		print(someses.map(\.unknown2).uniqued().sorted())
-//
-//		print(someses.map(\.unknown1).min()!)
-//		print(someses.map(\.unknown1).max()!)
-//		print(someses.map(\.unknown2).min()!)
-//		print(someses.map(\.unknown2).max()!)
-//
-//
-//		let filePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/data/btl_aiset/")
-//
-//		let contents = try filePath.contents()
-//
-//		let things = try contents.flatMap { file in
-//			let data = Datastream(try Data(contentsOf: file))
-//			let ast = try data.read(AST.Binary.self)
-//
-//			return ast.things
-//		}
-//
-//		print(things.map { $0.indices[0] }.uniqued().sorted())
-//		print(things.map { $0.indices[1] }.uniqued().sorted())
-//		print(things.map { $0.indices[2] }.uniqued().sorted())
-//		print(things.map { $0.indices[3] }.uniqued().sorted())
-//		print(things.map { $0.indices[4] }.uniqued().sorted())
-//		print(things.map { $0.indices[5] }.uniqued().sorted())
-//
-////		for thing in things.sorted(by: \.unknown1) {
-////			print(thing.idks)
-////		}
-////
-////		print(things.flatMap(\.idks).uniqued().sorted())
-////		print(things.map(\.unknown1).uniqued().sorted())
-//
-//		return ()
-        
-        
-
 #if !IN_CI
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
