@@ -9,10 +9,10 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-	- name: Set up Swift
-	  uses: SwiftyLab/setup-swift@latest
-	  with:
-		swift-version: "6.0"
+    - name: Set up Swift
+      uses: SwiftyLab/setup-swift@latest
+      with:
+        swift-version: "6.0"
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build
@@ -30,9 +30,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Set up Swift
-	  uses: SwiftyLab/setup-swift@latest
-	  with:
-		development: true
+      uses: SwiftyLab/setup-swift@latest
+      with:
+        development: true
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build
