@@ -28,10 +28,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Set up Swift
-      uses: compnerd/gha-setup-swift@main
+      uses: SwiftyLab/setup-swift@latest
       with:
-        branch: swift-5.10.1-release
-        tag: 5.10.1-RELEASE
+        swift-version: "5.10"
     - name: Build
       run: swift build -Xswiftc -DIN_CI
     # - name: Test
