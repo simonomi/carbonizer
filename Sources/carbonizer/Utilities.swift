@@ -230,11 +230,19 @@ extension JSONEncoder {
 	}
 }
 
+#if compiler(>=6)
 extension FileHandle: @retroactive TextOutputStream {
 	public func write(_ string: String) {
 		write(Data(string.utf8))
 	}
 }
+#else
+extension FileHandle: TextOutputStream {
+	public func write(_ string: String) {
+		write(Data(string.utf8))
+	}
+}
+#endif
 
 enum ANSIFontEffect: Int {
 	case normal = 0

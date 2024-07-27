@@ -43,7 +43,7 @@ extension ProprietaryFile: FileSystemObject {
 		ProprietaryFile(
 			name: name,
 			metadata: metadata,
-			data: data.packed()
+			data: data.packed() as any ProprietaryFileData
 		)
 	}
 	
@@ -51,7 +51,7 @@ extension ProprietaryFile: FileSystemObject {
 		ProprietaryFile(
 			name: name,
 			metadata: metadata,
-			data: data.unpacked()
+			data: data.unpacked()  as any ProprietaryFileData
 		)
 	}
 }

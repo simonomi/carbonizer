@@ -906,6 +906,7 @@ fileprivate func parse(command commandText: Substring) throws -> (CommandType, [
 	let argumentStartIndices: [String.Index]
 	let argumentEndIndices: [String.Index]
 	if #available(macOS 15.0, *) {
+#if compiler(>=6)
 		argumentStartIndices = commandText
 			.indices(of: "<")
 			.ranges
@@ -914,6 +915,9 @@ fileprivate func parse(command commandText: Substring) throws -> (CommandType, [
 			.indices(of: ">")
 			.ranges
 			.map(\.lowerBound)
+#else
+		fatalError("tried to run swift 5 on macos 15")
+#endif
 	} else {
 		argumentStartIndices = commandText
 			.myIndices(of: "<")

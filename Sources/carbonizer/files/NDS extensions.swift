@@ -1,6 +1,7 @@
 import BinaryParser
 import Foundation
 
+#if compiler(>=6)
 extension [NDS.Binary.FileNameTable.SubEntry]: @retroactive BinaryConvertible {
 	public init(_ data: Datastream) throws {
 		self = []
@@ -14,6 +15,21 @@ extension [NDS.Binary.FileNameTable.SubEntry]: @retroactive BinaryConvertible {
 		forEach(data.write)
 	}
 }
+#else
+extension [NDS.Binary.FileNameTable.SubEntry]: BinaryConvertible {
+	public init(_ data: Datastream) throws {
+		self = []
+		while last?.typeAndNameLength != 0 {
+			append(try data.read(NDS.Binary.FileNameTable.SubEntry.self))
+		}
+		removeLast()
+	}
+	
+	public func write(to data: BinaryParser.Datawriter) {
+		forEach(data.write)
+	}
+}
+#endif
 
 extension Datawriter {
 	func write(_ data: [NDS.Binary.FileNameTable.SubEntry]) {

@@ -69,7 +69,15 @@ extension MCM {
 				.map(compression.1.decompress)
 				.joined()
 			
+#if compiler(>=6)
 			content = try createFileData(data, fileExtension: "")?.unpacked() ?? data
+#else
+			if let fileData = try createFileData(data, fileExtension: "") {
+				content = fileData.unpacked() as any ProprietaryFileData
+			} else {
+				content = data
+			}
+#endif
 		} catch {
 			throw DecompressionError.whileReading(MCM.self, compression, error)
 		}
@@ -86,7 +94,12 @@ extension MCM.Binary {
 		compressionType2 = 0
 		
 		let data = Datawriter()
+#if compiler(>=6)
 		mcm.content.packed().write(to: data)
+#else
+		let packedContent: any ProprietaryFileData = mcm.content.packed()
+		packedContent.write(to: data)
+#endif
 		
 		decompressedSize = UInt32(data.offset)
 		

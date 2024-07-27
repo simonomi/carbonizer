@@ -310,17 +310,20 @@ extension DCL.Binary: ProprietaryFileData {
 		
 		vivosaurCount = UInt32(dcl.vivosaurs.count)
 		
-		vivosaurs = dcl.vivosaurs.map(Vivosaur.init)
+//		vivosaurs = dcl.vivosaurs.map(Vivosaur.init)
 		
 		fatalError()
 	}
 }
 
+// triggers a compiler bug in swift 5 mode with @Include
+#if compiler(>=6)
 extension DCL.Binary.Vivosaur {
 	init(_ unpacked: DCL.Vivosaur) {
 		fatalError("TODO:")
 	}
 }
+#endif
 
 // MARK: unpacked
 extension DCL: Codable {
