@@ -26,6 +26,8 @@ func createFileData(
 //			return try data.read(AIS.self)
 //		case AST.fileExtension:
 //			return try data.read(AST.self)
+//		case CHR.fileExtension:
+//			return try data.read(CHR.self)
 //		case DAL.fileExtension:
 //			return try data.read(DAL.self)
 //		case DCL.fileExtension:
@@ -60,6 +62,14 @@ func createFileData(
 	data.jump(to: marker)
 	
 	return switch magicBytes {
+//		case AIS.Binary.magicBytes:
+//			try data.read(AIS.Binary.self)
+//		case AST.Binary.magicBytes:
+//			try data.read(AST.Binary.self)
+//		case CHR.Binary.magicBytes:
+//			try data.read(CHR.Binary.self)
+//		case DAL.Binary.magicBytes:
+//			try data.read(DAL.Binary.self)
 //		case DCL.Binary.magicBytes:
 //			try data.read(DCL.Binary.self)
 		case DEX.Binary.magicBytes:

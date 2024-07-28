@@ -11,7 +11,6 @@ struct DMS {
 	}
 }
 
-// MARK: packed
 extension DMS: ProprietaryFileData {
 	static let fileExtension = "dms.json"
 	static let packedStatus: PackedStatus = .unpacked
@@ -21,16 +20,6 @@ extension DMS: ProprietaryFileData {
 	}
 }
 
-extension DMS.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
-	
-	init(_ dms: DMS) {
-		value = dms.value
-	}
-}
-
-// MARK: unpacked
 extension DMS: Codable {
 	init(from decoder: Decoder) throws {
 		value = try UInt32(from: decoder)
@@ -38,5 +27,14 @@ extension DMS: Codable {
 	
 	func encode(to encoder: Encoder) throws {
 		try value.encode(to: encoder)
+	}
+}
+
+extension DMS.Binary: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	init(_ dms: DMS) {
+		value = dms.value
 	}
 }
