@@ -1,9 +1,11 @@
 name: Build carbonizer
 
-on:
+on: 
+  workflow_dispatch:
   push:
     tags:
       - "v*.*.*"
+  
 
 permissions:
   contents: write
