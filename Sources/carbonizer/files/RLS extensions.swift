@@ -32,5 +32,9 @@ extension RLS.Binary.Kaseki {
 		unknownsCount = kaseki.unknownsCount
 		unknownsOffset = kaseki.unknownsOffset
 		unknowns = kaseki.unknowns
+		
+		unknown4 = kaseki.unknown4
+		unknown5 = kaseki.unknown5
+		unknown8 = kaseki.unknown8
 	}
 }

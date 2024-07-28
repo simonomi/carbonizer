@@ -34,8 +34,8 @@ func createFileData(
 //			return try data.read(DEX.self)
 		case DMG.fileExtension:
 			return try data.read(DMG.self)
-		case DMS.fileExtension:
-			return try data.read(DMS.self)
+//		case DMS.fileExtension:
+//			return try data.read(DMS.self)
 //		case DNC.fileExtension:
 //			return try data.DNC(DMS.self)
 		case DTX.fileExtension:
@@ -48,8 +48,8 @@ func createFileData(
 //			return try data.read(MMS.self)
 		case MPM.fileExtension:
 			return try data.read(MPM.self)
-		case RLS.fileExtension:
-			return try data.read(RLS.self)
+//		case RLS.fileExtension:
+//			return try data.read(RLS.self)
 //		case SHP.fileExtension:
 //			return try data.read(SHP.self)
 		default: ()
@@ -66,8 +66,8 @@ func createFileData(
 //			try data.read(DEX.Binary.self)
 		case DMG.Binary.magicBytes:
 			try data.read(DMG.Binary.self)
-		case DMS.Binary.magicBytes:
-			try data.read(DMS.Binary.self)
+//		case DMS.Binary.magicBytes:
+//			try data.read(DMS.Binary.self)
 //		case DNC.Binary.magicBytes:
 //			try data.read(DNC.Binary.self)
 		case DTX.Binary.magicBytes:
@@ -80,8 +80,8 @@ func createFileData(
 //			try data.read(MMS.Binary.self)
 		case MPM.Binary.magicBytes:
 			try data.read(MPM.Binary.self)
-		case RLS.Binary.magicBytes:
-			try data.read(RLS.Binary.self)
+//		case RLS.Binary.magicBytes:
+//			try data.read(RLS.Binary.self)
 //		case SHP.Binary.magicBytes:
 //			try data.read(SHP.Binary.self)
 		default:

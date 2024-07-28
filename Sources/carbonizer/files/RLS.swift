@@ -33,6 +33,10 @@ struct RLS {
 		var unknownsCount: UInt32
 		var unknownsOffset: UInt32
 		var unknowns: [UInt32]
+		
+		var unknown4: UInt8
+		var unknown5: UInt8
+		var unknown8: UInt32
 	}
 	
 	@BinaryConvertible
@@ -56,8 +60,8 @@ struct RLS {
 			
 			var unknown2: UInt8 // only high for special vivos
 			var unknown3: UInt8 // only 0 for droppings and some specials
-			var unknown4: UInt8 = 0
-			var unknown5: UInt8 = 0
+			var unknown4: UInt8 //= 0
+			var unknown5: UInt8 //= 0
 			
 			var fossilImage: UInt32
 			var rockImage: UInt32
@@ -69,7 +73,7 @@ struct RLS {
 			var unknown6: UInt32 // 100 for jewels, 0 else
 			var unknown7: UInt32 // 1 for jewels, 2 for droppings, 0 else
 			var fossilName: UInt32 // jewels/droppings only
-			var unknown8: UInt32 = 0
+			var unknown8: UInt32 //= 0
 			
 			var time: UInt32
 			var passingScore: UInt32
@@ -77,7 +81,7 @@ struct RLS {
 			var unknown9: UInt32 // same as unknown2
 			
 			var unknownsCount: UInt32
-			var unknownsOffset: UInt32 = 0x44
+			var unknownsOffset: UInt32 //= 0x44
 			@Count(givenBy: \Self.unknownsCount)
 			@Offset(givenBy: \Self.unknownsOffset)
 			var unknowns: [UInt32]
@@ -135,6 +139,10 @@ extension RLS.Kaseki {
 		unknownsCount = kaseki.unknownsCount
 		unknownsOffset = kaseki.unknownsOffset
 		unknowns = kaseki.unknowns
+		
+		unknown4 = kaseki.unknown4
+		unknown5 = kaseki.unknown5
+		unknown8 = kaseki.unknown8
 	}
 }
 
@@ -206,6 +214,10 @@ extension RLS.Kaseki: Codable {
 		case unknownsCount =  "unknowns count"
 		case unknownsOffset = "unknowns offset"
 		case unknowns =       "unknowns"
+		
+		case unknown4 =       "unknown 4"
+		case unknown5 =       "unknown 5"
+		case unknown8 =       "unknown 8"
 	}
 }
 

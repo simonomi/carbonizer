@@ -35,12 +35,12 @@ struct Carbonizer: ParsableCommand {
 	
 	mutating func main() throws {
 #if !IN_CI
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
 		
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters - Champions.nds"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions"))
+		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters - Champions.nds"))
+		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions.nds"))
 #endif
 		
