@@ -984,6 +984,7 @@ extension DEX.Command.Effect: CustomStringConvertible {
 	init?(from text: Substring) {
 		guard let id = text.split(separator: " ").last else { return nil }
 		
+		// 1 2 3 6 10 11 12 13 14 15 16 17 18 19 20
 		switch id {
 			case "haha", "4":
 				self = .haha
@@ -1023,6 +1024,7 @@ extension DEX.Command.Movement: CustomStringConvertible {
 	init?(from text: Substring) {
 		guard let id = text.split(separator: " ").last else { return nil }
 		
+		// 2 3 4 5 6 7 9 10 12 13 14 15 18 19 20 22
 		switch id {
 			case "jump", "1":
 				self = .jump

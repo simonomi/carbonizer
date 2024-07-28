@@ -156,7 +156,7 @@ extension Array where Element: Comparable {
 }
 
 struct WindowsError: Error {
-	var code: Int32
+	var code: UInt32
 }
 
 extension URL {
@@ -182,8 +182,7 @@ extension URL {
 		let hFile = CreateFileW(windowsFilePath, DWORD(GENERIC_WRITE), DWORD(FILE_SHARE_WRITE), nil, DWORD(OPEN_EXISTING), 0, nil)
 		defer { CloseHandle(hFile) }
 		var creationTime = FILETIME(from: time_t(date.timeIntervalSince1970))
-		let possibleError = SetFileTime(hFile, &creationTime, nil, nil)
-		if possibleError == 0 {
+		guard SetFileTime(hFile, &creationTime, nil, nil) else {
 			throw WindowsError(code: GetLastError())
 		}
 #else
