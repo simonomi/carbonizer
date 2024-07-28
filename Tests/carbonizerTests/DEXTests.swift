@@ -41,6 +41,7 @@ let exampleCommands: [DEX.Command] = [
 	.unknown(type: 500, arguments: []),
 	.unknown(type: 500, arguments: [1]),
 	.unknown(type: 500, arguments: [1, 2, 3]),
+	// dont test comments because they shouldnt round trip
 ]
 
 let dexsToTest = [

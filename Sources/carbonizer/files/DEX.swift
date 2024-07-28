@@ -38,6 +38,8 @@ struct DEX {
 		
 		case unknown(type: UInt32, arguments: [Int32])
 		
+		case comment(String)
+		
 		struct Dialogue: Codable {
 			var id: Int32
 			init(_ id: Int32) { self.id = id }
@@ -172,7 +174,7 @@ extension DEX.Command {
 		}
 	}
 	
-	var typeAndArguments: (UInt32, [Int32]) {
+	var typeAndArguments: (UInt32, [Int32])? {
 		switch self {
 			case .dialogue(let dialogue):
 				(1, [dialogue.id])
@@ -236,6 +238,7 @@ extension DEX.Command {
 				(201, [character.id])
 			case .unknown(let type, let arguments):
 				(type, arguments)
+			case .comment: nil
 		}
 	}
 }
@@ -745,6 +748,8 @@ extension DEX.Command {
 					}
 				
 				self = .unknown(type: type, arguments: intArguments)
+			case .comment:
+				self = .comment(String(text.dropFirst(3)))
 		}
 	}
 }
@@ -818,12 +823,14 @@ extension String {
 				} else {
 					"unknown: <\(type)> \(unknowns(arguments, hex: arguments.contains { $0 > UInt16.max }))"
 				}
+			case .comment(let text):
+				"// \(text)"
 		}
 	}
 }
 
 enum CommandType {
-	case dialogue, spawn, despawn, fadeOut, fadeIn, unownedDialogue, turnTo, turn1To, turnTowards, turn2To, turnTowards2, moveTo, moveBy, delay, clean1, clean2, angleCamera, startMusic, fadeMusic, playSound, characterEffect, clearEffects, characterMovement, dialogueChoice, imageFadeOut, imageSlideIn, imageFadeIn, revive, startTurning, stopTurning, unknown
+	case dialogue, spawn, despawn, fadeOut, fadeIn, unownedDialogue, turnTo, turn1To, turnTowards, turn2To, turnTowards2, moveTo, moveBy, delay, clean1, clean2, angleCamera, startMusic, fadeMusic, playSound, characterEffect, clearEffects, characterMovement, dialogueChoice, imageFadeOut, imageSlideIn, imageFadeIn, revive, startTurning, stopTurning, unknown, comment
 	
 	init?(_ command: Substring) {
 		let firstSpace = command.firstIndex(where: \.isWhitespace)
@@ -890,6 +897,7 @@ enum CommandType {
 			case "revive": .revive
 			case "stop": .stopTurning
 			case "unknown:", "unknowns:": .unknown
+			case "//": .comment
 			default: nil
 		}
 		
