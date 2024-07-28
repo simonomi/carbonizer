@@ -177,7 +177,7 @@ extension URL {
 		print("path", path)
 		print("count", path.count)
 		print("utf16 count", path.utf16.count)
-		print("utf16 c string count", path.cString(using: .utf16).count)
+		print("utf16 c string count", path.cString(using: .utf16)?.count)
 		print()
 		
 		let windowsFilePath = path.withCString(encodedAs: UTF16.self) {
