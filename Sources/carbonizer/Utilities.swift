@@ -180,8 +180,8 @@ extension URL {
 			return UnsafePointer(buffer)
 		}
 		
-		let shareAll = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE
-		let hFile = CreateFileW(windowsFilePath, GENERIC_WRITE, shareAll, nil, OPEN_EXISTING, 0, nil)
+		let shareAll = DWORD(FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+		let hFile = CreateFileW(windowsFilePath, DWORD(GENERIC_WRITE), shareAll, DWORD(nil, OPEN_EXISTING), 0, nil)
 		if hFile == INVALID_HANDLE_VALUE {
 			throw WindowsError(code: GetLastError())
 		}
