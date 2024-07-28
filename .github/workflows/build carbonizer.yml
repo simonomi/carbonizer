@@ -6,7 +6,6 @@ on:
     tags:
       - "v*.*.*"
   
-
 permissions:
   contents: write
 
@@ -23,7 +22,10 @@ jobs:
     - name: Test
       run: swift test -Xswiftc -DIN_CI
     - name: Build
-      run: swift build -c release -Xswiftc -DIN_CI
+      run: |
+        swift build -c release 
+          -Xswiftc -DIN_CI 
+          -Xswiftc -whole-module-optimization
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
@@ -42,7 +44,12 @@ jobs:
 #     - name: Test
 #       run: swift test -Xswiftc -DIN_CI
     - name: Build
-      run: swift build -c release -Xswiftc -DIN_CI -Xswiftc -static-executable -Xswiftc -static-stdlib
+      run: |
+        swift build -c release 
+          -Xswiftc -DIN_CI 
+          -Xswiftc -static-executable 
+          -Xswiftc -static-stdlib 
+          -Xswiftc -whole-module-optimization
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
