@@ -49,7 +49,7 @@ func createFile(
 	data.jump(to: marker)
 	
 	                                       /*  makes ffc work right  */
-	if magicBytes == MAR.Binary.magicBytes /*&& !name.contains("arc")*/ {
+	if magicBytes == MAR.Binary.magicBytes && !name.contains("arc") {
 		return PackedMAR(
 			name: name,
 			fileExtension: fileExtension,

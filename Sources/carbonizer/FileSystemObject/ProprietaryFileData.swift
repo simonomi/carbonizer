@@ -30,8 +30,8 @@ func createFileData(
 //			return try data.read(DAL.self)
 //		case DCL.fileExtension:
 //			return try data.read(DCL.self)
-		case DEX.fileExtension:
-			return try data.read(DEX.self)
+//		case DEX.fileExtension:
+//			return try data.read(DEX.self)
 		case DMG.fileExtension:
 			return try data.read(DMG.self)
 		case DMS.fileExtension:
@@ -62,8 +62,8 @@ func createFileData(
 	return switch magicBytes {
 //		case DCL.Binary.magicBytes:
 //			try data.read(DCL.Binary.self)
-		case DEX.Binary.magicBytes:
-			try data.read(DEX.Binary.self)
+//		case DEX.Binary.magicBytes:
+//			try data.read(DEX.Binary.self)
 		case DMG.Binary.magicBytes:
 			try data.read(DMG.Binary.self)
 		case DMS.Binary.magicBytes:
