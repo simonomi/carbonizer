@@ -41,7 +41,7 @@ struct Carbonizer: ParsableCommand {
 		
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters - Champions.nds"))
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions.nds"))
+		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions.nds"))
 #endif
 		
 		if filePaths.isEmpty {

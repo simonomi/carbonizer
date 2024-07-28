@@ -42,8 +42,8 @@ func createFileData(
 			return try data.read(DTX.self)
 //		case MFS.fileExtension:
 //			return try data.read(MFS.self)
-		case MM3.fileExtension:
-			return try data.read(MM3.self)
+//		case MM3.fileExtension:
+//			return try data.read(MM3.self)
 //		case MMS.fileExtension: // TODO: doesnt work for repacking due to .bin and MAR standalone name stuff
 //			return try data.read(MMS.self)
 		case MPM.fileExtension:
@@ -74,8 +74,8 @@ func createFileData(
 			try data.read(DTX.Binary.self)
 //		case MFS.Binary.magicBytes:
 //			try data.read(MFS.Binary.self)
-		case MM3.Binary.magicBytes:
-			try data.read(MM3.Binary.self)
+//		case MM3.Binary.magicBytes:
+//			try data.read(MM3.Binary.self)
 //		case MMS.Binary.magicBytes:
 //			try data.read(MMS.Binary.self)
 		case MPM.Binary.magicBytes:
