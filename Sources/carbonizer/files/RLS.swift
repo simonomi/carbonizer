@@ -209,7 +209,7 @@ extension RLS.Kaseki: Codable {
 	}
 }
 
-fileprivate let kasekiLabels = [
+let kasekiLabels = [
 	1:   "T-Rex Head",
 	2:   "T-Rex Body",
 	3:   "T-Rex Arms",
@@ -685,5 +685,34 @@ fileprivate let kasekiLabels = [
 	627: "Triple Dropping Fossil - diagonal line",
 	628: "Small Double Dropping Fossil",
 	629: "Small Double Dropping Fossil",
-	630: "Small Double Dropping Fossil"
+	630: "Small Double Dropping Fossil",
+	701: "Egg", // TODO: what egg
+	702: "Keymonite",
+	703: "Shark Dentures",
+	704: "Mt. Lavaflow N Rock",
+	705: "Mt. Lavaflow NE Puzzle 1",
+	706: "Mt. Lavaflow NE Puzzle 2",
+	707: "Mt. Lavaflow NE Puzzle 3",
+	708: "Unhardened Igno",
+	709: "Stone Sleep Dr. Diggins",
+	710: "Hardened Igno",
+	711: "Staff Quest 1 Round 1",
+	712: "Staff Quest 1 Round 2",
+	713: "Staff Quest 1 Round 3",
+	714: "Staff Quest 2 Round 1",
+	715: "Staff Quest 2 Round 2",
+	716: "Staff Quest 2 Round 3",
+	717: "Staff Quest 3 Round 1",
+	718: "Staff Quest 3 Round 2",
+	719: "Staff Quest 3 Round 3",
+	720: "Tools",
+	721: "Electrominite",
+	722: "Chapter 1 Fossil Level-Up Battle",
+	723: "Chapter 2 Fossil Level-Up Battle",
+	724: "Chapter 3 Fossil Level-Up Battle",
+	725: "Chapter 4 Fossil Level-Up Battle",
+	726: "Chapter 5 Fossil Level-Up Battle",
+	727: "Chapter 6 Fossil Level-Up Battle",
+	728: "Cleaning Practice",
+	729: "Pre-Chapter Level-Up Battle"
 ]

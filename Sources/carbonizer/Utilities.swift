@@ -69,6 +69,14 @@ extension Array {
 		get { self[x + y * width] }
 		set { self[x + y * width] = newValue }
 	}
+	
+	subscript(safely index: Index) -> Element? {
+		if indices.contains(index) {
+			self[index]
+		} else {
+			nil
+		}
+	}
 }
 
 extension BinaryInteger {
@@ -134,11 +142,21 @@ extension String {
 	}
 }
 
+extension StringProtocol {
+	func caseInsensitiveEquals(_ other: some StringProtocol) -> Bool {
+		caseInsensitiveCompare(other) == .orderedSame
+	}
+}
+
 // TODO: remove bc this is slow
 extension Array where Element: Comparable {
 	func isSorted() -> Bool {
 		self == self.sorted()
 	}
+}
+
+struct WindowsError: Error {
+	var code: Int32
 }
 
 extension URL {
@@ -164,7 +182,10 @@ extension URL {
 		let hFile = CreateFileW(windowsFilePath, DWORD(GENERIC_WRITE), DWORD(FILE_SHARE_WRITE), nil, DWORD(OPEN_EXISTING), 0, nil)
 		defer { CloseHandle(hFile) }
 		var creationTime = FILETIME(from: time_t(date.timeIntervalSince1970))
-		SetFileTime(hFile, &creationTime, nil, nil)
+		let possibleError = SetFileTime(hFile, &creationTime, nil, nil)
+		if possibleError == 0 {
+			throw WindowsError(code: GetLastError())
+		}
 #else
 		try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: path(percentEncoded: false))
 #endif

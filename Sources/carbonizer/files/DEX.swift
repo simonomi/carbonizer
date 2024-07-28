@@ -950,27 +950,33 @@ extension DEX.Command.Dialogue: CustomStringConvertible {
 
 extension DEX.Command.Character: CustomStringConvertible {
 	init?(from text: Substring) {
-		guard let id = text.split(separator: " ").last.flatMap({ Int32($0) }) else {
+		if let id = text.split(separator: " ").last.flatMap({ Int32($0) }) {
+			self.id = id
+		} else if let id = characterNames.first(where: { $0.value.caseInsensitiveEquals(text) })?.key {
+			self.id = id
+		} else {
 			return nil
 		}
-		self.id = id
 	}
 	
 	var description: String {
-		"<character \(id)>"
+		"<\(characterNames[id] ?? "character \(id)")>"
 	}
 }
 
 extension DEX.Command.Fossil: CustomStringConvertible {
 	init?(from text: Substring) {
-		guard let id = text.split(separator: " ").last.flatMap({ Int32($0) }) else {
+		if let id = text.split(separator: " ").last.flatMap({ Int32($0) }) {
+			self.id = id
+		} else if let id = kasekiLabels.first(where: { $0.value.caseInsensitiveEquals(text) })?.key {
+			self.id = Int32(id)
+		} else {
 			return nil
 		}
-		self.id = id
 	}
 	
 	var description: String {
-		"<fossil \(id)>"
+		"<\(kasekiLabels[Int(id)] ?? "fossil \(id)")>"
 	}
 }
 
@@ -1052,14 +1058,17 @@ extension DEX.Command.Image: CustomStringConvertible {
 
 extension DEX.Command.Vivosaur: CustomStringConvertible {
 	init?(from text: Substring) {
-		guard let id = text.split(separator: " ").last.flatMap({ Int32($0) }) else {
+		if let id = text.split(separator: " ").last.flatMap({ Int32($0) }) {
+			self.id = id
+		} else if let id = vivosaurNames.firstIndex(where: text.caseInsensitiveEquals) {
+			self.id = Int32(id)
+		} else {
 			return nil
 		}
-		self.id = id
 	}
 	
 	var description: String {
-		"<vivosaur \(id)>"
+		"<\(vivosaurNames[safely: Int(id)] ?? "vivosaur \(id)")>"
 	}
 }
 
@@ -1116,3 +1125,13 @@ fileprivate func degrees(from text: Substring) -> Int32? {
 fileprivate func degrees(_ angle: Int32) -> String {
 	"<\(angle) degrees>"
 }
+
+fileprivate let characterNames: [Int32: String] = [
+	1:   "Hunter",
+	31:  "Beth",
+	35:  "Dr. Diggins",
+	41:  "KL33N",
+	199: "Camera Focus",
+	405: "Sue",
+	945: "Staff Member",
+]
