@@ -172,14 +172,25 @@ extension URL {
 	
 	func setCreationDate(to date: Date) throws {
 #if os(Windows)
-		// try FileManager.default.setAttributes([.creationDate: date], ofItemAtPath: path)
 		let pathLength = path.count + 1
+		
+		print("path", path)
+		print("count", path.count)
+		print("utf16 count", path.utf16.count)
+		print("utf16 c string count", path.cString(using: .utf16).count)
+		print()
+		
 		let windowsFilePath = path.withCString(encodedAs: UTF16.self) {
 			let buffer = UnsafeMutablePointer<UInt16>.allocate(capacity: pathLength)
 			buffer.initialize(from: $0, count: pathLength)
 			return UnsafePointer(buffer)
 		}
 		let hFile = CreateFileW(windowsFilePath, DWORD(GENERIC_WRITE), DWORD(FILE_SHARE_WRITE), nil, DWORD(OPEN_EXISTING), 0, nil)
+		
+		if hFile == INVALID_HANDLE_VALUE {
+			throw WindowsError(code: GetLastError())
+		}
+		
 		defer { CloseHandle(hFile) }
 		var creationTime = FILETIME(from: time_t(date.timeIntervalSince1970))
 		guard SetFileTime(hFile, &creationTime, nil, nil) else {

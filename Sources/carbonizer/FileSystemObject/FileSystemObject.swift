@@ -16,7 +16,7 @@ protocol FileSystemObject {
 	associatedtype Unpacked: FileSystemObject
 	func unpacked() throws -> Unpacked
 	
-//	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self
+	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self
 }
 
 extension FileSystemObject {
