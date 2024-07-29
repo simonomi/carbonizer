@@ -36,8 +36,12 @@ func createOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 =
 	}
 }
 
-func hex(_ value: some BinaryInteger) -> String {
-	String(value, radix: 16)
+func hex<T: BinaryInteger & SignedNumeric>(_ value: T) -> String {
+	if value < 0 {
+		"-0x\(String(-value, radix: 16))"
+	} else {
+		"0x\(String(value, radix: 16))"
+	}
 }
 
 func logProgress(_ items: Any...) {
@@ -157,6 +161,16 @@ extension Array where Element: Comparable {
 
 struct WindowsError: Error {
 	var code: UInt32
+}
+
+extension Optional {
+	func orElseThrow(_ error: @autoclosure () -> some Error) throws -> Wrapped {
+		if let self {
+			self
+		} else {
+			throw error()
+		}
+	}
 }
 
 extension URL {

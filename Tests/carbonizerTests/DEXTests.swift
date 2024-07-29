@@ -7,37 +7,51 @@ func assertDescriptionsEqual<T>(_ left: T, _ right: T) {
 	XCTAssertEqual(String(describing: left), String(describing: right))
 }
 
+#if compiler(>=6)
+extension DEX.Command.Argument: @retroactive ExpressibleByIntegerLiteral {
+	public init(integerLiteral value: IntegerLiteralType) {
+		self.init(Int32(value))
+	}
+}
+#else
+extension DEX.Command.Argument: ExpressibleByIntegerLiteral {
+	public init(integerLiteral value: IntegerLiteralType) {
+		self.init(Int32(value))
+	}
+}
+#endif
+
 let exampleCommands: [DEX.Command] = [
-	.dialogue(DEX.Command.Dialogue(1)),
-	.spawn(DEX.Command.Character(1), 1, x: 1, y: 1, 1),
-	.despawn(DEX.Command.Character(1)),
-	.fadeOut(frameCount: 1),
-	.fadeIn(frameCount: 1),
-	.unownedDialogue(DEX.Command.Dialogue(1)),
-	.turnTo(DEX.Command.Character(1), angle: 1),
-	.turn1To(DEX.Command.Character(1), angle: 1, frameCount: 1, 1),
-	.turnTowards(DEX.Command.Character(1), target: DEX.Command.Character(1), frameCount: 1, 1),
-	.turn2To(DEX.Command.Character(1), angle: 1, frameCount: 1, 1),
-	.turnTowards2(DEX.Command.Character(1), target: DEX.Command.Character(1), 1, frameCount: 1, 1),
-	.moveTo(DEX.Command.Character(1), x: 1, y: 1, frameCount: 1, 1),
-	.moveBy(DEX.Command.Character(1), relativeX: 1, relativeY: 1, frameCount: 1, 1),
-	.delay(frameCount: 1),
-	.clean1(1, DEX.Command.Fossil(1)),
-	.clean2(1, DEX.Command.Fossil(1)),
-	.angleCamera(fov: 1, xRotation: 1, yRotation: 1, targetDistance: 1, frameCount: 1, 1),
-	.startMusic(id: 1),
-	.fadeMusic(frameCount: 1),
-	.playSound(id: 1),
-	.characterEffect(DEX.Command.Character(1), DEX.Command.Effect.ellipses),
-	.clearEffects(DEX.Command.Character(1)),
-	.characterMovement(DEX.Command.Character(1), DEX.Command.Movement(1)),
-	.dialogueChoice(DEX.Command.Dialogue(1), 1, choices: DEX.Command.Dialogue(1)),
-	.imageFadeOut(frameCount: 1, 1),
-	.imageSlideIn(DEX.Command.Image(1), 1, frameCount: 1, 1),
-	.imageFadeIn(DEX.Command.Image(1), 1, frameCount: 1, 1),
-	.revive(DEX.Command.Vivosaur(1)),
-	.startTurning(DEX.Command.Character(1), target: DEX.Command.Character(1)),
-	.stopTurning(DEX.Command.Character(1)),
+	.dialogue(12),
+	.spawn(12, 12, position: .init(x: 12, y: 12), 12),
+	.despawn(12),
+	.fadeOut(12),
+	.fadeIn(12),
+	.unownedDialogue(12),
+	.turnTo(12, 12),
+	.turn1To(12, 12, 12, 12),
+	.turnTowards(12, target: 12, 12, 12),
+	.turn2To(12, 12, 12, 12),
+	.turnTowards2(12, target: 12, 12, 12, 12),
+	.moveTo(12, position: .init(x: 12, y: 12), 12, 12),
+	.moveBy(12, relative: .init(x: 12, y: 12), 12, 12),
+	.delay(12),
+	.clean1(12, 12),
+	.clean2(12, 12),
+	.angleCamera(fov: 12, rotation: .init(x: 12, y: 12), targetDistance: 12, 12, 12),
+	.startMusic(id: 12),
+	.fadeMusic(12),
+	.playSound(id: 12),
+	.characterEffect(12, .init(12)),
+	.clearEffects(12),
+	.characterMovement(12, 12),
+	.dialogueChoice(12, 12, choices: 12),
+	.imageFadeOut(12, 12),
+	.imageSlideIn(12, 12, 12, 12),
+	.imageFadeIn(12, 12, 12, 12),
+	.revive(12),
+	.startTurning(12, target: 12),
+	.stopTurning(12),
 	.unknown(type: 500, arguments: []),
 	.unknown(type: 500, arguments: [1]),
 	.unknown(type: 500, arguments: [1, 2, 3]),
