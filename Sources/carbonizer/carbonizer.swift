@@ -36,7 +36,7 @@ struct Carbonizer: AsyncParsableCommand {
 	
 	mutating func main() throws {
 #if !IN_CI
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
+//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
 		
@@ -65,9 +65,14 @@ struct Carbonizer: AsyncParsableCommand {
 			let file = try createFileSystemObject(contentsOf: filePath)
 			
 #if !IN_CI
+//			let inputFile = try createFileSystemObject(contentsOf: filePath).unpacked()
+//			let allDialogue = dmgRipper(inputFile)
+//			let file = dexDialogueLabeller(inputFile, dialogue: allDialogue)
+			
 //			file = try file.postProcessed(with: mm3Finder)
 //			file = try file.postProcessed(with: mpmFinder) // doesnt work for much
 //			file = try file.postProcessed(with: mmsFinder)
+//			file = try file.postProcessed(with: dexDialogueLabeller)
 //			return
 #endif
 			

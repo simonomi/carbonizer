@@ -4,9 +4,12 @@ import Foundation
 struct DEX {
 	var commands: [[Command]]
 	
-	// 51 sets who you control?
+	// 143 - set name
+	// 142 - modify name
 	
 	// 50 ???? smoothes out movement or something
+	// 62 does something similar - camera goes to the wrong place without it
+	// 153 blanks out the screen (used before asking for name FIRST TIME)
 	
 	// 3: unknown (unknown)
 	// 6: unknown (0x5######)
