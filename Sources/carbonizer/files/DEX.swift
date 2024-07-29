@@ -4,7 +4,16 @@ import Foundation
 struct DEX {
 	var commands: [[Command]]
 	
-	// 22: fade to white
+	// 3: unknown (unknown)
+	// 6: unknown (0x5######)
+	// 8: unknown (unknown, unknown)
+	// 22: fade to white (frames)
+	// 50: unknown (character)
+	// 51: unknown (character)
+	// 116: unknown (unknown)
+	// 118: unknown ()
+	// 120: unknown ()
+	// 194: unknown (character)
 	enum Command {
 		case dialogue(Dialogue)
 		case spawn(Character, Unknown, position: Vector, Angle)
