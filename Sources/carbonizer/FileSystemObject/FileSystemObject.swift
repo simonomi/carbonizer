@@ -17,6 +17,8 @@ protocol FileSystemObject {
 	func unpacked() throws -> Unpacked
 	
 	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self
+	
+	mutating func setFile(at path: ArraySlice<String>, to content: any FileSystemObject)
 }
 
 extension FileSystemObject {

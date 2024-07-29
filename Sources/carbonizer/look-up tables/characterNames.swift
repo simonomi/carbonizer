@@ -8,7 +8,7 @@ let characterNames: [Int32: String] = [
 	7:   "Mole 1",
 	8:   "T-Rex Hunter",
 	31:  "Beth", // 12a
-//	32:  "", // 12e - another beth variation
+	32:  "Wendy",
 //	33:  "", // 37e - guys in suits
 //	34:  "", // 12c - another beth variation
 	35:  "Dr. Diggins 1",
@@ -96,22 +96,22 @@ let characterNames: [Int32: String] = [
 //	117: "", // cha40e head40e
 //	118: "", // cha42b head42b
 //	119: "", // cha12d head12d
-//	120: "", // cha38d head38d
-//	121: "", // cha45a head45a
+	120: "Trent", // cha38d head38d
+	121: "Zoe", // cha45a head45a
 //	122: "", // cha38b head38b
 //	123: "", // cha38e head38e
 //	124: "", // cha39b head39b
-//	125: "", // cha44c head44c
+	125: "Edward", // cha44c head44c
 //	126: "", // [cha38d, cha36b] [head38d, head36b]
 //	127: "", // [cha45b, cha10a] [head45b, head10a]
-//	128: "", // cha39a head39a
-//	129: "", // cha10c head10c
-//	130: "", // cha45e2 head45e
-	131: "Police Officer 3", // cha36c head36c
-//	132: "", // cha37a head37a
-//	133: "", // cha37a head37a
-//	134: "", // cha37a head37a
-//	135: "", // cha45b head45b
+	128: "Jenna", // cha39a head39a
+	129: "Tracy", // cha10c head10c
+	130: "Peggy", // cha45e2 head45e
+	131: "Security Guard", // cha36c head36c // pre-tutorial
+	132: "Cleaning Room Staff", // cha37a head37a
+	133: "Busy Fossil Center Staff", // cha37a head37a
+	134: "Warehouse Guard Staff", // cha37a head37a
+	135: "Diana", // cha45b head45b
 //	136: "", // cha36c head36c
 //	137: "", // cha36c head36c
 //	138: "", // cha36c head36c
@@ -160,7 +160,7 @@ let characterNames: [Int32: String] = [
 	185: "Duna Paralysis", // cha08_paralysis head08
 //	186: "", // r22mono1a []
 //	187: "", // r22mono1b []
-//	188: "", // cha37a head37a
+	188: "Fossil Center Staff", // cha37a head37a // pre-tutorial
 //	189: "", // [] []
 //	190: "", // [] []
 //	191: "", // cha36b head36b
@@ -172,7 +172,7 @@ let characterNames: [Int32: String] = [
 //	197: "", // [] []
 //	198: "", // [] []
 	199: "Camera Focus", // [] []
-//	200: "", // t01ship []
+	200: "Docked Ship", // t01ship []
 //	201: "", // o01iwa2 []
 //	202: "", // o01iwa1 []
 //	203: "", // o02kabu2 []
@@ -308,7 +308,7 @@ let characterNames: [Int32: String] = [
 //	339: "", // cha34 head34
 //	340: "", // cha35 head35
 //	341: "", // cha34 head34
-//	342: "", // sea01ship []
+	342: "Sea Ship", // sea01ship []
 //	343: "", // [] []
 //	344: "", // [] []
 //	345: "", // [] []

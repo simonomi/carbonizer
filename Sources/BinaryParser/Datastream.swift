@@ -4,8 +4,7 @@ import Foundation
 final public class Datastream: BinaryConvertible, Codable {
 	public typealias Byte = UInt8
 	
-//	public private(set) var bytes: ArraySlice<Byte>
-	public var bytes: ArraySlice<Byte> // for inlinability
+	public let bytes: ArraySlice<Byte> // for inlinability
 	
 //	public private(set) var offset: Int
 	public var offset: Int // for inlinability

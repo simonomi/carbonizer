@@ -1,5 +1,7 @@
 import BinaryParser
 
+// $f - finish current dialogue box
+
 struct DMG {
 	var strings: [DMGString]
 	

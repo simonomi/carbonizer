@@ -4,6 +4,10 @@ import Foundation
 struct DEX {
 	var commands: [[Command]]
 	
+	// 51 sets who you control?
+	
+	// 50 ???? smoothes out movement or something
+	
 	// 3: unknown (unknown)
 	// 6: unknown (0x5######)
 	// 8: unknown (unknown, unknown)
@@ -13,10 +17,12 @@ struct DEX {
 	// 116: unknown (unknown)
 	// 118: unknown ()
 	// 120: unknown ()
+	// 178: suppresses "Fighter Area" corner tag
 	// 194: unknown (character)
 	enum Command {
 		case dialogue(Dialogue)
-		case spawn(Character, Unknown, position: Vector, Angle)
+		case spawn(Character, Map, position: Vector, Angle)
+		case teleport(Character, to: Character)
 		case despawn(Character)
 		case fadeOut(FrameCount)
 		case fadeIn(FrameCount)
@@ -26,8 +32,10 @@ struct DEX {
 		case turnTowards(Character, target: Character, FrameCount, Unknown)
 		case turn2To(Character, Angle, FrameCount, Unknown)
 		case turnTowards2(Character, target: Character, Unknown, FrameCount, Unknown)
+		case move(Character, to: Character, FrameCount, Unknown)
 		case moveTo(Character, position: Vector, FrameCount, Unknown)
 		case moveBy(Character, relative: Vector, FrameCount, Unknown)
+		case control(Character)
 		case delay(FrameCount)
 		case clean1(Unknown, Fossil)
 		case clean2(Unknown, Fossil)
@@ -63,6 +71,7 @@ struct DEX {
 		typealias FixedPoint = Argument<FixedPointUnit>
 		typealias FrameCount = Argument<FrameUnit>
 		typealias Image = Argument<ImageUnit>
+		typealias Map = Argument<MapUnit>
 		typealias Movement = Argument<MovementUnit>
 		typealias Music = Argument<MusicUnit>
 		typealias SoundEffect = Argument<SoundEffectUnit>
@@ -169,7 +178,8 @@ extension DEX.Command {
 		let args = commandBinary.arguments
 		self = switch commandBinary.type {
 			case 1:  .dialogue(Dialogue(args[0]))
-			case 7:  .spawn(Character(args[0]), Unknown(args[1]), position: Vector(x: args[2], y: args[3]), Angle(args[4]))
+			case 7:  .spawn(Character(args[0]), Map(args[1]), position: Vector(x: args[2], y: args[3]), Angle(args[4]))
+			case 10: .teleport(Character(args[0]), to: Character(args[1]))
 			case 14: .despawn(Character(args[0]))
 			case 20: .fadeOut(FrameCount(args[0]))
 			case 21: .fadeIn(FrameCount(args[0]))
@@ -179,8 +189,10 @@ extension DEX.Command {
 			case 36: .turnTowards(Character(args[0]), target: Character(args[1]), FrameCount(args[2]), Unknown(args[3]))
 			case 37: .turn2To(Character(args[0]), Angle(args[1]), FrameCount(args[2]), Unknown(args[3]))
 			case 38: .turnTowards2(Character(args[0]), target: Character(args[1]), Unknown(args[2]), FrameCount(args[3]), Unknown(args[4]))
+			case 39: .move(Character(args[0]), to: Character(args[1]), FrameCount(args[2]), Unknown(args[3]))
 			case 43: .moveTo(Character(args[0]), position: Vector(x: args[1], y: args[2]), FrameCount(args[3]), Unknown(args[4]))
 			case 45: .moveBy(Character(args[0]), relative: Vector(x: args[1], y: args[2]), FrameCount(args[3]), Unknown(args[4]))
+			case 51: .control(Character(args[0]))
 			case 56: .delay(FrameCount(args[0]))
 			case 58: .clean1(Unknown(args[0]), Fossil(args[1]))
 			case 59: .clean2(Unknown(args[0]), Fossil(args[1]))
@@ -208,6 +220,8 @@ extension DEX.Command {
 				(1, [dialogue.value])
 			case .spawn(let character, let unknown, let position, let angle):
 				(7, [character.value, unknown.value, position.x, position.y, angle.value])
+			case .teleport(let source, to: let destination):
+				(10, [source.value, destination.value])
 			case .despawn(let character):
 				(14, [character.value])
 			case .fadeOut(let frames):
@@ -226,10 +240,14 @@ extension DEX.Command {
 				(37, [character.value, angle.value, frames.value, unknown.value])
 			case .turnTowards2(let character, let target, let unknown1, let frames, let unknown2):
 				(38, [character.value, target.value, unknown1.value, frames.value, unknown2.value])
+			case .move(let source, to: let destination, let frames, let unknown):
+				(39, [source.value, destination.value, frames.value, unknown.value])
 			case .moveTo(let character, let position, let frames, let unknown):
 				(43, [character.value, position.x, position.y, frames.value, unknown.value])
 			case .moveBy(let character, let relative, let frames, let unknown):
 				(45, [character.value, relative.x, relative.y, frames.value, unknown.value])
+			case .control(let character):
+				(51, [character.value])
 			case .delay(let frames):
 				(56, [frames.value])
 			case .clean1(let unknown, let fossil):
@@ -301,9 +319,13 @@ extension DEX.Command {
 			)
 			case .spawn: .spawn(
 				try Character(arguments[0]).orElseThrow(invalidArgument(0)),
-				try Unknown(arguments[3]).orElseThrow(invalidArgument(3)),
-				position: try Vector(arguments[1]).orElseThrow(invalidArgument(1)),
-				try Angle(arguments[2]).orElseThrow(invalidArgument(2))
+				try Map(arguments[1]).orElseThrow(invalidArgument(3)),
+				position: try Vector(arguments[2]).orElseThrow(invalidArgument(1)),
+				try Angle(arguments[3]).orElseThrow(invalidArgument(2))
+			)
+			case .teleport: .teleport(
+				try Character(arguments[0]).orElseThrow(invalidArgument(0)),
+				to: try Character(arguments[1]).orElseThrow(invalidArgument(1))
 			)
 			case .despawn: .despawn(
 				try Character(arguments[0]).orElseThrow(invalidArgument(0))
@@ -346,6 +368,12 @@ extension DEX.Command {
 				try FrameCount(arguments[2]).orElseThrow(invalidArgument(2)),
 				try Unknown(arguments[4]).orElseThrow(invalidArgument(4))
 			)
+			case .move: .move(
+				try Character(arguments[0]).orElseThrow(invalidArgument(0)),
+				to: try Character(arguments[1]).orElseThrow(invalidArgument(1)),
+				try FrameCount(arguments[2]).orElseThrow(invalidArgument(2)),
+				try Unknown(arguments[3]).orElseThrow(invalidArgument(3))
+			)
 			case .moveTo: .moveTo(
 				try Character(arguments[0]).orElseThrow(invalidArgument(0)),
 				position: try Vector(arguments[1]).orElseThrow(invalidArgument(1)),
@@ -357,6 +385,9 @@ extension DEX.Command {
 				relative: try Vector(arguments[1]).orElseThrow(invalidArgument(1)),
 				try FrameCount(arguments[2]).orElseThrow(invalidArgument(2)),
 				try Unknown(arguments[3]).orElseThrow(invalidArgument(3))
+			)
+			case .control: .control(
+				try Character(arguments[0]).orElseThrow(invalidArgument(0))
 			)
 			case .delay: .delay(
 				try FrameCount(arguments[0]).orElseThrow(invalidArgument(0))
@@ -451,8 +482,10 @@ extension String {
 		self = switch command {
 			case .dialogue(let dialogue):
 				"dialogue \(dialogue)"
-			case .spawn(let character, let unknown, let position, let angle):
-				"spawn \(character) at \(position) facing \(angle), unknown: \(unknown)"
+			case .spawn(let character, let map, let position, let angle):
+				"spawn \(character) in \(map) at \(position) facing \(angle)"
+			case .teleport(let source, to: let destination):
+				"teleport \(source) to \(destination)"
 			case .despawn(let character):
 				"despawn \(character)"
 			case .fadeOut(frameCount: let frameCount):
@@ -471,10 +504,14 @@ extension String {
 				"turn2 \(character) to \(angle) over \(frameCount), unknown: \(unknown)"
 			case .turnTowards2(let character, target: let target, let unknown1, let frameCount, let unknown2):
 				"turn \(character) towards \(target) over \(frameCount), unknowns: \(unknown1) \(unknown2)"
+			case .move(let source, to: let destination, let frameCount, let unknown):
+				"move \(source) to \(destination) over \(frameCount), unknown: \(unknown)"
 			case .moveTo(let character, let position, let frameCount, let unknown):
 				"move \(character) to \(position) over \(frameCount), unknown: \(unknown)"
 			case .moveBy(let character, relative: let relative, let frameCount, let unknown):
 				"move \(character) by \(relative) over \(frameCount), unknown: \(unknown)"
+			case .control(let character):
+				"control \(character)"
 			case .delay(frameCount: let frameCount):
 				"delay \(frameCount)"
 			case .clean1(let unknown, let fossil):
@@ -549,7 +586,7 @@ extension DEX.Command.Vector: CustomStringConvertible {
 }
 
 enum CommandType {
-	case dialogue, spawn, despawn, fadeOut, fadeIn, unownedDialogue, turnTo, turn1To, turnTowards, turn2To, turnTowards2, moveTo, moveBy, delay, clean1, clean2, angleCamera, startMusic, fadeMusic, playSound, characterEffect, clearEffects, characterMovement, dialogueChoice, imageFadeOut, imageSlideIn, imageFadeIn, revive, startTurning, stopTurning, unknown, comment
+	case dialogue, spawn, teleport, despawn, fadeOut, fadeIn, unownedDialogue, turnTo, turn1To, turnTowards, turn2To, turnTowards2, move, moveTo, moveBy, control, delay, clean1, clean2, angleCamera, startMusic, fadeMusic, playSound, characterEffect, clearEffects, characterMovement, dialogueChoice, imageFadeOut, imageSlideIn, imageFadeIn, revive, startTurning, stopTurning, unknown, comment
 	
 	init?(_ command: Substring) {
 		let firstSpace = command.firstIndex(where: \.isWhitespace)
@@ -564,6 +601,7 @@ enum CommandType {
 					.dialogue
 				}
 			case "spawn": .spawn
+			case "teleport": .teleport
 			case "despawn": .despawn
 			case "fade":
 				if command.contains("image") {
@@ -594,10 +632,15 @@ enum CommandType {
 			case "turn2": .turn2To
 			case "move":
 				if command.contains("to") {
-					.moveTo
+					if command.count(where: { $0 == "," }) > 1 {
+						.moveTo
+					} else {
+						.move
+					}
 				} else {
 					.moveBy
 				}
+			case "control": .control
 			case "delay": .delay
 			case "clean1": .clean1
 			case "clean2": .clean2
@@ -626,10 +669,10 @@ enum CommandType {
 	
 	var argumentCount: Int? {
 		switch self {
-			case .dialogue, .despawn, .fadeOut, .fadeIn, .unownedDialogue, .delay, .startMusic, .fadeMusic, .playSound, .clearEffects, .revive, .stopTurning: 1
-			case .turnTo, .clean1, .clean2, .characterEffect, .characterMovement, .imageFadeOut, .startTurning: 2
+			case .dialogue, .despawn, .fadeOut, .fadeIn, .unownedDialogue, .control, .delay, .startMusic, .fadeMusic, .playSound, .clearEffects, .revive, .stopTurning: 1
+			case .teleport, .turnTo, .clean1, .clean2, .characterEffect, .characterMovement, .imageFadeOut, .startTurning: 2
 			case .dialogueChoice: 3
-			case .moveTo, .moveBy, .spawn, .turn1To, .turnTowards, .turn2To, .imageSlideIn, .imageFadeIn: 4
+			case .move, .moveTo, .moveBy, .spawn, .turn1To, .turnTowards, .turn2To, .imageSlideIn, .imageFadeIn: 4
 			case .turnTowards2, .angleCamera: 5
 			case .unknown, .comment: nil
 		}

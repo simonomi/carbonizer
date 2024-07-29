@@ -173,6 +173,25 @@ extension Optional {
 	}
 }
 
+@discardableResult
+func shell(_ command: String) throws -> String {
+	let task = Process()
+	let pipe = Pipe()
+	
+	task.standardOutput = pipe
+	task.standardError = pipe
+	task.arguments = ["-c", command]
+	task.executableURL = URL(fileURLWithPath: "/bin/zsh")
+	task.standardInput = nil
+	
+	try task.run()
+	
+	let data = pipe.fileHandleForReading.readDataToEndOfFile()
+	let output = String(data: data, encoding: .utf8)!
+	
+	return output
+}
+
 extension URL {
 #if os(Windows)
 	func path(percentEncoded: Bool) -> String {
@@ -180,8 +199,12 @@ extension URL {
 	}
 #endif
 	
+	func getModificationDate() throws -> Date? {
+		try FileManager.default.attributesOfItem(atPath: path(percentEncoded: false))[.modificationDate] as? Date
+	}
+	
 	func getCreationDate() throws -> Date? {
-		try FileManager.default.attributesOfItem(atPath: path)[.creationDate] as? Date
+		try FileManager.default.attributesOfItem(atPath: path(percentEncoded: false))[.creationDate] as? Date
 	}
 	
 	func setCreationDate(to date: Date) throws {
@@ -218,7 +241,7 @@ extension URL {
 		try FileManager.default.contentsOfDirectory(at: self, includingPropertiesForKeys: nil)
 	}
 	
-	enum FileType {
+	enum FileType: Equatable {
 		case file, folder, other(FileAttributeType?)
 	}
 	

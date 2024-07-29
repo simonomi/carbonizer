@@ -40,6 +40,7 @@ extension SuffixUnit {
 enum DialogueUnit: PrefixUnit    { static let prefix = "dialogue"     }
 enum EffectUnit: PrefixUnit      { static let prefix = "effect"       }
 enum ImageUnit: PrefixUnit       { static let prefix = "image"        }
+enum MapUnit: PrefixUnit         { static let prefix = "map"          }
 enum MovementUnit: PrefixUnit    { static let prefix = "movement"     }
 enum MusicUnit: PrefixUnit       { static let prefix = "music"        }
 enum SoundEffectUnit: PrefixUnit { static let prefix = "sound effect" }
@@ -49,13 +50,13 @@ enum FrameUnit: SuffixUnit       { static let suffix = "frames"       }
 
 enum CharacterUnit: UnitProtocol {
 	static func parse(_ text: Substring) -> Int32? {
-		text
+		characterNames
+			.first(where: { $0.value.caseInsensitiveEquals(text) })
+			.map(\.key)
+		?? text
 			.split(separator: " ")
 			.last
 			.flatMap { Int32($0) }
-		?? characterNames
-			.first(where: { $0.value.caseInsensitiveEquals(text) })
-			.map(\.key)
 	}
 	
 	static func format(_ number: Int32) -> String {
@@ -65,14 +66,14 @@ enum CharacterUnit: UnitProtocol {
 
 enum FossilUnit: UnitProtocol {
 	static func parse(_ text: Substring) -> Int32? {
-		text
-			.split(separator: " ")
-			.last
-			.flatMap { Int32($0) }
-		?? fossilNames
+		fossilNames
 			.first(where: { $0.value.caseInsensitiveEquals(text) })
 			.map(\.key)
 			.map(Int32.init)
+		?? text
+			.split(separator: " ")
+			.last
+			.flatMap { Int32($0) }
 	}
 	
 	static func format(_ number: Int32) -> String {
@@ -82,13 +83,13 @@ enum FossilUnit: UnitProtocol {
 
 enum VivosaurUnit: UnitProtocol {
 	static func parse(_ text: Substring) -> Int32? {
-		text
+		vivosaurNames
+			.firstIndex(where: text.caseInsensitiveEquals)
+			.map(Int32.init)
+		?? text
 			.split(separator: " ")
 			.last
 			.flatMap { Int32($0) }
-		?? vivosaurNames
-			.firstIndex(where: text.caseInsensitiveEquals)
-			.map(Int32.init)
 	}
 	
 	static func format(_ number: Int32) -> String {

@@ -4,7 +4,7 @@ import Foundation
 import BinaryParser
 
 @main
-struct Carbonizer: ParsableCommand {
+struct Carbonizer: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		abstract: "A Fossil Fighters ROM-hacking tool.",
 		discussion: "By default, carbonizer automatically determines whether to pack or unpack each input. It does this by looking at file extensions, magic bytes, and metadata"
@@ -24,9 +24,10 @@ struct Carbonizer: ParsableCommand {
 		}
 	}
 	
-	mutating func run() throws {
+	mutating func run() async throws {
 		do {
 			try main()
+//			try await monitor()
 		} catch {
 			print(error)
 			waitForInput()
