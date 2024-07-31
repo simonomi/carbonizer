@@ -4,8 +4,18 @@ import Foundation
 struct DEX {
 	var commands: [[Command]]
 	
-	// 143 - set name
+	
+	// 22: fade to white (frames)
+	// 23 fade out from white (frames)
+	// 114 character model - sets which model for the characters body
+	// 115 character model - sets which model for the characters head
 	// 142 - modify name
+	// 143 - set name
+	// 41 - moveTo 2 (character) (position) (unknown)
+	
+	// 33 dialogue choice with help text??????????
+	
+	// unknown <3>: <7025> freezes camera focus
 	
 	// 50 ???? smoothes out movement or something
 	// 62 does something similar - camera goes to the wrong place without it
@@ -14,7 +24,6 @@ struct DEX {
 	// 3: unknown (unknown)
 	// 6: unknown (0x5######)
 	// 8: unknown (unknown, unknown)
-	// 22: fade to white (frames)
 	// 50: unknown (character)
 	// 51: unknown (character)
 	// 116: unknown (unknown)
@@ -322,9 +331,9 @@ extension DEX.Command {
 			)
 			case .spawn: .spawn(
 				try Character(arguments[0]).orElseThrow(invalidArgument(0)),
-				try Map(arguments[1]).orElseThrow(invalidArgument(3)),
+				try Map(arguments[1]).orElseThrow(invalidArgument(2)),
 				position: try Vector(arguments[2]).orElseThrow(invalidArgument(1)),
-				try Angle(arguments[3]).orElseThrow(invalidArgument(2))
+				try Angle(arguments[3]).orElseThrow(invalidArgument(3))
 			)
 			case .teleport: .teleport(
 				try Character(arguments[0]).orElseThrow(invalidArgument(0)),

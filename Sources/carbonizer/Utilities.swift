@@ -366,7 +366,7 @@ extension DefaultStringInterpolation {
 }
 
 func waitForInput() {
-#if os(Windows)
+#if IN_CI
 	print("Press Enter to continue...", terminator: "")
 	let _ = readLine()
 #endif

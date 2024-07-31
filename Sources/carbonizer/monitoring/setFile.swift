@@ -8,7 +8,7 @@ extension NDS {
 	mutating func setFile(at path: ArraySlice<String>, to content: any FileSystemObject) {
 		if let index = contents.firstIndex(where: { $0.name == path.dropFirst().first }) {
 			contents[index].setFile(at: path.dropFirst(2), to: content)
-		} else {
+		} else if path.dropFirst().first?.hasPrefix(".") != true {
 			fatalError("not found: \(path.dropFirst().first ?? "nil")")
 		}
 	}
@@ -22,7 +22,7 @@ extension Folder {
 			} else {
 				contents[index].setFile(at: path.dropFirst(), to: content)
 			}
-		} else {
+		} else if path.dropFirst().first?.hasPrefix(".") != true {
 			fatalError("not found: \(path.first ?? "nil")")
 		}
 	}

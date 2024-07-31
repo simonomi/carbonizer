@@ -117,7 +117,7 @@ let characterNames: [Int32: String] = [
 //	138: "", // cha36c head36c
 	139: "Holt 1", // cha31 head31
 //	140: "", // cha28e head28e
-//	141: "", // cha28c head28c
+	141: "Sam Inaro", // cha28c head28c
 	142: "Samurai", // cha16 head16
 //	143: "", // cha36a head36a
 //	144: "", // cha36a head36a

@@ -64,7 +64,17 @@ func label(_ dex: consuming DEX, with allDialogue: [UInt32: String]) -> DEX {
 						if let line = allDialogue[UInt32(dialogue.value)] {
 							partialResult.append(.comment(line.replacingOccurrences(of: "\n", with: "\n// ")))
 						}
-						partialResult.append(.dialogue(dialogue))
+						partialResult.append(command)
+					case .unownedDialogue(let dialogue):
+						if let line = allDialogue[UInt32(dialogue.value)] {
+							partialResult.append(.comment(line.replacingOccurrences(of: "\n", with: "\n// ")))
+						}
+						partialResult.append(command)
+					case .dialogueChoice(let dialogue, _, choices: _):
+						if let line = allDialogue[UInt32(dialogue.value)] {
+							partialResult.append(.comment(line.replacingOccurrences(of: "\n", with: "\n// ")))
+						}
+						partialResult.append(command)
 					default:
 						partialResult.append(command)
 				}
