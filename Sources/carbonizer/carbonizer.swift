@@ -54,30 +54,14 @@ struct Carbonizer: AsyncParsableCommand {
 		}
 		
 		for filePath in filePaths {
-			// TODO: document this
-//			let extractMARsOptionFile = URL.currentDirectory().appending(component: "extract mars.txt")
-//            if let extractMARsOverride = (try? String(contentsOf: extractMARsOptionFile))
-//                .flatMap(ExtractMARs.init) {
-//                await globalMutableState.replaceAutoExtractMARs(with: extractMARsOverride)
-//            }
-			
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
 			let file = try createFileSystemObject(contentsOf: filePath)
 			
-#if !IN_CI
-//			let inputFile = try createFileSystemObject(contentsOf: filePath).unpacked()
-//			let allDialogue = dmgRipper(inputFile)
-//			let file = dexDialogueLabeller(inputFile, dialogue: allDialogue)
-//			let compressionMode = CompressionMode.unpack
-			
-//			file = try file.postProcessed(with: mm3Finder)
-//			file = try file.postProcessed(with: mpmFinder) // doesnt work for much
-//			file = try file.postProcessed(with: mmsFinder)
-//			file = try file.postProcessed(with: dexDialogueLabeller)
-//			return
-#endif
-			
+#if IN_CI
 			let processedFile: any FileSystemObject
+#else
+			var processedFile: any FileSystemObject
+#endif
 			switch (compressionMode, file.packedStatus()) {
 				case (.unpack, _), (nil, .packed):
 					processedFile = try file.unpacked()
@@ -96,6 +80,21 @@ struct Carbonizer: AsyncParsableCommand {
 						continue
 					}
 			}
+			
+#if !IN_CI
+			logProgress("running post-processors")
+//			let inputFile = try createFileSystemObject(contentsOf: filePath).unpacked()
+//			let allDialogue = dmgRipper(inputFile)
+//			let file = dexDialogueLabeller(inputFile, dialogue: allDialogue)
+//			let compressionMode = CompressionMode.unpack
+
+//			processedFile = try processedFile.postProcessed(with: mmsFinder)
+			processedFile = try processedFile.postProcessed(with: mm3Finder)
+//			processedFile = try processedFile.postProcessed(with: mpmFinder) // doesnt work for much
+			
+//			file = try file.postProcessed(with: dexDialogueLabeller)
+			return
+#endif
 			
 #if IN_CI
 			let outputDirectory = filePath.deletingLastPathComponent()

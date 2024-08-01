@@ -16,13 +16,19 @@ public macro Padding(bytes: Int) = #externalMacro(module: "BinaryParserMacros", 
 public macro Offset(_ offset: Int) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
 
 @attached(peer)
-public macro Offset<S, T: BinaryInteger>(givenBy offset: KeyPath<S, T>, _ operator: Operator<T>? = nil) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
+public macro Offset<S, T: BinaryInteger>(givenBy offset: KeyPath<S, T>, _ operator: Operator<T>) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
+
+@attached(peer)
+public macro Offset<S, T: BinaryInteger>(givenBy offset: KeyPath<S, T>, _ operator: Operator<KeyPath<S, T>>...) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
 
 @attached(peer)
 public macro Count(_ count: Int) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
 
 @attached(peer)
-public macro Count<S, T: BinaryInteger>(givenBy count: KeyPath<S, T>, _ operator: Operator<T>? = nil) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
+public macro Count<S, T: BinaryInteger>(givenBy count: KeyPath<S, T>, _ operator: Operator<T>) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
+
+@attached(peer)
+public macro Count<S, T: BinaryInteger>(givenBy count: KeyPath<S, T>, _ operator: Operator<KeyPath<S, T>>...) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
 
 @attached(peer)
 public macro Offsets<S, T: BinaryInteger>(givenBy offsets: KeyPath<S, [T]>) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
@@ -37,7 +43,10 @@ public macro Offsets<S, T, U: BinaryInteger>(givenBy offsets: KeyPath<S, [T]>, f
 public macro Length(_ length: Int) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
 
 @attached(peer)
-public macro Length<S, T: BinaryInteger>(givenBy length: KeyPath<S, T>, _ operator: Operator<T>? = nil) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
+public macro Length<S, T: BinaryInteger>(givenBy length: KeyPath<S, T>, _ operator: Operator<T>) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
+
+@attached(peer)
+public macro Length<S, T: BinaryInteger>(givenBy length: KeyPath<S, T>, _ operator: Operator<KeyPath<S, T>>...) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
 
 public enum Comparison<T> {
 	case equalTo(T)

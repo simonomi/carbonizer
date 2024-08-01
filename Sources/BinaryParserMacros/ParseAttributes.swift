@@ -34,7 +34,7 @@ extension Attributes {
 			self[keyPath: keyPath] = try parseArgument(arguments.first!)
 			
 			if arguments.count > 1 {
-				self[keyPath: keyPath] = applyOperator(arguments.last!, to: self[keyPath: keyPath]!)
+				self[keyPath: keyPath] = applyOperators(arguments.dropFirst(), to: self[keyPath: keyPath]!)
 			}
 		} else if attributeName == "Offsets" {
 			guard offsets == nil else {
@@ -87,37 +87,55 @@ func parseArgument(_ argument: LabeledExprSyntax) throws -> ValueOrProperty {
 	}
 }
 
-func applyOperator(_ operatorArgument: LabeledExprSyntax, to valueOrProperty: ValueOrProperty) -> ValueOrProperty {
+func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueOrProperty: ValueOrProperty) -> ValueOrProperty {
 	guard case .property(let property) = valueOrProperty else {
 		fatalError("operators can only be used on properties")
 	}
 	
-	let expression = operatorArgument.expression
-	if expression.is(NilLiteralExprSyntax.self) {
-		return valueOrProperty
-	}
+	var components = [property]
 	
-	guard let enumCase = FunctionCallExprSyntax(expression) else {
-		fatalError("argument must be an enum case with an associated value")
-	}
-	
-	let caseName = enumCase.calledExpression.trimmedDescription.dropFirst() // remove leading .
-	
-	guard let modifyingValue = IntegerLiteralExprSyntax(enumCase.arguments.first?.expression)?.trimmedDescription else {
-		fatalError("associated value must be an int")
-	}
-	
-	let operatorSymbol =
-		switch caseName {
-			case "plus": " + "
-			case "minus": " - "
-			case "times": " * "
-			case "dividedBy": " / "
-			case "modulo": " % "
-			default: fatalError("unexpected operator")
+	for operatorArgument in operatorArguments {
+		let expression = operatorArgument.expression
+		if expression.is(NilLiteralExprSyntax.self) {
+			return valueOrProperty
 		}
-	
-	return .property("Int(" + property + ")" + operatorSymbol + modifyingValue)
+		
+		guard let enumCase = FunctionCallExprSyntax(expression) else {
+			fatalError("argument must be an enum case with an associated value")
+		}
+		
+		let caseName = enumCase.calledExpression.trimmedDescription.dropFirst() // remove leading .
+		
+		let operatorSymbol =
+			switch caseName {
+				case "plus": "+"
+				case "minus": "-"
+				case "times": "*"
+				case "dividedBy": "/"
+				case "modulo": "%"
+				default: fatalError("unexpected operator")
+			}
+		
+		components.append(operatorSymbol)
+		
+		guard let enumExpression = enumCase.arguments.first?.expression else {
+			fatalError("operator enum must have payload")
+		}
+		
+		let modifyingValue: String
+		if let integerLiteral = enumExpression.as(IntegerLiteralExprSyntax.self) {
+			modifyingValue = integerLiteral.trimmedDescription
+		} else if let keypath = enumExpression.as(KeyPathExprSyntax.self) {
+			let expression = keypath.components.trimmedDescription.dropFirst() // remove trailing .
+			modifyingValue = "\(expression)"
+		} else {
+			fatalError("associated value must be an integer literal or a keypath")
+		}
+		
+		components.append(modifyingValue)
+	}
+		
+	return .property(components.joined(separator: " "))
 }
 
 func parseOffsets(_ arguments: LabeledExprListSyntax) throws -> Property.Size.Offsets {

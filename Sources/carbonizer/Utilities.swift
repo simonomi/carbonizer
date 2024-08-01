@@ -24,6 +24,14 @@ func identity<T>(_ value: T) -> T { value }
 //	try rhs(lhs)
 //}
 
+#if compiler(<6)
+extension Collection {
+	public func count(where predicate: (Element) throws -> Bool) rethrows -> Int {
+		try self.filter(predicate).count
+	}
+}
+#endif
+
 func createOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
 	if sizes.isEmpty {
 		[]
@@ -45,14 +53,16 @@ func hex<T: BinaryInteger & SignedNumeric>(_ value: T) -> String {
 }
 
 func logProgress(_ items: Any...) {
+#if IN_CI
 	let message = items
 		.map { String(describing: $0) }
 		.joined(separator: " ")
 	
 	print(String(repeating: " ", count: 100), terminator: "\r")
-	print(message, terminator: "\r")
+	print(message + "...", terminator: "\r")
 	
 	fflush(stdout)
+#endif
 }
 
 func splitFileName(_ name: String) -> (name: String, fileExtension: String) {

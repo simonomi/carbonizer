@@ -105,7 +105,7 @@ extension MAR {
 	static let fileExtension = "mar"
 	
 	init(name: String, binary: Binary) throws {
-		logProgress("Decompressing", name + "...")
+		logProgress("Decompressing", name)
 		self.name = name
 		
 		do {

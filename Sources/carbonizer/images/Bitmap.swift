@@ -57,6 +57,9 @@ extension Bitmap: BinaryConvertible {
 	
 }
 
-//extension Bitmap {
-//    static let fileExtension = "bmp"
-//}
+extension Bitmap: ProprietaryFileData {
+    static let fileExtension = "bmp"
+	static let packedStatus: PackedStatus = .unknown
+	
+	init(_ bitmap: Self) { self = bitmap }
+}
