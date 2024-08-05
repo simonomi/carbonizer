@@ -204,7 +204,7 @@ extension Datastream {
 			throw StringParsingError.invalidUTF8(showInvalidUTF8(in: bytes[offset..<endOffset]))
 		}
 		
-		defer { offset = endOffset }
+		defer { offset = offset + Int(inputLength) }
 		return string
 	}
 	

@@ -12,6 +12,8 @@ struct DEX {
 	// 142 - modify name
 	// 143 - set name
 	// 41 - moveTo 2 (character) (position) (unknown)
+	// 138 - screen shake (how much it shakes) (gradual intensity) (duration)
+	// 57 - battle (unknown) (battle id)
 	
 	// 33 dialogue choice with help text??????????
 	

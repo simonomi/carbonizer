@@ -93,6 +93,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	// cha01a_01: 25, 26, 27
 	if file.name != "cha01a_01" { return [file] }
 //	if file.name != "head01a" { return [file] }
+//	print(file.name)
 	
 	for mm3 in file.files.compactMap({ $0.content as? MM3 }) {
 //		print(file.name)
@@ -114,65 +115,74 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //
 //		exit(0)
 		
-		let modelData = (arc.files[Int(mm3.model.index)].content as! Datastream).bytes
-		let model = Datastream(modelData)
+		let modelData = arc.files[Int(mm3.model.index)].content as! Datastream
+		let vertexData = try modelData.read(VertexData.self)
+        
+        let obj = try vertexData.obj()
+        
+        let filePath = URL(filePath: "/Users/simonomi/Desktop/cha01a_01.obj")
+        try obj.text().write(to: filePath, atomically: false, encoding: .utf8)
 		
-		let modelStart = model.placeMarker()
+        let animationData = arc.files[Int(mm3.animation.index)].content as! Datastream
+        
+        
 		
-//		print(file.name, mm3.model.index)
-		
-		let start = try! model.read(UInt32.self)
-		precondition(start == 0x20000)
-		
-		let commandsOffset = try! model.read(UInt32.self)
-		precondition(commandsOffset == 0x28)
-		
-		let commandsLength = try! model.read(UInt32.self)
-		let boneTableLength = try! model.read(UInt32.self)
-		let modelNamesLength = try! model.read(UInt32.self)
-		
-		let fourteen = try! model.read(UInt32.self)
-//		print(fourteen)
-//		guard fourteen == 3 else { continue }
-		
-		// no clue what this number means but when its 0 its all funky
-		let eighteen = try! model.read(UInt32.self)
-		guard eighteen != 0 else { continue }
-		
-		let oneC = try! model.read(UInt32.self)
-//		guard oneC == 0x3 else { continue }
-
-		let twenty = try! model.read(UInt32.self)
-//		guard twenty == 0x3C else { continue }
-		
-		let twentyFour = try! model.read(UInt32.self)
-		
+//		let modelStart = model.placeMarker()
+//		
+////		print(file.name, mm3.model.index)
+//		
+//		let start = try! model.read(UInt32.self)
+//		precondition(start == 0x20000)
+//		
+//		let commandsOffset = try! model.read(UInt32.self)
+//		precondition(commandsOffset == 0x28)
+//		
+//		let commandsLength = try! model.read(UInt32.self)
+//		let boneTableLength = try! model.read(UInt32.self)
+//		let modelNamesLength = try! model.read(UInt32.self)
+//		
+//		let fourteen = try! model.read(UInt32.self)
+////		print(fourteen)
+////		guard fourteen == 3 else { continue }
+//		
+//		// no clue what this number means but when its 0 its all funky
+//		let eighteen = try! model.read(UInt32.self)
+//		guard eighteen != 0 else { continue }
+//		
+//		let oneC = try! model.read(UInt32.self)
+////		guard oneC == 0x3 else { continue }
+//
+//		let twenty = try! model.read(UInt32.self)
+////		guard twenty == 0x3C else { continue }
+//		
+//		let twentyFour = try! model.read(UInt32.self)
+//		
+////		model.jump(to: modelStart + 0x28)
+//		
+//		model.jump(to: modelStart + 0x28 + commandsLength)
+//		
+//		let numberOfBones = try model.read(UInt32.self)
+//		
+//		let boneTable = try (0..<numberOfBones).map { _ in
+//			let name = try model.read(String.self, length: 16)
+//			let matrix = try model.read(Matrix.self)
+//			return (name: name, matrix: matrix)
+//		}
+//		
+//		print(
+//			boneTable
+//				.map(\.name)
+//				.map {
+//					$0.reversed()
+//						.drop { $0 == "\u{0}" }
+//						.reversed()
+//				}
+//				.map(String.init)
+//		)
+//		print(boneTable.map { "\($0.name) \($0.matrix)" }.joined(separator: "\n"))
+//		
+//		
 //		model.jump(to: modelStart + 0x28)
-		
-		model.jump(to: modelStart + 0x28 + commandsLength)
-		
-		let numberOfBones = try model.read(UInt32.self)
-		
-		let boneTable = try (0..<numberOfBones).map { _ in
-			let name = try model.read(String.self, length: 16)
-			let matrix = try model.read(Matrix.self)
-			return (name: name, matrix: matrix)
-		}
-		
-		print(
-			boneTable
-				.map(\.name)
-				.map {
-					$0.reversed()
-						.drop { $0 == "\u{0}" }
-						.reversed()
-				}
-				.map(String.init)
-		)
-		print(boneTable.map { "\($0.name) \($0.matrix)" }.joined(separator: "\n"))
-		
-		
-		model.jump(to: modelStart + 0x28)
 		
 		
 		
@@ -181,254 +191,254 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		
 //		return [file]
 		
-		var mtxRestores = [UInt32]()
-		
-		var currentMatrix = Matrix.unit
-		var currentVertex = SIMD3<Double>.zero
-		
-//		var triangles = [Triangle]()
-		var vertexMode = VertexMode.triangle // should be changed before using
-//		var vertexBuffer = [SIMD3<Double>]()
-		var vertexBuffer = [Int]()
-		
-		var vertexList = [SIMD3<Double>]()
-		var faceList = [[Int]]()
-		
-		var frameNumber = 0
-		func add(vertex: SIMD3<Double>) {
-			let vertexIndex: Int // plus 1 because 1-indexed
-			if let index = vertexList.firstIndex(of: vertex) {
-				vertexIndex = index + 1
-			} else {
-				vertexList.append(vertex)
-				vertexIndex = vertexList.count
-			}
-			
-			vertexBuffer.append(vertexIndex)
-			
-//			if currentMatrix != boneTable[10].matrix { return }
-			
-			precondition(!vertexBuffer.isEmpty)
-			switch vertexMode {
-				case .triangle:
-					guard vertexBuffer.count.isMultiple(of: 3) else { return }
-					faceList.append([
-						vertexBuffer[vertexBuffer.count - 3],
-						vertexBuffer[vertexBuffer.count - 2],
-						vertexBuffer[vertexBuffer.count - 1]
-					])
-				case .quadrilateral:
-					guard vertexBuffer.count.isMultiple(of: 4) else { return }
-					faceList.append([
-						vertexBuffer[vertexBuffer.count - 4],
-						vertexBuffer[vertexBuffer.count - 3],
-						vertexBuffer[vertexBuffer.count - 1]
-					])
-					faceList.append([
-						vertexBuffer[vertexBuffer.count - 3],
-						vertexBuffer[vertexBuffer.count - 2],
-						vertexBuffer[vertexBuffer.count - 1]
-					])
-				case .triangleStrip:
-					guard vertexBuffer.count >= 3 else { return }
-					if vertexBuffer.count.isMultiple(of: 2) {
-						// even - reverse winding order
-						faceList.append([
-							vertexBuffer[vertexBuffer.count - 2],
-							vertexBuffer[vertexBuffer.count - 3],
-							vertexBuffer[vertexBuffer.count - 1]
-						])
-					} else {
-						faceList.append([
-							vertexBuffer[vertexBuffer.count - 3],
-							vertexBuffer[vertexBuffer.count - 2],
-							vertexBuffer[vertexBuffer.count - 1]
-						])
-					}
-				case .quadrilateralStrip:
-					guard vertexBuffer.count >= 4, vertexBuffer.count.isMultiple(of: 2) else { return }
-					faceList.append([
-						vertexBuffer[vertexBuffer.count - 4],
-						vertexBuffer[vertexBuffer.count - 3],
-						vertexBuffer[vertexBuffer.count - 2]
-					])
-					faceList.append([
-						vertexBuffer[vertexBuffer.count - 3],
-						vertexBuffer[vertexBuffer.count - 1],
-						vertexBuffer[vertexBuffer.count - 2]
-					])
-			}
-		}
-		
-		reader: while true {
-			let commands = try (0..<4).map { _ in try model.read(UInt8.self) }
-			
-			guard let lastCommand = commands.filter({ $0 != 0 }).last else {
-				fatalError("4 NOPs in a row")
-			}
-			
-			for command in commands {
-				if command == 0xFF { break reader }
-				
-				if [0x50, 0x51].contains(command) {
-					print("UNKNOWN", "0x" + String(command, radix: 16))
-					let argumentsLength = try model.read(UInt32.self)
-					model.jump(bytes: argumentsLength)
-					break
-				}
-				
-				if command == 0x52 {
-					print("GPU command start")
-					model.jump(bytes: 4)
-					break
-				}
-				
-				if command == 0x53 { // UNKNOWN 0x53
-					model.jump(bytes: 0x0c)
-					print("UNKNOWN 0x53")
-					// sometimes 0x53 has a 16-bit word after it (length of args?)
-					break
-				}
-				
-				if command == 0x10 { // MTX_MODE
-					let argument = try model.read(UInt32.self)
-					let mode = switch argument {
-							case 0: "Projection Matrix"
-							case 1: "Position Matrix"
-							case 2: "Position & Vector Simultaneous Set mode"
-							case 3: "Texture Matrix"
-							default: fatalError()
-						}
-					
-					print("MTX_MODE", mode)
-				} else if command == 0x14 { // MTX_RESTORE
-					let number = try model.read(UInt32.self)
-					mtxRestores.append(number)
-					currentMatrix = boneTable[Int(number) - 5].matrix
-					print("MTX_RESTORE", number, boneTable[Int(number) - 5].name)
-				} else if command == 0x1B { // MTX_SCALE
-					let x = Double(try model.read(UInt32.self)) / 4096
-					let y = Double(try model.read(UInt32.self)) / 4096
-					let z = Double(try model.read(UInt32.self)) / 4096
-					
-					print("MTX_SCALE", x, y, z)
-				} else if command == 0x20 { // COLOR
-					let color = try model.read(UInt32.self)
-					let red = Double(color & 0b11111) / 0b11111
-					let green = Double((color >> 5) & 0b11111) / 0b11111
-					let blue = Double(color >> 10) / 0b11111
-					
-//					print("COLOR", red, green, blue)
-				} else if command == 0x23 { // VTX_16
-					let x = parse1_3_12(try model.read(UInt16.self))
-					let y = parse1_3_12(try model.read(UInt16.self))
-					let z = parse1_3_12(try model.read(UInt16.self))
-					model.jump(bytes: 2)
-					
-					currentVertex = SIMD3(x, y, z)
-					
-					print("VTX_16", x, y, z, terminator: " ")
-					print(format(currentVertex))
-					
-					add(vertex: currentVertex.transformed(by: currentMatrix))
-				} else if command == 0x25 { // VTX_XY
-					let x = parse1_3_12(try model.read(UInt16.self))
-					let y = parse1_3_12(try model.read(UInt16.self))
-					
-					currentVertex.x = x
-					currentVertex.y = y
-					print("VTX_XY", x, y, terminator: " ")
-					print(format(currentVertex))
-					
-					add(vertex: currentVertex.transformed(by: currentMatrix))
-				} else if command == 0x26 { // VTX_XZ
-					let x = parse1_3_12(try model.read(UInt16.self))
-					let z = parse1_3_12(try model.read(UInt16.self))
-					
-					currentVertex.x = x
-					currentVertex.z = z
-					print("VTX_XZ", x, z, terminator: " ")
-					print(format(currentVertex))
-					
-					add(vertex: currentVertex.transformed(by: currentMatrix))
-				} else if command == 0x27 { // VTX_YZ
-					let y = parse1_3_12(try model.read(UInt16.self))
-					let z = parse1_3_12(try model.read(UInt16.self))
-					
-					currentVertex.y = y
-					currentVertex.z = z
-					print("VTX_YZ", y, z, terminator: " ")
-					print(format(currentVertex))
-					
-					add(vertex: currentVertex.transformed(by: currentMatrix))
-				} else if command == 0x29 { // POLYGON_ATTR
-//					0-3   Light 0..3 Enable Flags (each bit: 0=Disable, 1=Enable)
-//					4-5   Polygon Mode  (0=Modulation,1=Decal,2=Toon/Highlight Shading,3=Shadow)
-//					6     Polygon Back Surface   (0=Hide, 1=Render)  ;Line-segments are always
-//					7     Polygon Front Surface  (0=Hide, 1=Render)  ;rendered (no front/back)
-//					11    Depth-value for Translucent Polygons  (0=Keep Old, 1=Set New Depth)
-//					12    Far-plane intersecting polygons       (0=Hide, 1=Render/clipped)
-//					13    1-Dot polygons behind DISP_1DOT_DEPTH (0=Hide, 1=Render)
-//					14    Depth Test, Draw Pixels with Depth    (0=Less, 1=Equal) (usually 0)
-//					15    Fog Enable                            (0=Disable, 1=Enable)
-//					16-20 Alpha      (0=Wire-Frame, 1..30=Translucent, 31=Solid)
-//					24-29 Polygon ID (00h..3Fh, used for translucent, shadow, and edge-marking)
-					let attributes = try model.read(UInt32.self)
-					
-					let backSurface = attributes & (1 << 6) > 0
-					let frontSurface = attributes & (1 << 7) > 0
-					let alpha = attributes >> 16 & 0b11111
-					let poly = attributes >> 24 & 0b111111
-					
-					print("POLYGON_ATTR", attributes, backSurface, frontSurface, alpha, poly)
-				} else if command == 0x40 { // BEGIN_VTXS
-					let argument = try model.read(UInt32.self)
-					let mode = switch argument {
-						case 0: "Separate Triangle(s)"
-						case 1: "Separate Quadliteral(s)"
-						case 2: "Triangle Strips"
-						case 3: "Quadliteral Strips"
-						default: fatalError()
-					}
-					
-					vertexMode = switch argument {
-						case 0: .triangle
-						case 1: .quadrilateral
-						case 2: .triangleStrip
-						case 3: .quadrilateralStrip
-						default: fatalError()
-					}
-					vertexBuffer = []
-					
-					print("BEGIN_VTXS", mode)
-				} else if command == 0x41 { // END_VTXS
-					vertexBuffer = []
-					print("END_VTXS")
-				} else {
-					let argumentCount = argumentCountPerCommand[command]!
-					let arguments = try model.read([UInt32].self, count: argumentCount)
-					if ![0x22, 0x2A, 0x2B].contains(command) {
-						print(commandNames[command]!, arguments)
-					}
-				}
-			}
-			
-			if argumentCountPerCommand[lastCommand] == 0 {
-				model.jump(bytes: 4)
-			}
-		}
-		
-		let vertexListText = vertexList
-			.map { "v \($0.x) \($0.y) \($0.z)" }
-			.joined(separator: "\n")
-		let faceListText = faceList
-			.map { "f " + $0.sorted().map(String.init).joined(separator: " ") }
-			.joined(separator: "\n")
-		
-		let filePath = URL(filePath: "/Users/simonomi/Desktop/cha01a_01.obj")
-		try (vertexListText + "\n\n" + faceListText).write(to: filePath, atomically: false, encoding: .utf8)
-		
-		let uniqueRestores = mtxRestores.uniqued().sorted()
+//		var mtxRestores = [UInt32]()
+//		
+//		var currentMatrix = Matrix.unit
+//		var currentVertex = SIMD3<Double>.zero
+//		
+////		var triangles = [Triangle]()
+//		var vertexMode = VertexMode.triangle // should be changed before using
+////		var vertexBuffer = [SIMD3<Double>]()
+//		var vertexBuffer = [Int]()
+//		
+//		var vertexList = [SIMD3<Double>]()
+//		var faceList = [[Int]]()
+//		
+//		var frameNumber = 0
+//		func add(vertex: SIMD3<Double>) {
+//			let vertexIndex: Int // plus 1 because 1-indexed
+//			if let index = vertexList.firstIndex(of: vertex) {
+//				vertexIndex = index + 1
+//			} else {
+//				vertexList.append(vertex)
+//				vertexIndex = vertexList.count
+//			}
+//			
+//			vertexBuffer.append(vertexIndex)
+//			
+////			if currentMatrix != boneTable[10].matrix { return }
+//			
+//			precondition(!vertexBuffer.isEmpty)
+//			switch vertexMode {
+//				case .triangle:
+//					guard vertexBuffer.count.isMultiple(of: 3) else { return }
+//					faceList.append([
+//						vertexBuffer[vertexBuffer.count - 3],
+//						vertexBuffer[vertexBuffer.count - 2],
+//						vertexBuffer[vertexBuffer.count - 1]
+//					])
+//				case .quadrilateral:
+//					guard vertexBuffer.count.isMultiple(of: 4) else { return }
+//					faceList.append([
+//						vertexBuffer[vertexBuffer.count - 4],
+//						vertexBuffer[vertexBuffer.count - 3],
+//						vertexBuffer[vertexBuffer.count - 1]
+//					])
+//					faceList.append([
+//						vertexBuffer[vertexBuffer.count - 3],
+//						vertexBuffer[vertexBuffer.count - 2],
+//						vertexBuffer[vertexBuffer.count - 1]
+//					])
+//				case .triangleStrip:
+//					guard vertexBuffer.count >= 3 else { return }
+//					if vertexBuffer.count.isMultiple(of: 2) {
+//						// even - reverse winding order
+//						faceList.append([
+//							vertexBuffer[vertexBuffer.count - 2],
+//							vertexBuffer[vertexBuffer.count - 3],
+//							vertexBuffer[vertexBuffer.count - 1]
+//						])
+//					} else {
+//						faceList.append([
+//							vertexBuffer[vertexBuffer.count - 3],
+//							vertexBuffer[vertexBuffer.count - 2],
+//							vertexBuffer[vertexBuffer.count - 1]
+//						])
+//					}
+//				case .quadrilateralStrip:
+//					guard vertexBuffer.count >= 4, vertexBuffer.count.isMultiple(of: 2) else { return }
+//					faceList.append([
+//						vertexBuffer[vertexBuffer.count - 4],
+//						vertexBuffer[vertexBuffer.count - 3],
+//						vertexBuffer[vertexBuffer.count - 2]
+//					])
+//					faceList.append([
+//						vertexBuffer[vertexBuffer.count - 3],
+//						vertexBuffer[vertexBuffer.count - 1],
+//						vertexBuffer[vertexBuffer.count - 2]
+//					])
+//			}
+//		}
+//		
+//		reader: while true {
+//			let commands = try (0..<4).map { _ in try model.read(UInt8.self) }
+//			
+//			guard let lastCommand = commands.filter({ $0 != 0 }).last else {
+//				fatalError("4 NOPs in a row")
+//			}
+//			
+//			for command in commands {
+//				if command == 0xFF { break reader }
+//				
+//				if [0x50, 0x51].contains(command) {
+//					print("UNKNOWN", "0x" + String(command, radix: 16))
+//					let argumentsLength = try model.read(UInt32.self)
+//					model.jump(bytes: argumentsLength)
+//					break
+//				}
+//				
+//				if command == 0x52 {
+//					print("GPU command start")
+//					model.jump(bytes: 4)
+//					break
+//				}
+//				
+//				if command == 0x53 { // UNKNOWN 0x53
+//					model.jump(bytes: 0x0c)
+//					print("UNKNOWN 0x53")
+//					// sometimes 0x53 has a 16-bit word after it (length of args?)
+//					break
+//				}
+//				
+//				if command == 0x10 { // MTX_MODE
+//					let argument = try model.read(UInt32.self)
+//					let mode = switch argument {
+//							case 0: "Projection Matrix"
+//							case 1: "Position Matrix"
+//							case 2: "Position & Vector Simultaneous Set mode"
+//							case 3: "Texture Matrix"
+//							default: fatalError()
+//						}
+//					
+//					print("MTX_MODE", mode)
+//				} else if command == 0x14 { // MTX_RESTORE
+//					let number = try model.read(UInt32.self)
+//					mtxRestores.append(number)
+//					currentMatrix = boneTable[Int(number) - 5].matrix
+//					print("MTX_RESTORE", number, boneTable[Int(number) - 5].name)
+//				} else if command == 0x1B { // MTX_SCALE
+//					let x = Double(try model.read(UInt32.self)) / 4096
+//					let y = Double(try model.read(UInt32.self)) / 4096
+//					let z = Double(try model.read(UInt32.self)) / 4096
+//					
+//					print("MTX_SCALE", x, y, z)
+//				} else if command == 0x20 { // COLOR
+//					let color = try model.read(UInt32.self)
+//					let red = Double(color & 0b11111) / 0b11111
+//					let green = Double((color >> 5) & 0b11111) / 0b11111
+//					let blue = Double(color >> 10) / 0b11111
+//					
+////					print("COLOR", red, green, blue)
+//				} else if command == 0x23 { // VTX_16
+//					let x = parse1_3_12(try model.read(UInt16.self))
+//					let y = parse1_3_12(try model.read(UInt16.self))
+//					let z = parse1_3_12(try model.read(UInt16.self))
+//					model.jump(bytes: 2)
+//					
+//					currentVertex = SIMD3(x, y, z)
+//					
+//					print("VTX_16", x, y, z, terminator: " ")
+//					print(format(currentVertex))
+//					
+//					add(vertex: currentVertex.transformed(by: currentMatrix))
+//				} else if command == 0x25 { // VTX_XY
+//					let x = parse1_3_12(try model.read(UInt16.self))
+//					let y = parse1_3_12(try model.read(UInt16.self))
+//					
+//					currentVertex.x = x
+//					currentVertex.y = y
+//					print("VTX_XY", x, y, terminator: " ")
+//					print(format(currentVertex))
+//					
+//					add(vertex: currentVertex.transformed(by: currentMatrix))
+//				} else if command == 0x26 { // VTX_XZ
+//					let x = parse1_3_12(try model.read(UInt16.self))
+//					let z = parse1_3_12(try model.read(UInt16.self))
+//					
+//					currentVertex.x = x
+//					currentVertex.z = z
+//					print("VTX_XZ", x, z, terminator: " ")
+//					print(format(currentVertex))
+//					
+//					add(vertex: currentVertex.transformed(by: currentMatrix))
+//				} else if command == 0x27 { // VTX_YZ
+//					let y = parse1_3_12(try model.read(UInt16.self))
+//					let z = parse1_3_12(try model.read(UInt16.self))
+//					
+//					currentVertex.y = y
+//					currentVertex.z = z
+//					print("VTX_YZ", y, z, terminator: " ")
+//					print(format(currentVertex))
+//					
+//					add(vertex: currentVertex.transformed(by: currentMatrix))
+//				} else if command == 0x29 { // POLYGON_ATTR
+////					0-3   Light 0..3 Enable Flags (each bit: 0=Disable, 1=Enable)
+////					4-5   Polygon Mode  (0=Modulation,1=Decal,2=Toon/Highlight Shading,3=Shadow)
+////					6     Polygon Back Surface   (0=Hide, 1=Render)  ;Line-segments are always
+////					7     Polygon Front Surface  (0=Hide, 1=Render)  ;rendered (no front/back)
+////					11    Depth-value for Translucent Polygons  (0=Keep Old, 1=Set New Depth)
+////					12    Far-plane intersecting polygons       (0=Hide, 1=Render/clipped)
+////					13    1-Dot polygons behind DISP_1DOT_DEPTH (0=Hide, 1=Render)
+////					14    Depth Test, Draw Pixels with Depth    (0=Less, 1=Equal) (usually 0)
+////					15    Fog Enable                            (0=Disable, 1=Enable)
+////					16-20 Alpha      (0=Wire-Frame, 1..30=Translucent, 31=Solid)
+////					24-29 Polygon ID (00h..3Fh, used for translucent, shadow, and edge-marking)
+//					let attributes = try model.read(UInt32.self)
+//					
+//					let backSurface = attributes & (1 << 6) > 0
+//					let frontSurface = attributes & (1 << 7) > 0
+//					let alpha = attributes >> 16 & 0b11111
+//					let poly = attributes >> 24 & 0b111111
+//					
+//					print("POLYGON_ATTR", attributes, backSurface, frontSurface, alpha, poly)
+//				} else if command == 0x40 { // BEGIN_VTXS
+//					let argument = try model.read(UInt32.self)
+//					let mode = switch argument {
+//						case 0: "Separate Triangle(s)"
+//						case 1: "Separate Quadliteral(s)"
+//						case 2: "Triangle Strips"
+//						case 3: "Quadliteral Strips"
+//						default: fatalError()
+//					}
+//					
+//					vertexMode = switch argument {
+//						case 0: .triangle
+//						case 1: .quadrilateral
+//						case 2: .triangleStrip
+//						case 3: .quadrilateralStrip
+//						default: fatalError()
+//					}
+//					vertexBuffer = []
+//					
+//					print("BEGIN_VTXS", mode)
+//				} else if command == 0x41 { // END_VTXS
+//					vertexBuffer = []
+//					print("END_VTXS")
+//				} else {
+//					let argumentCount = argumentCountPerCommand[command]!
+//					let arguments = try model.read([UInt32].self, count: argumentCount)
+//					if ![0x22, 0x2A, 0x2B].contains(command) {
+//						print(commandNames[command]!, arguments)
+//					}
+//				}
+//			}
+//			
+//			if argumentCountPerCommand[lastCommand] == 0 {
+//				model.jump(bytes: 4)
+//			}
+//		}
+//		
+//		let vertexListText = vertexList
+//			.map { "v \($0.x) \($0.y) \($0.z)" }
+//			.joined(separator: "\n")
+//		let faceListText = faceList
+//			.map { "f " + $0.sorted().map(String.init).joined(separator: " ") }
+//			.joined(separator: "\n")
+//		
+//		let filePath = URL(filePath: "/Users/simonomi/Desktop/cha01a_01.obj")
+//		try (vertexListText + "\n\n" + faceListText).write(to: filePath, atomically: false, encoding: .utf8)
+//		
+//		let uniqueRestores = mtxRestores.uniqued().sorted()
 //		print("MTX_RESTOREs", String(repeating: ".", count: uniqueRestores.count))
 //		if uniqueRestores.count != numberOfBones, uniqueRestores.count != (numberOfBones - 1) {
 //			print(numberOfBones, uniqueRestores.count)
@@ -438,16 +448,9 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	return [file]
 }
 
-fileprivate func parse1_3_12(_ fixed: UInt16) -> Double {
-//	let signMask: UInt16 = (1 << 15)
-//	let signBit = fixed & signMask
-//	if signBit > 0 {
-//		return -Double(fixed & ~signMask) / Double(1 << 12)
-//	} else {
-//		return Double(fixed & ~signMask) / Double(1 << 12)
-//	}
-	Double(Int16(bitPattern: fixed)) / Double(1 << 12)
-}
+//fileprivate func parse4_12(_ fixed: UInt16) -> Double {
+//	Double(Int16(bitPattern: fixed)) / Double(1 << 12)
+//}
 
 fileprivate func format<B>(_ simd: SIMD3<B>) -> String {
 	"(\(simd.x), \(simd.y), \(simd.z))"

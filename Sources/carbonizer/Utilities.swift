@@ -32,6 +32,45 @@ extension Collection {
 }
 #endif
 
+extension BinaryInteger {
+    @inline(__always)
+    var isEven: Bool {
+        isMultiple(of: 2)
+    }
+    
+    @inline(__always)
+    var isOdd: Bool {
+        !isMultiple(of: 2)
+    }
+}
+
+extension Collection where Index: Strideable {
+    public func chunked(maxSize: Index.Stride) -> [SubSequence] {
+        stride(from: startIndex, to: endIndex, by: maxSize).map {
+            self[$0..<Swift.min($0.advanced(by: maxSize), endIndex)]
+        }
+    }
+    
+    public func chunked(exactSize: Index.Stride) -> [SubSequence] {
+        chunks(exactSize: exactSize, every: exactSize)
+    }
+    
+//    public func chunks(maxSize: Int, every: Int)
+    
+    public func chunks(
+        exactSize: Index.Stride,
+        every chunkInterval: Index.Stride
+    ) -> [SubSequence] {
+        stride(
+            from: startIndex,
+            through: endIndex.advanced(by: -exactSize),
+            by: chunkInterval
+        ).map {
+            self[$0..<$0.advanced(by: exactSize)]
+        }
+    }
+}
+
 func createOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
 	if sizes.isEmpty {
 		[]
