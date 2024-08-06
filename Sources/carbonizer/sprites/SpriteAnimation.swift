@@ -274,7 +274,7 @@ struct SpriteAnimation: BinaryConvertible {
 		var canvas = Bitmap(
 			width: Int32(width),
 			height: Int32(height),
-			contents: Array(repeating: nil, count: Int(width) * Int(height))
+			contents: Array(repeating: .transparent, count: Int(width) * Int(height))
 		)
 		
 		for image in images {

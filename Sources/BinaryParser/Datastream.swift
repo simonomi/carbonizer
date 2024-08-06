@@ -187,16 +187,11 @@ extension Datastream {
 	/// Documentation
 	@inlinable
 	public func read<T: BinaryInteger>(_ type: String.Type, length inputLength: T) throws -> String {
-		let length: T
-		if let endIndex = bytes[offset...].firstIndex(of: 0),
-		   endIndex < inputLength
-		{
-			length = T(endIndex)
-		} else {
-			length = inputLength
-		}
+		let inputEndOffset = offset + Int(inputLength)
 		
-		let endOffset = offset + Int(length)
+		let nullByteOffset = bytes[offset...].firstIndex(of: 0) ?? .max
+		let endOffset = min(inputEndOffset, nullByteOffset)
+		
 		guard canRead(until: endOffset) else {
 			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: String.self)
 		}
@@ -204,7 +199,7 @@ extension Datastream {
 			throw StringParsingError.invalidUTF8(showInvalidUTF8(in: bytes[offset..<endOffset]))
 		}
 		
-		defer { offset = offset + Int(inputLength) }
+		defer { offset = inputEndOffset }
 		return string
 	}
 	

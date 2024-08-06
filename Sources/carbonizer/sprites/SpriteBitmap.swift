@@ -71,12 +71,12 @@ extension SpriteBitmap {
 		while bitmapIndex < contents.count {
 			for y in 0..<gridSize {
 				for x in 0..<gridSize {
-					if contents[bitmapIndex] != nil {
+					if let color = contents[bitmapIndex] {
 						bitmap.contents[
 							x: x + gridX * gridSize + xOffset,
 							y: y + gridY * gridSize + yOffset,
 							width: Int(bitmap.width)
-						] = contents[bitmapIndex]
+						] = Bitmap.Color(color)
 					}
 					bitmapIndex += 1
 				}
@@ -97,13 +97,13 @@ extension SpriteBitmap {
 				case .sixteenColors:
 					colorsIndexes16!.flatMap {[
 						// color 0 is transparent, which is indicated by nil
-						$0 & 0b1111 == 0 ? nil : palette.colors[Int($0 & 0b1111)],
-						$0 >> 4 == 0 ? nil : palette.colors[Int($0 >> 4)]
+						$0 & 0b1111 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0 & 0b1111)]),
+						$0 >> 4 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0 >> 4)])
 					]}
 				case .twoFiftySixColors:
 					colorsIndexes256!.map {
 						// color 0 is transparent, which is indicated by nil
-						$0 == 0 ? nil : palette.colors[Int($0)]
+						$0 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0)])
 					}
 			}
 		
@@ -113,7 +113,7 @@ extension SpriteBitmap {
 		var gridX = 0
 		var gridY = 0
 		
-		var gridContents = [RGB555Color?](repeating: nil, count: contents.count)
+		var gridContents = [Bitmap.Color](repeating: .transparent, count: contents.count)
 		
 		while bitmapIndex < contents.count {
 			for y in 0..<gridSize {

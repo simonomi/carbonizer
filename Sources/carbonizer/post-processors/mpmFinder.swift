@@ -44,11 +44,11 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				// color 0 is transparent, which is indicated by nil
 				if palette.colors.count == 16 {
 					[
-						($0 >> 4) == 0 ? nil : palette.colors[Int($0 >> 4)],
-						($0 & 0b1111) == 0 ? nil : palette.colors[Int($0 & 0b1111)]
+						($0 >> 4) == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0 >> 4)]),
+						($0 & 0b1111) == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0 & 0b1111)])
 					]
 				} else {
-					[$0 == 0 ? nil : palette.colors[Int($0)]]
+					[$0 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0)])]
 				}
 			}
 		)

@@ -71,6 +71,15 @@ extension Collection where Index: Strideable {
     }
 }
 
+func zip<S: Sequence, T: Sequence, U: Sequence>(
+	_ first: S,
+	_ second: T,
+	_ third: U
+) -> [(S.Element, T.Element, U.Element)] {
+	zip(first, zip(second, third))
+		.map { ($0, $1.0, $1.1) }
+}
+
 func createOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
 	if sizes.isEmpty {
 		[]

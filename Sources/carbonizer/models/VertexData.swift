@@ -95,6 +95,17 @@ extension Matrix4x3<Double> {
     }
 }
 
+extension Matrix4x3 where Scalar: FloatingPoint {
+    static var identity: Self {
+        Self(
+            x: SIMD3(1, 0, 0),
+            y: SIMD3(0, 1, 0),
+            z: SIMD3(0, 0, 1),
+            transform: .zero
+        )
+    }
+}
+
 extension SIMD3<Double> {
     init(_ vector3_2012: Vector3_2012) {
         self.init(
@@ -124,9 +135,8 @@ extension Collection where Index == Int {
 }
 
 extension VertexData {
-	func obj(using matrices: [Matrix4x3<Double>]? = nil) throws -> OBJ<Double> {
-        let matrices = matrices ?? self.boneTable.bones
-            .map(\.matrix)
+	func obj(using matrices: [Matrix4x3_2012]? = nil) throws -> OBJ<Double> {
+        let matrices = (matrices ?? self.boneTable.bones.map(\.matrix))
             .map(Matrix4x3.init)
 		
 		// copy so theres no side effects
@@ -134,13 +144,17 @@ extension VertexData {
 		
 		let commands = try commandData.readCommands()
 		
-		var currentMatrix: Matrix4x3<Double>!
-        var currentVertexMode: GPUCommand.VertexMode!
-        var currentVertex: SIMD3<Double>!
+		var currentMatrix: Matrix4x3<Double>?
+        var currentVertexMode: GPUCommand.VertexMode?
+        var currentVertex: SIMD3<Double> = .zero
         var currentVertices: [Int] = []
         var result = OBJ<Double>(vertices: [], faces: [])
 		
         func commitVertex() {
+            guard let currentMatrix else {
+                fatalError("currentMatrix was nil")
+            }
+            
             let vertex = currentVertex.transformed(by: currentMatrix)
             
             let vertexIndex: Int // plus 1 because 1-indexed
@@ -213,7 +227,8 @@ extension VertexData {
 				case .matrixPop(_): () // ignore for now
 				case .matrixRestore(let index):
 					currentMatrix = matrices[Int(index) - 5]
-				case .matrixIdentity: () // ignore for now
+				case .matrixIdentity:
+                    currentMatrix = .identity
 				case .matrixScale(_, _, _): () // ignore for now
 				case .color(_): () // ignore for now
 				case .textureCoordinate(_): () // ignore for now

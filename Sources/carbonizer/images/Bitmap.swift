@@ -4,7 +4,15 @@ import Foundation
 struct Bitmap {
 	var width: Int32
 	var height: Int32
-	var contents: [RGB555Color?]
+	var contents: [Color]
+	
+	@BinaryConvertible
+	struct Color {
+		var red: UInt8
+		var green: UInt8
+		var blue: UInt8
+		var alpha: UInt8
+	}
 }
 
 extension Bitmap: BinaryConvertible {
@@ -43,18 +51,24 @@ extension Bitmap: BinaryConvertible {
 		data.jump(bytes: 36) // endpoints (unused)
 		data.jump(bytes: 12) // response curves (unused)
 		
-		for pixel in contents {
-			if let pixel {
-				data.write(UInt8(pixel.red * 255))
-				data.write(UInt8(pixel.green * 255))
-				data.write(UInt8(pixel.blue * 255))
-				data.write(UInt8(255)) // alpha
-			} else {
-				data.write(UInt32.zero) // transparent
-			}
-		}
+		data.write(contents)
+	}
+}
+
+extension Bitmap.Color {
+	init(_ rgb555: RGB555Color, alpha: Double = 1) {
+		red = UInt8(rgb555.red * 255)
+		green = UInt8(rgb555.green * 255)
+		blue = UInt8(rgb555.blue * 255)
+		self.alpha = UInt8(alpha * 255)
 	}
 	
+	static let transparent = Self(red: 0, green: 0, blue: 0, alpha: 0)
+	
+	consuming func replacingAlpha(with newAlpha: Double) -> Self {
+		alpha = UInt8(newAlpha * 255)
+		return self
+	}
 }
 
 extension Bitmap: ProprietaryFileData {
