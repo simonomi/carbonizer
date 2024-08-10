@@ -55,7 +55,7 @@ jobs:
     - run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
     - run: echo "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
     - run: dir "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
-    - run: echo "${{setps.swift-setup.outputs.swift-version}}"
+    - run: echo "${{steps.swift-setup.outputs.swift-version}}"
     - run: >
         tar -acf thing.zip 
         "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
