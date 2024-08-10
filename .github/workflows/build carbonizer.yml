@@ -53,12 +53,10 @@ jobs:
     #     -Xswiftc -whole-module-optimization
     - run: dir "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\"
     - run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
-    - run: echo "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
-    - run: dir "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
-    - run: echo "${{steps.swift-setup.outputs.swift-version}}"
+    - run: echo "${{ steps.swift-setup.outputs.swift-version }}"
+        # "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
     - run: >
         tar -acf thing.zip 
-        "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
         LICENSE.txt
         "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\swiftCore.dll"
         "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\swift_StringProcessing.dll"
