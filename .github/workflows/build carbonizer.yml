@@ -51,11 +51,12 @@ jobs:
     #     -Xswiftc -static-stdlib
     #     -Xswiftc -whole-module-optimization
     - run: dir "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\"
-    - run: curl "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
+    - run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
     - run: dir
+    - run: tar -acf thing.zip "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe" LICENSE.txt "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\" "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\" "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\" "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\"
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
         draft: true
         # files: D:/a/carbonizer/carbonizer/.build/*/release/carbonizer.exe
-        files: C:/Library/Swift-development/bin/*
+        files: thing.zip
