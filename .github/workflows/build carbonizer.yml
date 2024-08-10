@@ -50,7 +50,7 @@ jobs:
     #     -Xswiftc -static-executable
     #     -Xswiftc -static-stdlib
     #     -Xswiftc -whole-module-optimization
-    - run: dir "C:\\Library\\Swift-development\\bin"
+    - run: dir "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\"
     - run: curl "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
     - run: dir
     - name: Release
