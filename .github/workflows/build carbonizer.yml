@@ -26,13 +26,13 @@ jobs:
         swift build -c release
         -Xswiftc -DIN_CI
         -Xswiftc -whole-module-optimization
-    - name: Rename
-      run: cp "/Users/runner/work/carbonizer/carbonizer/.build/*/release/carbonizer" "carbonizer-macOS"
+    - name: Package
+      run: tar -acf carbonizer-macOS.zip -C "/Users/runner/work/carbonizer/carbonizer/.build/*/release/carbonizer" carbonizer
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
         draft: true
-        files: carbonizer-macOS
+        files: carbonizer-macOS.zip
   
   build-windows:
     runs-on: windows-latest
@@ -42,24 +42,25 @@ jobs:
       uses: SwiftyLab/setup-swift@latest
       with:
         swift-version: "5.10"
-    # - name: Checkout
-    #   uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 #     - name: Test
 #       run: swift test -Xswiftc -DIN_CI
-    # - name: Build
-    #   run: >
-    #     swift build -c release
-    #     -Xswiftc -DIN_CI
-    #     -Xswiftc -static-executable
-    #     -Xswiftc -static-stdlib
-    #     -Xswiftc -whole-module-optimization
+    - name: Build
+      run: >
+        swift build -c release
+        -Xswiftc -DIN_CI
+        -Xswiftc -static-executable
+        -Xswiftc -static-stdlib
+        -Xswiftc -whole-module-optimization
     - name: Download license
       run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
-        # "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
     - name: Pack products
       run: >
         tar -acf carbonizer-Windows.zip 
         LICENSE.txt
+        -C "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release"
+        carbonizer.exe
         -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin"
         swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll
     - name: Release
