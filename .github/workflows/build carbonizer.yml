@@ -26,11 +26,13 @@ jobs:
         swift build -c release
         -Xswiftc -DIN_CI
         -Xswiftc -whole-module-optimization
+    - name: Rename
+      run: cp "/Users/runner/work/carbonizer/carbonizer/.build/*/release/carbonizer" "carbonizer-macOS"
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
         draft: true
-        files: /Users/runner/work/carbonizer/carbonizer/.build/*/release/carbonizer
+        files: carbonizer-macOS
   
   build-windows:
     runs-on: windows-latest
@@ -51,20 +53,17 @@ jobs:
     #     -Xswiftc -static-executable
     #     -Xswiftc -static-stdlib
     #     -Xswiftc -whole-module-optimization
-    - run: dir "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\"
-    - run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
-    - run: echo "${{ steps.swift-setup.outputs.swift-version }}"
+    - name: Download license
+      run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
         # "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
-    - run: >
-        tar -acf thing.zip 
+    - name: Pack products
+      run: >
+        tar -acf carbonizer-Windows.zip 
         LICENSE.txt
-        "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\swiftCore.dll"
-        "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\swift_StringProcessing.dll"
-        "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\swift_Concurrency.dll"
-        "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin\\swiftWinSDK.dll"
+        -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin"
+        swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
         draft: true
-        # files: D:/a/carbonizer/carbonizer/.build/*/release/carbonizer.exe
-        files: thing.zip
+        files: carbonizer-Windows.zip
