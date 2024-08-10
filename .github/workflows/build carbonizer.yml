@@ -36,6 +36,7 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Set up Swift
+      id: swift-setup
       uses: SwiftyLab/setup-swift@latest
       with:
         swift-version: "5.10"
@@ -54,7 +55,7 @@ jobs:
     - run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
     - run: echo "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
     - run: dir "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
-    - run: echo "${{outputs.swift-version}}"
+    - run: echo "${{setps.swift-setup.outputs.swift-version}}"
     - run: >
         tar -acf thing.zip 
         "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release\\carbonizer.exe"
