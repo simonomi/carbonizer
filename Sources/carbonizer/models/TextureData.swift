@@ -84,7 +84,7 @@ extension TextureData: BinaryConvertible {
 		let palettesStart = data.placeMarker()
 		palettes = try data.read(
 			[Datastream].self,
-			offsets: imageHeaders.map(\.paletteOffset),
+            offsets: imageHeaders.map(\.paletteOffset),
 			endOffset: palettesLength,
 			relativeTo: palettesStart
 		).map { paletteData in
@@ -127,7 +127,11 @@ fileprivate func file(
 ) throws -> ProprietaryFile {
 	let headerInfo = try header.info()
 	
-	let palette = palette.map { Bitmap.Color($0) }
+	var palette = palette.map { Bitmap.Color($0) }
+	
+	if headerInfo.transparent {
+		palette[0] = .transparent
+	}
 	
 	let pixelData = bitmap.bytes
 	let pixels: [Bitmap.Color]

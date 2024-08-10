@@ -83,7 +83,7 @@ enum GPUCommand {
 	case matrixIdentity
 	case matrixScale(UInt32, UInt32, UInt32) // 3w - signed 20.12
 	case color(UInt32) // 1w - 555
-	case textureCoordinate(UInt32) // 1w
+	case textureCoordinate(Double, Double) // 1w
 	case vertex16(Double, Double, Double) // 2w
 	case vertexXY(Double, Double) // 1w
 	case vertexXZ(Double, Double) // 1w
@@ -142,6 +142,10 @@ extension Datastream {
 		Double(try read(Int16.self)) / Double(1 << 12)
 	}
 	
+	fileprivate func readFixed124() throws -> Double {
+		Double(try read(Int16.self)) / Double(1 << 4)
+	}
+	
 	func readCommands() throws -> [GPUCommand] {
 		var commands: [GPUCommand] = []
 		
@@ -170,7 +174,10 @@ extension Datastream {
 								try read(UInt32.self)
 							)
 					case .color: .color(try read(UInt32.self))
-					case .textureCoordinate: .textureCoordinate(try read(UInt32.self))
+					case .textureCoordinate: .textureCoordinate(
+						try readFixed124(),
+						try readFixed124()
+					)
 					case .vertex16: try {
 						let command: GPUCommand = .vertex16(
 							try readFixed412(),
@@ -219,6 +226,15 @@ extension Datastream {
 				
 				commands.append(command)
 				
+                switch command {
+                    case .unknown50, .unknown51, .unknown53:
+                        continue mainloop // stop reading commands from this word
+                                          // and skip the argument count check
+                    case .commandsEnd:
+                        break mainloop
+                    default: ()
+                }
+                
 				if case .commandsEnd = command {
 					break mainloop
 				}
