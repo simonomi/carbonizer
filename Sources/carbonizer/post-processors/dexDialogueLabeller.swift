@@ -8,7 +8,7 @@ func dexDialogueLabeller(
 			ProprietaryFile(
 				name: file.name,
 				metadata: file.metadata,
-				data: label(file.data, with: dialogue)
+				data: label(file.data, with: dialogue) as any ProprietaryFileData
 			)
 		case let mar as MAR:
 			MAR(
@@ -18,7 +18,7 @@ func dexDialogueLabeller(
 						MCM(
 							compression: $0.compression,
 							maxChunkSize: $0.maxChunkSize,
-							content: label($0.content, with: dialogue)
+							content: label($0.content, with: dialogue) as any ProprietaryFileData
 						)
 					}
 			)
