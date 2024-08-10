@@ -39,19 +39,23 @@ jobs:
       uses: SwiftyLab/setup-swift@latest
       with:
         swift-version: "5.10"
-    - name: Checkout
-      uses: actions/checkout@v4
+    # - name: Checkout
+    #   uses: actions/checkout@v4
 #     - name: Test
 #       run: swift test -Xswiftc -DIN_CI
-    - name: Build
-      run: >
-        swift build -c release
-        -Xswiftc -DIN_CI
-        -Xswiftc -static-executable
-        -Xswiftc -static-stdlib
-        -Xswiftc -whole-module-optimization
+    # - name: Build
+    #   run: >
+    #     swift build -c release
+    #     -Xswiftc -DIN_CI
+    #     -Xswiftc -static-executable
+    #     -Xswiftc -static-stdlib
+    #     -Xswiftc -whole-module-optimization
+    - run: dir "C:\\Library\\Swift-development\\bin"
+    - run: curl "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
+    - run: dir
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
         draft: true
-        files: D:/a/carbonizer/carbonizer/.build/*/release/carbonizer.exe
+        # files: D:/a/carbonizer/carbonizer/.build/*/release/carbonizer.exe
+        files: C:/Library/Swift-development/bin/*
