@@ -93,7 +93,7 @@ struct Carbonizer: AsyncParsableCommand {
 //			processedFile = try processedFile.postProcessed(with: mpmFinder) // doesnt work for much
 			
 //			file = try file.postProcessed(with: dexDialogueLabeller)
-//			return
+			return
 #endif
 			
 #if IN_CI

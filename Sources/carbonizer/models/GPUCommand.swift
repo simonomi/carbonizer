@@ -154,13 +154,13 @@ extension Datastream {
 			// TODO: rework this so it doesnt read all 4 at once
 			// for commandsEnd, unknown53
 //			let commandTypes = try (0..<4).map { _ in try read(GPUCommandType.self) }
-            let rawCommandTypes = try (0..<4).map { _ in try read(UInt8.self) }
+			let rawCommandTypes = try (0..<4).map { _ in try read(UInt8.self) }
 			
 			for rawCommandType in rawCommandTypes {
-                guard let commandType = GPUCommandType(rawValue: rawCommandType) else {
-                    throw InvalidGPUCommand.invalidCommand(rawCommandType)
-                }
-                
+				guard let commandType = GPUCommandType(rawValue: rawCommandType) else {
+					throw InvalidGPUCommand.invalidCommand(rawCommandType)
+				}
+				
 				let command: GPUCommand = switch commandType {
 					case .noop: .noop
 					case .matrixMode: .matrixMode(try read(GPUCommand.MatrixMode.self))
@@ -226,24 +226,24 @@ extension Datastream {
 				
 				commands.append(command)
 				
-                switch command {
-                    case .unknown50, .unknown51, .unknown53:
-                        continue mainloop // stop reading commands from this word
-                                          // and skip the argument count check
-                    case .commandsEnd:
-                        break mainloop
-                    default: ()
-                }
-                
+				switch command {
+					case .unknown50, .unknown51, .unknown53:
+						continue mainloop // stop reading commands from this word
+										  // and skip the argument count check
+					case .commandsEnd:
+						break mainloop
+					default: ()
+				}
+				
 				if case .commandsEnd = command {
 					break mainloop
 				}
 			}
 			
 			guard let lastRawCommand = rawCommandTypes.filter({ $0 != 0 }).last,
-                  let lastCommand = GPUCommandType(rawValue: lastRawCommand)
-            else {
-                // TODO: throw error
+				  let lastCommand = GPUCommandType(rawValue: lastRawCommand)
+			else {
+				// TODO: throw error
 				fatalError("4 NOPs in a row")
 			}
 			

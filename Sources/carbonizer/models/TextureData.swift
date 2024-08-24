@@ -1,29 +1,29 @@
 import BinaryParser
 
 struct TextureData {
-    var imageCount: UInt32
-    var bitmapsLength: UInt32
-    var palettesLength: UInt32
-    
-	@Count(givenBy: \Self.imageCount)
-    var imageHeaders: [ImageHeader]
+	var imageCount: UInt32
+	var bitmapsLength: UInt32
+	var palettesLength: UInt32
 	
-    var bitmaps: [Datastream]
-    
+	@Count(givenBy: \Self.imageCount)
+	var imageHeaders: [ImageHeader]
+	
+	var bitmaps: [Datastream]
+	
 	var palettes: [[RGB555Color]]
-    
-    @BinaryConvertible
-    struct ImageHeader {
-        @Length(16)
-        var name: String
-        
-        var bitmapOffset: UInt32
-        var paletteOffset: UInt32
-        
-        var unknown1: UInt16 // redundant bitmap offset/8??
-        
-        var rawInfo: UInt16
-    }
+	
+	@BinaryConvertible
+	struct ImageHeader {
+		@Length(16)
+		var name: String
+		
+		var bitmapOffset: UInt32
+		var paletteOffset: UInt32
+		
+		var unknown1: UInt16 // redundant bitmap offset/8??
+		
+		var rawInfo: UInt16
+	}
 }
 
 struct ImageInfo {
@@ -84,7 +84,7 @@ extension TextureData: BinaryConvertible {
 		let palettesStart = data.placeMarker()
 		palettes = try data.read(
 			[Datastream].self,
-            offsets: imageHeaders.map(\.paletteOffset),
+			offsets: imageHeaders.map(\.paletteOffset),
 			endOffset: palettesLength,
 			relativeTo: palettesStart
 		).map { paletteData in

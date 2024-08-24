@@ -33,42 +33,42 @@ extension Collection {
 #endif
 
 extension BinaryInteger {
-    @inline(__always)
-    var isEven: Bool {
-        isMultiple(of: 2)
-    }
-    
-    @inline(__always)
-    var isOdd: Bool {
-        !isMultiple(of: 2)
-    }
+	@inline(__always)
+	var isEven: Bool {
+		isMultiple(of: 2)
+	}
+	
+	@inline(__always)
+	var isOdd: Bool {
+		!isMultiple(of: 2)
+	}
 }
 
 extension Collection where Index: Strideable {
-    public func chunked(maxSize: Index.Stride) -> [SubSequence] {
-        stride(from: startIndex, to: endIndex, by: maxSize).map {
-            self[$0..<Swift.min($0.advanced(by: maxSize), endIndex)]
-        }
-    }
-    
-    public func chunked(exactSize: Index.Stride) -> [SubSequence] {
-        chunks(exactSize: exactSize, every: exactSize)
-    }
-    
+	public func chunked(maxSize: Index.Stride) -> [SubSequence] {
+		stride(from: startIndex, to: endIndex, by: maxSize).map {
+			self[$0..<Swift.min($0.advanced(by: maxSize), endIndex)]
+		}
+	}
+	
+	public func chunked(exactSize: Index.Stride) -> [SubSequence] {
+		chunks(exactSize: exactSize, every: exactSize)
+	}
+	
 //    public func chunks(maxSize: Int, every: Int)
-    
-    public func chunks(
-        exactSize: Index.Stride,
-        every chunkInterval: Index.Stride
-    ) -> [SubSequence] {
-        stride(
-            from: startIndex,
-            through: endIndex.advanced(by: -exactSize),
-            by: chunkInterval
-        ).map {
-            self[$0..<$0.advanced(by: exactSize)]
-        }
-    }
+	
+	public func chunks(
+		exactSize: Index.Stride,
+		every chunkInterval: Index.Stride
+	) -> [SubSequence] {
+		stride(
+			from: startIndex,
+			through: endIndex.advanced(by: -exactSize),
+			by: chunkInterval
+		).map {
+			self[$0..<$0.advanced(by: exactSize)]
+		}
+	}
 }
 
 func zip<S: Sequence, T: Sequence, U: Sequence>(
@@ -200,6 +200,15 @@ extension String {
 		return switch direction {
 			case .leading: padding + self
 			case .trailing: self + padding
+		}
+	}
+	
+	init(withoutDecimalIfWhole number: some FloatingPoint & LosslessStringConvertible) {
+		if number.truncatingRemainder(dividingBy: 1) == 0 {
+			assert(String(number).suffix(2) == ".0")
+			self = String(String(number).dropLast(2))
+		} else {
+			self = String(number)
 		}
 	}
 }

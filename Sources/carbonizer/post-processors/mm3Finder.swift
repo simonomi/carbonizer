@@ -1,85 +1,6 @@
 import BinaryParser
 
-import Foundation
-
-fileprivate func parseFixed2012(_ fixed: Int32) -> Double {
-	Double(fixed) / Double(1 << 12)
-}
-
-fileprivate struct Matrix: BinaryConvertible, CustomStringConvertible, Equatable {
-	var x: SIMD3<Double>
-	var y: SIMD3<Double>
-	var z: SIMD3<Double>
-	var s: SIMD3<Double>
-	
-	static let zero = Self(x: .zero, y: .zero, z: .zero, s: .zero)
-	
-	static let unit = Self(x: SIMD3(1, 0, 0), y: SIMD3(0, 1, 0), z: SIMD3(0, 0, 1), s: .zero)
-	
-	init(x: SIMD3<Double>, y: SIMD3<Double>, z: SIMD3<Double>, s: SIMD3<Double>) {
-		self.x = x
-		self.y = y
-		self.z = z
-		self.s = s
-	}
-	
-	init(_ data: Datastream) throws {
-		x = SIMD3(
-			parseFixed2012(try data.read(Int32.self)),
-			parseFixed2012(try data.read(Int32.self)),
-			parseFixed2012(try data.read(Int32.self))
-		)
-		y = SIMD3(
-			parseFixed2012(try data.read(Int32.self)),
-			parseFixed2012(try data.read(Int32.self)),
-			parseFixed2012(try data.read(Int32.self))
-		)
-		z = SIMD3(
-			parseFixed2012(try data.read(Int32.self)),
-			parseFixed2012(try data.read(Int32.self)),
-			parseFixed2012(try data.read(Int32.self))
-		)
-		s = SIMD3(
-			parseFixed2012(try data.read(Int32.self)),
-			parseFixed2012(try data.read(Int32.self)),
-			parseFixed2012(try data.read(Int32.self))
-		)
-	}
-	
-	func write(to data: Datawriter) {
-		fatalError()
-	}
-	
-	var description: String {
-		"[\(format(x)), \(format(y)), \(format(z)), \(format(s))]"
-	}
-}
-
-fileprivate extension SIMD3<Double> {
-	consuming func transformed(by matrix: Matrix) -> Self {
-		x * matrix.x + y * matrix.y + z * matrix.z + matrix.s
-	}
-}
-
-struct Triangle: CustomStringConvertible {
-	var firstPoint: SIMD3<Double>
-	var secondPoint: SIMD3<Double>
-	var thirdPoint: SIMD3<Double>
-	
-	init(_ firstPoint: SIMD3<Double>, _ secondPoint: SIMD3<Double>, _ thirdPoint: SIMD3<Double>) {
-		self.firstPoint = firstPoint
-		self.secondPoint = secondPoint
-		self.thirdPoint = thirdPoint
-	}
-	
-	var description: String {
-		"(\(format(firstPoint)), \(format(secondPoint)), \(format(thirdPoint)))"
-	}
-}
-
-enum VertexMode {
-	case triangle, quadrilateral, triangleStrip, quadrilateralStrip
-}
+import Foundation // TODO: remove
 
 func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
 	let file: MAR
@@ -95,25 +16,18 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		return [file]
 	}
 	
-	// cha01a_01: 25, 26, 27
-//	guard file.name == "cha01a_01" else { return [file] }
-//	guard file.name == "head01a" else { return [file] }
+//	guard file.name.hasPrefix("cha") else { return [file] }
 //	guard file.name.hasPrefix("head") else { return [file] }
-    
-	// fails at implicitly unwrapped optional
-//	guard file.name == "o08iwa3_2_01" else { return [file] }
-
-//	guard file.name.hasPrefix("ch") else { return [file] }
 //	guard parent.name == "fieldchar" else { return [file] }
 	
-	let blocklist = ["testman", "out03_1", "out04_1", "out09_5", "room31", "room41", "room42", "room43", "room45", "room50", "room53", "town01b"]
+	let blocklist = ["testman", "out04_1", "out09_5", "room31", "room41", "room42", "room43", "room45", "room50", "room53", "town01b"]
 	guard !blocklist.contains(file.name) else { return [file] }
 	
+//	guard file.name == "cha01a_01" else { return [file] }
+//	guard file.name == "cha01a_02" else { return [file] }
+	guard file.name == "head01a" else { return [file] }
 //	guard file.name == "room01" else { return [file] }
-	guard file.name == "cha01a_04" else { return [file] }
-	
-//	let blocklist = ["ana_01", "boat_01", "hasigo_01", "mask06", "mask13"]
-//	guard !blocklist.contains(file.name) else { return [file] }
+//	guard file.name == "cha01a_04" else { return [file] }
 	
 //	print(file.name)
 	
@@ -135,59 +49,71 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		let animation = try animationData.read(AnimationData.self)
 		animationData.jump(to: animationStart)
 		
-		var outputFolder = try texture.folder(named: file.name)
 		
-		let mtlText = texture.imageHeaders
-			.map(\.name)
-			.map {
-				"""
-				newmtl \($0)
-				map_Kd \(outputFolder.name)/\($0).png
-				"""
-			}
-			.joined(separator: "\n\n")
 		
-		let mtlData = mtlText.data(using: .utf8)!
-		let mtlFile = BinaryFile(name: file.name, fileExtension: "mtl", data: Datastream(mtlData))
 		
-		outputFolder.contents.append(mtlFile)
 		
-		// no two images in a texture should have the same offset.... right?
-		let textureNames = Dictionary(
-			uniqueKeysWithValues: try texture.imageHeaders.map {
-				// see http://problemkaputt.de/gbatek-ds-3d-texture-attributes.htm
-				switch try $0.info().type {
-					case .twoBits:
-						($0.paletteOffset >> 3, $0.name)
-					default:
-						($0.paletteOffset >> 4, $0.name)
-				}
-			}
-		)
+		let collada = try Collada(vertexData, modelName: file.name)
+//		print(collada.asString())
 		
-		let boneTables = animation.keyframes.transforms
-			.chunked(exactSize: Int(animation.keyframes.boneCount))
+		let outputPath = URL(filePath: "/Users/simonomi/Desktop/model.dae")
+		try collada.asString()
+			.data(using: .utf8)!
+			.write(to: outputPath)
 		
-		let objFiles = try boneTables.enumerated().map { (frameNumber, boneTable) in
-			let obj = try vertexData.obj(
-				matrices: Array(boneTable),
-				textureNames: textureNames
-			)
-			
-			let mtlFileName = "\(outputFolder.name)/\(file.name)"
-			let objData = Datastream(obj.text(mtlFile: mtlFileName).data(using: .utf8)!)
-			
-			let fileName = "\(file.name) frame \(frameNumber)"
-			let objFile = BinaryFile(name: fileName, fileExtension: "obj", data: objData)
-			
-			return objFile
-		}
-		
-		return [file, outputFolder] + objFiles
-    } catch {
+//		var outputFolder = try texture.folder(named: file.name)
+//		
+//		let mtlText = texture.imageHeaders
+//			.map(\.name)
+//			.map {
+//				"""
+//				newmtl \($0)
+//				map_Kd \(outputFolder.name)/\($0).png
+//				"""
+//			}
+//			.joined(separator: "\n\n")
+//		
+//		let mtlData = mtlText.data(using: .utf8)!
+//		let mtlFile = BinaryFile(name: file.name, fileExtension: "mtl", data: Datastream(mtlData))
+//		
+//		outputFolder.contents.append(mtlFile)
+//		
+//		// no two images in a texture should have the same offset.... right?
+//		let textureNames = Dictionary(
+//			uniqueKeysWithValues: try texture.imageHeaders.map {
+//				// see http://problemkaputt.de/gbatek-ds-3d-texture-attributes.htm
+//				switch try $0.info().type {
+//					case .twoBits:
+//						($0.paletteOffset >> 3, $0.name)
+//					default:
+//						($0.paletteOffset >> 4, $0.name)
+//				}
+//			}
+//		)
+//
+//		let boneTables = animation.keyframes.transforms
+//			.chunked(exactSize: Int(animation.keyframes.boneCount))
+//		
+//		let objFiles = try boneTables.enumerated().map { (frameNumber, boneTable) in
+//			let obj = try vertexData.obj(
+//				matrices: Array(boneTable),
+//				textureNames: textureNames
+//			)
+//			
+//			let mtlFileName = "\(outputFolder.name)/\(file.name)"
+//			let objData = Datastream(obj.text(mtlFile: mtlFileName).data(using: .utf8)!)
+//			
+//			let fileName = "\(file.name) frame \(frameNumber)"
+//			let objFile = BinaryFile(name: fileName, fileExtension: "obj", data: objData)
+//			
+//			return objFile
+//		}
+//		
+//		return [file, outputFolder] + objFiles
+	} catch {
 		// ignore for now
-//		print(file.name, "failed", error)
-    }
+		print(file.name, "failed", error)
+	}
 	
 	return [file]
 }

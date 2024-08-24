@@ -37,7 +37,9 @@ struct MFS {
 			
 //			var colorPalettes
 			
-			@If(\Self.letterLength, is: .equalTo(16))
+			@If(\Self.letterLength, is: .equalTo(16)) // skip every font but font12
+													  // font10 seems to fail bc non-ascii
+													  // rv_num seems to fail bc direct color bitmap
 			@Offset(givenBy: \Self.lettersOffset)
 			@Count(givenBy: \Self.lettersCount)
 			var letters: [Letter]?
@@ -62,7 +64,7 @@ extension MFS: ProprietaryFileData {
 	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
-		somethings = []
+		somethings = binary.noClue
 		
 		guard binary.someCount == 3 else { return }
 		

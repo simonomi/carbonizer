@@ -23,7 +23,7 @@ enum Huffman {
 		outputData.reserveCapacity(Int(header.decompressedSize))
 		
 		let treeNodeCount = Int(inputData.first!)
-		let treeLength = (treeNodeCount + 1) * 2 - 1
+		let treeLength = 2 * treeNodeCount + 1
 		
 		let rootNodeOffset = base + 5
 		var currentNodeOffset = rootNodeOffset
@@ -84,8 +84,8 @@ enum Huffman {
 		var nodeData: UInt8
 		
 		func leftOffset(currentOffset: Int) -> Int {
-			let offset = Int(nodeData) & 0b111111
-			return dropLowestBit(of: currentOffset) + 2 * offset + 2
+			let offset = Int(nodeData) & 0b111111 + 1
+			return dropLowestBit(of: currentOffset) + 2 * offset
 		}
 		
 		var leftIsData: Bool {
@@ -93,8 +93,8 @@ enum Huffman {
 		}
 		
 		func rightOffset(currentOffset: Int) -> Int {
-			let offset = Int(nodeData) & 0b111111
-			return dropLowestBit(of: currentOffset) + 2 * offset + 3
+			let offset = Int(nodeData) & 0b111111 + 1
+			return dropLowestBit(of: currentOffset) + 2 * offset + 1
 		}
 		
 		var rightIsData: Bool {
