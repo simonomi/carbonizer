@@ -79,33 +79,6 @@ struct VertexData {
 	}
 }
 
-struct Matrix4x3<Scalar: SIMDScalar> {
-	var x: SIMD3<Scalar>
-	var y: SIMD3<Scalar>
-	var z: SIMD3<Scalar>
-	var transform: SIMD3<Scalar>
-}
-
-extension Matrix4x3<Double> {
-	init(_ matrix4x3_2012: Matrix4x3_2012) {
-		x = SIMD3(matrix4x3_2012.x)
-		y = SIMD3(matrix4x3_2012.y)
-		z = SIMD3(matrix4x3_2012.z)
-		transform = SIMD3(matrix4x3_2012.transform)
-	}
-}
-
-extension Matrix4x3 where Scalar: FloatingPoint {
-	static var identity: Self {
-		Self(
-			x: SIMD3(1, 0, 0),
-			y: SIMD3(0, 1, 0),
-			z: SIMD3(0, 0, 1),
-			transform: .zero
-		)
-	}
-}
-
 extension SIMD3<Double> {
 	init(_ vector3_2012: Vector3_2012) {
 		self.init(

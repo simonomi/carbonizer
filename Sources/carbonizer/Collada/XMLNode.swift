@@ -142,6 +142,10 @@ extension XMLNode {
 		Self(kind: "asset", children: children)
 	}
 	
+	static func controller(id: String, _ children: XMLNode...) -> Self {
+		Self(kind: "controller", id: id, children: children)
+	}
+	
 	static func collada(_ children: [XMLNode]) -> Self {
 		Self(
 			kind: "COLLADA",
@@ -150,6 +154,13 @@ extension XMLNode {
 				"xmlns": "http://www.collada.org/2005/11/COLLADASchema"
 			],
 			children: children
+		)
+	}
+	
+	static func created(_ date: Date) -> Self {
+		Self(
+			kind: "created",
+			body: .raw(ISO8601DateFormatter().string(from: date))
 		)
 	}
 	
@@ -181,6 +192,14 @@ extension XMLNode {
 		)
 	}
 	
+	static func instance_controller(controllerId: String, _ children: XMLNode...) -> Self {
+		Self(
+			kind: "instance_controller",
+			attributes: ["url": "#\(controllerId)"],
+			children: children
+		)
+	}
+	
 	static func instance_geometry(geometryId: String) -> Self {
 		Self(
 			kind: "instance_geometry",
@@ -195,6 +214,14 @@ extension XMLNode {
 		)
 	}
 	
+	static func joints(_ children: XMLNode...) -> Self {
+		Self(kind: "joints", children: children)
+	}
+	
+	static func library_controllers(_ children: XMLNode...) -> Self {
+		Self(kind: "library_controllers", children: children)
+	}
+	
 	static func library_geometries(_ children: XMLNode...) -> Self {
 		Self(kind: "library_geometries", children: children)
 	}
@@ -207,8 +234,49 @@ extension XMLNode {
 		Self(kind: "mesh", children: children)
 	}
 	
-	static func node(id: String, _ children: XMLNode...) -> Self {
-		Self(kind: "node", id: id, children: children)
+	static func modified(_ date: Date) -> Self {
+		Self(
+			kind: "modified",
+			body: .raw(ISO8601DateFormatter().string(from: date))
+		)
+	}
+	
+	static func name_array(id: String, _ children: [String]) -> Self {
+		Self(
+			kind: "Name_array",
+			id: id,
+			attributes: ["count": String(children.count)],
+			children: children
+		)
+	}
+	
+	static func node(
+		id: String? = nil,
+		sid: String? = nil,
+		name: String? = nil,
+		type: String? = nil,
+		_ children: XMLNode...
+	) -> Self {
+		.node(id: id, sid: sid, name: name, type: type, children)
+	}
+	
+	static func node(
+		id: String? = nil,
+		sid: String? = nil,
+		name: String? = nil,
+		type: String? = nil,
+		_ children: [XMLNode]
+	) -> Self {
+		Self(
+			kind: "node",
+			id: id,
+			attributes: [
+				"sid": sid,
+				"type": type,
+				"name": name
+			],
+			children: children
+		)
 	}
 	
 	static func p(_ children: [Int]) -> Self {
@@ -225,16 +293,28 @@ extension XMLNode {
 		)
 	}
 	
-	static func polylist(count: String, _ children: XMLNode...) -> Self {
+	static func polylist(count: Int, _ children: XMLNode...) -> Self {
 		Self(
 			kind: "polylist",
-			attributes: ["count": count],
+			attributes: ["count": String(count)],
 			children: children
 		)
 	}
 	
 	static func scene(_ children: XMLNode...) -> Self {
 		Self(kind: "scene", children: children)
+	}
+	
+	static func skeleton(_ id: String) -> Self {
+		Self(kind: "skeleton", body: .raw("#\(id)"))
+	}
+	
+	static func skin(sourceId: String, _ children: XMLNode...) -> Self {
+		Self(
+			kind: "skin",
+			attributes: ["source": "#\(sourceId)"],
+			children: children
+		)
 	}
 	
 	static func source(id: String, _ children: XMLNode...) -> Self {
@@ -245,8 +325,24 @@ extension XMLNode {
 		Self(kind: "technique_common", children: children)
 	}
 	
+	static func translate(_ vector: SIMD3<Double>) -> Self {
+		Self(kind: "translate", body: .raw(vector.spaceSeparated()))
+	}
+	
+	static func v(_ children: [Int]) -> Self {
+		Self(kind: "v", children: children)
+	}
+	
 	static func vcount(_ children: [Int]) -> Self {
 		Self(kind: "vcount", children: children)
+	}
+	
+	static func vertex_weights(count: Int, _ children: XMLNode...) -> Self {
+		Self(
+			kind: "vertex_weights",
+			attributes: ["count": String(count)],
+			children: children
+		)
 	}
 	
 	static func vertices(id: String, _ children: XMLNode...) -> Self {
@@ -255,5 +351,15 @@ extension XMLNode {
 	
 	static func visual_scene(id: String, _ children: XMLNode...) -> Self {
 		Self(kind: "visual_scene", id: id, children: children)
+	}
+}
+
+extension SIMD3<Double> {
+	func spaceSeparated() -> String {
+		let x = String(withoutDecimalIfWhole: x)
+		let y = String(withoutDecimalIfWhole: y)
+		let z = String(withoutDecimalIfWhole: z)
+		
+		return "\(x) \(y) \(z)"
 	}
 }

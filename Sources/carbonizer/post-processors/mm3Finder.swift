@@ -23,9 +23,9 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	let blocklist = ["testman", "out04_1", "out09_5", "room31", "room41", "room42", "room43", "room45", "room50", "room53", "town01b"]
 	guard !blocklist.contains(file.name) else { return [file] }
 	
-//	guard file.name == "cha01a_01" else { return [file] }
+	guard file.name == "cha01a_01" else { return [file] }
 //	guard file.name == "cha01a_02" else { return [file] }
-	guard file.name == "head01a" else { return [file] }
+//	guard file.name == "head01a" else { return [file] }
 //	guard file.name == "room01" else { return [file] }
 //	guard file.name == "cha01a_04" else { return [file] }
 	

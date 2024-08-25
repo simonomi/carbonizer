@@ -4,15 +4,8 @@ struct Collada {
 	var body: [XMLNode]
 	
 	func asString() -> String {
-		let hasAsset = body.contains { $0.kind == "asset" }
-		let bodyWithAsset = if hasAsset {
-				body
-			} else {
-				[.asset()] + body
-			}
-		
 		let xmlHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-		let collada: XMLNode = .collada(bodyWithAsset)
+		let collada: XMLNode = .collada(body)
 		
 		return xmlHeader + "\n" + collada.asString()
 	}
@@ -21,11 +14,15 @@ struct Collada {
 extension Collada {
 	init(_ vertexData: VertexData, modelName: String) throws {
 		// NOTE: if a bone name has a " in it, it'll break
-		let boneName = vertexData.boneTable.bones.first?.name ?? "no bones :("
+//		let boneName = vertexData.boneTable.bones.first?.name ?? "no bones :("
 		
 		// copy so theres no side effects
 		let commandData = Datastream(vertexData.commands)
 		let commands = try commandData.readCommands()
+		
+		let matrices = vertexData.boneTable.bones
+			.map(\.matrix)
+			.map(Matrix4x3.init)
 		
 		var vertices: [(SIMD3<Double>, bone: Int)] = []
 		var polygons: [[Int]] = []
@@ -34,8 +31,12 @@ extension Collada {
 		var currentVertex: SIMD3<Double> = .zero
 		var currentVertices: [Int] = []
 		
+		var currentBone = 0
+		
 		func commitVertex() {
-			let vertex = (currentVertex, bone: 1)
+			let currentMatrix = matrices[currentBone]
+//			let currentMatrix = Matrix4x3<Double>.identity
+			let vertex = (currentVertex.transformed(by: currentMatrix), bone: currentBone)
 			
 			let vertexIndex: Int
 			if let index = vertices.firstIndex(where: { $0 == vertex }) {
@@ -98,11 +99,9 @@ extension Collada {
 				case .matrixMode(_): () // ignore for now
 				case .matrixPop(_): () // ignore for now
 				case .matrixRestore(let index):
-//					print("restore", index)
-					() // ignore for now
+					currentBone = Int(index) - 5
 				case .matrixIdentity:
-//					print("identity")
-					() // ignore for now
+					currentBone = -1 // TODO: this should be handled wayyyy better
 				case .matrixScale(_, _, _): () // ignore for now
 				case .color(_): () // ignore for now
 				case .textureCoordinate(_, _): () // ignore for now
@@ -137,20 +136,28 @@ extension Collada {
 			}
 		}
 		
+		let boneCount = vertexData.boneTable.bones.count
+		
+		precondition(boneCount > 0)
+		
 		body = [
+			.asset(
+				.created(.now),
+				.modified(.now)
+			),
 			.library_geometries(
 				.geometry(
-					id: boneName,
+					id: "\(modelName)-mesh",
 					.mesh(
 						.source(
-							id: "\(boneName)-vertices-source",
+							id: "\(modelName)-vertices-source",
 							.float_array(
-								id: "\(boneName)-vertices-array",
+								id: "\(modelName)-vertices-array",
 								vertices.map(\.0).flatMap {[ $0.x, $0.y, $0.z ]}
 							),
 							.technique_common(
 								.accessor(
-									sourceId: "\(boneName)-vertices-array",
+									sourceId: "\(modelName)-vertices-array",
 									count: vertices.count,
 									stride: 3,
 									.param(name: "X", type: "float"),
@@ -160,14 +167,78 @@ extension Collada {
 							)
 						),
 						.vertices(
-							id: "\(boneName)-vertices",
-							.input(semantic: "POSITION", sourceId: "\(boneName)-vertices-source")
+							id: "\(modelName)-vertices",
+							.input(semantic: "POSITION", sourceId: "\(modelName)-vertices-source")
 						),
 						.polylist(
-							count: "2",
-							.input(semantic: "VERTEX", sourceId: "\(boneName)-vertices", offset: 0),
+							count: polygons.count,
+							.input(semantic: "VERTEX", sourceId: "\(modelName)-vertices", offset: 0),
 							.vcount(polygons.map(\.count)),
 							.p(Array(polygons.joined()))
+						)
+					)
+				)
+			),
+			.library_controllers(
+				.controller(
+					id: "\(modelName)-controller",
+					.skin(
+						sourceId: "\(modelName)-mesh",
+						.source(
+							id: "\(modelName)-joints",
+							.name_array(
+								id: "\(modelName)-joints-array",
+								vertexData.boneTable.bones.map(\.name)
+							),
+							.technique_common(
+								.accessor(
+									sourceId: "\(modelName)-joints-array",
+									count: boneCount,
+									.param(name: "JOINT", type: "Name")
+								)
+							)
+						),
+						.source(
+							id: "\(modelName)-weights",
+							.float_array(
+								id: "\(modelName)-weights-array",
+								Array(repeating: 1, count: boneCount) // TODO: document
+							),
+							.technique_common(
+								.accessor(
+									sourceId: "\(modelName)-weights-array",
+									count: boneCount,
+									.param(name: "WEIGHT", type: "float")
+								)
+							)
+						),
+						.source(
+							id: "\(modelName)-inverse-bind-matrix",
+							.float_array(
+								id: "\(modelName)-inverse-bind-matrix-array",
+								matrices
+									.map { $0.inverse()! }
+									.flatMap { $0.asArray() }
+							),
+							.technique_common(
+								.accessor(
+									sourceId: "\(modelName)-inverse-bind-matrix-array",
+									count: boneCount,
+									stride: 16,
+									.param(name: "TRANSFORM", type: "float4x4") // TODO: 4x3? 3x4?
+								)
+							)
+						),
+						.joints(
+							.input(semantic: "JOINT", sourceId: "\(modelName)-joints"),
+							.input(semantic: "INV_BIND_MATRIX", sourceId: "\(modelName)-inverse-bind-matrix")
+						),
+						.vertex_weights(
+							count: vertices.count,
+							.input(semantic: "JOINT", sourceId: "\(modelName)-joints", offset: 0),
+							.input(semantic: "WEIGHT", sourceId: "\(modelName)-weights", offset: 0),
+							.vcount(Array(repeating: 1, count: vertices.count)),
+							.v(vertices.map(\.bone))
 						)
 					)
 				)
@@ -176,8 +247,18 @@ extension Collada {
 				.visual_scene(
 					id: "scene",
 					.node(
+						id: "skeleton",
+						type: "JOINT",
+						vertexData.boneTable.bones
+							.map(\.name)
+							.map { .node(sid: $0, name: $0, type: "JOINT") }
+					),
+					.node(
 						id: modelName,
-						.instance_geometry(geometryId: boneName)
+						.instance_controller(
+							controllerId: "\(modelName)-controller",
+							.skeleton("skeleton")
+						)
 					)
 				)
 			),
