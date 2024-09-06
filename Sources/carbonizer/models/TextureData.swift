@@ -81,6 +81,8 @@ extension TextureData: BinaryConvertible {
 			relativeTo: bitmapsStart
 		)
 		
+		precondition(imageHeaders.map(\.paletteOffset).isSorted())
+		
 		let palettesStart = data.placeMarker()
 		palettes = try data.read(
 			[Datastream].self,

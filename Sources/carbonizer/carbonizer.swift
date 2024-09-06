@@ -53,6 +53,9 @@ struct Carbonizer: AsyncParsableCommand {
 			return
 		}
 		
+		let configurationFile = URL(filePath: "config.json")
+		let extractModels = configurationFile.exists()
+		
 		for filePath in filePaths {
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
 			let file = try createFileSystemObject(contentsOf: filePath)
@@ -93,10 +96,14 @@ struct Carbonizer: AsyncParsableCommand {
 //			processedFile = try processedFile.postProcessed(with: mpmFinder) // doesnt work for much
 			
 //			file = try file.postProcessed(with: dexDialogueLabeller)
-			return
+//			return
 #endif
 			
 #if IN_CI
+			if extractModels {
+				processedFile = try processedFile.postProcessed(with: mm3Finder)
+			}
+			
 			let outputDirectory = filePath.deletingLastPathComponent()
 #else
 			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")

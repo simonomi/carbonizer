@@ -219,10 +219,13 @@ extension StringProtocol {
 	}
 }
 
-// TODO: remove bc this is slow
 extension Array where Element: Comparable {
 	func isSorted() -> Bool {
-		self == self.sorted()
+		// this might be super slow idk
+		for (first, second) in zip(self, self.dropFirst()) {
+			guard first < second else { return false }
+		}
+		return true
 	}
 }
 

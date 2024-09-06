@@ -20,10 +20,25 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //	guard file.name.hasPrefix("head") else { return [file] }
 //	guard parent.name == "fieldchar" else { return [file] }
 	
-	let blocklist = ["testman", "out04_1", "out09_5", "room31", "room41", "room42", "room43", "room45", "room50", "room53", "town01b"]
+	let blocklist = [
+		"testman",
+		"out04_1",
+		"out09_5",
+		"room31",
+		"room41",
+		"room42",
+		"room43",
+		"room45",
+		"room50",
+		"room53",
+		"town01b",
+		"o02door1_01", // bone -1
+		"o08iwa3_2_01", // bone -1
+		"out03_1", // malformed texture
+	]
 	guard !blocklist.contains(file.name) else { return [file] }
 	
-	guard file.name == "cha01a_01" else { return [file] }
+//	guard file.name == "cha01a_01" else { return [file] }
 //	guard file.name == "cha01a_02" else { return [file] }
 //	guard file.name == "head01a" else { return [file] }
 //	guard file.name == "room01" else { return [file] }
@@ -52,45 +67,39 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		
 		
 		
+		let textureFolder = try texture.folder(named: file.name)
 		
-		let collada = try Collada(vertexData, modelName: file.name)
-//		print(collada.asString())
+		// no two images in a texture should have the same offset.... right?
+		let textureNames = Dictionary(
+			uniqueKeysWithValues: try texture.imageHeaders.map {
+				// see http://problemkaputt.de/gbatek-ds-3d-texture-attributes.htm
+				switch try $0.info().type {
+					case .twoBits:
+						($0.paletteOffset >> 3, "\(file.name)/\($0.name)")
+					default:
+						($0.paletteOffset >> 4, "\(file.name)/\($0.name)")
+				}
+			}
+		)
 		
-		let outputPath = URL(filePath: "/Users/simonomi/Desktop/model.dae")
-		try collada.asString()
-			.data(using: .utf8)!
-			.write(to: outputPath)
+		let collada = try Collada(vertexData, modelName: file.name, textureNames: textureNames)
 		
-//		var outputFolder = try texture.folder(named: file.name)
-//		
-//		let mtlText = texture.imageHeaders
-//			.map(\.name)
-//			.map {
-//				"""
-//				newmtl \($0)
-//				map_Kd \(outputFolder.name)/\($0).png
-//				"""
-//			}
-//			.joined(separator: "\n\n")
-//		
-//		let mtlData = mtlText.data(using: .utf8)!
-//		let mtlFile = BinaryFile(name: file.name, fileExtension: "mtl", data: Datastream(mtlData))
-//		
-//		outputFolder.contents.append(mtlFile)
-//		
-//		// no two images in a texture should have the same offset.... right?
-//		let textureNames = Dictionary(
-//			uniqueKeysWithValues: try texture.imageHeaders.map {
-//				// see http://problemkaputt.de/gbatek-ds-3d-texture-attributes.htm
-//				switch try $0.info().type {
-//					case .twoBits:
-//						($0.paletteOffset >> 3, $0.name)
-//					default:
-//						($0.paletteOffset >> 4, $0.name)
-//				}
-//			}
-//		)
-//
+		let colladaFile = BinaryFile(
+			name: file.name,
+			fileExtension: "dae",
+			data: Datastream(collada.asString().data(using: .utf8)!)
+		)
+		
+		return [file, colladaFile, textureFolder]
+		
+//		let outputPath = URL(filePath: "/Users/simonomi/Desktop/model.dae")
+//		try collada.asString()
+//			.data(using: .utf8)!
+//			.write(to: outputPath)
+		
+		
+		
+		
 //		let boneTables = animation.keyframes.transforms
 //			.chunked(exactSize: Int(animation.keyframes.boneCount))
 //		

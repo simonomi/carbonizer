@@ -15,14 +15,14 @@ enum GPUCommandType: UInt8, Equatable {
 	case matrixRestore = 0x14
 	case matrixIdentity = 0x15
 //	case matrixLoad4x4 = 0x16
-//	case matrixLoad4x3 = 0x17
+	case matrixLoad4x3 = 0x17
 //	case matrixMultiply4x4 = 0x18
 //	case matrixMultiply4x3 = 0x19
 //	case matrixMultiply3x3 = 0x1A
 	case matrixScale = 0x1B
 //	case matrixTranslate = 0x1C
 	case color = 0x20
-//	case normal = 0x21
+	case normal = 0x21
 	case textureCoordinate = 0x22
 	case vertex16 = 0x23
 //	case vertex10 = 0x24
@@ -53,9 +53,10 @@ enum GPUCommandType: UInt8, Equatable {
 	var argumentCount: Int? {
 		switch self {
 			case .noop, .matrixIdentity, .vertexEnd: 0
-			case .matrixMode, .matrixPop, .matrixRestore, .color, .textureCoordinate, .vertexXY, .vertexXZ, .vertexYZ, .polygonAttributes, .textureImageParameter, .texturePaletteBase, .vertexBegin: 1
+			case .matrixMode, .matrixPop, .matrixRestore, .color, .normal, .textureCoordinate, .vertexXY, .vertexXZ, .vertexYZ, .polygonAttributes, .textureImageParameter, .texturePaletteBase, .vertexBegin: 1
 			case .vertex16: 2
 			case .matrixScale: 3
+			case .matrixLoad4x3: 12
 			case .unknown50, .unknown51, .commandsStart, .unknown53, .commandsEnd, .commandsEnd1, .commandsEnd2: nil
 		}
 	}
@@ -81,13 +82,15 @@ enum GPUCommand {
 	case matrixPop(UInt32) // 1w - i6
 	case matrixRestore(UInt32) // 1w - u5
 	case matrixIdentity
+	case matrixLoad4x3([UInt32]) // 12w
 	case matrixScale(UInt32, UInt32, UInt32) // 3w - signed 20.12
 	case color(UInt32) // 1w - 555
-	case textureCoordinate(Double, Double) // 1w
-	case vertex16(Double, Double, Double) // 2w
-	case vertexXY(Double, Double) // 1w
-	case vertexXZ(Double, Double) // 1w
-	case vertexYZ(Double, Double) // 1w
+	case normal(UInt32) // 1w
+	case textureCoordinate(SIMD2<Double>) // 1w
+	case vertex16(SIMD3<Double>) // 2w
+	case vertexXY(x: Double, y: Double) // 1w
+	case vertexXZ(x: Double, z: Double) // 1w
+	case vertexYZ(y: Double, z: Double) // 1w
 	case polygonAttributes(UInt32) // 1w
 	case textureImageParameter(UInt32) // 1w
 	case texturePaletteBase(UInt32) // 1w
@@ -167,6 +170,8 @@ extension Datastream {
 					case .matrixPop: .matrixPop(try read(UInt32.self))
 					case .matrixRestore: .matrixRestore(try read(UInt32.self))
 					case .matrixIdentity: .matrixIdentity
+					case .matrixLoad4x3:
+						.matrixLoad4x3(try read([UInt32].self, count: 12))
 					case .matrixScale:
 							.matrixScale(
 								try read(UInt32.self),
@@ -174,30 +179,35 @@ extension Datastream {
 								try read(UInt32.self)
 							)
 					case .color: .color(try read(UInt32.self))
+					case .normal: .normal(try read(UInt32.self))
 					case .textureCoordinate: .textureCoordinate(
-						try readFixed124(),
-						try readFixed124()
+						SIMD2(
+							x: try readFixed124(),
+							y: try readFixed124()
+						)
 					)
 					case .vertex16: try {
 						let command: GPUCommand = .vertex16(
-							try readFixed412(),
-							try readFixed412(),
-							try readFixed412()
+							SIMD3(
+								x: try readFixed412(),
+								y: try readFixed412(),
+								z: try readFixed412()
+							)
 						)
 						jump(bytes: 2)
 						return command
 					}()
 					case .vertexXY: .vertexXY(
-						try readFixed412(),
-						try readFixed412()
+						x: try readFixed412(),
+						y: try readFixed412()
 					)
 					case .vertexXZ: .vertexXZ(
-						try readFixed412(),
-						try readFixed412()
+						x: try readFixed412(),
+						z: try readFixed412()
 					)
 					case .vertexYZ: .vertexYZ(
-						try readFixed412(),
-						try readFixed412()
+						y: try readFixed412(),
+						z: try readFixed412()
 					)
 					case .polygonAttributes: .polygonAttributes(try read(UInt32.self))
 					case .textureImageParameter: .textureImageParameter(try read(UInt32.self))

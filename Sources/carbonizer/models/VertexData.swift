@@ -240,12 +240,14 @@ extension VertexData {
 					currentMatrix = matrices[Int(index) - 5]
 				case .matrixIdentity:
 					currentMatrix = .identity
+				case .matrixLoad4x3(_): () // ignore for now
 				case .matrixScale(_, _, _): () // ignore for now
 				case .color(_): () // ignore for now
-				case .textureCoordinate(let x, let y):
-					currentTextureVertex = SIMD2(x, y) * textureScale
-				case .vertex16(let x, let y, let z):
-					currentVertex = SIMD3(x, y, z)
+				case .normal(_): () // ignore for now
+				case .textureCoordinate(let textureVertex):
+					currentTextureVertex = textureVertex * textureScale
+				case .vertex16(let vertex):
+					currentVertex = vertex
 					commitVertex()
 				case .vertexXY(let x, let y):
 					currentVertex.x = x
@@ -286,7 +288,7 @@ extension VertexData {
 	}
 }
 
-fileprivate func textureSize(for index: UInt32) -> Double {
-	// inverse bc obj texture coords are normalized
-	1 / Double(8 << index)
+func textureSize(for scale: UInt32) -> Double {
+	// inverse bc obj and collada texture coords are normalized
+	1 / Double(8 << scale)
 }

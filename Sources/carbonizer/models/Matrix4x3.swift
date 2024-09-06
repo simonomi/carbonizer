@@ -24,7 +24,7 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 		)
 	}
 	
-	func asArray() -> [Scalar] {
+	func as4x4Array() -> [Scalar] {
 		[
 			x.x, y.x, z.x, transform.x,
 			x.y, y.y, z.y, transform.y,
@@ -33,14 +33,16 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 		]
 	}
 	
+	func badInverse() -> Self {
+		Self(
+			x: SIMD3(1, 0, 0),
+			y: SIMD3(0, 1, 0),
+			z: SIMD3(0, 0, 1),
+			transform: -transform
+		)
+	}
+	
 	func inverse() -> Self? {
-//		return Self(
-//			x: SIMD3(1, 0, 0),
-//			y: SIMD3(0, 1, 0),
-//			z: SIMD3(0, 0, 1),
-//			transform: -transform
-//		)
-		
 		let temp0 = det_sub_proc(1, 2, 3)
 		let determinant = temp0.dot(SIMD4(x.x, y.x, z.x, transform.x)) // top row of things
 		
@@ -62,7 +64,7 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 	}
 	
 	func det_sub_proc(_ x: Int, _ y: Int, _ z: Int) -> SIMD4<Scalar> {
-		let array = asArray()
+		let array = as4x4Array()
 		
 		let a = SIMD4(array[x + 4],  array[x + 12], array[x + 0],  array[x + 8])
 		let b = SIMD4(array[y + 8],  array[y + 8],  array[y + 4],  array[y + 4])
