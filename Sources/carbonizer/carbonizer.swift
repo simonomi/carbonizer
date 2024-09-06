@@ -60,11 +60,7 @@ struct Carbonizer: AsyncParsableCommand {
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
 			let file = try createFileSystemObject(contentsOf: filePath)
 			
-#if IN_CI
-			let processedFile: any FileSystemObject
-#else
 			var processedFile: any FileSystemObject
-#endif
 			switch (compressionMode, file.packedStatus()) {
 				case (.unpack, _), (nil, .packed):
 					processedFile = try file.unpacked()
