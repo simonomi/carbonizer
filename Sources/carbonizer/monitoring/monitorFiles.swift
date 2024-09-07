@@ -1,5 +1,6 @@
 import Foundation
 
+#if os(macOS)
 typealias EventHandler = (URL) throws -> Void
 
 struct PathMonitor {
@@ -51,3 +52,4 @@ func monitorFiles(in path: URL, with eventHandler: @escaping EventHandler) throw
 	
 	return PathMonitor(sources: [source] + subSources)
 }
+#endif

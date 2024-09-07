@@ -1,5 +1,6 @@
 import Foundation
 
+#if os(macOS)
 extension Carbonizer {
 	func monitor() async throws {
 		let folderPath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/")
@@ -35,3 +36,4 @@ extension Carbonizer {
 		monitor.cancel()
 	}
 }
+#endif
