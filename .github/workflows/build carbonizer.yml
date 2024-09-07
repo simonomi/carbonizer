@@ -64,10 +64,9 @@ jobs:
 #         -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin"
 #         swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll
       run: >
-        for /f "usebackq tokens=*" %f in (`swift build -c release --show-bin-path`) do
         tar -acf carbonizer-Windows.zip
         LICENSE.txt
-        -C "%f"
+        -C "$(swift build -c release --show-bin-path)"
         carbonizer.exe
         -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin"
         swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll
