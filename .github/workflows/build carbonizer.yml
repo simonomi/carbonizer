@@ -27,7 +27,7 @@ jobs:
         -Xswiftc -DIN_CI
         -Xswiftc -whole-module-optimization
     - name: Package
-      run: tar -acf carbonizer-macOS.zip -C "$(swift build -c release --show-bin-path)/carbonizer" carbonizer
+      run: tar -acf carbonizer-macOS.zip -C "$(swift build -c release --show-bin-path)" carbonizer
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
