@@ -9,12 +9,12 @@ struct BinaryFile {
 }
 
 extension BinaryFile: FileSystemObject {
-	func savePath(in directory: URL) -> URL {
+	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		let path = directory
 			.appending(component: name)
 			.appendingPathExtension(fileExtension)
 		
-		if !path.exists() { return path }
+		if overwriting || !path.exists() { return path }
 		
 		for number in 1... {
 			let path = directory
@@ -27,18 +27,16 @@ extension BinaryFile: FileSystemObject {
 		fatalError("unreachable")
 	}
 	
-	func write(into directory: URL) throws {
-		let filePath = savePath(in: directory)
-		
+	func write(to path: URL) throws {
 		do {
-			try Data(data.bytes).write(to: filePath)
+			try Data(data.bytes).write(to: path)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
 		
 		if let metadataDate = metadata?.asDate {
 			do {
-				try filePath.setCreationDate(to: metadataDate)
+				try path.setCreationDate(to: metadataDate)
 			} catch {
 				throw BinaryParserError.whileWriting(Metadata.self, error)
 			}

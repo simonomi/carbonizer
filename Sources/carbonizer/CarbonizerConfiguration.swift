@@ -4,6 +4,7 @@ import Foundation
 struct CarbonizerConfiguration: Decodable {
 	var compressionMode: CompressionMode
 	var inputFiles: [URL]
+	var outputFolder: URL?
 	var overwriteOutput: Bool
 	
 	var fileTypes: [String]
@@ -29,25 +30,46 @@ struct CarbonizerConfiguration: Decodable {
 				case .ask: .long
 			}
 		}
+		
+		enum PackOrUnpack { case pack, unpack }
+		
+		func action(packedStatus: PackedStatus) -> PackOrUnpack? {
+			switch (self, packedStatus) {
+				case (.pack, _), (.auto, .unpacked): 
+					return .pack
+				case (.unpack, _), (.auto, .packed):
+					return .unpack
+				default:
+					print("Would you like to [p]ack or [u]npack? ")
+					let answer = readLine()?.lowercased()
+					
+					if answer?.starts(with: "p") == true {
+						return .pack
+					} else if answer?.starts(with: "u") == true {
+						return .unpack
+					} else {
+						return nil
+					}
+			}
+		}
 	}
 	
-	static let defaultConfiguration = Self(
-		compressionMode: .auto,
-		inputFiles: [],
-		overwriteOutput: false,
-		fileTypes: ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
-		skipExtracting: [],
-		onlyExtract: [],
-		experimental: ExperimentalOptions(
-			hotReloading: false,
-			postProcessors: []
-		)
-	)
+	init(contentsOf path: URL) throws {
+		let text = (try? String(contentsOf: path)) ?? Self.defaultConfiguration
+		
+		let commentRegex = #/\/\/.*/#
+		let textWithoutComments = text.replacing(commentRegex, with: "")
+		
+		let data = textWithoutComments.data(using: .utf8)!
+		
+		self = try JSONDecoder().decode(Self.self, from: data)
+	}
 	
-	static let defaultConfigurationFormatted: String = """
+	static let defaultConfiguration: String = """
 		{
 			"compressionMode": "auto", // pack, unpack, auto, ask
 			"inputFiles": [],
+			"outputFolder": null,
 			"overwriteOutput": false,
 			
 			// stable: DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS

@@ -12,17 +12,17 @@ extension ProprietaryFile: FileSystemObject {
 		type(of: data).fileExtension
 	}
 	
-	func savePath(in directory: URL) -> URL {
+	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		BinaryFile(
 			name: name,
 			fileExtension: fileExtension,
 			metadata: metadata,
 			data: Datastream()
 		)
-		.savePath(in: directory)
+		.savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(into directory: URL) throws {
+	func write(to path: URL) throws {
 		let writer = Datawriter()
 		data.write(to: writer)
 		
@@ -32,7 +32,7 @@ extension ProprietaryFile: FileSystemObject {
 			metadata: metadata,
 			data: writer.intoDatastream()
 		)
-		.write(into: directory)
+		.write(to: path)
 	}
 	
 	func packedStatus() -> PackedStatus {

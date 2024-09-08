@@ -6,8 +6,8 @@ protocol FileSystemObject {
 	var fileExtension: String { get }
 	var fullName: String { get }
 	
-	func savePath(in directory: URL) -> URL
-	func write(into directory: URL) throws
+	func savePath(in directory: URL, overwriting: Bool) -> URL
+	func write(to path: URL) throws
 	
 	func packedStatus() -> PackedStatus
 	

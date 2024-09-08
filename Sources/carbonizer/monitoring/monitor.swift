@@ -1,20 +1,19 @@
 import Foundation
 
-#if os(macOS)
 extension Carbonizer {
-	func monitor() async throws {
-		let folderPath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters/")
+	func monitor(with configuration: CarbonizerConfiguration) async throws {
+#if os(macOS)
+		if filePaths.count > 1 {
+			print("Note: more than one input file provided, only monitoring the first")
+		}
 		
-		var fileData = try createFileSystemObject(contentsOf: folderPath)
+		let inputPath = filePaths.first!
 		
-		let outputPath = URL(filePath: "/Users/simonomi/ff1/output")
-		let outputFile = URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds")
+		var fileData = try createFileSystemObject(contentsOf: inputPath)
 		
-		let monitor = try monitorFiles(in: folderPath) {
-			if outputFile.exists() {
-				try FileManager.default.removeItem(at: outputFile)
-			}
-			
+		let outputFolder = configuration.outputFolder ?? inputPath.deletingLastPathComponent()
+		
+		let monitor = try monitorFiles(in: inputPath) {
 			let components = $0
 				.deletingPathExtension()
 				.deletingPathExtension()
@@ -25,15 +24,22 @@ extension Carbonizer {
 			
 			fileData.setFile(at: components, to: newFile)
 			
-			try fileData.packed().write(into: outputPath)
+			let packedData = fileData.packed()
+			let outputPath = packedData.savePath(in: outputFolder, overwriting: true)
+			try packedData.write(to: outputPath)
 			
-			try shell("open \"\(outputFile.path(percentEncoded: false))\"")
+			try shell("open \"\(outputPath.path(percentEncoded: false))\"")
 		}
 		
 		print("ready!")
 		try await Task.sleep(for: .seconds(1_000_000))
 		
 		monitor.cancel()
+#else
+		var standardError = FileHandle.standardError
+		print("\(.red, .bold)Error:\(.normal) \(.bold)Hot reloading is only available on macOS\(.normal)", terminator: "\n\n", to: &standardError)
+		waitForInput()
+		return
+#endif
 	}
 }
-#endif

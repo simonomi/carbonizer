@@ -151,12 +151,12 @@ struct NDS {
 extension NDS: FileSystemObject {
 	var fileExtension: String { "" }
 	
-	func savePath(in directory: URL) -> URL {
+	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		Folder(name: name, contents: [])
-			.savePath(in: directory)
+			.savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(into directory: URL) throws {
+	func write(to path: URL) throws {
 		let encoder = JSONEncoder(.prettyPrinted)
 		
 		let header           = Datastream(try encoder.encode(header))
@@ -175,7 +175,7 @@ extension NDS: FileSystemObject {
 			BinaryFile(name: "icon banner",        fileExtension: "",     data: iconBanner)
 		]
 		
-		try Folder(name: name, contents: contents).write(into: directory)
+		try Folder(name: name, contents: contents).write(to: path)
 	}
 	
 	func packedStatus() -> PackedStatus {
@@ -204,34 +204,24 @@ struct PackedNDS: FileSystemObject {
 	static let fileExtension = "nds"
 	var fileExtension: String { Self.fileExtension }
 	
-	func savePath(in directory: URL) -> URL {
-		let path = directory
-			.appending(component: name)
-			.appendingPathExtension(Self.fileExtension)
-		
-		if !path.exists() { return path }
-		
-		for number in 1... {
-			let path = directory
-				.appending(component: name + " (\(number))")
-				.appendingPathExtension(Self.fileExtension)
-			
-			if !path.exists() { return path }
-		}
-		
-		fatalError("unreachable")
+	func savePath(in directory: URL, overwriting: Bool) -> URL {
+		BinaryFile(
+			name: name,
+			fileExtension: fileExtension,
+			data: Datastream()
+		).savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(into directory: URL) throws {
-		let data = Datawriter()
-		data.write(binary)
-		let filePath = savePath(in: directory)
+	func write(to path: URL) throws {
+		let writer = Datawriter()
+		writer.write(binary)
 		
-		do {
-			try Data(data.bytes).write(to: filePath)
-		} catch {
-			throw BinaryParserError.whileWriting(Self.self, error)
-		}
+		try BinaryFile(
+			name: name,
+			fileExtension: fileExtension,
+			data: writer.intoDatastream()
+		)
+		.write(to: path)
 	}
 	
 	func packedStatus() -> PackedStatus { .packed }

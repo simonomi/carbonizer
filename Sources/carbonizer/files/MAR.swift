@@ -27,22 +27,22 @@ struct MAR {
 extension MAR: FileSystemObject {
 	var fileExtension: String { "mar" }
 	
-	func savePath(in directory: URL) -> URL {
+	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		Folder(name: name, contents: [])
-			.savePath(in: directory)
+			.savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(into directory: URL) throws {
+	func write(to path: URL) throws {
 		if files.count == 1,
 		   let file = files.first
 		{
 			try ProprietaryFile(name: name, standaloneMCM: file)
-				.write(into: directory)
+				.write(to: path)
 		} else {
 			try Folder(
 				name: fullName,
 				contents: files.enumerated().map(ProprietaryFile.init)
-			).write(into: directory)
+			).write(to: path)
 		}
 	}
 	
@@ -66,16 +66,16 @@ struct PackedMAR: FileSystemObject {
 	var fileExtension: String
 	var binary: MAR.Binary
 	
-	func savePath(in directory: URL) -> URL {
+	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		BinaryFile(
 			name: name,
 			fileExtension: fileExtension,
 			data: Datastream()
 		)
-		.savePath(in: directory)
+		.savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(into directory: URL) throws {
+	func write(to path: URL) throws {
 		let writer = Datawriter()
 		writer.write(binary)
 		
@@ -84,7 +84,7 @@ struct PackedMAR: FileSystemObject {
 			fileExtension: fileExtension,
 			data: writer.intoDatastream()
 		)
-		.write(into: directory)
+		.write(to: path)
 	}
 	
 	func packedStatus() -> PackedStatus { .packed }

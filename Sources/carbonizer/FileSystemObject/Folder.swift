@@ -36,11 +36,11 @@ func createFolder(contentsOf path: URL) throws -> any FileSystemObject {
 extension Folder: FileSystemObject {
 	var fileExtension: String { "" }
 	
-	func savePath(in directory: URL) -> URL {
+	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		let path = directory
 			.appending(component: name)
 		
-		if !path.exists() { return path }
+		if overwriting || !path.exists() { return path }
 		
 		for number in 1... {
 			let path = directory
@@ -52,11 +52,9 @@ extension Folder: FileSystemObject {
 		fatalError("unreachable")
 	}
 	
-	func write(into directory: URL) throws {
-		let path = savePath(in: directory)
-		
+	func write(to path: URL) throws {
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
-		try contents.forEach { try $0.write(into: path) }
+		try contents.forEach { try $0.write(to: path) }
 	}
 	
 	func packedStatus() -> PackedStatus {

@@ -8,110 +8,88 @@ struct Carbonizer: AsyncParsableCommand {
 		discussion: "By default, carbonizer automatically determines whether to pack or unpack each input. It does this by looking at file extensions, magic bytes, and metadata"
 	)
 	
-	@Flag(help: "Manually specify compression mode")
-	var compressionMode: CarbonizerConfiguration.CompressionMode = .auto
+	@Flag(help: "Manually specify compression mode (default: --auto)")
+	var compressionMode: CarbonizerConfiguration.CompressionMode?
 	
 	@Argument(help: "The files to pack/unpack", transform: URL.fromFilePath)
 	var filePaths = [URL]()
 	
 	mutating func run() async throws {
 		do {
-			try main()
-//			try await monitor()
+			let configurationPath = URL(filePath: "config.json")
+			let configuration = try CarbonizerConfiguration(contentsOf: configurationPath)
+			
+			filePaths += configuration.inputFiles
+			
+			if filePaths.isEmpty {
+				var standardError = FileHandle.standardError
+				print("\(.red, .bold)Error:\(.normal) \(.bold)No files were specified as input\(.normal)", terminator: "\n\n", to: &standardError)
+				print(Self.helpMessage())
+				waitForInput()
+				return
+			}
+			
+			if configuration.experimental.hotReloading {
+				try await monitor(with: configuration)
+			} else {
+				try main(with: configuration)
+			}
 		} catch {
 			print(error)
 			waitForInput()
 		}
 	}
 	
-	mutating func main() throws {
-//		let filePath = URL(filePath: "/Users/simonomi/Desktop/config.json")
-//		
-//		try JSONEncoder(.prettyPrinted)
-//			.encode(CarbonizerConfiguration.defaultConfiguration)
-//			.write(to: filePath)
-//		
-//		return
+	mutating func main(with configuration: CarbonizerConfiguration) throws {
+		let compressionMode = compressionMode ?? configuration.compressionMode
 		
+		// file types
 		
-#if !IN_CI
-		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"))
-		
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters - Champions.nds"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions"))
-//		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters - Champions.nds"))
-#endif
-		
-		if filePaths.isEmpty {
-			var standardError = FileHandle.standardError
-			print("\(.red, .bold)Error:\(.normal) \(.bold)No files were specified as input\(.normal)", terminator: "\n\n", to: &standardError)
-			print(Self.helpMessage())
-			waitForInput()
-			return
-		}
-		
-		let configurationFile = URL(filePath: "config.json")
-		let extractModels = configurationFile.exists()
+		// skip/only extract
 		
 		for filePath in filePaths {
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
 			let file = try createFileSystemObject(contentsOf: filePath)
 			
-//			compressionMode ?? file.packedStatus()
+			let action = compressionMode.action(packedStatus: file.packedStatus())
 			
 			var processedFile: any FileSystemObject
-			switch (compressionMode, file.packedStatus()) {
-				case (.unpack, _), (.auto, .packed):
-					processedFile = try file.unpacked()
-				case (.pack, _), (.auto, .unpacked):
+			switch action {
+				case .pack:
 					processedFile = file.packed()
-				default:
-					print("Would you like to [p]ack or [u]npack? ")
-					let answer = readLine()?.lowercased()
-					
-					if answer?.starts(with: "p") == true {
-						processedFile = file.packed()
-					} else if answer?.starts(with: "u") == true {
-						processedFile = try file.unpacked()
-					} else {
-						print("Skipping file...")
-						continue
-					}
+				case .unpack:
+					processedFile = try file.unpacked()
+				case nil:
+					print("Skipping file...")
+					continue
 			}
 			
-#if !IN_CI
-			logProgress("running post-processors")
-//			let inputFile = try createFileSystemObject(contentsOf: filePath).unpacked()
-//			let allDialogue = dmgRipper(inputFile)
-//			let file = dexDialogueLabeller(inputFile, dialogue: allDialogue)
-//			let compressionMode = CompressionMode.unpack
-
-//			processedFile = try processedFile.postProcessed(with: mmsFinder)
-			processedFile = try processedFile.postProcessed(with: mm3Finder)
-//			processedFile = try processedFile.postProcessed(with: mpmFinder) // doesnt work for much
+			logProgress("Running post-processors")
+			let postProcessors: [String: PostProcessor] = [
+				"mm3Finder": mm3Finder,
+				"mmsFinder": mmsFinder,
+				"mpmFinder": mpmFinder
+			]
 			
-//			file = try file.postProcessed(with: dexDialogueLabeller)
-//			return
-#endif
-			
-#if IN_CI
-			if extractModels {
-				processedFile = try processedFile.postProcessed(with: mm3Finder)
+			for postProcessorName in configuration.experimental.postProcessors {
+				guard let postProcessor = postProcessors[postProcessorName] else {
+					print("Could not find a post-processor named '\(postProcessorName)', skipping...")
+					continue
+				}
+				
+				processedFile = try processedFile.postProcessed(with: postProcessor)
 			}
 			
-			let outputDirectory = filePath.deletingLastPathComponent()
-#else
-			let outputDirectory = URL(filePath: "/Users/simonomi/ff1/output/")
-#endif
+			let outputFolder = configuration.outputFolder ?? filePath.deletingLastPathComponent()
 			
-			let savePath = processedFile.savePath(in: outputDirectory).path(percentEncoded: false)
-			logProgress("Writing to \(savePath)")
+			let savePath = processedFile.savePath(
+				in: outputFolder,
+				overwriting: configuration.overwriteOutput
+			)
 			
-			try processedFile.write(into: outputDirectory)
+			logProgress("Writing to \(savePath.path(percentEncoded: false))")
+			
+			try processedFile.write(to: savePath)
 		}
 	}
 }
-
-//fileprivate func run(with configuration: CarbonizerConfiguration) throws {}
