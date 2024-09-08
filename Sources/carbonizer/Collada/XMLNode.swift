@@ -298,6 +298,19 @@ extension XMLNode {
 		Self(kind: "material", id: id, children: children)
 	}
 	
+	static func matrix(sid: String, _ matrix: Matrix4x3<Double>) -> Self {
+		Self(
+			kind: "matrix",
+			attributes: ["sid": sid],
+			body: .raw(
+				(matrix.inverse() ?? matrix.badInverse())
+					.asProper4x4Array()
+					.map { String(withoutDecimalIfWhole: $0) }
+					.joined(separator: " ")
+			)
+		)
+	}
+	
 	static func mesh(_ children: [XMLNode]) -> Self {
 		Self(kind: "mesh", children: children)
 	}

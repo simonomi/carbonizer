@@ -33,6 +33,15 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 		]
 	}
 	
+	func asProper4x4Array() -> [Scalar] {
+		[
+			x.x, x.y, x.z, transform.x,
+			y.x, y.y, y.z, transform.y,
+			z.x, z.y, z.z, transform.z,
+			0, 0, 0, 1
+		]
+	}
+	
 	func badInverse() -> Self {
 		Self(
 			x: SIMD3(1, 0, 0),

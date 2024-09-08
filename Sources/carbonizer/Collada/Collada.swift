@@ -364,8 +364,14 @@ extension Collada {
 						id: "skeleton",
 						type: "JOINT",
 						vertexData.boneTable.bones
-							.map(\.name) // NOTE: if a bone name has a " in it, it'll break
-							.map { .node(sid: $0, name: $0, type: "JOINT") }
+							.map {
+								.node( // NOTE: if a bone name has a " in it, it'll break
+									sid: $0.name,
+									name: $0.name,
+									type: "JOINT",
+									.matrix(sid: "transform", Matrix4x3($0.matrix))
+								)
+							}
 					),
 					.node(
 						id: modelName,
