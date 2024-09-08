@@ -54,17 +54,6 @@ struct CarbonizerConfiguration: Decodable {
 		}
 	}
 	
-	init(contentsOf path: URL) throws {
-		let text = (try? String(contentsOf: path)) ?? Self.defaultConfiguration
-		
-		let commentRegex = #/\/\/.*/#
-		let textWithoutComments = text.replacing(commentRegex, with: "")
-		
-		let data = textWithoutComments.data(using: .utf8)!
-		
-		self = try JSONDecoder().decode(Self.self, from: data)
-	}
-	
 	static let defaultConfiguration: String = """
 		{
 			"compressionMode": "auto", // pack, unpack, auto, ask
@@ -87,4 +76,17 @@ struct CarbonizerConfiguration: Decodable {
 			}
 		}
 		"""
+}
+
+extension CarbonizerConfiguration {
+	init(contentsOf path: URL) throws {
+		let text = (try? String(contentsOf: path)) ?? Self.defaultConfiguration
+		
+		let commentRegex = #/\/\/.*/#
+		let textWithoutComments = text.replacing(commentRegex, with: "")
+		
+		let data = textWithoutComments.data(using: .utf8)!
+		
+		self = try JSONDecoder().decode(Self.self, from: data)
+	}
 }

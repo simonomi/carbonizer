@@ -22,7 +22,7 @@ extension ProprietaryFile: FileSystemObject {
 		.savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(to path: URL) throws {
+	func write(into folder: URL, overwriting: Bool) throws {
 		let writer = Datawriter()
 		data.write(to: writer)
 		
@@ -32,7 +32,7 @@ extension ProprietaryFile: FileSystemObject {
 			metadata: metadata,
 			data: writer.intoDatastream()
 		)
-		.write(to: path)
+		.write(into: folder, overwriting: overwriting)
 	}
 	
 	func packedStatus() -> PackedStatus {

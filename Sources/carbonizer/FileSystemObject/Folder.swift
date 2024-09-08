@@ -52,9 +52,10 @@ extension Folder: FileSystemObject {
 		fatalError("unreachable")
 	}
 	
-	func write(to path: URL) throws {
+	func write(into folder: URL, overwriting: Bool) throws {
+		let path = savePath(in: folder, overwriting: overwriting)
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
-		try contents.forEach { try $0.write(to: path) }
+		try contents.forEach { try $0.write(into: path, overwriting: overwriting) }
 	}
 	
 	func packedStatus() -> PackedStatus {

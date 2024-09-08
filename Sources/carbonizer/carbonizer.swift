@@ -16,8 +16,26 @@ struct Carbonizer: AsyncParsableCommand {
 	
 	mutating func run() async throws {
 		do {
+#if IN_CI
 			let configurationPath = URL(filePath: "config.json")
 			let configuration = try CarbonizerConfiguration(contentsOf: configurationPath)
+#else
+			let configuration = CarbonizerConfiguration(
+				compressionMode: .auto,
+				inputFiles: [
+					URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds")
+				],
+				outputFolder: URL(filePath: "/Users/simonomi/ff1/output/"),
+				overwriteOutput: true,
+				fileTypes: ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
+				skipExtracting: [],
+				onlyExtract: [],
+				experimental: CarbonizerConfiguration.ExperimentalOptions(
+					hotReloading: false,
+					postProcessors: []
+				)
+			)
+#endif
 			
 			filePaths += configuration.inputFiles
 			
@@ -89,7 +107,7 @@ struct Carbonizer: AsyncParsableCommand {
 			
 			logProgress("Writing to \(savePath.path(percentEncoded: false))")
 			
-			try processedFile.write(to: savePath)
+			try processedFile.write(into: outputFolder, overwriting: configuration.overwriteOutput)
 		}
 	}
 }

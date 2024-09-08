@@ -361,25 +361,28 @@ extension Collada {
 				.visual_scene(
 					id: "scene",
 					.node(
-						id: "skeleton",
-						type: "JOINT",
-						vertexData.boneTable.bones
-							.map {
-								.node( // NOTE: if a bone name has a " in it, it'll break
-									sid: $0.name,
-									name: $0.name,
-									type: "JOINT",
-									.matrix(sid: "transform", Matrix4x3($0.matrix))
-								)
-							}
-					),
-					.node(
 						id: modelName,
-						.instance_controller(
-							controllerId: "\(modelName)-controller",
-							.skeleton("skeleton"),
-							.bind_material(
-								.technique_common(instanceMaterials)
+						.node(
+							id: "\(modelName)-skeleton",
+							type: "JOINT",
+							vertexData.boneTable.bones
+								.map {
+									.node( // NOTE: if a bone name has a " in it, it'll break
+										sid: $0.name,
+										name: $0.name,
+										type: "JOINT",
+										.matrix(sid: "transform", Matrix4x3($0.matrix))
+									)
+								}
+						),
+						.node(
+							id: "\(modelName)-mesh",
+							.instance_controller(
+								controllerId: "\(modelName)-controller",
+								.skeleton("\(modelName)-skeleton"),
+								.bind_material(
+									.technique_common(instanceMaterials)
+								)
 							)
 						)
 					)

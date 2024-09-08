@@ -27,7 +27,9 @@ extension BinaryFile: FileSystemObject {
 		fatalError("unreachable")
 	}
 	
-	func write(to path: URL) throws {
+	func write(into folder: URL, overwriting: Bool) throws {
+		let path = savePath(in: folder, overwriting: overwriting)
+		
 		do {
 			try Data(data.bytes).write(to: path)
 		} catch {

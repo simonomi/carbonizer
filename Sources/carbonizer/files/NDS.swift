@@ -156,7 +156,7 @@ extension NDS: FileSystemObject {
 			.savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(to path: URL) throws {
+	func write(into path: URL, overwriting: Bool) throws {
 		let encoder = JSONEncoder(.prettyPrinted)
 		
 		let header           = Datastream(try encoder.encode(header))
@@ -175,7 +175,8 @@ extension NDS: FileSystemObject {
 			BinaryFile(name: "icon banner",        fileExtension: "",     data: iconBanner)
 		]
 		
-		try Folder(name: name, contents: contents).write(to: path)
+		try Folder(name: name, contents: contents)
+			.write(into: path, overwriting: overwriting)
 	}
 	
 	func packedStatus() -> PackedStatus {
@@ -212,16 +213,20 @@ struct PackedNDS: FileSystemObject {
 		).savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(to path: URL) throws {
+	func write(into path: URL, overwriting: Bool) throws {
 		let writer = Datawriter()
 		writer.write(binary)
 		
-		try BinaryFile(
-			name: name,
-			fileExtension: fileExtension,
-			data: writer.intoDatastream()
-		)
-		.write(to: path)
+		do {
+			try BinaryFile(
+				name: name,
+				fileExtension: fileExtension,
+				data: writer.intoDatastream()
+			)
+			.write(into: path, overwriting: overwriting)
+		} catch {
+			throw BinaryParserError.whileWriting(Self.self, error)
+		}
 	}
 	
 	func packedStatus() -> PackedStatus { .packed }
