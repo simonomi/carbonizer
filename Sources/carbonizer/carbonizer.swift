@@ -1,8 +1,6 @@
 import ArgumentParser
 import Foundation
 
-import BinaryParser
-
 @main
 struct Carbonizer: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
@@ -11,18 +9,10 @@ struct Carbonizer: AsyncParsableCommand {
 	)
 	
 	@Flag(help: "Manually specify compression mode")
-	var compressionMode: CompressionMode?
+	var compressionMode: CarbonizerConfiguration.CompressionMode = .auto
 	
 	@Argument(help: "The files to pack/unpack", transform: URL.fromFilePath)
 	var filePaths = [URL]()
-	
-	enum CompressionMode: String, EnumerableFlag {
-		case pack, unpack, ask
-		
-		static func name(for value: Self) -> NameSpecification {
-			.shortAndLong
-		}
-	}
 	
 	mutating func run() async throws {
 		do {
@@ -35,6 +25,15 @@ struct Carbonizer: AsyncParsableCommand {
 	}
 	
 	mutating func main() throws {
+//		let filePath = URL(filePath: "/Users/simonomi/Desktop/config.json")
+//		
+//		try JSONEncoder(.prettyPrinted)
+//			.encode(CarbonizerConfiguration.defaultConfiguration)
+//			.write(to: filePath)
+//		
+//		return
+		
+		
 #if !IN_CI
 		filePaths.append(URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"))
 //		filePaths.append(URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"))
@@ -60,11 +59,13 @@ struct Carbonizer: AsyncParsableCommand {
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
 			let file = try createFileSystemObject(contentsOf: filePath)
 			
+//			compressionMode ?? file.packedStatus()
+			
 			var processedFile: any FileSystemObject
 			switch (compressionMode, file.packedStatus()) {
-				case (.unpack, _), (nil, .packed):
+				case (.unpack, _), (.auto, .packed):
 					processedFile = try file.unpacked()
-				case (.pack, _), (nil, .unpacked):
+				case (.pack, _), (.auto, .unpacked):
 					processedFile = file.packed()
 				default:
 					print("Would you like to [p]ack or [u]npack? ")
@@ -112,3 +113,5 @@ struct Carbonizer: AsyncParsableCommand {
 		}
 	}
 }
+
+//fileprivate func run(with configuration: CarbonizerConfiguration) throws {}

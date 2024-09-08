@@ -175,7 +175,7 @@ extension Collada {
 					.profile_COMMON(
 						.image(
 							id: "\(materialName)-image",
-							.init_from("\(materialName).png")
+							.init_from("\(materialName).bmp")
 						),
 						.technique(
 							sid: "technique",

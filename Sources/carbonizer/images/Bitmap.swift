@@ -8,9 +8,9 @@ struct Bitmap {
 	
 	@BinaryConvertible
 	struct Color {
-		var red: UInt8
-		var green: UInt8
 		var blue: UInt8
+		var green: UInt8
+		var red: UInt8
 		var alpha: UInt8
 	}
 }
@@ -63,7 +63,7 @@ extension Bitmap.Color {
 		self.alpha = UInt8(alpha * 255)
 	}
 	
-	static let transparent = Self(red: 0, green: 0, blue: 0, alpha: 0)
+	static let transparent = Self(blue: 0, green: 0, red: 0, alpha: 0)
 	
 	consuming func replacingAlpha(with newAlpha: Double) -> Self {
 		alpha = UInt8(newAlpha * 255)
