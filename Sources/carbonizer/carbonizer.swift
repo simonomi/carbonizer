@@ -91,12 +91,26 @@ struct Carbonizer: AsyncParsableCommand {
 			]
 			
 			for postProcessorName in configuration.experimental.postProcessors {
+#if os(Windows)
+				switch postProcessorName {
+					case "mm3Finder":
+						processedFile = try processedFile.postProcessed(with: mm3Finder)
+					case "mmsFinder":
+						processedFile = try processedFile.postProcessed(with: mmsFinder)
+					case "mpmFinder":
+						processedFile = try processedFile.postProcessed(with: mpmFinder)
+					default:
+						print("Could not find a post-processor named '\(postProcessorName)', skipping...")
+						continue
+				}
+#else
 				guard let postProcessor = postProcessors[postProcessorName] else {
 					print("Could not find a post-processor named '\(postProcessorName)', skipping...")
 					continue
 				}
 				
 				processedFile = try processedFile.postProcessed(with: postProcessor)
+#endif
 			}
 			
 			let outputFolder = configuration.outputFolder ?? filePath.deletingLastPathComponent()
