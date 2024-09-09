@@ -187,6 +187,14 @@ extension XMLNode {
 		Self(kind: "effect", id: id, children: children)
 	}
 	
+	static func float(sid: String, _ value: Double) -> Self {
+		Self(
+			kind: "float",
+			attributes: ["sid": sid],
+			body: .raw(String(withoutDecimalIfWhole: value))
+		)
+	}
+	
 	static func float_array(id: String, _ children: [Double]) -> Self {
 		Self(
 			kind: "float_array",
@@ -202,6 +210,15 @@ extension XMLNode {
 	
 	static func image(id: String, _ children: XMLNode...) -> Self {
 		Self(kind: "image", id: id, children: children)
+	}
+	
+	static func index_of_refraction(_ ior: Double) -> Self {
+		Self(
+			kind: "index_of_refraction",
+			children: [
+				.float(sid: "ior", ior)
+			]
+		)
 	}
 	
 	static func init_from(_ fileName: String) -> Self {

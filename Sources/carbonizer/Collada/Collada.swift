@@ -173,7 +173,7 @@ extension Collada {
 				.effect(
 					id: "\(materialName)-effect",
 					.profile_COMMON(
-						.image(
+						.image( // TODO: move to library_images?
 							id: "\(materialName)-image",
 							.init_from("\(materialName).bmp")
 						),
@@ -196,7 +196,8 @@ extension Collada {
 								.diffuse(
 									// TODO: change texcoord per material?
 									.texture(texture: "sampler", texcoord: "UVMap")
-								)
+								),
+								.index_of_refraction(0)
 							)
 						)
 					)

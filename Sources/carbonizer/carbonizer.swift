@@ -23,8 +23,8 @@ struct Carbonizer: AsyncParsableCommand {
 			let configuration = CarbonizerConfiguration(
 				compressionMode: .auto,
 				inputFiles: [
-//					URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"),
-					URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"),
+					URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"),
+//					URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"),
 				],
 				outputFolder: URL(filePath: "/Users/simonomi/ff1/output/"),
 				overwriteOutput: true,
@@ -33,7 +33,7 @@ struct Carbonizer: AsyncParsableCommand {
 //				onlyExtract: [],
 				experimental: CarbonizerConfiguration.ExperimentalOptions(
 					hotReloading: false,
-					postProcessors: []
+					postProcessors: ["mm3Finder"]
 				)
 			)
 #endif
