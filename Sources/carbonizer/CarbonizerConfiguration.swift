@@ -7,10 +7,10 @@ struct CarbonizerConfiguration: Decodable {
 	var outputFolder: URL?
 	var overwriteOutput: Bool
 	
-	var fileTypes: [String]
-	
-	var skipExtracting: [String]
-	var onlyExtract: [String]
+//	var fileTypes: [String]
+//	
+//	var skipExtracting: [String]
+//	var onlyExtract: [String]
 	
 	var experimental: ExperimentalOptions
 	
@@ -63,10 +63,10 @@ struct CarbonizerConfiguration: Decodable {
 			
 			// stable: DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
 			// experimental: AIS, AST, CHR, DAL, DCL, DNC, MFS, MMS, SHP
-			"fileTypes": ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
+			// "fileTypes": ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
-			"skipExtracting": [],
-			"onlyExtract": [],
+			// "skipExtracting": [],
+			// "onlyExtract": [],
 
 			"experimental": {
 				"hotReloading": false, // macOS only

@@ -23,13 +23,14 @@ struct Carbonizer: AsyncParsableCommand {
 			let configuration = CarbonizerConfiguration(
 				compressionMode: .auto,
 				inputFiles: [
-					URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds")
+//					URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"),
+					URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"),
 				],
 				outputFolder: URL(filePath: "/Users/simonomi/ff1/output/"),
 				overwriteOutput: true,
-				fileTypes: ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
-				skipExtracting: [],
-				onlyExtract: [],
+//				fileTypes: ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
+//				skipExtracting: [],
+//				onlyExtract: [],
 				experimental: CarbonizerConfiguration.ExperimentalOptions(
 					hotReloading: false,
 					postProcessors: []
@@ -61,9 +62,9 @@ struct Carbonizer: AsyncParsableCommand {
 	mutating func main(with configuration: CarbonizerConfiguration) throws {
 		let compressionMode = compressionMode ?? configuration.compressionMode
 		
-		// file types
+		// TODO: file types
 		
-		// skip/only extract
+		// TODO: skip/only extract
 		
 		for filePath in filePaths {
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
