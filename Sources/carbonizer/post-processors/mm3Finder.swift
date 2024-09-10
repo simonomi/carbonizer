@@ -37,6 +37,14 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	]
 	guard !blocklist.contains(file.name) else { return [file] }
 	
+#if os(Windows)
+	let windowsBlocklist = [
+		"map_model_0001",
+		"map_model_0002"
+	]
+	guard !windowsBlocklist.contains(file.name) else { return [file] }
+#endif
+	
 //	guard file.name == "cha01a_01" else { return [file] }
 //	guard file.name == "cha01a_02" else { return [file] }
 //	guard file.name == "head01a" else { return [file] }
@@ -62,8 +70,6 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //		let animationStart = animationData.placeMarker()
 //		let animation = try animationData.read(AnimationData.self)
 //		animationData.jump(to: animationStart)
-		
-		
 		
 		
 		let textureFolder = try texture.folder(named: file.name)
