@@ -80,7 +80,13 @@ struct CarbonizerConfiguration: Decodable {
 
 extension CarbonizerConfiguration {
 	init(contentsOf path: URL) throws {
-		let text = (try? String(contentsOf: path)) ?? Self.defaultConfiguration
+		let text: String
+		if path.exists() {
+			text = try String(contentsOf: path)
+		} else {
+			text = Self.defaultConfiguration
+			try text.write(to: path, atomically: true, encoding: .utf8)
+		}
 		
 		let commentRegex = #/\/\/.*/#
 		let textWithoutComments = text.replacing(commentRegex, with: "")
