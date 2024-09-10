@@ -1,6 +1,5 @@
 import BinaryParser
 
-
 func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
 	let file: MAR
 	switch inputFile {
@@ -56,16 +55,40 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	do {
 		let arc = parent.contents.first { $0.name == mm3.model.tableName }! as! MAR
 		
+		guard arc.files.indices.contains(Int(mm3.model.index)) else {
+			throw BinaryParserError.indexOutOfBounds(
+				index: Int(mm3.model.index),
+				expected: arc.files.indices,
+				for: MM3.self
+			)
+		}
+		
 		let modelData = arc.files[Int(mm3.model.index)].content as! Datastream
 		let modelStart = modelData.placeMarker()
 		let vertexData = try modelData.read(VertexData.self)
 		modelData.jump(to: modelStart)
+		
+		guard arc.files.indices.contains(Int(mm3.texture.index)) else {
+			throw BinaryParserError.indexOutOfBounds(
+				index: Int(mm3.texture.index),
+				expected: arc.files.indices,
+				for: MM3.self
+			)
+		}
 		
 		let textureData = arc.files[Int(mm3.texture.index)].content as! Datastream
 		let textureStart = textureData.placeMarker()
 		let texture = try textureData.read(TextureData.self)
 		textureData.jump(to: textureStart)
 		
+//		guard arc.files.indices.contains(Int(mm3.animation.index)) else {
+//			throw BinaryParserError.indexOutOfBounds(
+//				index: Int(mm3.animation.index),
+//				expected: arc.files.indices,
+//				for: MM3.self
+//			)
+//		}
+//		
 //		let animationData = arc.files[Int(mm3.animation.index)].content as! Datastream
 //		let animationStart = animationData.placeMarker()
 //		let animation = try animationData.read(AnimationData.self)
@@ -126,9 +149,8 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	} catch {
 		// ignore for now
 		print(file.name, "failed", error)
+		return [file]
 	}
-	
-	return [file]
 }
 
 //fileprivate func parse4_12(_ fixed: UInt16) -> Double {

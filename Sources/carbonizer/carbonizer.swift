@@ -38,7 +38,7 @@ struct Carbonizer: AsyncParsableCommand {
 				experimental: CarbonizerConfiguration.ExperimentalOptions(
 					hotReloading: false,
 					postProcessors: [
-//						"mm3Finder"
+						"mm3Finder"
 					]
 				)
 			)
