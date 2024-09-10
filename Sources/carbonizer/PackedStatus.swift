@@ -1,7 +1,7 @@
 enum PackedStatus {
 	case unknown, packed, unpacked, contradictory
 	
-	var wasPacked: Bool? {
+	var isPacked: Bool? {
 		switch self {
 			case .packed: true
 			case .unpacked: false

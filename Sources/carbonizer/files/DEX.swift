@@ -140,7 +140,8 @@ struct DEX {
 }
 
 extension DEX: ProprietaryFileData {
-	static let fileExtension = "dex.txt"
+	static let fileExtension = ".dex.txt"
+	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {
@@ -151,7 +152,7 @@ extension DEX: ProprietaryFileData {
 	
 	init(_ data: Datastream) throws {
 		let fileLength = data.bytes.endIndex - data.offset
-		let string = try data.read(String.self, length: fileLength)
+		let string = try data.read(String.self, exactLength: fileLength)
 		
 		commands = try string
 			.split(separator: "\n\n")

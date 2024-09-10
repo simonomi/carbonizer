@@ -60,7 +60,8 @@ struct MFS {
 
 // MARK: packed
 extension MFS: ProprietaryFileData {
-	static let fileExtension = "mfs.json"
+	static let fileExtension = ".mfs.json"
+	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary) {

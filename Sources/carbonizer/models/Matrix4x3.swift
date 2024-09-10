@@ -62,7 +62,7 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 		let realTemp0 = temp0 * inverseDeterminant
 		let temp1 = det_sub_proc(0, 3, 2) * inverseDeterminant
 		let temp2 = det_sub_proc(0, 1, 3) * inverseDeterminant
-		let temp3 = det_sub_proc(0, 2, 1) * inverseDeterminant
+//		let temp3 = det_sub_proc(0, 2, 1) * inverseDeterminant
 		
 		return Self(
 			x: SIMD3(realTemp0.x, temp1.x, temp2.x),

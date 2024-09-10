@@ -14,8 +14,7 @@ extension ProprietaryFile: FileSystemObject {
 	
 	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		BinaryFile(
-			name: name,
-			fileExtension: fileExtension,
+			name: name + fileExtension,
 			metadata: metadata,
 			data: Datastream()
 		)
@@ -27,8 +26,7 @@ extension ProprietaryFile: FileSystemObject {
 		data.write(to: writer)
 		
 		try BinaryFile(
-			name: name,
-			fileExtension: fileExtension,
+			name: name + fileExtension,
 			metadata: metadata,
 			data: writer.intoDatastream()
 		)

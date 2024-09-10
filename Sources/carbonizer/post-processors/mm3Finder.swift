@@ -1,6 +1,5 @@
 import BinaryParser
 
-import Foundation // TODO: remove
 
 func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
 	let file: MAR
@@ -59,10 +58,10 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		let texture = try textureData.read(TextureData.self)
 		textureData.jump(to: textureStart)
 		
-		let animationData = arc.files[Int(mm3.animation.index)].content as! Datastream
-		let animationStart = animationData.placeMarker()
-		let animation = try animationData.read(AnimationData.self)
-		animationData.jump(to: animationStart)
+//		let animationData = arc.files[Int(mm3.animation.index)].content as! Datastream
+//		let animationStart = animationData.placeMarker()
+//		let animation = try animationData.read(AnimationData.self)
+//		animationData.jump(to: animationStart)
 		
 		
 		
@@ -85,8 +84,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		let collada = try Collada(vertexData, modelName: file.name, textureNames: textureNames)
 		
 		let colladaFile = BinaryFile(
-			name: file.name,
-			fileExtension: "dae",
+			name: file.name + ".dae",
 			data: Datastream(collada.asString().data(using: .utf8)!)
 		)
 		

@@ -9,7 +9,7 @@ extension Carbonizer {
 		
 		let inputPath = filePaths.first!
 		
-		var fileData = try createFileSystemObject(contentsOf: inputPath)
+		var fileData = try fileSystemObject(contentsOf: inputPath, configuration: configuration)
 		
 		let outputFolder = configuration.outputFolder ?? inputPath.deletingLastPathComponent()
 		
@@ -20,7 +20,7 @@ extension Carbonizer {
 				.pathComponents
 				.dropFirst(6)
 			
-			let newFile = try createFile(contentsOf: $0)
+			let newFile = try createFile(contentsOf: $0, configuration: configuration)
 			
 			fileData.setFile(at: components, to: newFile)
 			

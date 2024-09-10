@@ -17,6 +17,8 @@ struct NDS {
 	
 	var contents: [any FileSystemObject]
 	
+	var configuration: CarbonizerConfiguration
+	
 	@BinaryConvertible
 	struct Binary {
 		var header: Header
@@ -167,12 +169,12 @@ extension NDS: FileSystemObject {
 			Folder(name: "arm9 overlays", contents: arm9Overlays),
 			Folder(name: "arm7 overlays", contents: arm7Overlays),
 			Folder(name: "data",          contents: contents),
-			BinaryFile(name: "arm9",               fileExtension: "",     data: arm9),
-			BinaryFile(name: "arm9 overlay table", fileExtension: "json", data: arm9OverlayTable),
-			BinaryFile(name: "arm7",               fileExtension: "",     data: arm7),
-			BinaryFile(name: "arm7 overlay table", fileExtension: "json", data: arm7OverlayTable),
-			BinaryFile(name: "header",             fileExtension: "json", data: header),
-			BinaryFile(name: "icon banner",        fileExtension: "",     data: iconBanner)
+			BinaryFile(name: "arm9",                    data: arm9),
+			BinaryFile(name: "arm9 overlay table.json", data: arm9OverlayTable),
+			BinaryFile(name: "arm7",                    data: arm7),
+			BinaryFile(name: "arm7 overlay table.json", data: arm7OverlayTable),
+			BinaryFile(name: "header.json",             data: header),
+			BinaryFile(name: "icon banner",             data: iconBanner)
 		]
 		
 		try Folder(name: name, contents: contents)
@@ -188,7 +190,8 @@ extension NDS: FileSystemObject {
 	func packed() -> PackedNDS {
 		PackedNDS(
 			name: name,
-			binary: NDS.Binary(self)
+			binary: NDS.Binary(self),
+			configuration: configuration
 		)
 	}
 	
@@ -201,14 +204,14 @@ extension NDS: FileSystemObject {
 struct PackedNDS: FileSystemObject {
 	var name: String
 	var binary: NDS.Binary
+	var configuration: CarbonizerConfiguration
 	
-	static let fileExtension = "nds"
+	static let fileExtension = ".nds"
 	var fileExtension: String { Self.fileExtension }
 	
 	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		BinaryFile(
-			name: name,
-			fileExtension: fileExtension,
+			name: name + Self.fileExtension,
 			data: Datastream()
 		).savePath(in: directory, overwriting: overwriting)
 	}
@@ -219,8 +222,7 @@ struct PackedNDS: FileSystemObject {
 		
 		do {
 			try BinaryFile(
-				name: name,
-				fileExtension: fileExtension,
+				name: name + Self.fileExtension,
 				data: writer.intoDatastream()
 			)
 			.write(into: path, overwriting: overwriting)
@@ -234,14 +236,14 @@ struct PackedNDS: FileSystemObject {
 	func packed() -> Self { self }
 	
 	func unpacked() throws -> NDS {
-		try NDS(name: name, binary: binary).unpacked()
+		try NDS(name: name, binary: binary, configuration: configuration).unpacked()
 	}
 }
 
 
 // MARK: packed
 extension NDS {
-	init(name: String, binary: Binary) throws {
+	init(name: String, binary: Binary, configuration: CarbonizerConfiguration) throws {
 		self.name = name
 		header = binary.header
 		
@@ -249,8 +251,7 @@ extension NDS {
 		arm9OverlayTable = binary.arm9OverlayTable
 		arm9Overlays = arm9OverlayTable.map {
 			BinaryFile(
-				name: "overlay \($0.fileId, digits: 2)",
-				fileExtension: "bin",
+				name: "overlay \($0.fileId, digits: 2).bin",
 				data: binary.files[Int($0.fileId)]
 			)
 		}
@@ -259,17 +260,26 @@ extension NDS {
 		arm7OverlayTable = binary.arm7OverlayTable
 		arm7Overlays = arm7OverlayTable.map {
 			BinaryFile(
-				name: "overlay \($0.fileId, digits: 2)",
-				fileExtension: "bin",
+				name: "overlay \($0.fileId, digits: 2).bin",
 				data: binary.files[Int($0.fileId)]
 			)
 		}
 		
 		iconBanner = binary.iconBanner
 		
-		let completeTable = binary.fileNameTable.completeTable()
-		contents = try completeTable[0xF000]!.map {
-			try $0.createFileSystemObject(files: binary.files, fileNameTable: completeTable)
+		self.configuration = configuration
+		
+		do {
+			let completeTable = binary.fileNameTable.completeTable()
+			contents = try completeTable[0xF000]!.map {
+				try $0.fileSystemObject(
+					files: binary.files,
+					fileNameTable: completeTable,
+					configuration: configuration
+				)
+			}
+		} catch {
+			throw BinaryParserError.whileReading(Self.self, error)
 		}
 	}
 }
@@ -310,8 +320,7 @@ extension NDS.Binary {
 			return writer.intoDatastream()
 		}
 		
-		// TODO: doesnt account for FNT or FAT sizes change
-		// crashes if file/folder added while unpacked
+		precondition(files.count == header.fileAllocationTableSize / 8, "error: file added while unpacked")
 		
 		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(4)
 		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(4)
@@ -347,15 +356,19 @@ extension NDS {
 		case invalidFolderStructure([String])
 	}
 	
-	init(name: String, contents: [any FileSystemObject]) throws {
+	init(
+		name: String,
+		contents: [any FileSystemObject],
+		configuration: CarbonizerConfiguration
+	) throws {
 		self.name = name
 		
-		guard let headerFile =           contents.getChild(named: "header") as? BinaryFile,
+		guard let headerFile =           contents.getChild(named: "header.json") as? BinaryFile,
 			  let arm9File =             contents.getChild(named: "arm9") as? BinaryFile,
-			  let arm9OverlayTableFile = contents.getChild(named: "arm9 overlay table") as? BinaryFile,
+			  let arm9OverlayTableFile = contents.getChild(named: "arm9 overlay table.json") as? BinaryFile,
 			  let arm9OverlaysFolder =   contents.getChild(named: "arm9 overlays") as? Folder,
 			  let arm7File =             contents.getChild(named: "arm7") as? BinaryFile,
-			  let arm7OverlayTableFile = contents.getChild(named: "arm7 overlay table") as? BinaryFile,
+			  let arm7OverlayTableFile = contents.getChild(named: "arm7 overlay table.json") as? BinaryFile,
 			  let arm7OverlaysFolder =   contents.getChild(named: "arm7 overlays") as? Folder,
 			  let iconBannerFile =       contents.getChild(named: "icon banner") as? BinaryFile,
 			  let dataFolder =           contents.getChild(named: "data") as? Folder
@@ -389,6 +402,8 @@ extension NDS {
 			.compactMap(as: BinaryFile.self)
 		
 		iconBanner = iconBannerFile.data
+		
+		self.configuration = configuration
 		
 		self.contents = dataFolder.contents
 	}

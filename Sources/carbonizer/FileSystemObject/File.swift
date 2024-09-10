@@ -1,8 +1,11 @@
 import Foundation
 import BinaryParser
 
-func createFile(contentsOf path: URL) throws -> any FileSystemObject {
-	let (name, fileExtension) = splitFileName(path.lastPathComponent)
+func createFile(
+	contentsOf path: URL,
+	configuration: CarbonizerConfiguration
+) throws -> any FileSystemObject {
+	let name = path.lastPathComponent
 	let data = Datastream(try Data(contentsOf: path))
 	
 	let metadata = try path
@@ -11,20 +14,16 @@ func createFile(contentsOf path: URL) throws -> any FileSystemObject {
 	
 	let file = try createFile(
 		name: name,
-		fileExtension: fileExtension,
 		metadata: metadata,
-		data: data
+		data: data,
+		configuration: configuration
 	)
 	
 	if metadata?.standalone == true {
-		let fileName = switch file {
-			case is ProprietaryFile: file.name
-			default: file.fullName
-		}
-		
 		return MAR(
-			name: fileName,
-			files: [try MCM(file)!] // a file with metadata should always be an MCM
+			name: file.name,
+			files: [try MCM(file)!], // a file with metadata should always be an MCM
+			configuration: configuration
 		)
 	} else {
 		return file
@@ -33,40 +32,60 @@ func createFile(contentsOf path: URL) throws -> any FileSystemObject {
 
 func createFile(
 	name: String,
-	fileExtension: String,
 	metadata: Metadata?,
-	data: Datastream
+	data: Datastream,
+	configuration: CarbonizerConfiguration
 ) throws -> any FileSystemObject {
-	if fileExtension == PackedNDS.fileExtension {
+	if name.hasSuffix(PackedNDS.fileExtension) {
 		return PackedNDS(
-			name: name,
-			binary: try data.read(NDS.Binary.self)
+			name: String(name.dropLast(PackedNDS.fileExtension.count)),
+			binary: try data.read(NDS.Binary.self),
+			configuration: configuration
 		)
 	}
 	
-	let marker = data.placeMarker()
-	let magicBytes = (try? data.read(String.self, length: 3)) ?? ""
-	data.jump(to: marker)
-	
-	                                       /*  makes ffc work right  */
-	if magicBytes == MAR.Binary.magicBytes /*&& !name.contains("arc")*/ {
-		return PackedMAR(
-			name: name,
-			fileExtension: fileExtension,
-			binary: try data.read(MAR.Binary.self)
-		)
+	if configuration.fileTypes.contains(String(describing: MAR.self)) {
+		let marker = data.placeMarker()
+		let magicBytes = try? data.read(String.self, exactLength: 3)
+		data.jump(to: marker)
+		
+											   /*  makes ffc work right  */
+		if magicBytes == MAR.Binary.magicBytes /*&& !name.contains("arc")*/ {
+			return PackedMAR(
+				name: name,
+				binary: try data.read(MAR.Binary.self),
+				configuration: configuration
+			)
+		}
 	}
 	
-	if let fileData = try createFileData(data, fileExtension: fileExtension) {
+	let fileData = try createFileData(
+		name: name,
+		data: data,
+		configuration: configuration
+	)
+	
+	if let fileData {
+		let fileType = type(of: fileData)
+		
+		guard let isPacked = fileType.packedStatus.isPacked else {
+			fatalError("proprietary file type \(fileType) is neither packed or unpacked")
+		}
+		
+		let newName = if isPacked {
+			name
+		} else {
+			String(name.dropLast(fileType.fileExtension.count))
+		}
+		
 		return ProprietaryFile(
-			name: name,
+			name: newName,
 			metadata: metadata,
 			data: fileData
 		)
 	} else {
 		return BinaryFile(
 			name: name,
-			fileExtension: fileExtension,
 			metadata: metadata,
 			data: data
 		)

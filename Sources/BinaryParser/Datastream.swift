@@ -205,6 +205,22 @@ extension Datastream {
 	
 	/// Documentation
 	@inlinable
+	public func read<T: BinaryInteger>(_ type: String.Type, exactLength inputLength: T) throws -> String {
+		let endOffset = offset + Int(inputLength)
+		
+		guard canRead(until: endOffset) else {
+			throw BinaryParserError.indexOutOfBounds(index: endOffset, expected: bytes.indices, for: String.self)
+		}
+		guard let string = String(data: Data(bytes[offset..<endOffset]), encoding: .utf8) else {
+			throw StringParsingError.invalidUTF8(showInvalidUTF8(in: bytes[offset..<endOffset]))
+		}
+		
+		defer { offset = endOffset }
+		return string
+	}
+	
+	/// Documentation
+	@inlinable
 	public func read<T: BinaryInteger>(
 		_ type: Datastream.Type, endOffset: T, relativeTo baseOffset: Offset
 	) throws -> Datastream {

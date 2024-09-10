@@ -5,25 +5,32 @@ struct Folder {
 	var contents: [any FileSystemObject]
 }
 
-func createFolder(contentsOf path: URL) throws -> any FileSystemObject {
+func createFolder(
+	contentsOf path: URL,
+	configuration: CarbonizerConfiguration
+) throws -> any FileSystemObject {
 	let contentPaths = try path.contents()
 	
 	let contents = try contentPaths
 		.filter { !$0.lastPathComponent.starts(with: ".") }
-		.map(createFileSystemObject)
+		.map { try fileSystemObject(contentsOf: $0, configuration: configuration) }
 		.sorted(by: \.name)
 	
-	if path.pathExtension == "mar" {
+	if configuration.fileTypes.contains(String(describing: MAR.self)),
+	   path.lastPathComponent.hasSuffix(MAR.fileExtension) 
+	{
 		return MAR(
-			name: path.deletingPathExtension().lastPathComponent,
-			files: try contents.compactMap(MCM.init)
+			name: String(path.lastPathComponent.dropLast(MAR.fileExtension.count)),
+			files: try contents.compactMap(MCM.init),
+			configuration: configuration
 		)
 	}
 	
 	if contentPaths.contains(where: { $0.lastPathComponent == "header.json" }) {
 		return try NDS(
 			name: path.lastPathComponent,
-			contents: contents
+			contents: contents,
+			configuration: configuration
 		)
 	}
 	

@@ -5,6 +5,8 @@ struct MAR {
 	var name: String
 	var files: [MCM]
 	
+	var configuration: CarbonizerConfiguration
+	
 	@BinaryConvertible
 	struct Binary {
 		@Include
@@ -25,22 +27,25 @@ struct MAR {
 
 
 extension MAR: FileSystemObject {
-	var fileExtension: String { "mar" }
-	
-	func savePath(in directory: URL, overwriting: Bool) -> URL {
-		Folder(name: name, contents: [])
-			.savePath(in: directory, overwriting: overwriting)
+	func savePath(in folder: URL, overwriting: Bool) -> URL {
+		if files.count == 1 {
+			ProprietaryFile(name: name, data: Datastream())
+				.savePath(in: folder, overwriting: overwriting)
+		} else {
+			Folder(
+				name: name + Self.fileExtension,
+				contents: []
+			).savePath(in: folder, overwriting: overwriting)
+		}
 	}
 	
 	func write(into folder: URL, overwriting: Bool) throws {
-		if files.count == 1,
-		   let file = files.first
-		{
+		if files.count == 1, let file = files.first {
 			try ProprietaryFile(name: name, standaloneMCM: file)
 				.write(into: folder, overwriting: overwriting)
 		} else {
 			try Folder(
-				name: fullName,
+				name: name + Self.fileExtension,
 				contents: files.enumerated().map(ProprietaryFile.init)
 			).write(into: folder, overwriting: overwriting)
 		}
@@ -49,12 +54,10 @@ extension MAR: FileSystemObject {
 	func packedStatus() -> PackedStatus { .unpacked }
 	
 	func packed() -> PackedMAR {
-		let (name, fileExtension) = splitFileName(name)
-		
-		return PackedMAR(
+		PackedMAR(
 			name: name,
-			fileExtension: fileExtension,
-			binary: MAR.Binary(self)
+			binary: MAR.Binary(self),
+			configuration: configuration
 		)
 	}
 	
@@ -63,13 +66,13 @@ extension MAR: FileSystemObject {
 
 struct PackedMAR: FileSystemObject {
 	var name: String
-	var fileExtension: String
 	var binary: MAR.Binary
+	
+	var configuration: CarbonizerConfiguration
 	
 	func savePath(in directory: URL, overwriting: Bool) -> URL {
 		BinaryFile(
 			name: name,
-			fileExtension: fileExtension,
 			data: Datastream()
 		)
 		.savePath(in: directory, overwriting: overwriting)
@@ -82,7 +85,6 @@ struct PackedMAR: FileSystemObject {
 		do {
 			try BinaryFile(
 				name: name,
-				fileExtension: fileExtension,
 				data: writer.intoDatastream()
 			)
 			.write(into: path, overwriting: overwriting)
@@ -97,8 +99,9 @@ struct PackedMAR: FileSystemObject {
 	
 	func unpacked() throws -> MAR {
 		try MAR(
-			name: combineFileName(name, withExtension: fileExtension),
-			binary: binary
+			name: name,
+			binary: binary,
+			configuration: configuration
 		)
 	}
 }
@@ -106,14 +109,20 @@ struct PackedMAR: FileSystemObject {
 
 // MARK: packed
 extension MAR {
-	static let fileExtension = "mar"
+	static let fileExtension = ".mar"
 	
-	init(name: String, binary: Binary) throws {
+	init(
+		name: String,
+		binary: Binary,
+		configuration: CarbonizerConfiguration
+	) throws {
 		logProgress("Decompressing", name)
 		self.name = name
 		
+		self.configuration = configuration
+		
 		do {
-			files = try binary.files.map(MCM.init)
+			files = try binary.files.map { try MCM($0, configuration: configuration) }
 		} catch {
 			throw BinaryParserError.whileReadingFile(name, "mar", "", error)
 		}

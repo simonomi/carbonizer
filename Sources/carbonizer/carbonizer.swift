@@ -15,6 +15,8 @@ struct Carbonizer: AsyncParsableCommand {
 	var filePaths = [URL]()
 	
 	mutating func run() async throws {
+		let start = Date.now
+		
 		do {
 #if IN_CI
 			let configurationPath = URL(filePath: "config.json")
@@ -22,18 +24,22 @@ struct Carbonizer: AsyncParsableCommand {
 #else
 			let configuration = CarbonizerConfiguration(
 				compressionMode: .auto,
+//				compressionMode: .unpack,
 				inputFiles: [
 					URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"),
 //					URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"),
+//					URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"),
 				],
 				outputFolder: URL(filePath: "/Users/simonomi/ff1/output/"),
 				overwriteOutput: true,
-//				fileTypes: ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
+				fileTypes: ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 //				skipExtracting: [],
 //				onlyExtract: [],
 				experimental: CarbonizerConfiguration.ExperimentalOptions(
 					hotReloading: false,
-					postProcessors: ["mm3Finder"]
+					postProcessors: [
+//						"mm3Finder"
+					]
 				)
 			)
 #endif
@@ -57,18 +63,16 @@ struct Carbonizer: AsyncParsableCommand {
 			print(error)
 			waitForInput()
 		}
+		
+		print(-start.timeIntervalSinceNow)
 	}
 	
 	mutating func main(with configuration: CarbonizerConfiguration) throws {
 		let compressionMode = compressionMode ?? configuration.compressionMode
 		
-		// TODO: file types
-		
-		// TODO: skip/only extract
-		
 		for filePath in filePaths {
 			logProgress("Reading \(filePath.path(percentEncoded: false))")
-			let file = try createFileSystemObject(contentsOf: filePath)
+			let file = try fileSystemObject(contentsOf: filePath, configuration: configuration)
 			
 			let action = compressionMode.action(packedStatus: file.packedStatus())
 			
@@ -121,6 +125,10 @@ struct Carbonizer: AsyncParsableCommand {
 			)
 			
 			logProgress("Writing to \(savePath.path(percentEncoded: false))")
+			
+			if configuration.overwriteOutput && savePath.exists() {
+				try FileManager.default.removeItem(at: savePath)
+			}
 			
 			try processedFile.write(into: outputFolder, overwriting: configuration.overwriteOutput)
 		}

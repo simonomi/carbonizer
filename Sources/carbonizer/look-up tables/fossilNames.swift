@@ -475,7 +475,7 @@ let fossilNames = [
 	628: "Small Double Dropping Fossil",
 	629: "Small Double Dropping Fossil",
 	630: "Small Double Dropping Fossil",
-	701: "Egg", // TODO: what egg
+	701: "Egg",
 	702: "Keymonite",
 	703: "Shark Dentures",
 	704: "Mt. Lavaflow N Rock",

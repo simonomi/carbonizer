@@ -20,7 +20,8 @@ func dexDialogueLabeller(
 							maxChunkSize: $0.maxChunkSize,
 							content: label($0.content, with: dialogue) as any ProprietaryFileData
 						)
-					}
+					},
+				configuration: { fatalError("TODO: add config for dexDialogueLabeller") }()
 			)
 		case let nds as NDS:
 			NDS(
@@ -33,7 +34,8 @@ func dexDialogueLabeller(
 				arm7OverlayTable: nds.arm7OverlayTable,
 				arm7Overlays: nds.arm7Overlays,
 				iconBanner: nds.iconBanner,
-				contents: nds.contents.map { dexDialogueLabeller($0, dialogue: dialogue) }
+				contents: nds.contents.map { dexDialogueLabeller($0, dialogue: dialogue) },
+				configuration: { fatalError("TODO: add config for dexDialogueLabeller") }()
 			)
 		case let folder as Folder:
 			Folder(

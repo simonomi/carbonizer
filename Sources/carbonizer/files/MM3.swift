@@ -31,7 +31,8 @@ struct MM3 {
 
 // MARK: packed
 extension MM3: ProprietaryFileData {
-	static let fileExtension = "mm3.json"
+	static let fileExtension = ".mm3.json"
+	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ packed: Binary) {

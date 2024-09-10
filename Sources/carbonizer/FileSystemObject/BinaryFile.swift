@@ -3,23 +3,22 @@ import BinaryParser
 
 struct BinaryFile {
 	var name: String
-	var fileExtension: String
 	var metadata: Metadata?
 	var data: Datastream
 }
 
 extension BinaryFile: FileSystemObject {
 	func savePath(in directory: URL, overwriting: Bool) -> URL {
-		let path = directory
-			.appending(component: name)
-			.appendingPathExtension(fileExtension)
+		let path = directory.appending(component: name)
 		
 		if overwriting || !path.exists() { return path }
 		
+		let (baseName, fileExtensions) = splitFileName(name)
+		
 		for number in 1... {
 			let path = directory
-				.appending(component: name + " (\(number))")
-				.appendingPathExtension(fileExtension)
+				.appending(component: "\(baseName) (\(number))")
+				.appendingPathExtension(fileExtensions)
 			
 			if !path.exists() { return path }
 		}

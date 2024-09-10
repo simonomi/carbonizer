@@ -177,7 +177,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 ////				}
 			}
 		
-		if !folder.contents.isEmpty {
+		if folder.contents.isNotEmpty {
 			folders.append(folder)
 		}
 	}

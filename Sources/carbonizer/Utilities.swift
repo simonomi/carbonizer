@@ -32,6 +32,12 @@ extension Collection {
 }
 #endif
 
+extension Collection {
+	var isNotEmpty: Bool {
+		!isEmpty
+	}
+}
+
 extension BinaryInteger {
 	@inline(__always)
 	var isEven: Bool {
@@ -113,17 +119,13 @@ func logProgress(_ items: Any...) {
 #endif
 }
 
-func splitFileName(_ name: String) -> (name: String, fileExtension: String) {
+func splitFileName(_ name: String) -> (name: String, fileExtensions: String) {
 	let split = name.split(separator: ".", maxSplits: 1)
 	if split.count == 2 {
 		return (String(split[0]), String(split[1]))
 	} else {
 		return (name, "")
 	}
-}
-
-func combineFileName(_ name: String, withExtension fileExtension: String) -> String {
-	URL(filePath: name).appendingPathExtension(fileExtension).lastPathComponent
 }
 
 extension Array {

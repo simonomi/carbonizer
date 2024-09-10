@@ -95,7 +95,8 @@ struct RLS {
 
 // MARK: packed
 extension RLS: ProprietaryFileData {
-	static let fileExtension = "rls.json"
+	static let fileExtension = ".rls.json"
+	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ packed: Binary) {

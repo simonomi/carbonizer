@@ -7,8 +7,9 @@ struct CarbonizerConfiguration: Decodable {
 	var outputFolder: URL?
 	var overwriteOutput: Bool
 	
-//	var fileTypes: [String]
-//	
+	var fileTypes: [String]
+	
+	// TODO: skip/only extract
 //	var skipExtracting: [String]
 //	var onlyExtract: [String]
 	
@@ -62,8 +63,8 @@ struct CarbonizerConfiguration: Decodable {
 			"overwriteOutput": false,
 			
 			// stable: DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
-			// experimental: AIS, AST, CHR, DAL, DCL, DNC, MFS, MMS, SHP
-			// "fileTypes": ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
+			// experimental: CHR, DCL, MFS, MMS
+			"fileTypes": ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
 			// "skipExtracting": [],
 			// "onlyExtract": [],
@@ -71,7 +72,7 @@ struct CarbonizerConfiguration: Decodable {
 			"experimental": {
 				"hotReloading": false, // macOS only
 				
-				// dexDialogueLabeller, dmgRipper, mm3Finder, mmsFinder, mpmFinder
+				// mm3Finder, mmsFinder, mpmFinder
 				"postProcessors": []
 			}
 		}
@@ -88,6 +89,10 @@ extension CarbonizerConfiguration {
 			try text.write(to: path, atomically: true, encoding: .utf8)
 		}
 		
+		self = try Self(decoding: text)
+	}
+	
+	init(decoding text: String) throws {
 		let commentRegex = #/\/\/.*/#
 		let textWithoutComments = text.replacing(commentRegex, with: "")
 		

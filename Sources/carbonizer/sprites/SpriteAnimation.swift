@@ -194,7 +194,7 @@ struct SpriteAnimation: BinaryConvertible {
 					images[fitting: image].bitmap = number
 				case .show(let image):
 					images[fitting: image].visible = true
-//					guard !images.isEmpty else { continue }
+//					guard images.isNotEmpty else { continue }
 //					frames.append(try drawFrame(images: images, palettes: palettes, bitmaps: bitmaps))
 				case .hide(let image):
 					images[fitting: image].visible = false
@@ -205,7 +205,7 @@ struct SpriteAnimation: BinaryConvertible {
 					images[fitting: image].position = Point(x: -width, y: -height)
 				// seven
 				case .commit:
-					guard !images.isEmpty else { continue }
+					guard images.isNotEmpty else { continue }
 					frames.append(try drawFrame(images: images, palettes: palettes, bitmaps: bitmaps))
 				case .jumpToLoop: () // do nothing (for now)
 //				case .ten(let arg):

@@ -54,10 +54,13 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		)
 		
 		
-		if let entry3 = mpm.entry3 {
-			let bgMapArchive = parent.contents.first { $0.name == entry3.tableName } as! MAR
-			let bgMap = bgMapArchive.files[Int(entry3.index)]
-			let bgMapData = bgMap.content as! Datastream
+		if mpm.entry3 != nil {
+//		if let entry3 = mpm.entry3 {
+//			let bgMapArchive = parent.contents.first { $0.name == entry3.tableName } as! MAR
+//			let bgMap = bgMapArchive.files[Int(entry3.index)]
+//			let bgMapData = bgMap.content as! Datastream
+			
+			// TODO: images with bg maps
 		} else {
 			images.append(ProprietaryFile(name: file.name, data: bitmapFile))
 		}

@@ -66,7 +66,8 @@ struct MMS {
 
 // MARK: packed
 extension MMS: ProprietaryFileData {
-	static let fileExtension = "mms.json"
+	static let fileExtension = ".mms.json"
+	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ packed: Binary) {
@@ -108,7 +109,7 @@ extension MMS: ProprietaryFileData {
 }
 
 extension MMS.Binary: ProprietaryFileData {
-	static let fileExtension = "bin"
+	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
 	init(_ mms: MMS) {

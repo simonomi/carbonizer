@@ -72,7 +72,8 @@ extension Bitmap.Color {
 }
 
 extension Bitmap: ProprietaryFileData {
-	static let fileExtension = "bmp"
+	static let fileExtension = ".bmp"
+	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unknown
 	
 	init(_ bitmap: Self) { self = bitmap }

@@ -154,9 +154,6 @@ extension Datastream {
 		
 	mainloop:
 		while true {
-			// TODO: rework this so it doesnt read all 4 at once
-			// for commandsEnd, unknown53
-//			let commandTypes = try (0..<4).map { _ in try read(GPUCommandType.self) }
 			let rawCommandTypes = try (0..<4).map { _ in try read(UInt8.self) }
 			
 			for rawCommandType in rawCommandTypes {

@@ -54,7 +54,7 @@ extension MCM {
 		case whileReading(Any.Type, (CompressionType, CompressionType), any Error)
 	}
 	
-	init(_ binary: Binary) throws {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) throws {
 		compression = (
 			CompressionType(rawValue: binary.compressionType1) ?? .none,
 			CompressionType(rawValue: binary.compressionType2) ?? .none
@@ -68,9 +68,19 @@ extension MCM {
 				.joined()
 			
 #if compiler(>=6)
-			content = try createFileData(data, fileExtension: "")?.unpacked() ?? data
+			content = try createFileData(
+				name: "",
+				data: data,
+				configuration: configuration
+			)?.unpacked() ?? data
 #else
-			if let fileData = try createFileData(data, fileExtension: "") {
+			let fileData = try createFileData(
+				name: "",
+				data: data,
+				configuration: configuration
+			)
+			
+			if let fileData {
 				content = fileData.unpacked() as any ProprietaryFileData
 			} else {
 				content = data
@@ -143,7 +153,7 @@ extension MCM {
 		}
 		
 		guard let metadata else {
-			throw NoMetadataError.noMetadata(file.fullName)
+			throw NoMetadataError.noMetadata(file.name)
 		}
 		
 		compression = metadata.compression
