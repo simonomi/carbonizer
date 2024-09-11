@@ -31,10 +31,13 @@ func createFileData(
 	data: Datastream,
 	configuration: CarbonizerConfiguration
 ) throws -> (any ProprietaryFileData)? {
-	let allFileTypes: [any ProprietaryFileData.Type] = [CHR.self, DCL.self, DEX.self, DMG.self, DMS.self, DTX.self, MFS.self, MM3.self, MMS.self, MPM.self, RLS.self]
+	let allFileTypes: [any ProprietaryFileData.Type] = [CHR.self, DCL.self, DEX.self, DMG.self, DMS.self, DTX.self, MFS.self, MM3.self, MMS.self, MPM.self, RLS.self, TCL.self]
 	
 	let fileTypes: [any ProprietaryFileData.Type] = allFileTypes
-		.filter { configuration.fileTypes.contains(String(describing: $0)) }
+		.filter {
+			configuration.fileTypes.contains(String(describing: $0)) || 
+			($0 == TCL.self && configuration.fileTypes.contains("3CL"))
+		}
 		.flatMap { $0.selfAndPacked() }
 	
 	if let fileType = fileTypes.first(where: name.hasExtension) {
@@ -59,8 +62,8 @@ extension ProprietaryFileData where Self: Codable {
 	}
 	
 	func write(to data: Datawriter) {
-		// TODO: panic bad here?
-		let jsonData = try! JSONEncoder(.prettyPrinted).encode(self)
+		// TODO: is it possible to panic here?
+		let jsonData = try! JSONEncoder(.prettyPrinted, .sortedKeys).encode(self)
 		data.write(jsonData)
 	}
 }

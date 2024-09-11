@@ -63,7 +63,7 @@ struct CarbonizerConfiguration: Decodable {
 			"overwriteOutput": false,
 			
 			// stable: DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
-			// experimental: CHR, DCL, MFS, MMS
+			// experimental: 3CL, CHR, DCL, MFS, MMS
 			"fileTypes": ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
 			// "skipExtracting": [],

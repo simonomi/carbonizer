@@ -21,7 +21,7 @@ struct Carbonizer: AsyncParsableCommand {
 #if IN_CI
 			let configurationPath = URL(filePath: "config.json")
 #else
-			let configurationPath = URL(filePath: "/Users/simonomi/Documents/programming/swift/carbonizer/config.json")
+			let configurationPath = URL(filePath: "/Users/simonomi/Desktop/config.json")
 #endif
 			let configuration = try CarbonizerConfiguration(contentsOf: configurationPath)
 			
