@@ -56,20 +56,13 @@ jobs:
     - name: Download license
       run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
     - name: Pack products
-#       run: >
-#         tar -acf carbonizer-Windows.zip
-#         LICENSE.txt
-#         -C "D:\\a\\carbonizer\\carbonizer\\.build\\*\\release"
-#         carbonizer.exe
-#         -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin"
-#         swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll
       run: >
         tar -acf carbonizer-Windows.zip
         LICENSE.txt
         -C "$(swift build -c release --show-bin-path)"
         carbonizer.exe
         -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin"
-        swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll swiftCRT.dll Foundation.dll swift_RegexParser.dll dispatch.dll BlocksRuntime.dll
+        swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll swiftCRT.dll Foundation.dll swift_RegexParser.dll dispatch.dll BlocksRuntime.dll swiftDispatch.dll
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
