@@ -11,7 +11,7 @@ extension Carbonizer {
 		
 		var fileData = try fileSystemObject(contentsOf: inputPath, configuration: configuration)
 		
-		let outputFolder = configuration.outputFolder ?? inputPath.deletingLastPathComponent()
+		let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? inputPath.deletingLastPathComponent()
 		
 		let monitor = try monitorFiles(in: inputPath) {
 			let components = $0

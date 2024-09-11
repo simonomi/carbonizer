@@ -20,31 +20,12 @@ struct Carbonizer: AsyncParsableCommand {
 		do {
 #if IN_CI
 			let configurationPath = URL(filePath: "config.json")
-			let configuration = try CarbonizerConfiguration(contentsOf: configurationPath)
 #else
-			let configuration = CarbonizerConfiguration(
-				compressionMode: .auto,
-//				compressionMode: .unpack,
-				inputFiles: [
-					URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds"),
-//					URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters"),
-//					URL(filePath: "/Users/simonomi/ff1/output/Fossil Fighters.nds"),
-				],
-				outputFolder: URL(filePath: "/Users/simonomi/ff1/output/"),
-				overwriteOutput: true,
-				fileTypes: ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
-//				skipExtracting: [],
-//				onlyExtract: [],
-				experimental: CarbonizerConfiguration.ExperimentalOptions(
-					hotReloading: false,
-					postProcessors: [
-						"mm3Finder"
-					]
-				)
-			)
+			let configurationPath = URL(filePath: "/Users/simonomi/Documents/programming/swift/carbonizer/config.json")
 #endif
+			let configuration = try CarbonizerConfiguration(contentsOf: configurationPath)
 			
-			filePaths += configuration.inputFiles
+			filePaths += configuration.inputFiles.map { URL(filePath: $0) }
 			
 			if filePaths.isEmpty {
 				var standardError = FileHandle.standardError
@@ -117,7 +98,7 @@ struct Carbonizer: AsyncParsableCommand {
 #endif
 			}
 			
-			let outputFolder = configuration.outputFolder ?? filePath.deletingLastPathComponent()
+			let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? filePath.deletingLastPathComponent()
 			
 			let savePath = processedFile.savePath(
 				in: outputFolder,

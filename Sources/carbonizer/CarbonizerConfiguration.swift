@@ -3,8 +3,8 @@ import Foundation
 
 struct CarbonizerConfiguration: Decodable {
 	var compressionMode: CompressionMode
-	var inputFiles: [URL]
-	var outputFolder: URL?
+	var inputFiles: [String]
+	var outputFolder: String?
 	var overwriteOutput: Bool
 	
 	var fileTypes: [String]
