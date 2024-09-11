@@ -131,12 +131,21 @@ fileprivate struct CommandParsingResult {
 	}
 }
 
+extension String {
+	fileprivate func withoutSpaces() -> Self {
+		self.replacing(" ", with: "-")
+	}
+}
+
 extension Collada {
 	// textureNames: a mapping from palette offset to texture file name. the offset should be normalized (bit shifted according to type)
 	init(_ vertexData: VertexData, modelName: String, textureNames: [UInt32: String]) throws {
 		// copy so theres no side effects
 		let commandData = Datastream(vertexData.commands)
 		let commands = try commandData.readCommands()
+		
+		let modelNameWithSpaces = modelName
+		let modelName = modelName.withoutSpaces()
 		
 		let matrices = vertexData.boneTable.bones
 			.map(\.matrix)
@@ -363,6 +372,7 @@ extension Collada {
 					id: "scene",
 					.node(
 						id: modelName,
+						name: modelNameWithSpaces,
 						.node(
 							id: "\(modelName)-skeleton",
 							type: "JOINT",

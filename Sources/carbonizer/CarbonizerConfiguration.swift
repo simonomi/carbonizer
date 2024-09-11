@@ -72,7 +72,7 @@ struct CarbonizerConfiguration: Decodable {
 			"experimental": {
 				"hotReloading": false, // macOS only
 				
-				// mm3Finder, mmsFinder, mpmFinder
+				// 3clFinder, mm3Finder, mmsFinder, mpmFinder
 				"postProcessors": []
 			}
 		}

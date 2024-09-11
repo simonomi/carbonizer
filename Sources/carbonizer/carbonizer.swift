@@ -70,6 +70,7 @@ struct Carbonizer: AsyncParsableCommand {
 			
 			logProgress("Running post-processors")
 			let postProcessors: [String: PostProcessor] = [
+				"3clFinder": tclFinder,
 				"mm3Finder": mm3Finder,
 				"mmsFinder": mmsFinder,
 				"mpmFinder": mpmFinder
@@ -78,6 +79,8 @@ struct Carbonizer: AsyncParsableCommand {
 			for postProcessorName in configuration.experimental.postProcessors {
 #if os(Windows)
 				switch postProcessorName {
+					case "3clFinder":
+						processedFile = try processedFile.postProcessed(with: tclFinder)
 					case "mm3Finder":
 						processedFile = try processedFile.postProcessed(with: mm3Finder)
 					case "mmsFinder":
