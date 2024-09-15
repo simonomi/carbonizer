@@ -604,8 +604,7 @@ enum CommandType {
 	case dialogue, spawn, teleport, despawn, fadeOut, fadeIn, unownedDialogue, turnTo, turn1To, turnTowards, turn2To, turnTowards2, move, moveTo, moveBy, control, delay, clean1, clean2, angleCamera, startMusic, fadeMusic, playSound, characterEffect, clearEffects, characterMovement, dialogueChoice, imageFadeOut, imageSlideIn, imageFadeIn, revive, startTurning, stopTurning, unknown, comment
 	
 	init?(_ command: Substring) {
-		let firstSpace = command.firstIndex(where: \.isWhitespace)
-		guard let firstSpace else { return nil }
+		let firstSpace = command.firstIndex(where: \.isWhitespace) ?? command.endIndex
 		let firstWord = command[..<firstSpace]
 		
 		let possiblySelf: Self? = switch firstWord {
