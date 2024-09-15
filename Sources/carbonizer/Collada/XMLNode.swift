@@ -138,6 +138,10 @@ extension XMLNode {
 		)
 	}
 	
+	static func animation(_ children: [XMLNode]) -> Self {
+		Self(kind: "animation", children: children)
+	}
+	
 	static func asset(_ children: XMLNode...) -> Self {
 		Self(kind: "asset", children: children)
 	}
@@ -152,6 +156,17 @@ extension XMLNode {
 			attributes: [
 				"semantic": semantic,
 				"input_semantic": input_semantic
+			],
+			children: []
+		)
+	}
+	
+	static func channel(sourceId: String, target: String) -> Self {
+		Self(
+			kind: "channel",
+			attributes: [
+				"source": "#\(sourceId)",
+				"target": target
 			],
 			children: []
 		)
@@ -291,6 +306,10 @@ extension XMLNode {
 		Self(kind: "lambert", children: children)
 	}
 	
+	static func library_animations(_ children: XMLNode...) -> Self {
+		Self(kind: "library_animations", children: children)
+	}
+	
 	static func library_controllers(_ children: XMLNode...) -> Self {
 		Self(kind: "library_controllers", children: children)
 	}
@@ -412,6 +431,10 @@ extension XMLNode {
 	
 	static func profile_COMMON(_ children: XMLNode...) -> Self {
 		Self(kind: "profile_COMMON", children: children)
+	}
+	
+	static func sampler(id: String, _ children: XMLNode...) -> Self {
+		Self(kind: "sampler", id: id, children: children)
 	}
 	
 	static func sampler2D(_ children: XMLNode...) -> Self {
