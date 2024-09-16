@@ -19,49 +19,49 @@ func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		
 		for (vivosaurId, vivosaur) in tcl.vivosaurs.enumerated() {
 			let animations = vivosaur?.animations ?? []
-			for (animationId, animation) in animations.enumerated() {
-				guard let animation else { continue }
+			for (animationId, vivosaurAnimation) in animations.enumerated() {
+				guard let vivosaurAnimation else { continue }
 				
-				let arc = parent.contents.first { $0.name == animation.model.tableName }! as! MAR
+				let arc = parent.contents.first { $0.name == vivosaurAnimation.model.tableName }! as! MAR
 				
-				guard arc.files.indices.contains(Int(animation.model.index)) else {
+				guard arc.files.indices.contains(Int(vivosaurAnimation.model.index)) else {
 					throw BinaryParserError.indexOutOfBounds(
-						index: Int(animation.model.index),
+						index: Int(vivosaurAnimation.model.index),
 						expected: arc.files.indices,
 						for: TCL.self
 					)
 				}
 				
-				let modelData = arc.files[Int(animation.model.index)].content as! Datastream
+				let modelData = arc.files[Int(vivosaurAnimation.model.index)].content as! Datastream
 				let modelStart = modelData.placeMarker()
 				let vertexData = try modelData.read(VertexData.self)
 				modelData.jump(to: modelStart)
 				
-				guard arc.files.indices.contains(Int(animation.texture.index)) else {
+				guard arc.files.indices.contains(Int(vivosaurAnimation.texture.index)) else {
 					throw BinaryParserError.indexOutOfBounds(
-						index: Int(animation.texture.index),
+						index: Int(vivosaurAnimation.texture.index),
 						expected: arc.files.indices,
 						for: TCL.self
 					)
 				}
 				
-				let textureData = arc.files[Int(animation.texture.index)].content as! Datastream
+				let textureData = arc.files[Int(vivosaurAnimation.texture.index)].content as! Datastream
 				let textureStart = textureData.placeMarker()
 				let texture = try textureData.read(TextureData.self)
 				textureData.jump(to: textureStart)
 				
-//				guard arc.files.indices.contains(Int(animation.animation.index)) else {
-//					throw BinaryParserError.indexOutOfBounds(
-//						index: Int(animation.animation.index),
-//						expected: arc.files.indices,
-//						for: TCL.self
-//					)
-//				}
-//
-//				let animationData = arc.files[Int(animation.animation.index)].content as! Datastream
-//				let animationStart = animationData.placeMarker()
-//				let animation = try animationData.read(AnimationData.self)
-//				animationData.jump(to: animationStart)
+				guard arc.files.indices.contains(Int(vivosaurAnimation.animation.index)) else {
+					throw BinaryParserError.indexOutOfBounds(
+						index: Int(vivosaurAnimation.animation.index),
+						expected: arc.files.indices,
+						for: TCL.self
+					)
+				}
+
+				let animationData = arc.files[Int(vivosaurAnimation.animation.index)].content as! Datastream
+				let animationStart = animationData.placeMarker()
+				let animation = try animationData.read(AnimationData.self)
+				animationData.jump(to: animationStart)
 				
 				let fileName = "vivosaur \(vivosaurId) animation \(animationId)"
 				let fileNameWithoutSpaces = fileName.replacing(" ", with: "-")
@@ -84,7 +84,8 @@ func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				)
 				
 				let collada = try Collada(
-					vertexData,
+					vertexData: vertexData,
+					animationData: animation,
 					modelName: fileName,
 					textureNames: textureNames
 				)

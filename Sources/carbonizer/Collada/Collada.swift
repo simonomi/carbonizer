@@ -139,7 +139,12 @@ extension String {
 
 extension Collada {
 	// textureNames: a mapping from palette offset to texture file name. the offset should be normalized (bit shifted according to type)
-	init(_ vertexData: VertexData, modelName: String, textureNames: [UInt32: String]) throws {
+	init(
+		vertexData: VertexData,
+		animationData: AnimationData,
+		modelName: String,
+		textureNames: [UInt32: String]
+	) throws {
 		// copy so theres no side effects
 		let commandData = Datastream(vertexData.commands)
 		let commands = try commandData.readCommands()
@@ -164,6 +169,7 @@ extension Collada {
 			}
 		
 		let boneCount = vertexData.boneTable.bones.count
+		let boneNames = vertexData.boneTable.bones.map(\.name)
 		
 		precondition(boneCount > 0)
 		
@@ -250,6 +256,97 @@ extension Collada {
 				)
 			}
 		
+		precondition(animationData.keyframes.boneCount == boneCount, "the number of bones in the animation doesn't match the mesh")
+		
+		let transforms = animationData.keyframes.transforms
+			.map(Matrix4x3.init)
+			.chunked(exactSize: boneCount)
+			.map(Array.init)
+			.transposed()
+		
+		let frameCount = Int(animationData.keyframeCount)
+		guard frameCount == Int(animationData.keyframes.frameCount) else {
+			throw ColladaError(description: "keyframeCount doesn't match keyframes.frameCount")
+		}
+		precondition(frameCount == Int(animationData.keyframes.frameCount))
+		
+		precondition(boneCount == transforms.count)
+		
+		let transformSources: [XMLNode] = zip(boneNames, transforms)
+			.map { (boneName, transforms) in
+				.source(
+					id: "\(modelName)-animation-\(boneName)-keyframes",
+					.float_array(
+						id: "\(modelName)-animation-\(boneName)-keyframes-array",
+						transforms.flatMap { $0.as4x4Array() }
+					),
+					.technique_common(
+						.accessor(
+							sourceId: "\(modelName)-animation-\(boneName)-keyframes-array",
+							count: transforms.count,
+							stride: 16,
+							.param(name: "TRANSFORM", type: "float4x4")
+						)
+					)
+				)
+			}
+		
+		let keyframeTimestamps = (0..<frameCount)
+			.map(Double.init)
+			.map { $0 * (1 / 30) } // play everything at 30fps for now
+		
+		let commonSamplers: [XMLNode] = [
+			.source(
+				id: "\(modelName)-animation-timestamps",
+				.float_array(
+					id: "\(modelName)-animation-timestamps-array",
+					keyframeTimestamps
+				),
+				.technique_common(
+					.accessor(
+						sourceId: "\(modelName)-animation-timestamps-array",
+						count: frameCount,
+						.param(name: "TIME", type: "float")
+					)
+				)
+			),
+			.source(
+				id: "\(modelName)-animation-interpolation",
+				.name_array(
+					id: "\(modelName)-animation-interpolation-array",
+					Array(repeating: "STEP", count: frameCount)
+				),
+				.technique_common(
+					.accessor(
+						sourceId: "\(modelName)-animation-interpolation-array",
+						count: frameCount,
+						.param(name: "INTERPOLATION", type: "name")
+					)
+				)
+			)
+		]
+		
+		let samplers: [XMLNode] = boneNames.map { boneName in
+			.sampler(
+				id: "\(modelName)-animation-\(boneName)-sampler",
+				.input(semantic: "INPUT", sourceId: "\(modelName)-animation-timestamps"),
+				.input(semantic: "OUTPUT", sourceId: "\(modelName)-animation-\(boneName)-keyframes"),
+				.input(semantic: "INTERPOLATION", sourceId: "animation-interpolation")
+			)
+		}
+		
+		let channels: [XMLNode] = boneNames.map { boneName in
+			.channel(sourceId: "\(modelName)-animation-\(boneName)-sampler", target: "\(modelName)-skeleton/\(boneName)/transform")
+		}
+		
+		let animation: XMLNode = .animation(
+			transformSources + commonSamplers + samplers + channels
+		)
+		
+		struct ColladaError: Error {
+			var description: String
+		}
+		
 		body = [
 			.asset(
 				.created(.now),
@@ -312,13 +409,13 @@ extension Collada {
 							id: "\(modelName)-joints",
 							.name_array(
 								id: "\(modelName)-joints-array",
-								vertexData.boneTable.bones.map(\.name)
+								boneNames
 							),
 							.technique_common(
 								.accessor(
 									sourceId: "\(modelName)-joints-array",
 									count: boneCount,
-									.param(name: "JOINT", type: "Name")
+									.param(name: "JOINT", type: "name")
 								)
 							)
 						),
@@ -340,8 +437,13 @@ extension Collada {
 							id: "\(modelName)-inverse-bind-matrix",
 							.float_array(
 								id: "\(modelName)-inverse-bind-matrix-array",
-								matrices
-									.map { $0.inverse() ?? $0.badInverse() }
+								try matrices
+									.map {
+										guard let inverse = $0.inverse() else {
+											throw ColladaError(description: "inverse failed")
+										}
+										return inverse
+									}
 									.flatMap { $0.as4x4Array() }
 							),
 							.technique_common(
@@ -349,7 +451,7 @@ extension Collada {
 									sourceId: "\(modelName)-inverse-bind-matrix-array",
 									count: boneCount,
 									stride: 16,
-									.param(name: "TRANSFORM", type: "float4x4") // TODO: 4x3? 3x4?
+									.param(name: "TRANSFORM", type: "float4x4")
 								)
 							)
 						),
@@ -367,6 +469,7 @@ extension Collada {
 					)
 				)
 			),
+			.library_animations(animation),
 			.library_visual_scenes(
 				.visual_scene(
 					id: "scene",
@@ -469,5 +572,23 @@ fileprivate func parseCommand(
 extension SIMD2 where Scalar: FloatingPoint {
 	fileprivate func flippedVertically() -> Self {
 		Self(x: x, y: 1 - y)
+	}
+}
+
+extension [[Matrix4x3<Double>]] {
+	fileprivate func transposed() -> [[Matrix4x3<Double>]] {
+		guard let first else { return [] }
+		let range = first.indices
+		
+		precondition(allSatisfy { $0.count == first.count })
+		
+		var result = [[Matrix4x3<Double>]]()
+		result.reserveCapacity(first.count)
+		
+		for index in range {
+			result.append(map { $0[index] })
+		}
+		
+		return result
 	}
 }

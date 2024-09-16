@@ -339,8 +339,8 @@ extension XMLNode {
 			kind: "matrix",
 			attributes: ["sid": sid],
 			body: .raw(
-				(matrix.inverse() ?? matrix.badInverse())
-					.asProper4x4Array()
+				matrix
+					.as4x4Array()
 					.map { String(withoutDecimalIfWhole: $0) }
 					.joined(separator: " ")
 			)

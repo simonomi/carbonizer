@@ -33,15 +33,6 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 		]
 	}
 	
-	func asProper4x4Array() -> [Scalar] {
-		[
-			x.x, x.y, x.z, transform.x,
-			y.x, y.y, y.z, transform.y,
-			z.x, z.y, z.z, transform.z,
-			0, 0, 0, 1
-		]
-	}
-	
 	func badInverse() -> Self {
 		Self(
 			x: SIMD3(1, 0, 0),
@@ -50,56 +41,138 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 			transform: -transform
 		)
 	}
-	
-	func inverse() -> Self? {
-		let temp0 = det_sub_proc(1, 2, 3)
-		let determinant = temp0.dot(SIMD4(x.x, y.x, z.x, transform.x)) // top row of things
-		
-		guard determinant != .zero else { return nil }
-		
-		let inverseDeterminant = 1 / determinant
-		
-		let realTemp0 = temp0 * inverseDeterminant
-		let temp1 = det_sub_proc(0, 3, 2) * inverseDeterminant
-		let temp2 = det_sub_proc(0, 1, 3) * inverseDeterminant
-//		let temp3 = det_sub_proc(0, 2, 1) * inverseDeterminant
-		
-		return Self(
-			x: SIMD3(realTemp0.x, temp1.x, temp2.x),
-			y: SIMD3(realTemp0.y, temp1.y, temp2.y),
-			z: SIMD3(realTemp0.z, temp1.z, temp2.z),
-			transform: SIMD3(realTemp0.w, temp1.w, temp2.w)
-		)
-	}
-	
-	func det_sub_proc(_ x: Int, _ y: Int, _ z: Int) -> SIMD4<Scalar> {
-		let array = as4x4Array()
-		
-		let a = SIMD4(array[x + 4],  array[x + 12], array[x + 0],  array[x + 8])
-		let b = SIMD4(array[y + 8],  array[y + 8],  array[y + 4],  array[y + 4])
-		let c = SIMD4(array[z + 12], array[z + 0],  array[z + 12], array[z + 0])
-		
-		let d = SIMD4(array[x + 8],  array[x + 8],  array[x + 4],  array[x + 4])
-		let e = SIMD4(array[y + 12], array[y + 0],  array[y + 12], array[y + 0])
-		let f = SIMD4(array[z + 4],  array[z + 12], array[z + 0],  array[z + 8])
-		
-		let g = SIMD4(array[x + 12], array[x + 0],  array[x + 12], array[x + 0])
-		let h = SIMD4(array[y + 4],  array[y + 12], array[y + 0],  array[y + 8])
-		let i = SIMD4(array[z + 8],  array[z + 8],  array[z + 4],  array[z + 4])
-		
-		var temp = a * b * c
-		temp += d * e * f
-		temp += g * h * i
-		temp -= a * e * i
-		temp -= d * h * c
-		temp -= g * b * f
-		
-		return temp
-	}
 }
 
-extension SIMD4 where Scalar: FloatingPoint {
-	func dot(_ other: Self) -> Scalar {
-		(self * other).sum()
+extension Matrix4x3<Double> {
+	func inverse() -> Self? {
+		let m = as4x4Array()
+		var inv = Array(repeating: 0.0, count: 16)
+		
+		inv[0] = m[5]  * m[10] * m[15] -
+		         m[5]  * m[11] * m[14] -
+		         m[9]  * m[6]  * m[15] +
+		         m[9]  * m[7]  * m[14] +
+		         m[13] * m[6]  * m[11] -
+		         m[13] * m[7]  * m[10]
+		
+		inv[4] = -m[4]  * m[10] * m[15] +
+		          m[4]  * m[11] * m[14] +
+		          m[8]  * m[6]  * m[15] -
+		          m[8]  * m[7]  * m[14] -
+		          m[12] * m[6]  * m[11] +
+		          m[12] * m[7]  * m[10]
+		
+		inv[8] = m[4]  * m[9]  * m[15] -
+		         m[4]  * m[11] * m[13] -
+		         m[8]  * m[5]  * m[15] +
+		         m[8]  * m[7]  * m[13] +
+		         m[12] * m[5]  * m[11] -
+		         m[12] * m[7]  * m[9]
+		
+		inv[12] = -m[4]  * m[9]  * m[14] +
+		           m[4]  * m[10] * m[13] +
+		           m[8]  * m[5]  * m[14] -
+		           m[8]  * m[6]  * m[13] -
+		           m[12] * m[5]  * m[10] +
+		           m[12] * m[6]  * m[9]
+		
+		inv[1] = -m[1]  * m[10] * m[15] +
+		          m[1]  * m[11] * m[14] +
+		          m[9]  * m[2]  * m[15] -
+		          m[9]  * m[3]  * m[14] -
+		          m[13] * m[2]  * m[11] +
+		          m[13] * m[3]  * m[10]
+		
+		inv[5] = m[0]  * m[10] * m[15] -
+		         m[0]  * m[11] * m[14] -
+		         m[8]  * m[2]  * m[15] +
+		         m[8]  * m[3]  * m[14] +
+		         m[12] * m[2]  * m[11] -
+		         m[12] * m[3]  * m[10]
+		
+		inv[9] = -m[0]  * m[9]  * m[15] +
+		          m[0]  * m[11] * m[13] +
+		          m[8]  * m[1]  * m[15] -
+		          m[8]  * m[3]  * m[13] -
+		          m[12] * m[1]  * m[11] +
+		          m[12] * m[3]  * m[9]
+		
+		inv[13] = m[0]  * m[9]  * m[14] -
+		          m[0]  * m[10] * m[13] -
+		          m[8]  * m[1]  * m[14] +
+		          m[8]  * m[2]  * m[13] +
+		          m[12] * m[1]  * m[10] -
+		          m[12] * m[2]  * m[9]
+		
+		inv[2] = m[1]  * m[6] * m[15] -
+				 m[1]  * m[7] * m[14] -
+				 m[5]  * m[2] * m[15] +
+				 m[5]  * m[3] * m[14] +
+				 m[13] * m[2] * m[7] -
+				 m[13] * m[3] * m[6]
+		
+		inv[6] = -m[0]  * m[6] * m[15] +
+		          m[0]  * m[7] * m[14] +
+		          m[4]  * m[2] * m[15] -
+		          m[4]  * m[3] * m[14] -
+		          m[12] * m[2] * m[7] +
+		          m[12] * m[3] * m[6]
+		
+		inv[10] = m[0]  * m[5] * m[15] -
+		          m[0]  * m[7] * m[13] -
+		          m[4]  * m[1] * m[15] +
+		          m[4]  * m[3] * m[13] +
+		          m[12] * m[1] * m[7] -
+		          m[12] * m[3] * m[5]
+		
+		inv[14] = -m[0]  * m[5] * m[14] +
+		           m[0]  * m[6] * m[13] +
+		           m[4]  * m[1] * m[14] -
+		           m[4]  * m[2] * m[13] -
+		           m[12] * m[1] * m[6] +
+		           m[12] * m[2] * m[5]
+		
+		inv[3] = -m[1] * m[6] * m[11] +
+		          m[1] * m[7] * m[10] +
+		          m[5] * m[2] * m[11] -
+		          m[5] * m[3] * m[10] -
+		          m[9] * m[2] * m[7] +
+		          m[9] * m[3] * m[6]
+		
+		inv[7] = m[0] * m[6] * m[11] -
+				 m[0] * m[7] * m[10] -
+				 m[4] * m[2] * m[11] +
+				 m[4] * m[3] * m[10] +
+				 m[8] * m[2] * m[7] -
+				 m[8] * m[3] * m[6]
+		
+		inv[11] = -m[0] * m[5] * m[11] +
+		           m[0] * m[7] * m[9] +
+		           m[4] * m[1] * m[11] -
+		           m[4] * m[3] * m[9] -
+		           m[8] * m[1] * m[7] +
+		           m[8] * m[3] * m[5]
+		
+		inv[15] = m[0] * m[5] * m[10] -
+		          m[0] * m[6] * m[9] -
+		          m[4] * m[1] * m[10] +
+		          m[4] * m[2] * m[9] +
+		          m[8] * m[1] * m[6] -
+		          m[8] * m[2] * m[5]
+		
+		var det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12]
+		
+		guard det != 0 else { return nil }
+		
+		det = 1.0 / det
+		
+		inv = inv.map { $0 * det }
+		
+		return Self(
+			x: SIMD3(x: inv[0], y: inv[4], z: inv[8]),
+			y: SIMD3(x: inv[1], y: inv[5], z: inv[9]),
+			z: SIMD3(x: inv[2], y: inv[6], z: inv[10]),
+			transform: SIMD3(x: inv[3], y: inv[7], z: inv[11])
+		)
 	}
 }
