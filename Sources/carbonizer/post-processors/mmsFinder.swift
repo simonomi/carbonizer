@@ -82,7 +82,11 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				do {
 					return try SpritePalette(colorPaletteData)
 				} catch {
-					throw BinaryParserError.whileReadingFile(parent.name + "/" + file.name, "palette", String(colorPaletteIndex), error)
+					throw BinaryParserError.whileReadingFile(
+						parent.name + "/" + file.name,
+//						notes: "palette \(colorPaletteIndex)",
+						error
+					)
 				}
 				
 			}
@@ -97,7 +101,11 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				do {
 					return try SpriteBitmap(bitmapData)
 				} catch {
-					throw BinaryParserError.whileReadingFile(parent.name + "/" + file.name, "bitmap", String(bitmapIndex), error)
+					throw BinaryParserError.whileReadingFile(
+						parent.name + "/" + file.name,
+//						notes: "bitmap \(bitmapIndex)",
+						error
+					)
 				}
 			}
 			
@@ -111,7 +119,11 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			do {
 				frames = try animation.frames(palettes: palettes, bitmaps: bitmaps)
 			} catch {
-				throw BinaryParserError.whileReadingFile(parent.name + "/" + file.name, "animation", String(animationIndex), error)
+				throw BinaryParserError.whileReadingFile(
+					parent.name + "/" + file.name,
+//					notes: "animation \(animationIndex)",
+					error
+				)
 			}
 			
 			for (frameIndex, bitmap) in frames.enumerated() {

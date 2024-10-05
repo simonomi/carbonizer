@@ -6,6 +6,17 @@ struct CarbonizerConfiguration: Decodable {
 	var inputFiles: [String]
 	var outputFolder: String?
 	var overwriteOutput: Bool
+	var showProgress: Bool
+	var keepWindowOpen: KeepWindowOpen
+	var useColor: Bool
+	
+	enum KeepWindowOpen: String, Decodable {
+		case always, never, onError
+		
+		var onError: Bool {
+			self == .always || self == .onError
+		}
+	}
 	
 	var fileTypes: [String]
 	
@@ -61,6 +72,9 @@ struct CarbonizerConfiguration: Decodable {
 			"inputFiles": [],
 			"outputFolder": null,
 			"overwriteOutput": false,
+			"showProgress": true,
+			"keepWindowOpen": "onError", // always, never, onError
+			"useColor": true,
 			
 			// stable: DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
 			// experimental: 3CL, CHR, DCL, MFS, MMS
@@ -68,7 +82,7 @@ struct CarbonizerConfiguration: Decodable {
 			
 			// "skipExtracting": [],
 			// "onlyExtract": [],
-
+			
 			"experimental": {
 				"hotReloading": false, // macOS only
 				
@@ -93,11 +107,11 @@ extension CarbonizerConfiguration {
 	}
 	
 	init(decoding text: String) throws {
-		let commentRegex = #/\/\/.*/#
-		let textWithoutComments = text.replacing(commentRegex, with: "")
+		let data = text.data(using: .utf8)!
 		
-		let data = textWithoutComments.data(using: .utf8)!
+		let decoder = JSONDecoder()
+		decoder.allowsJSON5 = true
 		
-		self = try JSONDecoder().decode(Self.self, from: data)
+		self = try decoder.decode(Self.self, from: data)
 	}
 }

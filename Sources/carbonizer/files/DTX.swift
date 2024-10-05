@@ -8,11 +8,11 @@ struct DTX {
 		@Include
 		static let magicBytes = "DTX"
 		var stringCount: UInt32
-		var indexesOffset: UInt32 = 0xC
+		var indicesOffset: UInt32 = 0xC
 		@Count(givenBy: \Self.stringCount)
-		@Offset(givenBy: \Self.indexesOffset)
-		var indexes: [UInt32]
-		@Offsets(givenBy: \Self.indexes)
+		@Offset(givenBy: \Self.indicesOffset)
+		var indices: [UInt32]
+		@Offsets(givenBy: \Self.indices)
 		var strings: [String]
 	}
 }
@@ -35,8 +35,8 @@ extension DTX.Binary: ProprietaryFileData {
 	init(_ dtx: DTX) {
 		stringCount = UInt32(dtx.strings.count)
 
-		indexes = createOffsets(
-			start: indexesOffset + stringCount * 4,
+		indices = createOffsets(
+			start: indicesOffset + stringCount * 4,
 			sizes: dtx.strings
 				.map(\.utf8CString.count)
 				.map(UInt32.init)

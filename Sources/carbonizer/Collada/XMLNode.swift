@@ -74,7 +74,7 @@ struct XMLNode {
 		self.kind = kind
 		self.attributes = ["id": id]
 			.merging(attributes) { $1 }
-			.compactMapValues(identity)
+			.compactMapValues(\.self)
 		self.body = body
 	}
 	

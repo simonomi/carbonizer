@@ -32,20 +32,22 @@ final public class Datawriter {
 extension Datawriter {
 	/// Documentation
 	@inlinable
-	public func write<T: BinaryConvertible>(_ data: T) {
+	public func write(_ data: some BinaryConvertible) {
 		data.write(to: self)
 	}
 	
 	/// Documentation
 	@inlinable
-	public func write<S: Sequence<T>, T: BinaryConvertible>(_ data: S) {
+	public func write(_ data: some Sequence<some BinaryConvertible>) {
 		data.forEach(write)
 	}
 	
 	/// Documentation
 	@inlinable
-	public func write<T: BinaryConvertible, U: BinaryInteger>(
-		_ data: [T], offsets: [U], relativeTo baseOffset: Offset
+	public func write(
+		_ data: [some BinaryConvertible],
+		offsets: [some BinaryInteger],
+		relativeTo baseOffset: Offset
 	) {
 		let offsets = offsets.map { Int($0) + baseOffset.offest }
 		
@@ -92,7 +94,7 @@ extension Datawriter {
 	
 	/// Documentation
 	@inlinable
-	public func write<S: Sequence<T>, T: FixedWidthInteger>(_ data: S) {
+	public func write(_ data: some Sequence<some FixedWidthInteger>) {
 		data.forEach(write)
 	}
 	
@@ -112,7 +114,20 @@ extension Datawriter {
 	
 	/// Documentation
 	@inlinable
-	public func write<T: BinaryInteger>(_ string: String, length: T) {
+	public func write(
+		_ data: [String], offsets: [some BinaryInteger], relativeTo baseOffset: Offset
+	) {
+		let offsets = offsets.map { Int($0) + baseOffset.offest }
+		
+		for (offset, item) in zip(offsets, data) {
+			jump(to: Offset(offset))
+			write(item)
+		}
+	}
+	
+	/// Documentation
+	@inlinable
+	public func write(_ string: String, length: some BinaryInteger) {
 		let length = Int(length)
 		
 		var string = string
@@ -146,8 +161,8 @@ extension Datawriter {
 	
 	/// Documentation
 	@inlinable
-	public func write<T: BinaryInteger>(
-		_ data: Datastream, length: T
+	public func write(
+		_ data: Datastream, length: some BinaryInteger
 	) {
 		let length = Int(length)
 		
@@ -165,8 +180,8 @@ extension Datawriter {
 	
 	/// Documentation
 	@inlinable
-	public func write<T: BinaryInteger>(
-		_ data: [Datastream], offsets: [T], relativeTo baseOffset: Offset
+	public func write(
+		_ data: [Datastream], offsets: [some BinaryInteger], relativeTo baseOffset: Offset
 	) {
 		let offsets = offsets.map { Int($0) + baseOffset.offest }
 		
@@ -189,7 +204,7 @@ extension Datawriter {
 		}
 		
 		@inlinable
-		public static func + <T: BinaryInteger>(lhs: Offset, rhs: T) -> Offset {
+		public static func + (lhs: Offset, rhs: some BinaryInteger) -> Offset {
 			Offset(lhs.offest + Int(rhs))
 		}
 	}
@@ -203,13 +218,13 @@ extension Datawriter {
 
 @usableFromInline
 //fileprivate let fillerByte: UInt8 = 0
-internal let fillerByte: UInt8 = 0
+internal let fillerByte: UInt8 = 0 // for inlinability
 
 // MARK: jump
 extension Datawriter {
 	/// Documentation
 	@inlinable
-	public func jump<T: BinaryInteger>(bytes: T) {
+	public func jump(bytes: some BinaryInteger) {
 		offset += Int(bytes)
 		
 		if offset > self.bytes.endIndex {

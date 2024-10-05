@@ -13,8 +13,8 @@ struct MAR {
 		static let magicBytes = "MAR"
 		var fileCount: UInt32
 		@Count(givenBy: \Self.fileCount)
-		var indexes: [Index]
-		@Offsets(givenBy: \Self.indexes, at: \.fileOffset)
+		var indices: [Index]
+		@Offsets(givenBy: \Self.indices, at: \.fileOffset)
 		var files: [MCM.Binary]
 		
 		@BinaryConvertible
@@ -116,7 +116,10 @@ extension MAR {
 		binary: Binary,
 		configuration: CarbonizerConfiguration
 	) throws {
-		logProgress("Decompressing", name)
+		logProgress(
+			"Decompressing", name,
+			showProgress: configuration.showProgress
+		)
 		self.name = name
 		
 		self.configuration = configuration
@@ -124,7 +127,7 @@ extension MAR {
 		do {
 			files = try binary.files.map { try MCM($0, configuration: configuration) }
 		} catch {
-			throw BinaryParserError.whileReadingFile(name, "mar", "", error)
+			throw BinaryParserError.whileReadingFile(name, error)
 		}
 	}
 }
@@ -141,6 +144,6 @@ extension MAR.Binary {
 		
 		let decompressedSizes = files.map(\.decompressedSize)
 		
-		indexes = zip(offsets, decompressedSizes).map(Index.init)
+		indices = zip(offsets, decompressedSizes).map(Index.init)
 	}
 }

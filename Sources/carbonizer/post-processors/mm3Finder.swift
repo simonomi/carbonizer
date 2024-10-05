@@ -53,7 +53,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			throw BinaryParserError.indexOutOfBounds(
 				index: Int(mm3.model.index),
 				expected: arc.files.indices,
-				for: MM3.self
+				whileReading: MM3.self
 			)
 		}
 		
@@ -66,7 +66,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			throw BinaryParserError.indexOutOfBounds(
 				index: Int(mm3.texture.index),
 				expected: arc.files.indices,
-				for: MM3.self
+				whileReading: MM3.self
 			)
 		}
 		
@@ -79,7 +79,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			throw BinaryParserError.indexOutOfBounds(
 				index: Int(mm3.animation.index),
 				expected: arc.files.indices,
-				for: MM3.self
+				whileReading: MM3.self
 			)
 		}
 		

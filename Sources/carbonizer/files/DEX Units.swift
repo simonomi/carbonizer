@@ -37,13 +37,13 @@ extension SuffixUnit {
 	}
 }
 
-enum DialogueUnit: PrefixUnit    { static let prefix = "dialogue"     }
-enum ImageUnit: PrefixUnit       { static let prefix = "image"        }
-enum MusicUnit: PrefixUnit       { static let prefix = "music"        }
+enum DialogueUnit: PrefixUnit    { static let prefix = "dialogue" }
+enum ImageUnit: PrefixUnit       { static let prefix = "image" }
+enum MusicUnit: PrefixUnit       { static let prefix = "music" }
 enum SoundEffectUnit: PrefixUnit { static let prefix = "sound effect" }
 
-enum DegreeUnit: SuffixUnit      { static let suffix = "degrees"      }
-enum FrameUnit: SuffixUnit       { static let suffix = "frames"       }
+enum DegreeUnit: SuffixUnit      { static let suffix = "degrees" }
+enum FrameUnit: SuffixUnit       { static let suffix = "frames" }
 
 enum CharacterUnit: UnitProtocol {
 	static func parse(_ text: Substring) -> Int32? {

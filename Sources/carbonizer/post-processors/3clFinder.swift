@@ -28,7 +28,7 @@ func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 					throw BinaryParserError.indexOutOfBounds(
 						index: Int(vivosaurAnimation.model.index),
 						expected: arc.files.indices,
-						for: TCL.self
+						whileReading: TCL.self
 					)
 				}
 				
@@ -41,7 +41,7 @@ func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 					throw BinaryParserError.indexOutOfBounds(
 						index: Int(vivosaurAnimation.texture.index),
 						expected: arc.files.indices,
-						for: TCL.self
+						whileReading: TCL.self
 					)
 				}
 				
@@ -54,7 +54,7 @@ func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 					throw BinaryParserError.indexOutOfBounds(
 						index: Int(vivosaurAnimation.animation.index),
 						expected: arc.files.indices,
-						for: TCL.self
+						whileReading: TCL.self
 					)
 				}
 

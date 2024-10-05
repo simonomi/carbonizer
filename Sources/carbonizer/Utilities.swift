@@ -4,6 +4,19 @@ import Foundation
 import WinSDK
 #endif
 
+func todo(
+	_ message: String? = nil,
+	function: String = #function,
+	file: StaticString = #file,
+	line: UInt = #line
+) -> Never {
+	if let message {
+		fatalError("TODO: \(function): \(message)", file: file, line: line)
+	} else {
+		fatalError("TODO: \(function)", file: file, line: line)
+	}
+}
+
 extension URL {
 #if os(Windows)
 	init(filePath: String) {
@@ -61,7 +74,7 @@ extension Collection where Index: Strideable {
 		chunks(exactSize: exactSize, every: exactSize)
 	}
 	
-//    public func chunks(maxSize: Int, every: Int)
+// 	public func chunks(maxSize: Int, every: Int)
 	
 	public func chunks(
 		exactSize: Index.Stride,
@@ -106,8 +119,9 @@ func hex<T: BinaryInteger & SignedNumeric>(_ value: T) -> String {
 	}
 }
 
-func logProgress(_ items: Any...) {
-#if IN_CI
+func logProgress(_ items: Any..., showProgress: Bool) {
+	guard showProgress else { return }
+	
 	let message = items
 		.map { String(describing: $0) }
 		.joined(separator: " ")
@@ -116,7 +130,6 @@ func logProgress(_ items: Any...) {
 	print(message + "...", terminator: "\r")
 	
 	fflush(stdout)
-#endif
 }
 
 func splitFileName(_ name: String) -> (name: String, fileExtensions: String) {
@@ -370,6 +383,13 @@ extension JSONEncoder {
 	}
 }
 
+extension JSONDecoder {
+	convenience init(allowsJSON5: Bool) {
+		self.init()
+		self.allowsJSON5 = allowsJSON5
+	}
+}
+
 #if compiler(>=6)
 extension FileHandle: @retroactive TextOutputStream {
 	public func write(_ string: String) {
@@ -438,8 +458,41 @@ extension DefaultStringInterpolation {
 }
 
 func waitForInput() {
-#if IN_CI
 	print("Press Enter to continue...", terminator: "")
 	let _ = readLine()
-#endif
+}
+
+extension [any CodingKey] {
+	func formatted() -> String {
+		reduce("") { partialResult, key in
+			if partialResult.isEmpty {
+				if let index = key.intValue {
+					"[\(index)]"
+				} else {
+					key.stringValue
+				}
+			} else if let index = key.intValue {
+				"\(partialResult)[\(index)]"
+			} else {
+				"\(partialResult).\(key.stringValue)"
+			}
+		}
+	}
+}
+
+extension DecodingError {
+	func configurationFormatting(path: URL) -> String {
+		switch self {
+			case .typeMismatch(let expectedType, let context):
+				let fullKeyPath = context.codingPath
+				
+				return "\(.bold)\(path.path(percentEncoded: false))\(.normal)>\(.bold)\(fullKeyPath.formatted())\(.normal): invalid type, expected \(.green)\(expectedType)\(.normal)"
+			case .keyNotFound(let key, let context):
+				let fullKeyPath = context.codingPath + [key]
+				
+				return "\(.bold)\(path.path(percentEncoded: false))\(.normal)>\(.bold)\(fullKeyPath.formatted())\(.normal): missing value for option"
+			default:
+				return "\(.bold)\(path.path(percentEncoded: false))\(.normal): \(self)"
+		}
+	}
 }

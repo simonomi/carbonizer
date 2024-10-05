@@ -65,7 +65,7 @@ extension Property {
 			if let expected {
 				"""
 				\nguard \(name) == \(expected) else {
-					throw BinaryParserAssertionError.unexpectedValue(actual: \(name), expected: \(expected))
+					throw BinaryParserAssertionError(expected: \(expected), actual: \(name))
 				}
 				"""
 			} else {

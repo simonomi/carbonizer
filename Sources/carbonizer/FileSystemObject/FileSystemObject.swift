@@ -33,7 +33,7 @@ func fileSystemObject(
 				throw FileReadError.invalidFileType(path, otherType)
 		}
 	} catch {
-		throw BinaryParserError.whileReadingFile(path.path(percentEncoded: false), "", "", error)
+		throw BinaryParserError.whileReadingFile(path.lastPathComponent, error)
 	}
 }
 

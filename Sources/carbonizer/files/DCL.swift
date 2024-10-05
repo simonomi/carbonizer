@@ -25,7 +25,7 @@ struct DCL {
 		var unknown4: UInt32
 		
 		var vivosaurCount: UInt32
-		var indexesOffset: UInt32 = 0x2C
+		var indicesOffset: UInt32 = 0x2C
 		
 		var unknown5: UInt32
 		var unknown6: UInt32
@@ -34,10 +34,10 @@ struct DCL {
 		
 		// -1 and +4 to skip the first vivo TODO: this should be temporary, right?
 		@Count(givenBy: \Self.vivosaurCount, .minus(1))
-		@Offset(givenBy: \Self.indexesOffset, .plus(4))
-		var indexes: [UInt32]
+		@Offset(givenBy: \Self.indicesOffset, .plus(4))
+		var indices: [UInt32]
 		
-		@Offsets(givenBy: \Self.indexes)
+		@Offsets(givenBy: \Self.indices)
 		var vivosaurs: [Vivosaur]
 		
 		// see https://github.com/opiter09/Fossil-Fighters-Documentation/blob/main/FF1/Creature_Defs.txt

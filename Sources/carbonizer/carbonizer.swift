@@ -15,16 +15,30 @@ struct Carbonizer: AsyncParsableCommand {
 	var filePaths = [URL]()
 	
 	mutating func run() async throws {
+#if !IN_CI
 		let start = Date.now
+#endif
+		
+#if IN_CI
+		let configurationPath = URL(filePath: "config.json")
+#else
+		let configurationPath = URL(filePath: "/Users/simonomi/Desktop/config.json5")
+#endif
+		
+		let configuration: CarbonizerConfiguration
+		do {
+			configuration = try CarbonizerConfiguration(contentsOf: configurationPath)
+		} catch let error as DecodingError {
+			print(error.configurationFormatting(path: configurationPath))
+			waitForInput()
+			return
+		} catch {
+			print("\(.bold)\(configurationPath.path(percentEncoded: false))\(.normal): \(error)")
+			waitForInput()
+			return
+		}
 		
 		do {
-#if IN_CI
-			let configurationPath = URL(filePath: "config.json")
-#else
-			let configurationPath = URL(filePath: "/Users/simonomi/Desktop/config.json")
-#endif
-			let configuration = try CarbonizerConfiguration(contentsOf: configurationPath)
-			
 			filePaths += configuration.inputFiles.map { URL(filePath: $0) }
 			
 			if filePaths.isEmpty {
@@ -41,19 +55,38 @@ struct Carbonizer: AsyncParsableCommand {
 				try main(with: configuration)
 			}
 		} catch {
-			print(error)
-			waitForInput()
+			print("\(.red)error:\(.normal)", error)
+			if configuration.keepWindowOpen.onError {
+				waitForInput()
+			}
 		}
 		
-		print(-start.timeIntervalSinceNow)
+#if !IN_CI
+		print("\(.green)total", -start.timeIntervalSinceNow, "\(.normal)")
+#endif
 	}
 	
 	mutating func main(with configuration: CarbonizerConfiguration) throws {
 		let compressionMode = compressionMode ?? configuration.compressionMode
 		
 		for filePath in filePaths {
-			logProgress("Reading \(filePath.path(percentEncoded: false))")
+			logProgress(
+				"Reading \(filePath.path(percentEncoded: false))",
+				showProgress: configuration.showProgress
+			)
+			
+#if !IN_CI
+			let readStart = Date.now
+#endif
+			
 			let file = try fileSystemObject(contentsOf: filePath, configuration: configuration)
+			
+#if !IN_CI
+			print()
+			print("\(.red)read", -readStart.timeIntervalSinceNow, "\(.normal)")
+			
+			let processStart = Date.now
+#endif
 			
 			let action = compressionMode.action(packedStatus: file.packedStatus())
 			
@@ -68,7 +101,10 @@ struct Carbonizer: AsyncParsableCommand {
 					continue
 			}
 			
-			logProgress("Running post-processors")
+			logProgress(
+				"Running post-processors",
+				showProgress: configuration.showProgress
+			)
 			let postProcessors: [String: PostProcessor] = [
 				"3clFinder": tclFinder,
 				"mm3Finder": mm3Finder,
@@ -101,6 +137,12 @@ struct Carbonizer: AsyncParsableCommand {
 #endif
 			}
 			
+#if !IN_CI
+			print()
+			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)")
+#endif
+			
+			
 			let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? filePath.deletingLastPathComponent()
 			
 			let savePath = processedFile.savePath(
@@ -108,13 +150,33 @@ struct Carbonizer: AsyncParsableCommand {
 				overwriting: configuration.overwriteOutput
 			)
 			
-			logProgress("Writing to \(savePath.path(percentEncoded: false))")
+			logProgress(
+				"Writing to \(savePath.path(percentEncoded: false))",
+				showProgress: configuration.showProgress
+			)
+			
+#if !IN_CI
+			let removeStart = Date.now
+			print()
+#endif
 			
 			if configuration.overwriteOutput && savePath.exists() {
 				try FileManager.default.removeItem(at: savePath)
+				
+#if !IN_CI
+				print("\(.red)remove", -removeStart.timeIntervalSinceNow, "\(.normal)")
+#endif
 			}
 			
+#if !IN_CI
+			let writeStart = Date.now
+#endif
+			
 			try processedFile.write(into: outputFolder, overwriting: configuration.overwriteOutput)
+			
+#if !IN_CI
+			print("\(.cyan)write", -writeStart.timeIntervalSinceNow, "\(.normal)")
+#endif
 		}
 	}
 }

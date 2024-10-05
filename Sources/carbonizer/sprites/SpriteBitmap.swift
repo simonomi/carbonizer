@@ -9,12 +9,12 @@ struct SpriteBitmap {
 	@If(\Self.colorPaletteType, is: .equalTo(.sixteenColors))
 	@Padding(bytes: 1)
 	@Count(givenBy: \Self.pixelCount, .times(32)) // times 64 but each pixel is 4 bits
-	var colorsIndexes16: [UInt8]?
+	var colorsindices16: [UInt8]?
 	
 	@If(\Self.colorPaletteType, is: .equalTo(.twoFiftySixColors))
 	@Padding(bytes: 1)
 	@Count(givenBy: \Self.pixelCount, .times(64))
-	var colorsIndexes256: [UInt8]?
+	var colorsindices256: [UInt8]?
 }
 
 extension SpriteBitmap {
@@ -47,13 +47,13 @@ extension SpriteBitmap {
 		let contents =
 			switch colorPaletteType {
 				case .sixteenColors:
-					colorsIndexes16!.flatMap {[
+					colorsindices16!.flatMap {[
 						// color 0 is transparent, which is indicated by nil
 						$0 & 0b1111 == 0 ? nil : palette.colors[Int($0 & 0b1111)],
 						$0 >> 4 == 0 ? nil : palette.colors[Int($0 >> 4)]
 					]}
 				case .twoFiftySixColors:
-					colorsIndexes256!.map {
+					colorsindices256!.map {
 						// color 0 is transparent, which is indicated by nil
 						$0 == 0 ? nil : palette.colors[Int($0)]
 					}
@@ -95,13 +95,13 @@ extension SpriteBitmap {
 		let contents =
 			switch colorPaletteType {
 				case .sixteenColors:
-					colorsIndexes16!.flatMap {[
+					colorsindices16!.flatMap {[
 						// color 0 is transparent, which is indicated by nil
 						$0 & 0b1111 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0 & 0b1111)]),
 						$0 >> 4 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0 >> 4)])
 					]}
 				case .twoFiftySixColors:
-					colorsIndexes256!.map {
+					colorsindices256!.map {
 						// color 0 is transparent, which is indicated by nil
 						$0 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0)])
 					}

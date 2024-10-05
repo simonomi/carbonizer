@@ -7,12 +7,12 @@ struct DAL {
 		static let magicBytes = "DAL"
 		var unknown1: UInt32 = 0x659
 		var unknown2: UInt32 = 0x7f4
-		var indexesCount: UInt32
-		var indexesOffset: UInt32
-		@Count(givenBy: \Self.indexesCount)
-		@Offset(givenBy: \Self.indexesOffset)
-		var indexes: [UInt32]
-		@Offsets(givenBy: \Self.indexes)
+		var indicesCount: UInt32
+		var indicesOffset: UInt32
+		@Count(givenBy: \Self.indicesCount)
+		@Offset(givenBy: \Self.indicesOffset)
+		var indices: [UInt32]
+		@Offsets(givenBy: \Self.indices)
 		var attacks: [Attack]
 		
 		// see https://github.com/opiter09/Fossil-Fighters-Documentation/blob/main/FF1/Attack_Defs.txt
