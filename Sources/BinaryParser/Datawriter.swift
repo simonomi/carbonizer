@@ -30,19 +30,16 @@ final public class Datawriter {
 
 // MARK: write
 extension Datawriter {
-	/// Documentation
 	@inlinable
 	public func write(_ data: some BinaryConvertible) {
 		data.write(to: self)
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(_ data: some Sequence<some BinaryConvertible>) {
 		data.forEach(write)
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(
 		_ data: [some BinaryConvertible],
@@ -60,7 +57,6 @@ extension Datawriter {
 
 // MARK: primitives
 extension Datawriter {
-	/// Documentation
 	@inlinable
 	public func write(_ byte: Byte) {
 		if offset == bytes.endIndex {
@@ -73,7 +69,6 @@ extension Datawriter {
 		offset += 1
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write<T: FixedWidthInteger>(_ data: T) {
 		let byteWidth = T.bitWidth / 8
@@ -92,13 +87,11 @@ extension Datawriter {
 		offset += byteWidth
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(_ data: some Sequence<some FixedWidthInteger>) {
 		data.forEach(write)
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(_ string: String) {
 		let data = string.utf8CString.map(Byte.init)
@@ -112,7 +105,6 @@ extension Datawriter {
 		offset += string.utf8CString.count
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(
 		_ data: [String], offsets: [some BinaryInteger], relativeTo baseOffset: Offset
@@ -125,7 +117,6 @@ extension Datawriter {
 		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(_ string: String, length: some BinaryInteger) {
 		let length = Int(length)
@@ -146,7 +137,6 @@ extension Datawriter {
 		offset += length
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(_ data: Datastream) {
 		if offset == bytes.endIndex {
@@ -159,7 +149,6 @@ extension Datawriter {
 		offset += data.bytes.count
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(
 		_ data: Datastream, length: some BinaryInteger
@@ -178,7 +167,6 @@ extension Datawriter {
 		offset += length
 	}
 	
-	/// Documentation
 	@inlinable
 	public func write(
 		_ data: [Datastream], offsets: [some BinaryInteger], relativeTo baseOffset: Offset
@@ -209,7 +197,6 @@ extension Datawriter {
 		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func placeMarker() -> Offset {
 		Offset(offset)
@@ -222,7 +209,6 @@ internal let fillerByte: UInt8 = 0 // for inlinability
 
 // MARK: jump
 extension Datawriter {
-	/// Documentation
 	@inlinable
 	public func jump(bytes: some BinaryInteger) {
 		offset += Int(bytes)
@@ -232,7 +218,6 @@ extension Datawriter {
 		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func jump(to offset: Offset) {
 		self.offset = offset.offest

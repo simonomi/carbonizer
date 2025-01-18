@@ -31,21 +31,35 @@ func createFileData(
 	data: Datastream,
 	configuration: CarbonizerConfiguration
 ) throws -> (any ProprietaryFileData)? {
-	let allFileTypes: [any ProprietaryFileData.Type] = [CHR.self, DCL.self, DEX.self, DMG.self, DMS.self, DTX.self, MFS.self, MM3.self, MMS.self, MPM.self, RLS.self, TCL.self]
+	let allFileTypes: [String: any ProprietaryFileData.Type] = [
+		"CHR": CHR.self,
+		"DCL": DCL.self,
+		"DEX": DEX.self,
+		"DMG": DMG.self,
+		"DMS": DMS.self,
+		"DTX": DTX.self,
+		"MFS": MFS.self,
+		"MM3": MM3.self,
+		"MMS": MMS.self,
+		"MPM": MPM.self,
+		"RLS": RLS.self,
+		"3CL": TCL.self
+	]
 	
 	let fileTypes: [any ProprietaryFileData.Type] = allFileTypes
-		.filter {
-			configuration.fileTypes.contains(String(describing: $0)) || 
-			($0 == TCL.self && configuration.fileTypes.contains("3CL"))
+		.filter { (fileTypeName, _) in
+			configuration.fileTypes.contains(fileTypeName)
 		}
-		.flatMap { $0.selfAndPacked() }
+		.flatMap { (_, fileType) in
+			fileType.selfAndPacked()
+		}
 	
 	if let fileType = fileTypes.first(where: name.hasExtension) {
 		return try data.read(fileType) as any ProprietaryFileData
 	}
 	
 	let marker = data.placeMarker()
-	let magicBytes = try? data.read(String.self, exactLength: 3)
+	let magicBytes = try? data.read(String.self, exactLength: 3) // note: in ffc, donate_mask_defs has DMSK
 	data.jump(to: marker)
 	
 	if let fileType = fileTypes.first(where: { $0.magicBytes == magicBytes }) {

@@ -1,38 +1,66 @@
 import BinaryParser
 import Foundation
 
+// each command needs:
+// - a number
+// - an argument count
+// - an argument list (with types)
+// - the language output (ast?)
+
 struct DEX {
 	var commands: [[Command]]
 	
 	
-	// 22: fade to white (frames)
-	// 23 fade out from white (frames)
-	// 114 character model - sets which model for the characters body
-	// 115 character model - sets which model for the characters head
-	// 142 - modify name
-	// 143 - set name
-	// 41 - moveTo 2 (character) (position) (unknown)
-	// 138 - screen shake (how much it shakes) (gradual intensity) (duration)
-	// 57 - battle (unknown) (battle id)
-	
-	// 33 dialogue choice with help text??????????
+	// 22 (frames) fade to white
+	// 23 (frames) fade out from white
+	// 33 (dialogue, dialogue) also dialogue choice
+	// 41 moveTo 2 (character) (position) (unknown)
+	// 57 battle (unknown) (battle id)
+	// 114 (character, model) - sets which model for the characters body
+	// 115 (character, model) - sets which model for the characters head
+	// 138 (how much it shakes, gradual intensity, duration) screen shake
+	// 142 modify name
+	// 143 set name
+	// 153: (image, frames, #) fade in image on bottom screen
+	// 159: (image, frames, #) fade in image on top screen
 	
 	// unknown <3>: <7025> freezes camera focus
+	// unknown <5>: <0xa00001d> makes it possible to save
+	// unknown <5>: <0x50000cf> activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
 	
-	// 50 ???? smoothes out movement or something
-	// 62 does something similar - camera goes to the wrong place without it
-	// 153 blanks out the screen (used before asking for name FIRST TIME)
-	
-	// 3: unknown (unknown)
-	// 6: unknown (0x5######)
-	// 8: unknown (unknown, unknown)
-	// 50: unknown (character)
-	// 51: unknown (character)
-	// 116: unknown (unknown)
-	// 118: unknown ()
-	// 120: unknown ()
-	// 178: suppresses "Fighter Area" corner tag
-	// 194: unknown (character)
+	// 3: (#)
+	// 4: (#) wipes some stored dialogue answer. resets based on the *order* seen??? but the order of these dont matter
+	// 5: (0x#######)
+	// 6: (0x#######)
+	// 8: (#, #)
+	// 9: (character, #, #) another spawn or maybe a move?
+	// 16: (#, #)
+	// 26: (#)
+	// 27: (#) 44 makes the hotel person intercept you (which occurs in e0044) but doenst seem to just activate an episode
+	// 41: (character?, #, frames?, #)
+	// 46: (#, #, #.#, #, #)
+	// 50: (character) smoothes out movement or something
+	// 51: (character)
+	// 52: (#, #)
+	// 57: (#, #)
+	// 60: (#, fossil) clean (used in fighter test in e0090)
+	// 62: () camera goes to the wrong place sometimes without it (similar to 50??) (is this accurate ???)
+	// 63: ()
+	// 70: (0x#######, #) write data to somewhere?
+	//     writing to 0x9000007 sets the player's profile pic (0-7 is a-h)
+	// 90: (#) sets the level for the fighter level up animation
+	// 112: (#, #)
+	// 116: (#) i think this stops music from playing, not sure if thats the main effect or just a side effect
+	// 118: ()
+	// 120: ()
+	// 128: (#, #)
+	// 141: (#)
+	// 143: () asks user for name
+	// 150: () plays fighter level up animation
+	// 160: (#, #)
+	// 178: () suppresses "Fighter Area" corner tag?
+	// 194: (character)
+	// 195: (#, #)
 	enum Command {
 		case dialogue(Dialogue)
 		case spawn(Character, Map, position: Vector, Angle)
@@ -72,7 +100,7 @@ struct DEX {
 		
 		case comment(String)
 		
-		struct Argument<Unit: UnitProtocol> {
+		struct Argument<Unit: UnitProtocol>: Equatable {
 			var value: Int32
 			init(_ value: Int32) { self.value = value }
 		}
@@ -561,12 +589,14 @@ extension String {
 				"start turning \(character) to follow \(target)"
 			case .stopTurning(let character):
 				"stop turning \(character)"
+			case .unknown(type: let type, arguments: []):
+				"unknown <\(type)>"
 			case .unknown(type: let type, arguments: let arguments):
-				if arguments.isEmpty {
-					"unknown <\(type)>"
-				} else {
-					"unknown <\(type)>: \(arguments.map(\.description).joined(separator: " "))"
-				}
+				"unknown <\(type)>: \(arguments.map(\.description).joined(separator: " "))"
+			case .comment(""):
+				"//"
+			case .comment(let text) where text.starts(with: "\n"):
+				"//\(text)"
 			case .comment(let text):
 				"// \(text)"
 		}

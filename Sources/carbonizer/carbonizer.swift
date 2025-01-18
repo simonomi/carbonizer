@@ -137,6 +137,15 @@ struct Carbonizer: AsyncParsableCommand {
 #endif
 			}
 			
+			if configuration.experimental.dexDialogueLabeller {
+				let dialogue = dmgRipper(processedFile)
+				processedFile = dexDialogueLabeller(
+					processedFile,
+					dialogue: dialogue,
+					configuration: configuration
+				)
+			}
+			
 #if !IN_CI
 			print()
 			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)")

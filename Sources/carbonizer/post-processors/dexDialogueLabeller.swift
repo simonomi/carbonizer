@@ -1,6 +1,7 @@
 func dexDialogueLabeller(
 	_ fileSystemObject: consuming any FileSystemObject,
-	dialogue: [UInt32: String]
+	dialogue: [UInt32: String],
+	configuration: CarbonizerConfiguration
 ) -> any FileSystemObject {
 	switch fileSystemObject {
 		case let binaryFile as BinaryFile: binaryFile
@@ -21,7 +22,7 @@ func dexDialogueLabeller(
 							content: label($0.content, with: dialogue) as any ProprietaryFileData
 						)
 					},
-				configuration: { fatalError("TODO: add config for dexDialogueLabeller") }()
+				configuration: configuration
 			)
 		case let nds as NDS:
 			NDS(
@@ -34,13 +35,17 @@ func dexDialogueLabeller(
 				arm7OverlayTable: nds.arm7OverlayTable,
 				arm7Overlays: nds.arm7Overlays,
 				iconBanner: nds.iconBanner,
-				contents: nds.contents.map { dexDialogueLabeller($0, dialogue: dialogue) },
-				configuration: { fatalError("TODO: add config for dexDialogueLabeller") }()
+				contents: nds.contents.map {
+					dexDialogueLabeller($0, dialogue: dialogue, configuration: configuration)
+				},
+				configuration: configuration
 			)
 		case let folder as Folder:
 			Folder(
 				name: folder.name,
-				contents: folder.contents.map { dexDialogueLabeller($0, dialogue: dialogue) }
+				contents: folder.contents.map {
+					dexDialogueLabeller($0, dialogue: dialogue, configuration: configuration)
+				}
 			)
 		case is PackedMAR, is PackedNDS:
 			fatalError("must be run on unpacked data")
@@ -64,17 +69,17 @@ func label(_ dex: consuming DEX, with allDialogue: [UInt32: String]) -> DEX {
 				switch command {
 					case .dialogue(let dialogue):
 						if let line = allDialogue[UInt32(dialogue.value)] {
-							partialResult.append(.comment(line.replacingOccurrences(of: "\n", with: "\n// ")))
+							partialResult.append(.comment(line.asMultilineComment()))
 						}
 						partialResult.append(command)
 					case .unownedDialogue(let dialogue):
 						if let line = allDialogue[UInt32(dialogue.value)] {
-							partialResult.append(.comment(line.replacingOccurrences(of: "\n", with: "\n// ")))
+							partialResult.append(.comment(line.asMultilineComment()))
 						}
 						partialResult.append(command)
 					case .dialogueChoice(let dialogue, _, choices: _):
 						if let line = allDialogue[UInt32(dialogue.value)] {
-							partialResult.append(.comment(line.replacingOccurrences(of: "\n", with: "\n// ")))
+							partialResult.append(.comment(line.asMultilineComment()))
 						}
 						partialResult.append(command)
 					default:
@@ -83,4 +88,11 @@ func label(_ dex: consuming DEX, with allDialogue: [UInt32: String]) -> DEX {
 			}
 		}
 	)
+}
+
+fileprivate extension String {
+	func asMultilineComment() -> String {
+		replacingOccurrences(of: "\n", with: "\n// ")
+			.replacingOccurrences(of: "// \n", with: "//\n")
+	}
 }

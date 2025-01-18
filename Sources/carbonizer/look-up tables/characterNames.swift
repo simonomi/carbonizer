@@ -9,7 +9,7 @@ let characterNames: [Int32: String] = [
 	8:   "T-Rex Hunter",
 	31:  "Beth", // 12a
 	32:  "Wendy",
-//	33:  "", // 37e - guys in suits
+	33:  "Hotel Manager",
 //	34:  "", // 12c - another beth variation
 	35:  "Dr. Diggins 1",
 	36:  "Rosie",

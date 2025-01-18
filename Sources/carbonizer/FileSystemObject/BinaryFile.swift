@@ -30,6 +30,10 @@ extension BinaryFile: FileSystemObject {
 		let path = savePath(in: folder, overwriting: overwriting)
 		
 		do {
+			if !folder.exists() {
+				try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+			}
+			
 			try Data(data.bytes).write(to: path)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)

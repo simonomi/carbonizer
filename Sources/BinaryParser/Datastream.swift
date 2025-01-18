@@ -59,7 +59,6 @@ final public class Datastream: BinaryConvertible, Codable {
 
 // MARK: read
 extension Datastream {
-	/// Documentation
 	@inlinable
 	public func read<T: BinaryConvertible>(_ type: T.Type) throws -> T {
 		do {
@@ -69,7 +68,6 @@ extension Datastream {
 		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read<T: BinaryConvertible>(
 		_ type: [T].Type, count: some BinaryInteger
@@ -84,7 +82,6 @@ extension Datastream {
 		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read<T: BinaryConvertible>(
 		_ type: [T].Type, offsets: [some BinaryInteger], relativeTo baseOffset: Offset
@@ -103,7 +100,6 @@ extension Datastream {
 
 // MARK: primitives
 extension Datastream {
-	/// Documentation
 	@inlinable
 	public func read(_ type: UInt8.Type) throws -> UInt8 {
 		guard canRead(bytes: 1) else {
@@ -133,7 +129,6 @@ extension Datastream {
 		return Int8(bitPattern: bytes[offset])
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read<T: FixedWidthInteger>(_ type: T.Type) throws -> T {
 		let byteWidth = T.bitWidth / 8
@@ -147,18 +142,23 @@ extension Datastream {
 		
 		let range = offset..<(offset + byteWidth)
 		
-		let output = bytes[range]
+		defer { offset += byteWidth }
+		
+		return bytes[range]
 			.enumerated()
 			.map { (index, byte) in
 				T(byte) << (index * 8)
 			}
 			.reduce(T.zero, |)
 		
-		defer { offset += byteWidth }
-		return output
+		// this unsafe version is ~.05s faster over the whole nds
+//		return bytes[range].withUnsafeBufferPointer {
+//			$0.withMemoryRebound(to: T.self) {
+//				$0[0]
+//			}
+//		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read<T: FixedWidthInteger>(
 		_ type: [T].Type, count: some BinaryInteger
@@ -179,7 +179,6 @@ extension Datastream {
 		case invalidUTF8(String)
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read(_ type: String.Type) throws -> String {
 		guard canRead(until: offset) else {
@@ -236,7 +235,6 @@ extension Datastream {
 		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read(_ type: String.Type, length inputLength: some BinaryInteger) throws -> String {
 		guard canRead(until: offset) else {
@@ -267,7 +265,6 @@ extension Datastream {
 		return string
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read(_ type: String.Type, exactLength inputLength: some BinaryInteger) throws -> String {
 		let endOffset = offset + Int(inputLength)
@@ -287,7 +284,6 @@ extension Datastream {
 		return string
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read(
 		_ type: Datastream.Type, endOffset: some BinaryInteger, relativeTo baseOffset: Offset
@@ -306,7 +302,6 @@ extension Datastream {
 		return Datastream(bytes[offset..<endOffset])
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read(
 		_ type: Datastream.Type, length: some BinaryInteger
@@ -325,7 +320,6 @@ extension Datastream {
 		return Datastream(bytes[offset..<(offset + length)])
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read<T: BinaryInteger>(
 		_ type: [Datastream].Type, offsets: [T], endOffset: T, relativeTo baseOffset: Offset
@@ -348,7 +342,6 @@ extension Datastream {
 		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func read<T: BinaryInteger>(
 		_ type: [Datastream].Type, startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
@@ -392,7 +385,6 @@ extension Datastream {
 		}
 	}
 	
-	/// Documentation
 	@inlinable
 	public func placeMarker() -> Offset {
 		Offset(offset)
@@ -401,13 +393,11 @@ extension Datastream {
 
 // MARK: jump
 extension Datastream {
-	/// Documentation
 	@inlinable
 	public func jump(bytes: some BinaryInteger) {
 		offset += Int(bytes)
 	}
 	
-	/// Documentation
 	@inlinable
 	public func jump(to offset: Offset) {
 		self.offset = offset.offset

@@ -62,6 +62,8 @@ extension MCM {
 		maxChunkSize = binary.maxChunkSize
 		
 		do {
+			// TODO: this can be optimized by having each chunk's
+			// decompression functions write to the same buffer
 			let data = try binary.chunks
 				.map(compression.0.decompress)
 				.map(compression.1.decompress)
