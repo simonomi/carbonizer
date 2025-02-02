@@ -106,7 +106,7 @@ extension RLS: ProprietaryFileData {
 
 extension RLS.Kaseki {
 	init?(index: Int, _ kaseki: RLS.Binary.Kaseki) {
-		_label = fossilNames[index]
+		_label = fossilNames[Int32(index)]
 		
 		isEntry = kaseki.isEntry > 0
 		guard isEntry else { return nil }

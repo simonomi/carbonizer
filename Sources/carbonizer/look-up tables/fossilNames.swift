@@ -1,4 +1,4 @@
-let fossilNames = [
+let fossilNames: [Int32: String] = [
 	1:   "T-Rex Head",
 	2:   "T-Rex Body",
 	3:   "T-Rex Arms",

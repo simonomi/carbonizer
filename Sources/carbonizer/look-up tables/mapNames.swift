@@ -1,4 +1,4 @@
-let mapNames = [
+let mapNames: [Int32: String] = [
 	4:   "Harbor Area Beta",
 	5:   "Stadium Area Beta",
 	6:   "Fighter Area Beta",

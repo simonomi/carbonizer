@@ -159,7 +159,7 @@ extension NDS: FileSystemObject {
 	}
 	
 	func write(into path: URL, overwriting: Bool) throws {
-		let encoder = JSONEncoder(.prettyPrinted)
+		let encoder = JSONEncoder(.prettyPrinted, .sortedKeys)
 		
 		let header           = Datastream(try encoder.encode(header))
 		let arm9OverlayTable = Datastream(try encoder.encode(arm9OverlayTable))

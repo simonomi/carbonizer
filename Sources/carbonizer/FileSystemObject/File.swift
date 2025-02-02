@@ -91,3 +91,5 @@ func createFile(
 		)
 	}
 }
+
+// TODO: removing nds from config doesnt stop it from extracting nds

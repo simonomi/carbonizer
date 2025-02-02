@@ -43,7 +43,7 @@ struct DCL {
 		// see https://github.com/opiter09/Fossil-Fighters-Documentation/blob/main/FF1/Creature_Defs.txt
 		@BinaryConvertible
 		struct Vivosaur {
-			var id: UInt32
+			var id: Int32
 			
 			var unknown1: UInt32 = 0
 			var unknown2: UInt32 = 0
@@ -332,5 +332,5 @@ extension DCL: Codable {
 }
 
 fileprivate func nameForVivosaur(_ vivosaur: DCL.Binary.Vivosaur) -> String {
-	vivosaurNames[Int(vivosaur.id)]
+	vivosaurNames[vivosaur.id]!
 }

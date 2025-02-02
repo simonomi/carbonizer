@@ -100,7 +100,7 @@ extension CarbonizerConfiguration {
 	init(contentsOf path: URL) throws {
 		let text: String
 		if path.exists() {
-			text = try String(contentsOf: path)
+			text = try String(contentsOf: path, encoding: .utf8)
 		} else {
 			text = Self.defaultConfiguration
 			try text.write(to: path, atomically: true, encoding: .utf8)

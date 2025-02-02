@@ -1,11 +1,11 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
 	name: "carbonizer",
 	platforms: [
-		.macOS(.v14), // NOTE: if updating to v15 remove myIndices(of:)
+		.macOS(.v15),
 //		.custom("Windows", versionString: "11")
 	],
 	products: [
@@ -29,9 +29,6 @@ let package = Package(
 			dependencies: [
 				"BinaryParser",
 				.product(name: "ArgumentParser", package: "swift-argument-parser")
-			],
-			swiftSettings: [
-				.enableUpcomingFeature("StrictConcurrency")
 			]
 		),
 		.testTarget(

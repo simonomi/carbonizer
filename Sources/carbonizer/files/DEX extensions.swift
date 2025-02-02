@@ -1,8 +1,6 @@
 extension DEX.Binary.Scene {
 	init(_ commands: [DEX.Command]) {
-		self.commands = commands
-			.filter(\.isNotComment)
-			.compactMap(Command.init)
+		self.commands = commands.compactMap(Command.init)
 		
 		numberOfCommands = UInt32(self.commands.count)
 		

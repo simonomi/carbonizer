@@ -66,33 +66,14 @@ func label(_ dex: consuming DEX, with allDialogue: [UInt32: String]) -> DEX {
 	DEX(
 		commands: dex.commands.map {
 			$0.reduce(into: []) { partialResult, command in
-				switch command {
-					case .dialogue(let dialogue):
-						if let line = allDialogue[UInt32(dialogue.value)] {
-							partialResult.append(.comment(line.asMultilineComment()))
-						}
-						partialResult.append(command)
-					case .unownedDialogue(let dialogue):
-						if let line = allDialogue[UInt32(dialogue.value)] {
-							partialResult.append(.comment(line.asMultilineComment()))
-						}
-						partialResult.append(command)
-					case .dialogueChoice(let dialogue, _, choices: _):
-						if let line = allDialogue[UInt32(dialogue.value)] {
-							partialResult.append(.comment(line.asMultilineComment()))
-						}
-						partialResult.append(command)
-					default:
-						partialResult.append(command)
+				let linesOfDialogue = command.linesOfDialogue()
+					.compactMap { allDialogue[UInt32($0)] }
+				
+				for lineOfDialogue in linesOfDialogue {
+					partialResult.append(.comment(lineOfDialogue))
 				}
+				partialResult.append(command)
 			}
 		}
 	)
-}
-
-fileprivate extension String {
-	func asMultilineComment() -> String {
-		replacingOccurrences(of: "\n", with: "\n// ")
-			.replacingOccurrences(of: "// \n", with: "//\n")
-	}
 }

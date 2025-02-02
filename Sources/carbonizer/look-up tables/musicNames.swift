@@ -1,4 +1,4 @@
-let musicNames = [
+let musicNames: [Int32: String] = [
 	1: "opening ocean",
 	2: "vivosaur island",
 	3: "vivosaur island again?",
@@ -13,5 +13,6 @@ let musicNames = [
 	12: "greenhorn plains",
 	13: "knotwood forest",
 	14: "digadigamid",
+	323: "post-level-up",
 	932: "diggins intro"
 ]

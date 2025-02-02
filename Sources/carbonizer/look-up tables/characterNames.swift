@@ -10,7 +10,7 @@ let characterNames: [Int32: String] = [
 	31:  "Beth", // 12a
 	32:  "Wendy",
 	33:  "Hotel Manager",
-//	34:  "", // 12c - another beth variation
+	34:  "Tiffany", // 12c - another beth variation
 	35:  "Dr. Diggins 1",
 	36:  "Rosie",
 	37:  "Mr. Richmond 1",
@@ -18,7 +18,7 @@ let characterNames: [Int32: String] = [
 	39:  "Police Officer 2",
 	40:  "Bullwort",
 	41:  "KL-33N",
-//	42:  "", // 37c - guys in suits
+	42:  "Cannon Attendant", // 37c - guys in suits
 //	43:  "", // 37 - guys in suits
 //	44:  "", // 37 - guys in suits
 //	45:  "", // 37 - guys in suits
@@ -91,16 +91,16 @@ let characterNames: [Int32: String] = [
 	112: "Dr. Diggins 2", // cha03b head03b
 //	113: "", // t02atm_3 []
 	114: "Nevada", // cha14 head14
-//	115: "", // cha40d head40d
-//	116: "", // cha37b head37b
-//	117: "", // cha40e head40e
+	115: "Fred", // cha40d head40d
+	116: "Pat", // cha37b head37b
+	117: "Dennis", // cha40e head40e
 //	118: "", // cha42b head42b
 //	119: "", // cha12d head12d
 	120: "Trent", // cha38d head38d
 	121: "Zoe", // cha45a head45a
-//	122: "", // cha38b head38b
-//	123: "", // cha38e head38e
-//	124: "", // cha39b head39b
+	122: "Guy", // cha38b head38b
+	123: "Andy", // cha38e head38e
+	124: "Michelle", // cha39b head39b
 	125: "Edward", // cha44c head44c
 //	126: "", // [cha38d, cha36b] [head38d, head36b]
 //	127: "", // [cha45b, cha10a] [head45b, head10a]
@@ -112,15 +112,15 @@ let characterNames: [Int32: String] = [
 	133: "Busy Fossil Center Staff", // cha37a head37a
 	134: "Warehouse Guard Staff", // cha37a head37a
 	135: "Diana", // cha45b head45b
-//	136: "", // cha36c head36c
-//	137: "", // cha36c head36c
-//	138: "", // cha36c head36c
+	136: "Richmond Guard 1", // cha36c head36c
+	137: "Richmond Guard 2", // cha36c head36c
+	138: "Richmond Guard 3", // cha36c head36c
 	139: "Holt 1", // cha31 head31
 //	140: "", // cha28e head28e
 	141: "Sam Inaro", // cha28c head28c
 	142: "Samurai", // cha16 head16
-//	143: "", // cha36a head36a
-//	144: "", // cha36a head36a
+//	143: "Police Officer", // cha36a head36a
+//	144: "Police Officer", // cha36a head36a
 //	145: "", // cha44e head44e
 //	146: "", // cha38a head38a
 //	147: "", // cha44a head44a
@@ -133,7 +133,7 @@ let characterNames: [Int32: String] = [
 //	154: "", // cha45d head45d
 //	155: "", // cha50a head45c
 //	156: "", // cha43c head43c
-//	157: "", // cha38a head38a
+	157: "Westley", // cha38a head38a
 //	158: "", // cha42c head42c
 //	159: "", // cha32 head32
 //	160: "", // cha36a head36a
