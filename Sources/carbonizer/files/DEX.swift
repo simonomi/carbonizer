@@ -153,7 +153,7 @@ struct DEX {
 		//     writing to 0x9000007 sets the player's profile pic (0-7 is a-h)
 		80:  "make \(0, .character) follow \(1, .character)",
 		90:  "set level for level-up animation \(0, .unknown)",
-		112: "play animation \(1, .unknown) on \(0, .character)",
+		112: "play animation \(1, .unknown) on \(0, .character)", // 1 is animation
 		114: "set \(0, .character) body model variant to \(1, .unknown)", // 1 is model variant
 		115: "set \(0, .character) head model variant to \(1, .unknown)", // 1 is model variant
 		// 116: (#) i think this stops music from playing, not sure if thats the main effect or just a side effect
@@ -167,6 +167,8 @@ struct DEX {
 		129: "effect \(1, .effect) on \(0, .character)",
 		131: "clear effects on \(0, .character)",
 		135: "movement \(1, .movement) on \(0, .character)",
+		136: "unknown 136: \(0, .character) \(1, .unknown)",
+		//   136: 1 24 - makes hunter blush
 		138: "shake screen for \(2, .frames) with intensity: \(0, .unknown), gradual intensity: \(1, .unknown)",
 		// 141: (#)
 		142: "modify player name", // has back button
@@ -206,6 +208,12 @@ struct DEX {
 		case known(type: UInt32, definition: CommandDefinition, arguments: [Int32])
 		case unknown(type: UInt32, arguments: [Int32])
 		case comment(String)
+		
+		enum ParseError: Error {
+			case failedToParse(Substring)
+			case incorrectArgumentCount(command: Substring, actual: Int, expected: Int)
+			case unknownCommand(Substring)
+		}
 	}
 	
 	@BinaryConvertible
@@ -353,7 +361,11 @@ extension DEX.Command {
 		if let (commandType, knownCommand) = DEX.knownCommands.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
 			
 			guard knownCommand.argumentIndicesFromText.count == arguments.count else {
-				todo("throw error here")
+				throw ParseError.incorrectArgumentCount(
+					command: text,
+					actual: arguments.count,
+					expected: knownCommand.argumentIndicesFromText.count
+				)
 			}
 			
 			let reorderedArguments = knownCommand.argumentIndicesFromText.map { arguments[$0] }
@@ -361,28 +373,28 @@ extension DEX.Command {
 			self = .known(
 				type: commandType,
 				definition: knownCommand,
-				arguments: zip(reorderedArguments, knownCommand.argumentTypes)
+				arguments: try zip(reorderedArguments, knownCommand.argumentTypes)
 					.map {
 						guard let number = $1.parse($0) else {
-							todo("throw error here")
+							throw ParseError.failedToParse($0)
 						}
 						return number
 					}
 			)
 		} else {
 			guard text.hasPrefix("unknown") else {
-				todo("throw error here")
+				throw ParseError.unknownCommand(text)
 			}
 			
-			let parsedArguments = arguments
-				.map(DEX.ArgumentType.unknown.parse)
-				.map {
-					guard let value = $0 else { todo("throw error here") }
-					return value
+			let parsedArguments = try arguments.map {
+				guard let value = DEX.ArgumentType.unknown.parse($0) else {
+					throw ParseError.failedToParse($0)
 				}
+				return value
+			}
 			
 			guard let commandType = parsedArguments.first else {
-				todo("throw error here")
+				throw ParseError.incorrectArgumentCount(command: text, actual: 0, expected: 1)
 			}
 			
 			self = .unknown(
@@ -408,6 +420,19 @@ extension DEX.Command {
 			.ranges
 			.map(\.lowerBound)
 			.map { arguments[$0] }
+	}
+}
+
+extension DEX.Command.ParseError: CustomStringConvertible {
+	var description: String {
+		switch self {
+			case .failedToParse(let text):
+				"failed to parse \(text)"
+			case .incorrectArgumentCount(let command, let actual, let expected):
+				"incorrect number of arguments in command '\(.cyan)\(command)\(.normal)', expected \(.green)\(expected)\(.normal), got \(.red)\(actual)\(.normal)"
+			case .unknownCommand(let text):
+				"unknown command: \(.red)\(text)\(.normal)"
+		}
 	}
 }
 

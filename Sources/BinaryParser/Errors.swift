@@ -19,7 +19,7 @@ public enum BinaryParserError: Error, CustomStringConvertible {
 	public var description: String {
 		switch self {
 			case .indexOutOfBounds(let index, let expected):
-				"index \(index) out of bounds, expected \(expected)"
+				"index \(.red)\(index)\(.normal) out of bounds, expected \(.green)\(expected)\(.normal)"
 			case .whileReadingFile(let name, let error as BinaryParserError) where error.isWrapper:
 				if case .whileReadingFile = error {
 					"\(.bold)\(name)\(.normal)/\(error)"

@@ -36,7 +36,7 @@ final class MakeInitializationTests: XCTestCase {
 				string1 = try data.read(String.self)
 				string2 = try data.read(String.self)
 				guard string2 == "expected" else {
-					throw BinaryParserAssertionError.unexpectedValue(actual: string2, expected: "expected")
+					throw BinaryParserAssertionError(expected: "expected", actual: string2)
 				}
 				"""#
 		)
