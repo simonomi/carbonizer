@@ -1,4 +1,4 @@
-extension DEX.Binary.Scene {
+extension DEX.Binary.Block {
 	init(_ commands: [DEX.Command]) {
 		self.commands = commands.compactMap(Command.init)
 		
@@ -15,7 +15,7 @@ extension DEX.Binary.Scene {
 	}
 }
 
-extension DEX.Binary.Scene.Command {
+extension DEX.Binary.Block.Command {
 	init?(_ command: DEX.Command) {
 		guard let typeAndArguments = command.typeAndArguments else { return nil }
 		(type, arguments) = typeAndArguments

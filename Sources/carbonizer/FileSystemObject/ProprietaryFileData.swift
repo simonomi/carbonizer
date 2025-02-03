@@ -34,6 +34,7 @@ func createFileData(
 	let allFileTypes: [String: any ProprietaryFileData.Type] = [
 		"CHR": CHR.self,
 		"DCL": DCL.self,
+		"DEP": DEP.self,
 		"DEX": DEX.self,
 		"DMG": DMG.self,
 		"DMS": DMS.self,
