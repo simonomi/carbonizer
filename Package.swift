@@ -12,7 +12,7 @@ let package = Package(
 		.executable(name: "carbonizer", targets: ["carbonizer"])
 	],
 	dependencies: [
-		.package(url: "https://github.com/swiftlang/swift-syntax.git", revision: "510.0.0"),
+		.package(url: "https://github.com/swiftlang/swift-syntax.git", revision: "600.0.0"),
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
 	],
 	targets: [
