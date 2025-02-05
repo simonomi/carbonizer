@@ -145,7 +145,9 @@ struct DEX {
 		59:  "clean2 \(1, .fossil), unknown: \(0, .unknown)",
 		60:  "clean3 \(1, .fossil), unknown: \(0, .unknown)", // (used in fighter test in e0090)
 		61:  "angle camera from \(1, 2, .vector) at distance \(3, .fixedPoint) with fov: \(0, .fixedPoint) over \(4, .frames), unknown: \(5, .unknown)",
-		// 62: () camera goes to the wrong place sometimes without it (similar to 50??) (is this accurate ???)
+		// 62: ()
+		//    often after diologue choices
+		//    often after battles
 		// 63: ()
 		70:  "memory 70 \(0, .dep), \(1, .unknown)",
 		//     writing to 0x9000007 sets the player's profile pic (0-7 is a-h)
