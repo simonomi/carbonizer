@@ -30,6 +30,7 @@ struct CarbonizerConfiguration: Decodable {
 		var hotReloading: Bool
 		var postProcessors: [String]
 		var dexDialogueLabeller: Bool
+		var dexBlockLabeller: Bool
 	}
 	
 	enum CompressionMode: String, EnumerableFlag, Decodable {
@@ -90,7 +91,8 @@ struct CarbonizerConfiguration: Decodable {
 				// 3clFinder, mm3Finder, mmsFinder, mpmFinder
 				"postProcessors": []
 				
-				"dexDialogueLabeller": false
+				"dexDialogueLabeller": false,
+				"dexBlockLabeller": false
 			}
 		}
 		"""

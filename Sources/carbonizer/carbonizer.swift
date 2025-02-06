@@ -150,6 +150,13 @@ struct Carbonizer: AsyncParsableCommand {
 				)
 			}
 			
+			if configuration.experimental.dexBlockLabeller, action == .unpack {
+				processedFile = dexBlockLabeller(
+					processedFile,
+					configuration: configuration
+				)
+			}
+			
 #if !IN_CI
 			print()
 			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)")
