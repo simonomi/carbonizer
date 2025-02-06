@@ -57,7 +57,7 @@ extension DMG.Binary: ProprietaryFileData {
 	init(_ dmg: DMG) {
 		stringCount = UInt32(dmg.strings.count)
 		
-		indices = createOffsets(
+		indices = makeOffsets(
 			start: indicesOffset + stringCount * 4,
 			sizes: dmg.strings
 				.map(\.string.utf8CString.count)

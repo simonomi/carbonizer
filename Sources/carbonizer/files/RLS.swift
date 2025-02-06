@@ -146,7 +146,7 @@ extension RLS.Binary: ProprietaryFileData {
 	init(_ rls: RLS) {
 		kasekiCount = UInt32(rls.kasekis.count)
 		
-		offsets = createOffsets(
+		offsets = makeOffsets(
 			start: offsetsStart + kasekiCount * 4,
 			sizes: rls.kasekis.map(\.size)
 		)

@@ -4,7 +4,7 @@ extension DEX.Binary.Block {
 		
 		numberOfCommands = UInt32(self.commands.count)
 		
-		commandOffsets = createOffsets(
+		commandOffsets = makeOffsets(
 			start: offsetsOffset + numberOfCommands * 4,
 			sizes: self.commands.map(\.size)
 		)

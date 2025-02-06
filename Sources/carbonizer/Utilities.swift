@@ -99,7 +99,7 @@ func zip<S: Sequence, T: Sequence, U: Sequence>(
 		.map { ($0, $1.0, $1.1) }
 }
 
-func createOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
+func makeOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
 	if sizes.isEmpty {
 		[]
 	} else {
@@ -469,4 +469,45 @@ extension DecodingError {
 				return "\(.bold)\(path.path(percentEncoded: false))\(.normal): \(self)"
 		}
 	}
+}
+
+func extractAngleBrackets(from text: Substring) throws -> ([Substring], [String]) {
+	let argumentStartIndices = text
+		.indices(of: "<")
+		.ranges
+		.map(\.lowerBound)
+	let argumentEndIndices = text
+		.indices(of: ">")
+		.ranges
+		.map(\.upperBound)
+	
+	guard argumentStartIndices.count == argumentEndIndices.count else {
+		todo("throw here: mismatched angle brackets")
+	}
+	
+	let argumentRanges = zip(argumentStartIndices, argumentEndIndices)
+		.map { $0..<$1 }
+		.map(RangeSet.init)
+		.reduce(into: RangeSet()) { $0.formUnion($1) }
+	
+	let arguments = argumentRanges.ranges
+		.map { text[$0].dropFirst().dropLast() }
+		.flatMap {
+			if $0.contains(", ") {
+				$0.split(separator: ", ")
+			} else if $0.contains(",") {
+				$0.split(separator: ",")
+			} else {
+				[$0]
+			}
+		}
+	
+	let textWithoutArguments = RangeSet(text.startIndex..<text.endIndex)
+		.subtracting(argumentRanges)
+		.ranges
+		.map { text[$0] }
+		.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+		.filter(\.isNotEmpty)
+	
+	return (arguments, textWithoutArguments)
 }

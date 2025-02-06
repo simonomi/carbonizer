@@ -8,96 +8,15 @@ struct DEX {
 		case character, degrees, dep, dialogue, effect, fixedPoint, fossil, frames, image, map, movement, music, soundEffect, unknown, vivosaur
 	}
 	
-	// TODO: move conformance/impl to extension
-	struct CommandDefinition: ExpressibleByStringInterpolation {
+	struct CommandDefinition {
+		// used to parse each argument
 		var argumentTypes: [ArgumentType]
+		// used to generate output string
 		var outputStringThingy: [OutputStringThingyChunk]
+		// used to match command type
 		var textWithoutArguments: [String]
+		// used to reorder arguments when reading from string
 		var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
-		
-		enum OutputStringThingyChunk {
-			case text(String)
-			case argument(Int)
-			case vector(Int, Int)
-			
-			init(_ stringInterpolationChunk: StringInterpolation.Chunk) {
-				self = switch stringInterpolationChunk {
-					case .text(let text): .text(text)
-					case .argument(let index, _): .argument(index)
-					case .vector(let index1, let index2): .vector(index1, index2)
-				}
-			}
-		}
-		
-		struct StringInterpolation: StringInterpolationProtocol {
-			var chunks: [Chunk]
-			
-			enum Chunk {
-				case text(String)
-				case argument(Int, ArgumentType)
-				case vector(Int, Int)
-			}
-			
-			init(literalCapacity: Int, interpolationCount: Int) {
-				chunks = []
-				chunks.reserveCapacity(interpolationCount)
-			}
-			
-			mutating func appendLiteral(_ literal: String) {
-				chunks.append(.text(literal))
-			}
-			
-			mutating func appendInterpolation(_ argumentNumber: Int, _ argumentType: ArgumentType) {
-				chunks.append(.argument(argumentNumber, argumentType))
-			}
-			
-			enum VectorType {
-				case vector
-			}
-			
-			mutating func appendInterpolation(_ argumentOne: Int, _ argumentTwo: Int, _: VectorType) {
-				chunks.append(.vector(argumentOne, argumentTwo))
-			}
-		}
-		
-		init(stringLiteral value: String) {
-			argumentTypes = []
-			outputStringThingy = [.text(value)]
-			textWithoutArguments = [value]
-			argumentIndicesFromText = []
-		}
-		
-		init(stringInterpolation: StringInterpolation) {
-			argumentTypes = stringInterpolation.chunks
-				.flatMap { (chunk: StringInterpolation.Chunk) -> [(index: Int, argumentType: ArgumentType)] in
-					switch chunk {
-						case .text: []
-						case .argument(let index, let argumentType): [(index, argumentType)]
-						case .vector(let index1, let index2): [(index1, .fixedPoint), (index2, .fixedPoint)]
-					}
-				}
-				.sorted(by: \.index)
-				.map(\.argumentType)
-			outputStringThingy = stringInterpolation.chunks.map(OutputStringThingyChunk.init)
-			textWithoutArguments = stringInterpolation.chunks
-				.compactMap {
-					switch $0 {
-						case .text(let text): text.trimmingCharacters(in: .whitespacesAndNewlines)
-						default: nil
-					}
-				}
-				.filter(\.isNotEmpty)
-			let badthingArgumentIndicesFromText = stringInterpolation.chunks.flatMap {
-				switch $0 {
-					case .text: [Int]()
-					case .argument(let index, _): [index]
-					case .vector(let index1, let index2): [index1, index2]
-				}
-			}
-			argumentIndicesFromText = badthingArgumentIndicesFromText.indices.map {
-				badthingArgumentIndicesFromText.firstIndex(of: $0)!
-			}
-		}
 	}
 	
 	static let knownCommands: [UInt32: CommandDefinition] = [
@@ -105,6 +24,7 @@ struct DEX {
 		// 3: (#)
 		//     7025 freezes camera focus (?)
 		4:   "memory 4 \(0, .unknown)", // wipes some stored dialogue answer. argument is the index in DEP
+		                                // possibly dep too but the 2nd number is always 0
 		5:   "memory 5 \(0, .dep)",
 		//     0xa00001d makes it possible to save
 		//     0x50000cf activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
@@ -173,7 +93,7 @@ struct DEX {
 		// 141: (#)
 		142: "modify player name", // has back button
 		143: "set player name",
-		144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), unknown: \(1, .unknown)", // 1 is block
+		144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), unknown: \(1, .unknown)", // 1 is address/variable to write the result to
 		150: "level-up animation",
 		153: "fade in image \(0, .image) over \(1, .frames) on bottom screen, unknown: \(2, .unknown)", // TODO: is this actually top?
 		154: "fade out image over \(0, .frames), unknown: \(1, .unknown)",
@@ -192,25 +112,13 @@ struct DEX {
 		// all the unknown commands as of rn 2 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 44 46 47 48 52 53 55 62 63 71 72 75 76 77 81 82 83 84 85 86 87 88 89 91 92 93 95 96 97 98 99 100 102 103 104 105 106 107 108 110 111 112 113 116 118 120 121 126 127 128 134 136 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205 206
 	]
 	
-	static func checkKnownCommands() {
-		var allCommandsWithoutArguments = Set<[String]>()
-		
-		for command in knownCommands.values {
-			guard !allCommandsWithoutArguments.contains(command.textWithoutArguments) else {
-				print("\(.red)duplicate command text for \(command.textWithoutArguments) >:(\(.normal)")
-				preconditionFailure()
-			}
-			allCommandsWithoutArguments.insert(command.textWithoutArguments)
-		}
-	}
-	
 	enum Command {
 		case known(type: UInt32, definition: CommandDefinition, arguments: [Int32])
 		case unknown(type: UInt32, arguments: [Int32])
 		case comment(String)
 		
 		enum ParseError: Error {
-			case failedToParse(Substring)
+			case failedToParse(Substring, in: Substring)
 			case incorrectArgumentCount(command: Substring, actual: Int, expected: Int)
 			case unknownCommand(Substring)
 		}
@@ -293,10 +201,110 @@ extension DEX.Binary: ProprietaryFileData {
 		
 		blocks = dex.commands.map(Block.init)
 		
-		blockOffsets = createOffsets(
+		blockOffsets = makeOffsets(
 			start: blockOffsetsStart + numberOfBlocks * 4,
 			sizes: blocks.map { $0.size() }
 		)
+	}
+}
+
+extension DEX.CommandDefinition: ExpressibleByStringInterpolation {
+	enum OutputStringThingyChunk {
+		case text(String)
+		case argument(Int)
+		case vector(Int, Int)
+		
+		init(_ stringInterpolationChunk: StringInterpolation.Chunk) {
+			self = switch stringInterpolationChunk {
+				case .text(let text): .text(text)
+				case .argument(let index, _): .argument(index)
+				case .vector(let index1, let index2): .vector(index1, index2)
+			}
+		}
+	}
+	
+	struct StringInterpolation: StringInterpolationProtocol {
+		var chunks: [Chunk]
+		
+		enum Chunk {
+			case text(String)
+			case argument(Int, DEX.ArgumentType)
+			case vector(Int, Int)
+		}
+		
+		init(literalCapacity: Int, interpolationCount: Int) {
+			chunks = []
+			chunks.reserveCapacity(interpolationCount)
+		}
+		
+		mutating func appendLiteral(_ literal: String) {
+			chunks.append(.text(literal))
+		}
+		
+		mutating func appendInterpolation(_ argumentNumber: Int, _ argumentType: DEX.ArgumentType) {
+			chunks.append(.argument(argumentNumber, argumentType))
+		}
+		
+		enum VectorType {
+			case vector
+		}
+		
+		mutating func appendInterpolation(_ argumentOne: Int, _ argumentTwo: Int, _: VectorType) {
+			chunks.append(.vector(argumentOne, argumentTwo))
+		}
+	}
+	
+	init(stringLiteral value: String) {
+		argumentTypes = []
+		outputStringThingy = [.text(value)]
+		textWithoutArguments = [value]
+		argumentIndicesFromText = []
+	}
+	
+	init(stringInterpolation: StringInterpolation) {
+		argumentTypes = stringInterpolation.chunks
+			.flatMap { (chunk: StringInterpolation.Chunk) -> [(index: Int, argumentType: DEX.ArgumentType)] in
+				switch chunk {
+					case .text: []
+					case .argument(let index, let argumentType): [(index, argumentType)]
+					case .vector(let index1, let index2): [(index1, .fixedPoint), (index2, .fixedPoint)]
+				}
+			}
+			.sorted(by: \.index)
+			.map(\.argumentType)
+		outputStringThingy = stringInterpolation.chunks.map(OutputStringThingyChunk.init)
+		textWithoutArguments = stringInterpolation.chunks
+			.compactMap {
+				switch $0 {
+					case .text(let text): text.trimmingCharacters(in: .whitespacesAndNewlines)
+					default: nil
+				}
+			}
+			.filter(\.isNotEmpty)
+		let badthingArgumentIndicesFromText = stringInterpolation.chunks.flatMap {
+			switch $0 {
+				case .text: [Int]()
+				case .argument(let index, _): [index]
+				case .vector(let index1, let index2): [index1, index2]
+			}
+		}
+		argumentIndicesFromText = badthingArgumentIndicesFromText.indices.map {
+			badthingArgumentIndicesFromText.firstIndex(of: $0)!
+		}
+	}
+}
+
+extension DEX {
+	static func checkKnownCommands() {
+		var allCommandsWithoutArguments = Set<[String]>()
+		
+		for command in knownCommands.values {
+			guard !allCommandsWithoutArguments.contains(command.textWithoutArguments) else {
+				print("\(.red)duplicate command text for \(command.textWithoutArguments) >:(\(.normal)")
+				preconditionFailure()
+			}
+			allCommandsWithoutArguments.insert(command.textWithoutArguments)
+		}
 	}
 }
 
@@ -316,6 +324,7 @@ extension DEX.Command {
 		}
 	}
 	
+	// TODO: use typed throws
 	init(_ text: Substring) throws {
 		if text.hasPrefix("// ") {
 			self = .comment(String(text.dropFirst(3)))
@@ -325,41 +334,14 @@ extension DEX.Command {
 			return
 		}
 		
-		let argumentStartIndices = text
-			.indices(of: "<")
-			.ranges
-			.map(\.lowerBound)
-		let argumentEndIndices = text
-			.indices(of: ">")
-			.ranges
-			.map(\.upperBound)
-		
-		let argumentRanges = zip(argumentStartIndices, argumentEndIndices)
-			.map { $0..<$1 }
-			.map(RangeSet.init)
-			.reduce(into: RangeSet()) { $0.formUnion($1) }
-		
-		let arguments = argumentRanges.ranges
-			.map { text[$0].dropFirst().dropLast() }
-			.flatMap {
-				if $0.contains(", ") {
-					$0.split(separator: ", ")
-				} else if $0.contains(",") {
-					$0.split(separator: ",")
-				} else {
-					[$0]
-				}
-			}
-		
-		let textWithoutArguments = RangeSet(text.startIndex..<text.endIndex)
-			.subtracting(argumentRanges)
-			.ranges
-			.map { text[$0] }
-			.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-			.filter(\.isNotEmpty)
+		let (arguments, textWithoutArguments): ([Substring], [String])
+		do {
+			(arguments, textWithoutArguments) = try extractAngleBrackets(from: text)
+		} catch {
+			todo("handle error: mismatched angle brackets")
+		}
 		
 		if let (commandType, knownCommand) = DEX.knownCommands.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
-			
 			guard knownCommand.argumentIndicesFromText.count == arguments.count else {
 				throw ParseError.incorrectArgumentCount(
 					command: text,
@@ -376,7 +358,7 @@ extension DEX.Command {
 				arguments: try zip(reorderedArguments, knownCommand.argumentTypes)
 					.map {
 						guard let number = $1.parse($0) else {
-							throw ParseError.failedToParse($0)
+							throw ParseError.failedToParse($0, in: text)
 						}
 						return number
 					}
@@ -388,7 +370,7 @@ extension DEX.Command {
 			
 			let parsedArguments = try arguments.map {
 				guard let value = DEX.ArgumentType.unknown.parse($0) else {
-					throw ParseError.failedToParse($0)
+					throw ParseError.failedToParse($0, in: text)
 				}
 				return value
 			}
@@ -426,8 +408,8 @@ extension DEX.Command {
 extension DEX.Command.ParseError: CustomStringConvertible {
 	var description: String {
 		switch self {
-			case .failedToParse(let text):
-				"failed to parse \(text)"
+			case .failedToParse(let text, in: let command):
+				"failed to parse \(.red)<\(text)>\(.normal) in command '\(.cyan)\(command)\(.normal)'"
 			case .incorrectArgumentCount(let command, let actual, let expected):
 				"incorrect number of arguments in command '\(.cyan)\(command)\(.normal)', expected \(.green)\(expected)\(.normal), got \(.red)\(actual)\(.normal)"
 			case .unknownCommand(let text):
@@ -470,8 +452,9 @@ extension String {
 				}()
 			case .comment(let string):
 				("// " + string)
-					.replacingOccurrences(of: "\n", with: "\n// ")
-					.replacingOccurrences(of: " \n", with: "\n")
+					.replacing("\n", with: "\n// ")
+					.replacing(/\ *\n/, with: "\n")
+					.replacing(/\ $/, with: "")
 		}
 	}
 }
@@ -519,7 +502,7 @@ extension DEX.ArgumentType {
 	
 	private func parseDEP(_ text: Substring) -> Int32? {
 		let components = text.split(separator: " ")
-		guard components.count == 3,
+		guard components.count == 2,
 			  let unknown1 = Int32(components[0]),
 			  let unknown2 = Int32(components[1])
 		else { return nil }

@@ -121,7 +121,7 @@ extension MCM.Binary {
 		
 		chunkCount = UInt32(chunks.count)
 		
-		chunkOffsets = createOffsets(
+		chunkOffsets = makeOffsets(
 			start: 24 + chunkCount * 4,
 			sizes: chunks.map(\.bytes.count).map(UInt32.init)
 		)

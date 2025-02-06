@@ -35,7 +35,7 @@ extension DTX.Binary: ProprietaryFileData {
 	init(_ dtx: DTX) {
 		stringCount = UInt32(dtx.strings.count)
 
-		indices = createOffsets(
+		indices = makeOffsets(
 			start: indicesOffset + stringCount * 4,
 			sizes: dtx.strings
 				.map(\.utf8CString.count)

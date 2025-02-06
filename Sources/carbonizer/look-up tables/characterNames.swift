@@ -14,8 +14,8 @@ let characterNames: [Int32: String] = [
 	35:  "Dr. Diggins 1",
 	36:  "Rosie",
 	37:  "Mr. Richmond 1",
-	38:  "Police Officer 1",
-	39:  "Police Officer 2",
+	38:  "Officer 1",
+	39:  "Officer 2",
 	40:  "Bullwort",
 	41:  "KL-33N",
 	42:  "Cannon Attendant", // 37c - guys in suits
@@ -28,10 +28,10 @@ let characterNames: [Int32: String] = [
 //	49:  "", // 28 - uhh guild shopkeep guy and others
 //	50:  "", // 28 - uhh guild shopkeep guy and others
 //	51:  "", // 28 - uhh guild shopkeep guy and others
-//	52:  "" // o09haniwa1 // idolcomps??
-//	53:  "" // o09haniwa2
-//	54:  "" // o09haniwa3
-//	55:  "" // o09haniwa4
+	52:  "Sub-Idolcomp 1", // o09haniwa1 // idolcomps??
+	53:  "Sub-Idolcomp 2", // o09haniwa2
+	54:  "Sub-Idolcomp 3", // o09haniwa3
+	55:  "Sub-Idolcomp 4", // o09haniwa4
 	56:  "Boat",
 	57:  "BB Boy 1",
 	58:  "BB Girl 3",
@@ -74,7 +74,7 @@ let characterNames: [Int32: String] = [
 	95:  "Dinaurian 8", // cha33 head33
 	96:  "Dinaurian 9", // cha33 head33
 	97:  "Dynal", // [cha29, cha20] [head29, head20]
-//	98:  "", // cha37a head37a //オソロシの森通行禁止係員→一般職員
+	98:  "Attendant", // cha37a head37a //オソロシの森通行禁止係員→一般職員
 //	99:  "", // saku [] //オソロシの柵
 //	100: "", // saku [] //オソロシの柵
 //	101: "", // saku [] //オソロシの柵
@@ -85,7 +85,7 @@ let characterNames: [Int32: String] = [
 	106: "Digadig 2", // cha30 head30 //ディグディグ人の男
 	107: "Digadig 3", // cha30 head30 //ディグディグ人の男
 	108: "Digadig Chieftain", // cha21 head21 //ディグディグ人の男
-//	109: "", // cha42d head42d
+	109: "Laurence", // cha42d head42d
 	110: "Oonga Oonga", // cha27 []
 	111: "Mr. Richmond 2", // cha20 head20
 	112: "Dr. Diggins 2", // cha03b head03b
@@ -119,8 +119,8 @@ let characterNames: [Int32: String] = [
 //	140: "", // cha28e head28e
 	141: "Sam Inaro", // cha28c head28c
 	142: "Samurai", // cha16 head16
-//	143: "Police Officer", // cha36a head36a
-//	144: "Police Officer", // cha36a head36a
+	143: "Officer 3", // cha36a head36a
+	144: "Officer 4", // cha36a head36a
 //	145: "", // cha44e head44e
 //	146: "", // cha38a head38a
 //	147: "", // cha44a head44a
@@ -938,9 +938,9 @@ let characterNames: [Int32: String] = [
 //	969: "", // takara3 []
 //	970: "", // takara2_02 []
 //	971: "", // takara3_02 []
-//	973: "", // cha50a head47c
-//	974: "", // cha50b head47c
-//	975: "", // cha50c head47c
-//	976: "", // cha50d head47c
-//	977: "", // cha51a head47c
+	973: "Ms. Drummond", // cha50a head47c
+	974: "Monica", // cha50b head47c
+	975: "Keynon", // cha50c head47c
+	976: "Hornsby", // cha50d head47c
+	977: "Clara", // cha51a head47c
 ]
