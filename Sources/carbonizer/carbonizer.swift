@@ -141,7 +141,7 @@ struct Carbonizer: AsyncParsableCommand {
 #endif
 			}
 			
-			if configuration.experimental.dexDialogueLabeller {
+			if configuration.experimental.dexDialogueLabeller, action == .unpack {
 				let dialogue = dmgRipper(processedFile)
 				processedFile = dexDialogueLabeller(
 					processedFile,

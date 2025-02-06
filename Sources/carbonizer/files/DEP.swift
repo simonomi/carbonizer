@@ -15,6 +15,7 @@ struct DEP {
 		var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
 	}
 	
+	// note: requirements with variadic arguments cannot have ANY of their arguments out of order
 	static let knownRequirements: [UInt32: RequirementDefinition] = [
 		1:  "unconditional/always",
 		2:  "talked to \(0, .character)",
@@ -24,8 +25,10 @@ struct DEP {
 //		    90 8-# 0    used to alternate hotel manager between dialogues
 		16: "memory \(0, .dep) is less than \(1, .firstNumberOnly)", // wait, < or <=? probably <
 //		    56 8-5 0    used to determine whether to spawn bullwort in his office
-//		19: "requires an unknown 5 (1+ args)",
-//		21: "requires NOT an unknown 5 (1+ args)",
+		19: "memory 19 \(0..., .dep)",
+//		    requires an unknown 5
+		21: "memory 21 \(0..., .dep)",
+//		    requires NOT an unknown 5
 		36: "\(0, .block) has played", // is op 2 always 2?
 		38: "\(0, .block) has not played",
 		41: "has \(0, .vivosaur)",
@@ -169,8 +172,8 @@ extension DEP.Binary: ProprietaryFileData {
 	static let packedStatus: PackedStatus = .packed
 	
 	init(_ dep: DEP) {
-		blockCount = UInt32(dep.blocks.count)
 		blocks = dep.blocks.compactMap(Block.init)
+		blockCount = UInt32(blocks.count)
 		blockOffsets = makeOffsets(
 			start: blockOffsetsOffset + UInt32(blocks.count * 4),
 			sizes: blocks.map { $0.size() }
@@ -186,8 +189,8 @@ extension DEP.Binary.Block {
 		unknown1 = depBlock.unknown1
 		unknown2 = depBlock.unknown2
 		
-		requirementCount = UInt32(depBlock.requirements.count)
 		requirements = depBlock.requirements.compactMap(Requirement.init)
+		requirementCount = UInt32(requirements.count)
 		requirementOffsets = makeOffsets(
 			start: requirementOffsetsOffset + UInt32(requirements.count * 4),
 			sizes: requirements.map(\.size)
@@ -287,15 +290,21 @@ extension DEP.Block.Requirement {
 		}
 		
 		if let (requirementType, knownRequirement) = DEP.knownRequirements.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
-			guard knownRequirement.argumentIndicesFromText.count == arguments.count else {
-				throw .incorrectArgumentCount(
-					requirement: text,
-					actual: arguments.count,
-					expected: knownRequirement.argumentIndicesFromText.count
-				)
-			}
+			let reorderedArguments: [Substring]
 			
-			let reorderedArguments = knownRequirement.argumentIndicesFromText.map { arguments[$0] }
+			if knownRequirement.outputStringThingy.contains(where: \.isVariadic) {
+				reorderedArguments = arguments
+			} else {
+				guard knownRequirement.argumentIndicesFromText.count == arguments.count else {
+					throw .incorrectArgumentCount(
+						requirement: text,
+						actual: arguments.count,
+						expected: knownRequirement.argumentIndicesFromText.count
+					)
+				}
+				
+				reorderedArguments = knownRequirement.argumentIndicesFromText.map { arguments[$0] }
+			}
 			
 			self = .known(
 				type: requirementType,
@@ -367,6 +376,12 @@ extension String {
 							partialResult += "<"
 							partialResult += definition.argumentTypes[index].format(arguments[index])
 							partialResult += ">"
+						case .arguments(let indices):
+							let argumentType = definition.argumentTypes[indices.lowerBound]
+							partialResult += arguments[indices]
+								.map(argumentType.format)
+								.map { "<\($0)>" }
+								.joined(separator: " ")
 					}
 				}
 			case .unknown(let type, []):
@@ -409,11 +424,20 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 	enum OutputStringThingyChunk {
 		case text(String)
 		case argument(Int)
+		case arguments(PartialRangeFrom<Int>)
 		
 		init(_ stringInterpolationChunk: StringInterpolation.Chunk) {
 			self = switch stringInterpolationChunk {
 				case .text(let text): .text(text)
 				case .argument(let index, _): .argument(index)
+				case .arguments(let indices, _): .arguments(indices)
+			}
+		}
+		
+		var isVariadic: Bool {
+			switch self {
+				case .arguments: true
+				case .text, .argument: false
 			}
 		}
 	}
@@ -424,6 +448,7 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 		enum Chunk {
 			case text(String)
 			case argument(Int, DEP.ArgumentType)
+			case arguments(PartialRangeFrom<Int>, DEP.ArgumentType)
 		}
 		
 		init(literalCapacity: Int, interpolationCount: Int) {
@@ -437,6 +462,10 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 		
 		mutating func appendInterpolation(_ argumentNumber: Int, _ argumentType: DEP.ArgumentType) {
 			chunks.append(.argument(argumentNumber, argumentType))
+		}
+		
+		mutating func appendInterpolation(_ argumentRange: PartialRangeFrom<Int>, _ argumentType: DEP.ArgumentType) {
+			chunks.append(.arguments(argumentRange, argumentType))
 		}
 	}
 	
@@ -453,6 +482,7 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 				switch chunk {
 					case .text: []
 					case .argument(let index, let argumentType): [(index, argumentType)]
+					case .arguments(let indices, let argumentType): [(indices.lowerBound, argumentType)]
 				}
 			}
 			.sorted(by: \.index)
@@ -470,6 +500,7 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 			switch $0 {
 				case .text: [Int]()
 				case .argument(let index, _): [index]
+				case .arguments(let indices, _): [indices.lowerBound]
 			}
 		}
 		argumentIndicesFromText = badthingArgumentIndicesFromText.indices.map {
