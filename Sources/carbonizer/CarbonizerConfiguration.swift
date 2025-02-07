@@ -78,9 +78,9 @@ struct CarbonizerConfiguration: Decodable {
 			"keepWindowOpen": "onError", // always, never, onError
 			"useColor": true,
 			
-			// stable: DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
-			// experimental: 3CL, CHR, DCL, DEP, MFS, MMS
-			"fileTypes": ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
+			// stable: DEP, DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
+			// experimental: 3CL, CHR, DCL, MFS, MMS
+			"fileTypes": ["DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
 			// "skipExtracting": [],
 			// "onlyExtract": [],

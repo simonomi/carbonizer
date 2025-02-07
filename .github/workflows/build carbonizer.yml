@@ -62,7 +62,7 @@ jobs:
         -C "$(swift build -c release --show-bin-path)"
         carbonizer.exe
         -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\5.10.0\\usr\\bin"
-        swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll swiftCRT.dll Foundation.dll swift_RegexParser.dll dispatch.dll BlocksRuntime.dll swiftDispatch.dll
+        swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll swiftCRT.dll Foundation.dll swift_RegexParser.dll dispatch.dll BlocksRuntime.dll swiftDispatch.dll FoundationEssentials.dll FoundationInternationalization.dll _FoundationICU.dll
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
