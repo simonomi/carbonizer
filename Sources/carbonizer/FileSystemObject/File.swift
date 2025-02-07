@@ -36,7 +36,7 @@ func createFile(
 	data: Datastream,
 	configuration: CarbonizerConfiguration
 ) throws -> any FileSystemObject {
-	if name.hasSuffix(PackedNDS.fileExtension) {
+	if configuration.fileTypes.contains("NDS"), name.hasSuffix(PackedNDS.fileExtension) {
 		return PackedNDS(
 			name: String(name.dropLast(PackedNDS.fileExtension.count)),
 			binary: try data.read(NDS.Binary.self),
@@ -44,7 +44,7 @@ func createFile(
 		)
 	}
 	
-	if configuration.fileTypes.contains(String(describing: MAR.self)) {
+	if configuration.fileTypes.contains("MAR") {
 		let marker = data.placeMarker()
 		let magicBytes = try? data.read(String.self, exactLength: 3)
 		data.jump(to: marker)
@@ -91,5 +91,3 @@ func createFile(
 		)
 	}
 }
-
-// TODO: removing nds from config doesnt stop it from extracting nds

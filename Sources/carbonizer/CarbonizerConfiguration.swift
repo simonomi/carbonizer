@@ -2,13 +2,17 @@ import ArgumentParser
 import Foundation
 
 struct CarbonizerConfiguration: Decodable {
-	var compressionMode: CompressionMode
-	var inputFiles: [String]
-	var outputFolder: String?
-	var overwriteOutput: Bool
-	var showProgress: Bool
-	var keepWindowOpen: KeepWindowOpen
-	var useColor: Bool
+	var compressionMode: CompressionMode = .auto
+	var inputFiles: [String] = []
+	var outputFolder: String? = nil
+	var overwriteOutput: Bool = false
+	var showProgress: Bool = true
+	var keepWindowOpen: KeepWindowOpen = .onError
+#if os(Windows)
+	var useColor: Bool = false
+#else
+	var useColor: Bool = true
+#endif
 	
 	enum KeepWindowOpen: String, Decodable {
 		case always, never, onError
@@ -18,19 +22,19 @@ struct CarbonizerConfiguration: Decodable {
 		}
 	}
 	
-	var fileTypes: [String]
+	var fileTypes: [String] = ["DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"]
 	
 	// TODO: skip/only extract
-//	var skipExtracting: [String]
-//	var onlyExtract: [String]
+//	var skipExtracting: [String] = []
+//	var onlyExtract: [String] = []
 	
-	var experimental: ExperimentalOptions
+	var experimental: ExperimentalOptions = ExperimentalOptions()
 	
 	struct ExperimentalOptions: Decodable {
-		var hotReloading: Bool
-		var postProcessors: [String]
-		var dexDialogueLabeller: Bool
-		var dexBlockLabeller: Bool
+		var hotReloading: Bool = false
+		var postProcessors: [String] = []
+		var dexDialogueLabeller: Bool = false
+		var dexBlockLabeller: Bool = false
 	}
 	
 	enum CompressionMode: String, EnumerableFlag, Decodable {
