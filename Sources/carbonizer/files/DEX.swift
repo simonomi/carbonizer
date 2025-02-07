@@ -121,6 +121,7 @@ struct DEX {
 			case failedToParse(Substring, in: Substring)
 			case incorrectArgumentCount(command: Substring, actual: Int, expected: Int)
 			case unknownCommand(Substring)
+			case mismatchedAngleBrackets(requirement: Substring)
 		}
 	}
 	
@@ -324,8 +325,7 @@ extension DEX.Command {
 		}
 	}
 	
-	// TODO: use typed throws
-	init(_ text: Substring) throws {
+	init(_ text: Substring) throws(DEX.Command.ParseError) {
 		if text.hasPrefix("// ") {
 			self = .comment(String(text.dropFirst(3)))
 			return
@@ -334,16 +334,14 @@ extension DEX.Command {
 			return
 		}
 		
-		let (arguments, textWithoutArguments): ([Substring], [String])
-		do {
-			(arguments, textWithoutArguments) = try extractAngleBrackets(from: text)
-		} catch {
-			todo("handle error: mismatched angle brackets")
+		guard let (arguments, textWithoutArguments) = extractAngleBrackets(from: text) else {
+			throw .mismatchedAngleBrackets(requirement: text)
 		}
 		
 		if let (commandType, knownCommand) = DEX.knownCommands.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
 			guard knownCommand.argumentIndicesFromText.count == arguments.count else {
-				throw ParseError.incorrectArgumentCount(
+				throw
+					.incorrectArgumentCount(
 					command: text,
 					actual: arguments.count,
 					expected: knownCommand.argumentIndicesFromText.count
@@ -356,27 +354,27 @@ extension DEX.Command {
 				type: commandType,
 				definition: knownCommand,
 				arguments: try zip(reorderedArguments, knownCommand.argumentTypes)
-					.map {
-						guard let number = $1.parse($0) else {
-							throw ParseError.failedToParse($0, in: text)
+					.map { (argument, argumentType) throws(DEX.Command.ParseError) in
+						guard let number = argumentType.parse(argument) else {
+							throw .failedToParse(argument, in: text)
 						}
 						return number
 					}
 			)
 		} else {
 			guard text.hasPrefix("unknown") else {
-				throw ParseError.unknownCommand(text)
+				throw .unknownCommand(text)
 			}
 			
-			let parsedArguments = try arguments.map {
-				guard let value = DEX.ArgumentType.unknown.parse($0) else {
-					throw ParseError.failedToParse($0, in: text)
+			let parsedArguments = try arguments.map { (argument) throws(DEX.Command.ParseError) in
+				guard let value = DEX.ArgumentType.unknown.parse(argument) else {
+					throw .failedToParse(argument, in: text)
 				}
 				return value
 			}
 			
 			guard let commandType = parsedArguments.first else {
-				throw ParseError.incorrectArgumentCount(command: text, actual: 0, expected: 1)
+				throw .incorrectArgumentCount(command: text, actual: 0, expected: 1)
 			}
 			
 			self = .unknown(
@@ -414,6 +412,8 @@ extension DEX.Command.ParseError: CustomStringConvertible {
 				"incorrect number of arguments in command '\(.cyan)\(command)\(.normal)', expected \(.green)\(expected)\(.normal), got \(.red)\(actual)\(.normal)"
 			case .unknownCommand(let text):
 				"unknown command: \(.red)\(text)\(.normal)"
+			case .mismatchedAngleBrackets(let requirement):
+				"requirement '\(.cyan)\(requirement)\(.normal)' has misimatching angle brackets"
 		}
 	}
 }

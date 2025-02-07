@@ -57,6 +57,8 @@ struct DEP {
 		case failedToParse(Substring, in: Substring)
 		case incorrectArgumentCount(requirement: Substring, actual: Int, expected: Int)
 		case unknownRequirement(Substring)
+		case blockMissingID(blockText: Substring)
+		case mismatchedAngleBrackets(requirement: Substring)
 	}
 	
 	@BinaryConvertible
@@ -229,22 +231,18 @@ extension DEP.Binary.Block.Requirement.Argument {
 extension DEP.Block {
 	init(_ text: Substring) throws(DEP.ParseError) {
 		let lines = text.split(separator: "\n")
-		guard let firstLine = lines.first else { todo("throw here: block is empty (is this possible)") }
-		// first line must be (possibly commented) "block <id>, unknowns: <uk>, <uk>"
+		let firstLine = lines.first!
 		
 		if firstLine.hasPrefix("// block") {
 			isComment = true
 		} else if firstLine.hasPrefix("block") {
 			isComment = false
 		} else {
-			todo("throw here: block does not start with block")
+			throw .blockMissingID(blockText: text)
 		}
 		
-		let blockArguments: [Substring]
-		do {
-			(blockArguments, _) = try extractAngleBrackets(from: firstLine)
-		} catch {
-			todo("handle error: mismatched angle brackets")
+		guard let (blockArguments, _) = extractAngleBrackets(from: firstLine) else {
+			throw .mismatchedAngleBrackets(requirement: text)
 		}
 		
 		guard blockArguments.count == 3 else {
@@ -282,11 +280,8 @@ extension DEP.Block.Requirement {
 			return
 		}
 		
-		let (arguments, textWithoutArguments): ([Substring], [String])
-		do {
-			(arguments, textWithoutArguments) = try extractAngleBrackets(from: text)
-		} catch {
-			todo("handle error: mismatched angle brackets")
+		guard let (arguments, textWithoutArguments) = extractAngleBrackets(from: text) else {
+			throw .mismatchedAngleBrackets(requirement: text)
 		}
 		
 		if let (requirementType, knownRequirement) = DEP.knownRequirements.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
@@ -411,11 +406,15 @@ extension DEP.ParseError: CustomStringConvertible {
 	var description: String {
 		switch self {
 			case .failedToParse(let text, in: let requirement):
-				"failed to parse \(.red)<\(text)>\(.normal) in command '\(.cyan)\(requirement)\(.normal)'"
+				"failed to parse \(.red)<\(text)>\(.normal) in requirement '\(.cyan)\(requirement)\(.normal)'"
 			case .incorrectArgumentCount(let requirement, let actual, let expected):
-				"incorrect number of arguments in command '\(.cyan)\(requirement)\(.normal)', expected \(.green)\(expected)\(.normal), got \(.red)\(actual)\(.normal)"
+				"incorrect number of arguments in requirement '\(.cyan)\(requirement)\(.normal)', expected \(.green)\(expected)\(.normal), got \(.red)\(actual)\(.normal)"
 			case .unknownRequirement(let text):
 				"unknown requirement: '\(.red)\(text)\(.normal)'"
+			case .blockMissingID(blockText: let blockText):
+				"first line of block is not block id: '\(.cyan)\(blockText)\(.normal)'"
+			case .mismatchedAngleBrackets(let requirement):
+				"requirement '\(.cyan)\(requirement)\(.normal)' has misimatching angle brackets"
 		}
 	}
 }

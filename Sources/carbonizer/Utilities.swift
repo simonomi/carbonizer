@@ -471,7 +471,8 @@ extension DecodingError {
 	}
 }
 
-func extractAngleBrackets(from text: Substring) throws -> ([Substring], [String]) {
+
+func extractAngleBrackets(from text: Substring) -> ([Substring], [String])? {
 	let argumentStartIndices = text
 		.indices(of: "<")
 		.ranges
@@ -481,9 +482,7 @@ func extractAngleBrackets(from text: Substring) throws -> ([Substring], [String]
 		.ranges
 		.map(\.upperBound)
 	
-	guard argumentStartIndices.count == argumentEndIndices.count else {
-		todo("throw here: mismatched angle brackets")
-	}
+	guard argumentStartIndices.count == argumentEndIndices.count else { return nil }
 	
 	let argumentRanges = zip(argumentStartIndices, argumentEndIndices)
 		.map { $0..<$1 }

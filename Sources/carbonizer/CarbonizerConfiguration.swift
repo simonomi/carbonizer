@@ -79,7 +79,7 @@ struct CarbonizerConfiguration: Decodable {
 			"useColor": true,
 			
 			// stable: DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
-			// experimental: 3CL, CHR, DCL, MFS, MMS
+			// experimental: 3CL, CHR, DCL, DEP, MFS, MMS
 			"fileTypes": ["DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
 			// "skipExtracting": [],
