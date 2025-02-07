@@ -25,7 +25,6 @@ jobs:
       run: >
         swift build -c release
         -Xswiftc -DIN_CI
-        -Xswiftc -whole-module-optimization
     - name: Package
       run: tar -acf carbonizer-macOS.zip -C "$(swift build -c release --show-bin-path)" carbonizer
     - name: Release
@@ -50,9 +49,6 @@ jobs:
       run: >
         swift build -c release
         -Xswiftc -DIN_CI
-        -Xswiftc -static-executable
-        -Xswiftc -static-stdlib
-        -Xswiftc -whole-module-optimization
     - name: Download license
       run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
     - name: Pack products
