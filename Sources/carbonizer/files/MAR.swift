@@ -118,7 +118,7 @@ extension MAR {
 	) throws {
 		logProgress(
 			"Decompressing", name,
-			showProgress: configuration.showProgress
+			configuration: configuration
 		)
 		self.name = name
 		

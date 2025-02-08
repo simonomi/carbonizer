@@ -1,5 +1,6 @@
 import BinaryParser
 
+// https://github.com/opiter09/Fossil-Fighters-Documentation/blob/main/FF1/Battle%20Folder.txt
 struct DBS {
 	@BinaryConvertible
 	struct Binary {

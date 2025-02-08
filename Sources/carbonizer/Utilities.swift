@@ -119,8 +119,8 @@ func hex<T: BinaryInteger & SignedNumeric>(_ value: T) -> String {
 	}
 }
 
-func logProgress(_ items: Any..., showProgress: Bool) {
-	guard showProgress else { return }
+func logProgress(_ items: Any..., configuration: CarbonizerConfiguration) {
+	guard configuration.showProgress else { return }
 	
 	let message = items
 		.map { String(describing: $0) }

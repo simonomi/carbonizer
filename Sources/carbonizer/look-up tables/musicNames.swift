@@ -15,6 +15,7 @@ let musicNames: [Int32: String] = [
 	12:   "greenhorn plains",
 	13:   "knotwood forest",
 	14:   "digadigamid",
+	// 107: tutorial battle theme?
 	108:  "Battle Theme",
 	109:  "Level-Up Theme",
 	110:  "Final Battle Theme",

@@ -20,6 +20,10 @@ func createFile(
 	)
 	
 	if metadata?.standalone == true {
+		guard let mcm = try MCM(file) else {
+			throw ExtraneousMetadataError(on: path)
+		}
+		
 		return MAR(
 			name: file.name,
 			files: [try MCM(file)!], // a file with metadata should always be an MCM
@@ -27,6 +31,18 @@ func createFile(
 		)
 	} else {
 		return file
+	}
+}
+
+struct ExtraneousMetadataError: Error, CustomStringConvertible {
+	var filePath: URL
+	
+	init(on path: URL) {
+		filePath = path
+	}
+	
+	var description: String {
+		"the file '\(filePath)' has metadata, which it shouldnt. check if the creation date is correct"
 	}
 }
 

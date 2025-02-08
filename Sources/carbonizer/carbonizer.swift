@@ -17,6 +17,7 @@ struct Carbonizer: AsyncParsableCommand {
 	mutating func run() async throws {
 #if !IN_CI
 		DEX.checkKnownCommands()
+		DEP.checkKnownRequirements()
 #endif
 		
 #if !IN_CI
@@ -24,7 +25,8 @@ struct Carbonizer: AsyncParsableCommand {
 #endif
 		
 #if IN_CI
-		let configurationPath = URL(filePath: "config.json")
+		// TODO: dont let this just fallback, show an error if theres no url
+		let configurationPath = Bundle.main.executableURL?.appending(component: "config.json") ?? URL(filePath: "config.json")
 #else
 		let configurationPath = URL(filePath: "/Users/simonomi/Desktop/config.json5")
 #endif
@@ -76,7 +78,7 @@ struct Carbonizer: AsyncParsableCommand {
 		for filePath in filePaths {
 			logProgress(
 				"Reading \(filePath.path(percentEncoded: false))",
-				showProgress: configuration.showProgress
+				configuration: configuration
 			)
 			
 #if !IN_CI
@@ -107,7 +109,7 @@ struct Carbonizer: AsyncParsableCommand {
 			
 			logProgress(
 				"Running post-processors",
-				showProgress: configuration.showProgress
+				configuration: configuration
 			)
 			let postProcessors: [String: PostProcessor] = [
 				"3clFinder": tclFinder,
@@ -172,7 +174,7 @@ struct Carbonizer: AsyncParsableCommand {
 			
 			logProgress(
 				"Writing to \(savePath.path(percentEncoded: false))",
-				showProgress: configuration.showProgress
+				configuration: configuration
 			)
 			
 #if !IN_CI
