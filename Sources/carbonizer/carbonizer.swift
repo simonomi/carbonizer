@@ -26,7 +26,9 @@ struct Carbonizer: AsyncParsableCommand {
 		
 #if IN_CI
 		// TODO: dont let this just fallback, show an error if theres no url
-		let configurationPath = Bundle.main.executableURL?.appending(component: "config.json") ?? URL(filePath: "config.json")
+		let configurationPath = Bundle.main.executableURL?
+			.deletingLastPathComponent()
+			.appending(component: "config.json") ?? URL(filePath: "config.json")
 #else
 		let configurationPath = URL(filePath: "/Users/simonomi/Desktop/config.json5")
 #endif
