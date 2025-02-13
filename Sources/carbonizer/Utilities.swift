@@ -99,6 +99,16 @@ func zip<S: Sequence, T: Sequence, U: Sequence>(
 		.map { ($0, $1.0, $1.1) }
 }
 
+func zip<S: Sequence, T: Sequence, U: Sequence, V: Sequence>(
+	_ first: S,
+	_ second: T,
+	_ third: U,
+	_ fourth: V
+) -> [(S.Element, T.Element, U.Element, V.Element)] {
+	zip(first, zip(second, zip(third, fourth)))
+		.map { ($0, $1.0, $1.1.0, $1.1.1) }
+}
+
 func makeOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
 	if sizes.isEmpty {
 		[]

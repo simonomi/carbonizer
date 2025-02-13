@@ -19,6 +19,7 @@ let musicNames: [Int32: String] = [
 	108:  "Battle Theme",
 	109:  "Level-Up Theme",
 	110:  "Final Battle Theme",
+//	111:  "", // battle theme for "normal enemies"
 	112:  "Boss Battle Theme",
 	113:  "Big Boss Theme",
 	323:  "Scenario Theme 1", // post-level-up

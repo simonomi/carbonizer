@@ -166,7 +166,6 @@ struct Carbonizer: AsyncParsableCommand {
 			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)")
 #endif
 			
-			
 			let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? filePath.deletingLastPathComponent()
 			
 			let savePath = processedFile.savePath(

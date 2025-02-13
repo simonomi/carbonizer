@@ -50,8 +50,20 @@ struct MCM {
 
 // MARK: packed
 extension MCM {
-	enum DecompressionError: Error {
-		case whileReading(Any.Type, (CompressionType, CompressionType), any Error)
+	struct DecompressionError: WrappingError, CustomStringConvertible {
+		var compression: (CompressionType, CompressionType)
+		var wrapped: any Error
+		
+		var joinedErrorPrefix: String { ">" }
+		
+		var description: String {
+			switch wrapped {
+				case let error as WrappingError:
+					"\(.bold)MCM\(.normal)\(error.joinedErrorPrefix)\(error)"
+				case let error:
+					"\(.bold)MCM\(.normal): \(error)"
+			}
+		}
 	}
 	
 	init(_ binary: Binary, configuration: CarbonizerConfiguration) throws {
@@ -89,7 +101,7 @@ extension MCM {
 			}
 #endif
 		} catch {
-			throw DecompressionError.whileReading(MCM.self, compression, error)
+			throw DecompressionError(compression: compression, wrapped: error)
 		}
 	}
 }

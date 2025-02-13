@@ -125,8 +125,8 @@ let characterNames: [Int32: String] = [
 //	146: "", // cha38a head38a
 //	147: "", // cha44a head44a
 //	148: "", // cha45d head45d
-//	149: "", // cha40b head40b
-//	150: "", // cha37d head37d
+	149: "Tony 1", // cha40b head40b // unused?
+	150: "Tony 2", // cha37d head37d // unused?
 //	151: "", // cha10e head10e
 //	152: "", // cha28b head28b
 //	153: "", // cha44a head44a

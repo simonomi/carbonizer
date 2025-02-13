@@ -89,7 +89,7 @@ struct CarbonizerConfiguration: Decodable {
 			"dexCommandList": "ff1", // ff1, ffc, none
 			
 			// stable: DEP, DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
-			// experimental: 3CL, CHR, DCL, MFS, MMS
+			// experimental: 3CL, CHR, DBS, DCL, MFS, MMS
 			"fileTypes": ["DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
 			"experimental": {
