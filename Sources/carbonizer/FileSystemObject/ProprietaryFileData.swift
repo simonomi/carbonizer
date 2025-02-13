@@ -8,10 +8,10 @@ protocol ProprietaryFileData: BinaryConvertible {
 	static var packedStatus: PackedStatus { get }
 	
 	associatedtype Packed: ProprietaryFileData where Packed.Unpacked == Self
-	init(_ packed: Packed)
+	init(_ packed: Packed, configuration: CarbonizerConfiguration)
 	
 	associatedtype Unpacked: ProprietaryFileData where Unpacked.Packed == Self
-	init(_ unpacked: Unpacked)
+	init(_ unpacked: Unpacked, configuration: CarbonizerConfiguration)
 }
 
 extension ProprietaryFileData {
@@ -84,8 +84,12 @@ extension ProprietaryFileData where Self: Codable {
 }
 
 extension ProprietaryFileData {
-	func packed() -> Packed { Packed(self) }
-	func unpacked() -> Unpacked { Unpacked(self) }
+	func packed(configuration: CarbonizerConfiguration) -> Packed {
+		Packed(self, configuration: configuration)
+	}
+	func unpacked(configuration: CarbonizerConfiguration) -> Unpacked {
+		Unpacked(self, configuration: configuration)
+	}
 }
 
 extension Datastream: ProprietaryFileData {
@@ -94,4 +98,8 @@ extension Datastream: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unknown
+	
+	convenience init(_ packed: Datastream, configuration: CarbonizerConfiguration) {
+		self.init(packed)
+	}
 }

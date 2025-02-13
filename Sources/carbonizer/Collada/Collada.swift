@@ -33,7 +33,7 @@ fileprivate struct CommandParsingState {
 	var vertices: [PolygonPoint] = []
 	
 	mutating func commitVertex(for result: inout CommandParsingResult, matrices: [Matrix4x3<Double>]) {
-		if bone == -1 { fatalError("THE BONE IS NEGATIVE 1") }
+		if bone == -1 { preconditionFailure("THE BONE IS NEGATIVE 1") }
 		let vertex = vertex.transformed(by: matrices[bone])
 		
 		let textureInfo = material.map {
@@ -56,17 +56,17 @@ fileprivate struct CommandParsingState {
 		switch vertexMode! {
 			case .triangle:
 				guard vertices.count.isMultiple(of: 3) else {
-					fatalError("TODO: throw here (triangle)")
+					todo("throw here (triangle)")
 				}
 				newPolygons = vertices.chunked(exactSize: 3)
 			case .quadrilateral:
 				guard vertices.count.isMultiple(of: 4) else {
-					fatalError("TODO: throw here (quadrilateral)")
+					todo("throw here (quadrilateral)")
 				}
 				newPolygons = vertices.chunked(exactSize: 4)
 			case .triangleStrip:
 				guard vertices.count >= 3 else {
-					fatalError("TODO: throw here (triangleStrip)")
+					todo("throw here (triangleStrip)")
 				}
 				newPolygons = vertices
 					.chunks(exactSize: 3, every: 1)
@@ -83,7 +83,7 @@ fileprivate struct CommandParsingState {
 				guard vertices.count >= 4,
 					  vertices.count.isMultiple(of: 2)
 				else {
-					fatalError("TODO: throw here (quadrilateralStrip)")
+					todo("throw here (quadrilateralStrip)")
 				}
 				newPolygons = vertices
 					.chunks(exactSize: 4, every: 2)

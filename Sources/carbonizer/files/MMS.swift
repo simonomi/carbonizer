@@ -70,7 +70,7 @@ extension MMS: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ packed: Binary) {
+	init(_ packed: Binary, configuration: CarbonizerConfiguration) {
 		unknown1 = packed.unknown1
 		
 		colorPaletteType = packed.colorPaletteType
@@ -112,7 +112,7 @@ extension MMS.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ mms: MMS) {
+	init(_ mms: MMS, configuration: CarbonizerConfiguration) {
 		unknown1 = mms.unknown1
 		
 		colorPaletteType = mms.colorPaletteType

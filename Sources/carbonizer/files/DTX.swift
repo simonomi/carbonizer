@@ -23,7 +23,7 @@ extension DTX: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
 		strings = binary.strings
 	}
 }
@@ -32,7 +32,7 @@ extension DTX.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dtx: DTX) {
+	init(_ dtx: DTX, configuration: CarbonizerConfiguration) {
 		stringCount = UInt32(dtx.strings.count)
 
 		indices = makeOffsets(

@@ -165,10 +165,10 @@ extension DEX: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
 		commands = binary.blocks
 			.map(\.commands)
-			.recursiveMap(Command.init)
+			.recursiveMap { Command($0, configuration: configuration) }
 	}
 	
 	init(_ data: Datastream) throws {
@@ -197,7 +197,7 @@ extension DEX.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dex: DEX) {
+	init(_ dex: DEX, configuration: CarbonizerConfiguration) {
 		numberOfBlocks = UInt32(dex.commands.count)
 		
 		blocks = dex.commands.map(Block.init)
@@ -310,7 +310,7 @@ extension DEX {
 }
 
 extension DEX.Command {
-	init(_ binaryCommand: DEX.Binary.Block.Command) {
+	init(_ binaryCommand: DEX.Binary.Block.Command, configuration: CarbonizerConfiguration) {
 		self = if let definition = DEX.knownCommands[binaryCommand.type] {
 			.known(
 				type: binaryCommand.type,

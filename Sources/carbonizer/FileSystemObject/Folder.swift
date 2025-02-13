@@ -21,8 +21,7 @@ func createFolder(
 	{
 		return MAR(
 			name: String(path.lastPathComponent.dropLast(MAR.fileExtension.count)),
-			files: try contents.compactMap(MCM.init),
-			configuration: configuration
+			files: try contents.compactMap(MCM.init)
 		)
 	}
 	
@@ -71,17 +70,17 @@ extension Folder: FileSystemObject {
 			.reduce(.unknown) { $0.combined(with: $1) }
 	}
 	
-	func packed() -> Self {
+	func packed(configuration: CarbonizerConfiguration) -> Self {
 		Folder(
 			name: name,
-			contents: contents.map { $0.packed() }
+			contents: contents.map { $0.packed(configuration: configuration) }
 		)
 	}
 	
-	func unpacked() throws -> Self {
+	func unpacked(configuration: CarbonizerConfiguration) throws -> Self {
 		Folder(
 			name: name,
-			contents: try contents.map { try $0.unpacked() }
+			contents: try contents.map { try $0.unpacked(configuration: configuration) }
 		)
 	}
 }

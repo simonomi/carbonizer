@@ -76,5 +76,5 @@ extension Bitmap: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unknown
 	
-	init(_ bitmap: Self) { self = bitmap }
+	init(_ bitmap: Self, configuration: CarbonizerConfiguration) { self = bitmap }
 }

@@ -113,7 +113,7 @@ extension DEP: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
 		blocks = binary.blocks.map(Block.init)
 	}
 	
@@ -173,7 +173,7 @@ extension DEP.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dep: DEP) {
+	init(_ dep: DEP, configuration: CarbonizerConfiguration) {
 		blocks = dep.blocks.compactMap(Block.init)
 		blockCount = UInt32(blocks.count)
 		blockOffsets = makeOffsets(

@@ -250,8 +250,7 @@ extension Datastream {
 			guard let lastRawCommand = rawCommandTypes.filter({ $0 != 0 }).last,
 				  let lastCommand = GPUCommandType(rawValue: lastRawCommand)
 			else {
-				// TODO: throw error
-				fatalError("4 NOPs in a row")
+				todo("4 NOPs in a row; throw error")
 			}
 			
 			if lastCommand.argumentCount == 0 {

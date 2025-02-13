@@ -99,7 +99,7 @@ extension RLS: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ packed: Binary) {
+	init(_ packed: Binary, configuration: CarbonizerConfiguration) {
 		kasekis = packed.kasekis.enumerated().map(Kaseki.init)
 	}
 }
@@ -143,7 +143,7 @@ extension RLS.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ rls: RLS) {
+	init(_ rls: RLS, configuration: CarbonizerConfiguration) {
 		kasekiCount = UInt32(rls.kasekis.count)
 		
 		offsets = makeOffsets(

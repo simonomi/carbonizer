@@ -136,7 +136,7 @@ extension VertexData {
 		
 		func commitVertex() {
 			guard let currentMatrix else {
-				fatalError("currentMatrix was nil")
+				preconditionFailure("currentMatrix was nil")
 			}
 			
 			let vertex = currentVertex.transformed(by: currentMatrix)
@@ -171,7 +171,7 @@ extension VertexData {
 			switch currentVertexMode! {
 				case .triangle:
 					guard currentVertices.count.isMultiple(of: 3) else {
-						fatalError("TODO: throw here")
+						todo("throw here")
 					}
 					newFaces = currentVertices
 						.chunked(exactSize: 3)
@@ -181,7 +181,7 @@ extension VertexData {
 						)}
 				case .quadrilateral:
 					guard currentVertices.count.isMultiple(of: 4) else {
-						fatalError("TODO: throw here")
+						todo("throw here")
 					}
 					newFaces = currentVertices
 						.chunked(exactSize: 4)
@@ -193,7 +193,7 @@ extension VertexData {
 						]}
 				case .triangleStrip:
 					guard currentVertices.count >= 3 else {
-						fatalError("TODO: throw here")
+						todo("throw here")
 					}
 					newFaces = currentVertices
 						.chunks(exactSize: 3, every: 1)
@@ -212,7 +212,7 @@ extension VertexData {
 					guard currentVertices.count >= 4,
 						  currentVertices.count.isMultiple(of: 2)
 					else {
-						fatalError("TODO: throw here")
+						todo("throw here")
 					}
 					newFaces = currentVertices
 						.chunks(exactSize: 4, every: 2)

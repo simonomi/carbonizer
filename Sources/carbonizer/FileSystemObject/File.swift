@@ -24,11 +24,7 @@ func createFile(
 			throw ExtraneousMetadataError(on: path)
 		}
 		
-		return MAR(
-			name: file.name,
-			files: [try MCM(file)!], // a file with metadata should always be an MCM
-			configuration: configuration
-		)
+		return MAR(name: file.name, files: [mcm])
 	} else {
 		return file
 	}
@@ -85,7 +81,7 @@ func createFile(
 		let fileType = type(of: fileData)
 		
 		guard let isPacked = fileType.packedStatus.isPacked else {
-			fatalError("proprietary file type \(fileType) is neither packed or unpacked")
+			preconditionFailure("proprietary file type \(fileType) is neither packed or unpacked")
 		}
 		
 		let newName = if isPacked {

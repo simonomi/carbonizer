@@ -16,7 +16,7 @@ extension DMS: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
 		value = binary.value
 	}
 }
@@ -35,7 +35,7 @@ extension DMS.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dms: DMS) {
+	init(_ dms: DMS, configuration: CarbonizerConfiguration) {
 		value = dms.value
 	}
 }

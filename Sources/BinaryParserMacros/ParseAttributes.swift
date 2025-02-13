@@ -28,7 +28,7 @@ extension Attributes {
 			
 			guard let arguments = attribute.arguments.flatMap(LabeledExprListSyntax.init),
 				  !arguments.isEmpty else {
-				fatalError("all attributes require arguments")
+				preconditionFailure("all attributes require arguments")
 			}
 			
 			self[keyPath: keyPath] = try parseArgument(arguments.first!)
@@ -42,7 +42,7 @@ extension Attributes {
 			}
 			
 			guard let arguments = attribute.arguments.flatMap(LabeledExprListSyntax.init) else {
-				fatalError("@Offsets requires arguments")
+				preconditionFailure("@Offsets requires arguments")
 			}
 			
 			offsets = try parseOffsets(arguments)
@@ -52,7 +52,7 @@ extension Attributes {
 			}
 			
 			guard let arguments = attribute.arguments.flatMap(LabeledExprListSyntax.init) else {
-				fatalError("@If requires arguments")
+				preconditionFailure("@If requires arguments")
 			}
 			
 			ifCondition = try parseIfCondition(arguments)
@@ -81,7 +81,7 @@ func parseArgument(_ argument: LabeledExprSyntax) throws -> ValueOrProperty {
 			}
 		return .value(value)
 	} else {
-		fatalError("the argument must be an int or a keypath")
+		preconditionFailure("the argument must be an int or a keypath")
 		// this could possibly happen if its an identifier? maybe a static let?
 		// oh well idc that much
 	}
@@ -89,7 +89,7 @@ func parseArgument(_ argument: LabeledExprSyntax) throws -> ValueOrProperty {
 
 func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueOrProperty: ValueOrProperty) -> ValueOrProperty {
 	guard case .property(let property) = valueOrProperty else {
-		fatalError("operators can only be used on properties")
+		preconditionFailure("operators can only be used on properties")
 	}
 	
 	var components = [property]
@@ -101,7 +101,7 @@ func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueO
 		}
 		
 		guard let enumCase = FunctionCallExprSyntax(expression) else {
-			fatalError("argument must be an enum case with an associated value")
+			preconditionFailure("argument must be an enum case with an associated value")
 		}
 		
 		let caseName = enumCase.calledExpression.trimmedDescription.dropFirst() // remove leading .
@@ -113,13 +113,13 @@ func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueO
 				case "times": "*"
 				case "dividedBy": "/"
 				case "modulo": "%"
-				default: fatalError("unexpected operator")
+				default: preconditionFailure("unexpected operator")
 			}
 		
 		components.append(operatorSymbol)
 		
 		guard let enumExpression = enumCase.arguments.first?.expression else {
-			fatalError("operator enum must have payload")
+			preconditionFailure("operator enum must have payload")
 		}
 		
 		let modifyingValue: String
@@ -129,7 +129,7 @@ func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueO
 			let expression = keypath.components.trimmedDescription.dropFirst() // remove trailing .
 			modifyingValue = "\(expression)"
 		} else {
-			fatalError("associated value must be an integer literal or a keypath")
+			preconditionFailure("associated value must be an integer literal or a keypath")
 		}
 		
 		components.append(modifyingValue)
@@ -140,7 +140,7 @@ func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueO
 
 func parseOffsets(_ arguments: LabeledExprListSyntax) throws -> Property.Size.Offsets {
 	guard let keyPath = KeyPathExprSyntax(arguments.first!.expression) else {
-		fatalError("@Offsets first argument must be a keypath")
+		preconditionFailure("@Offsets first argument must be a keypath")
 	}
 	
 	let keyPathBase = keyPath.root?.trimmedDescription
@@ -156,7 +156,7 @@ func parseOffsets(_ arguments: LabeledExprListSyntax) throws -> Property.Size.Of
 			return .givenByPath(pathWithoutLeadingPeriod)
 		case 2:
 			guard let subKeyPath = KeyPathExprSyntax(arguments.last!.expression) else {
-				fatalError("@Offsets' second argument must be a keypath")
+				preconditionFailure("@Offsets' second argument must be a keypath")
 			}
 			
 			let subPath = subKeyPath.trimmedDescription
@@ -165,28 +165,28 @@ func parseOffsets(_ arguments: LabeledExprListSyntax) throws -> Property.Size.Of
 		case 3:
 			let secondIndex = arguments.index(after: arguments.startIndex)
 			guard let startKeyPath = KeyPathExprSyntax(arguments[secondIndex].expression) else {
-				fatalError("@Offsets' second argument must be a keypath")
+				preconditionFailure("@Offsets' second argument must be a keypath")
 			}
 			let startPath = startKeyPath.trimmedDescription
 			
 			guard let endKeyPath = KeyPathExprSyntax(arguments.last!.expression) else {
-				fatalError("@Offsets' third argument must be a keypath")
+				preconditionFailure("@Offsets' third argument must be a keypath")
 			}
 			let endPath = endKeyPath.trimmedDescription
 			
 			return .givenByPathStartToEnd(pathWithoutLeadingPeriod, startPath, endPath)
 		default:
-			fatalError("@Offsets should only have 1 or 2 arguments")
+			preconditionFailure("@Offsets should only have 1 or 2 arguments")
 	}
 }
 
 func parseIfCondition(_ arguments: LabeledExprListSyntax) throws -> String {
 	guard arguments.count == 2 else {
-		fatalError("@If requires two arguments")
+		preconditionFailure("@If requires two arguments")
 	}
 	
 	guard let keyPath = KeyPathExprSyntax(arguments.first!.expression) else {
-		fatalError("@Offsets first argument must be a keypath")
+		preconditionFailure("@Offsets first argument must be a keypath")
 	}
 	
 	let keyPathBase = keyPath.root?.trimmedDescription
@@ -206,13 +206,13 @@ func parseCondition(_ conditionArgument: LabeledExprSyntax) throws -> (String, S
 	let expression = conditionArgument.expression
 	
 	guard let enumCase = FunctionCallExprSyntax(expression) else {
-		fatalError("argument must be an enum case with an associated value")
+		preconditionFailure("argument must be an enum case with an associated value")
 	}
 	
 	let caseName = enumCase.calledExpression.trimmedDescription.dropFirst() // remove leading .
 	
 	guard let modifyingValue = enumCase.arguments.first?.expression.trimmedDescription else {
-		fatalError("argument must have associated value")
+		preconditionFailure("argument must have associated value")
 	}
 	
 	let operatorSymbol =
@@ -223,7 +223,7 @@ func parseCondition(_ conditionArgument: LabeledExprSyntax) throws -> (String, S
 			case "lessThan": " < "
 			case "greaterThanOrEqualTo": " >= "
 			case "lessThanOrEqualTo": " <= "
-			default: fatalError("unexpected condition")
+			default: preconditionFailure("unexpected condition")
 		}
 	
 	return (operatorSymbol, modifyingValue)

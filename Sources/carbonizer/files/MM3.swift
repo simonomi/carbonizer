@@ -35,7 +35,7 @@ extension MM3: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ packed: Binary) {
+	init(_ packed: Binary, configuration: CarbonizerConfiguration) {
 		model = TableEntry(index: packed.modelIndex, tableName: packed.modelTableName)
 		animation = TableEntry(index: packed.animationIndex, tableName: packed.animationTableName)
 		texture = TableEntry(index: packed.textureIndex, tableName: packed.textureTableName)
@@ -46,7 +46,7 @@ extension MM3.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ mm3: MM3) {
+	init(_ mm3: MM3, configuration: CarbonizerConfiguration) {
 		modelIndex = mm3.model.index
 		animationIndex = mm3.animation.index
 		textureIndex = mm3.texture.index

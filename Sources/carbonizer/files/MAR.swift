@@ -5,8 +5,6 @@ struct MAR {
 	var name: String
 	var files: [MCM]
 	
-	var configuration: CarbonizerConfiguration
-	
 	@BinaryConvertible
 	struct Binary {
 		@Include
@@ -53,15 +51,15 @@ extension MAR: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .unpacked }
 	
-	func packed() -> PackedMAR {
+	func packed(configuration: CarbonizerConfiguration) -> PackedMAR {
 		PackedMAR(
 			name: name,
-			binary: MAR.Binary(self),
+			binary: MAR.Binary(self, configuration: configuration),
 			configuration: configuration
 		)
 	}
 	
-	func unpacked() throws -> Self { self }
+	func unpacked(configuration: CarbonizerConfiguration) throws -> Self { self }
 }
 
 struct PackedMAR: FileSystemObject {
@@ -95,9 +93,9 @@ struct PackedMAR: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .packed }
 	
-	func packed() -> Self { self }
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
 	
-	func unpacked() throws -> MAR {
+	func unpacked(configuration: CarbonizerConfiguration) throws -> MAR {
 		try MAR(
 			name: name,
 			binary: binary,
@@ -122,8 +120,6 @@ extension MAR {
 		)
 		self.name = name
 		
-		self.configuration = configuration
-		
 		do {
 			files = try binary.files.map { try MCM($0, configuration: configuration) }
 		} catch {
@@ -133,10 +129,10 @@ extension MAR {
 }
 
 extension MAR.Binary {
-	init(_ mar: MAR) {
+	init(_ mar: MAR, configuration: CarbonizerConfiguration) {
 		fileCount = UInt32(mar.files.count)
 		
-		files = mar.files.map(MCM.Binary.init)
+		files = mar.files.map { MCM.Binary($0, configuration: configuration) }
 		
 		let firstFileIndex = 8 + fileCount * 8
 		let mcmSizes = files.map(\.endOfFileOffset)

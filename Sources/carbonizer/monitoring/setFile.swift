@@ -1,3 +1,5 @@
+// TODO: should this extension be a requirement of FileSystemObject?
+// PostProcessor has `fatalError("shouldnt be called on \(Self.self)")`
 extension FileSystemObject {
 	func setFile(at path: ArraySlice<String>, to content: any FileSystemObject) {
 		fatalError()

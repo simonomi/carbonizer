@@ -74,7 +74,7 @@ extension MCM {
 				name: "",
 				data: data,
 				configuration: configuration
-			)?.unpacked() ?? data
+			)?.unpacked(configuration: configuration) ?? data
 #else
 			let fileData = try createFileData(
 				name: "",
@@ -95,7 +95,7 @@ extension MCM {
 }
 
 extension MCM.Binary {
-	init(_ mcm: MCM) {
+	init(_ mcm: MCM, configuration: CarbonizerConfiguration) {
 		maxChunkSize = mcm.maxChunkSize
 		// TODO: turn back on once compression is implemented
 //		compressionType1 = mcm.compression.0.rawValue
@@ -105,7 +105,7 @@ extension MCM.Binary {
 		
 		let data = Datawriter()
 #if compiler(>=6)
-		mcm.content.packed().write(to: data)
+		mcm.content.packed(configuration: configuration).write(to: data)
 #else
 		let packedContent: any ProprietaryFileData = mcm.content.packed()
 		packedContent.write(to: data)

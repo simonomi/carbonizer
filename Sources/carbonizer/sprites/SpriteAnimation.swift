@@ -129,7 +129,7 @@ struct SpriteAnimation: BinaryConvertible {
 		}
 		
 		func write(to data: Datawriter) {
-			fatalError("TODO:")
+			todo()
 		}
 		
 		var description: String {
@@ -218,7 +218,7 @@ struct SpriteAnimation: BinaryConvertible {
 //				case .fifteen(let arg, let uInt16):
 //					<#code#>
 				case .unknown: fatalError("unreachable")
-				default: fatalError("TODO: \(command)")
+				default: todo("\(command)")
 			}
 //			print(images)
 		}

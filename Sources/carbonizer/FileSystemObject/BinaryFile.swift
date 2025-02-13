@@ -50,6 +50,6 @@ extension BinaryFile: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .unknown }
 	
-	func packed() -> BinaryFile { self }
-	func unpacked() throws -> BinaryFile { self }
+	func packed(configuration: CarbonizerConfiguration) -> BinaryFile { self }
+	func unpacked(configuration: CarbonizerConfiguration) throws -> BinaryFile { self }
 }

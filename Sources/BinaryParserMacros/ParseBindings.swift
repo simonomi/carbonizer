@@ -27,7 +27,7 @@ func parseBinding(_ binding: PatternBindingSyntax, with attributes: Attributes) 
 				throw PropertyParsingError.cannotInferType(for: name, initializer.trimmedDescription)
 			}
 		} else {
-			fatalError("binding has no type")
+			preconditionFailure("binding has no type")
 		}
 	
 	let expected = binding.initializer?.value.trimmedDescription

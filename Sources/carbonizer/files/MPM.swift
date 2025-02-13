@@ -57,7 +57,7 @@ extension MPM: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ packed: Binary) {
+	init(_ packed: Binary, configuration: CarbonizerConfiguration) {
 		unknown1 = packed.unknown1
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3
@@ -81,7 +81,7 @@ extension MPM.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ mpm: MPM) {
+	init(_ mpm: MPM, configuration: CarbonizerConfiguration) {
 		unknown1 = mpm.unknown1
 		unknown2 = mpm.unknown2
 		unknown3 = mpm.unknown3

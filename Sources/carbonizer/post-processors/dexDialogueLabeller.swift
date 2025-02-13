@@ -21,8 +21,7 @@ func dexDialogueLabeller(
 							maxChunkSize: $0.maxChunkSize,
 							content: label($0.content, with: dialogue) as any ProprietaryFileData
 						)
-					},
-				configuration: configuration
+					}
 			)
 		case let nds as NDS:
 			NDS(

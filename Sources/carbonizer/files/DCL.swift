@@ -277,7 +277,7 @@ extension DCL: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
 		unknown1 = binary.unknown1
 		unknown2 = binary.unknown2
 		unknown3 = binary.unknown3
@@ -299,7 +299,7 @@ extension DCL.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dcl: DCL) {
+	init(_ dcl: DCL, configuration: CarbonizerConfiguration) {
 		unknown1 = dcl.unknown1
 		unknown2 = dcl.unknown2
 		unknown3 = dcl.unknown3
@@ -313,7 +313,7 @@ extension DCL.Binary: ProprietaryFileData {
 		
 //		vivosaurs = dcl.vivosaurs.map(Vivosaur.init)
 		
-		fatalError()
+		todo()
 	}
 }
 
@@ -321,7 +321,7 @@ extension DCL.Binary: ProprietaryFileData {
 #if compiler(>=6)
 extension DCL.Binary.Vivosaur {
 	init(_ unpacked: DCL.Vivosaur) {
-		fatalError("TODO:")
+		todo()
 	}
 }
 #endif

@@ -24,7 +24,7 @@ extension SpriteBitmap {
 			case 1, 4, 10: 16
 			case 5, 8, 9, 14: 32
 			case 12, 13: 64
-			default: fatalError("unreachable") // TODO: handle errors properly
+			default: todo("handle this properly")
 		}
 	}
 	
@@ -34,7 +34,7 @@ extension SpriteBitmap {
 			case 2, 4, 9: 16
 			case 6, 8, 10, 13: 32
 			case 12, 14: 64
-			default: fatalError("unreachable") // TODO: handle errors properly
+			default: todo("handle this properly")
 		}
 	}
 	

@@ -2,7 +2,7 @@ import BinaryParser
 
 enum RunLength {
 	static func compress(_ data: Datastream) -> Datastream {
-		fatalError("TODO:")
+		todo()
 	}
 	
 	static func decompress(_ inputData: Datastream) throws -> Datastream {

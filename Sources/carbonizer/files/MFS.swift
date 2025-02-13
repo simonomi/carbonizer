@@ -64,7 +64,7 @@ extension MFS: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
 		somethings = binary.noClue
 		
 		guard binary.someCount == 3 else { return }
@@ -102,8 +102,8 @@ extension MFS.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ mfs: MFS) {
-		fatalError("TODO")
+	init(_ mfs: MFS, configuration: CarbonizerConfiguration) {
+		todo()
 	}
 }
 

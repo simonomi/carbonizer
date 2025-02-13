@@ -187,16 +187,16 @@ extension NDS: FileSystemObject {
 			.reduce(.unpacked) { $0.combined(with: $1) }
 	}
 	
-	func packed() -> PackedNDS {
+	func packed(configuration: CarbonizerConfiguration) -> PackedNDS {
 		PackedNDS(
 			name: name,
-			binary: NDS.Binary(self),
+			binary: NDS.Binary(self, configuration: configuration),
 			configuration: configuration
 		)
 	}
 	
-	consuming func unpacked() throws -> Self {
-		contents = try contents.map { try $0.unpacked() }
+	consuming func unpacked(configuration: CarbonizerConfiguration) throws -> Self {
+		contents = try contents.map { try $0.unpacked(configuration: configuration) }
 		return self
 	}
 }
@@ -233,10 +233,11 @@ struct PackedNDS: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .packed }
 	
-	func packed() -> Self { self }
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
 	
-	func unpacked() throws -> NDS {
-		try NDS(name: name, binary: binary, configuration: configuration).unpacked()
+	func unpacked(configuration: CarbonizerConfiguration) throws -> NDS {
+		try NDS(name: name, binary: binary, configuration: configuration)
+			.unpacked(configuration: configuration)
 	}
 }
 
@@ -285,7 +286,7 @@ extension NDS {
 }
 
 extension NDS.Binary {
-	init(_ nds: NDS) {
+	init(_ nds: NDS, configuration: CarbonizerConfiguration) {
 		header = nds.header
 		
 		arm9 = nds.arm9
@@ -296,7 +297,7 @@ extension NDS.Binary {
 		
 		iconBanner = nds.iconBanner
 		
-		let contents = nds.contents.map { $0.packed() }
+		let contents = nds.contents.map { $0.packed(configuration: configuration) }
 		
 		let numberOfOverlays = UInt16(arm9OverlayTable.count + arm7OverlayTable.count)
 		fileNameTable = FileNameTable(contents, firstFileId: numberOfOverlays)

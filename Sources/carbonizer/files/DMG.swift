@@ -38,7 +38,7 @@ extension DMG: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
 		strings = binary.strings.map(DMGString.init)
 	}
 }
@@ -54,7 +54,7 @@ extension DMG.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dmg: DMG) {
+	init(_ dmg: DMG, configuration: CarbonizerConfiguration) {
 		stringCount = UInt32(dmg.strings.count)
 		
 		indices = makeOffsets(

@@ -78,7 +78,7 @@ extension TCL: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
 		vivosaurs = binary.vivosaurs.map {
 			Vivosaur(
 				animations: $0.animations.map {
@@ -110,7 +110,7 @@ extension TCL.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ tcl: TCL) {
-		fatalError("TODO:")
+	init(_ tcl: TCL, configuration: CarbonizerConfiguration) {
+		todo()
 	}
 }

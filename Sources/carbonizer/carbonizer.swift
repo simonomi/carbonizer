@@ -101,9 +101,9 @@ struct Carbonizer: AsyncParsableCommand {
 			var processedFile: any FileSystemObject
 			switch action {
 				case .pack:
-					processedFile = file.packed()
+					processedFile = file.packed(configuration: configuration)
 				case .unpack:
-					processedFile = try file.unpacked()
+					processedFile = try file.unpacked(configuration: configuration)
 				case nil:
 					print("Skipping file...")
 					continue

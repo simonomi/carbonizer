@@ -7,7 +7,7 @@ fileprivate func dropLowestBit<T: FixedWidthInteger>(of number: T) -> T {
 // https://mgba-emu.github.io/gbatek/#huffuncompreadbycallback---swi-13h-ndsdsi
 enum Huffman {
 	static func compress(_ data: Datastream) -> Datastream {
-		fatalError("TODO:")
+		todo()
 	}
 	
 	static func decompress(_ inputData: Datastream) throws -> Datastream {

@@ -47,8 +47,8 @@ extension CHR: ProprietaryFileData, Codable {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary) {
-		fatalError("TODO:")
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
+		todo()
 	}
 	
 	enum CodingKeys: CodingKey {
@@ -60,7 +60,7 @@ extension CHR.Binary: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ chr: CHR) {
-		fatalError("TODO:")
+	init(_ chr: CHR, configuration: CarbonizerConfiguration) {
+		todo()
 	}
 }

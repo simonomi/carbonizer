@@ -37,19 +37,19 @@ extension ProprietaryFile: FileSystemObject {
 		type(of: data).packedStatus
 	}
 	
-	func packed() -> Self {
+	func packed(configuration: CarbonizerConfiguration) -> Self {
 		ProprietaryFile(
 			name: name,
 			metadata: metadata,
-			data: data.packed() as any ProprietaryFileData
+			data: data.packed(configuration: configuration) as any ProprietaryFileData
 		)
 	}
 	
-	func unpacked() throws -> Self {
+	func unpacked(configuration: CarbonizerConfiguration) throws -> Self {
 		ProprietaryFile(
 			name: name,
 			metadata: metadata,
-			data: data.unpacked()  as any ProprietaryFileData
+			data: data.unpacked(configuration: configuration) as any ProprietaryFileData
 		)
 	}
 }
