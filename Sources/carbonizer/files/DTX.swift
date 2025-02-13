@@ -18,7 +18,7 @@ struct DTX {
 }
 
 // MARK: packed
-extension DTX: ProprietaryFileData {
+extension DTX: ProprietaryFileData, BinaryConvertible {
 	static let fileExtension = ".dtx.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked

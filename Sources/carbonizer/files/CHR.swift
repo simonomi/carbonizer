@@ -42,7 +42,7 @@ struct CHR {
 	}
 }
 
-extension CHR: ProprietaryFileData, Codable {
+extension CHR: ProprietaryFileData, BinaryConvertible, Codable {
 	static let fileExtension = ".chr.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked

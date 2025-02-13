@@ -308,7 +308,7 @@ extension NDS.Binary {
 			let writer = Datawriter()
 			switch $0 {
 				case let proprietaryFile as ProprietaryFile:
-					writer.write(proprietaryFile.data)
+					proprietaryFile.data.write(to: writer)
 				case let binaryFile as BinaryFile:
 					writer.write(binaryFile.data)
 				case let packedMAR as PackedMAR:

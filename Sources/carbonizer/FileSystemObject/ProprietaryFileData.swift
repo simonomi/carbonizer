@@ -1,7 +1,7 @@
 import BinaryParser
 import Foundation
 
-protocol ProprietaryFileData: BinaryConvertible {
+protocol ProprietaryFileData {
 	static var fileExtension: String { get }
 	static var magicBytes: String { get }
 	
@@ -12,11 +12,20 @@ protocol ProprietaryFileData: BinaryConvertible {
 	
 	associatedtype Unpacked: ProprietaryFileData where Unpacked.Packed == Self
 	init(_ unpacked: Unpacked, configuration: CarbonizerConfiguration)
+	
+	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws
+	func write(to data: Datawriter)
 }
 
 extension ProprietaryFileData {
 	fileprivate static func selfAndPacked() -> [any ProprietaryFileData.Type] {
 		[Self.self, Packed.self]
+	}
+}
+
+extension ProprietaryFileData where Self: BinaryConvertible {
+	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
+		self = try data.read(Self.self)
 	}
 }
 
@@ -56,7 +65,7 @@ func createFileData(
 		}
 	
 	if let fileType = fileTypes.first(where: name.hasExtension) {
-		return try data.read(fileType) as any ProprietaryFileData
+		return try fileType.init(data, configuration: configuration) as any ProprietaryFileData
 	}
 	
 	let marker = data.placeMarker()
@@ -64,7 +73,7 @@ func createFileData(
 	data.jump(to: marker)
 	
 	if let fileType = fileTypes.first(where: { $0.magicBytes == magicBytes }) {
-		return try data.read(fileType) as any ProprietaryFileData
+		return try fileType.init(data, configuration: configuration) as any ProprietaryFileData
 	}
 	
 	return nil

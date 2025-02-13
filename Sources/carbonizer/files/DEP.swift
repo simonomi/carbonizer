@@ -117,7 +117,7 @@ extension DEP: ProprietaryFileData {
 		blocks = binary.blocks.map(Block.init)
 	}
 	
-	init(_ data: Datastream) throws {
+	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
 		let fileLength = data.bytes.endIndex - data.offset
 		let string = try data.read(String.self, exactLength: fileLength)
 		

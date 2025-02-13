@@ -11,7 +11,7 @@ struct DMS {
 	}
 }
 
-extension DMS: ProprietaryFileData {
+extension DMS: ProprietaryFileData, BinaryConvertible {
 	static let fileExtension = ".dms.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked

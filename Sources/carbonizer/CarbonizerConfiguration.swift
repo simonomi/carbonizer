@@ -13,14 +13,7 @@ struct CarbonizerConfiguration: Decodable {
 #else
 	var useColor: Bool = true
 #endif
-	
-	enum KeepWindowOpen: String, Decodable {
-		case always, never, onError
-		
-		var onError: Bool {
-			self == .always || self == .onError
-		}
-	}
+	var dexCommandList: DEXCommandList = .ff1
 	
 	var fileTypes: [String] = ["DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"]
 	
@@ -72,6 +65,18 @@ struct CarbonizerConfiguration: Decodable {
 		}
 	}
 	
+	enum KeepWindowOpen: String, Decodable {
+		case always, never, onError
+		
+		var onError: Bool {
+			self == .always || self == .onError
+		}
+	}
+	
+	enum DEXCommandList: String, Decodable {
+		case ff1, ffc, none
+	}
+	
 	static let defaultConfiguration: String = """
 		{
 			"compressionMode": "auto", // pack, unpack, auto, ask
@@ -81,13 +86,11 @@ struct CarbonizerConfiguration: Decodable {
 			"showProgress": true,
 			"keepWindowOpen": "onError", // always, never, onError
 			"useColor": true,
+			"dexCommandList": "ff1", // ff1, ffc, none
 			
 			// stable: DEP, DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
 			// experimental: 3CL, CHR, DCL, MFS, MMS
 			"fileTypes": ["DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
-			
-			// "skipExtracting": [],
-			// "onlyExtract": [],
 			
 			"experimental": {
 				"hotReloading": false, // macOS only
@@ -100,6 +103,9 @@ struct CarbonizerConfiguration: Decodable {
 			}
 		}
 		"""
+#if os(Windows)
+		.replacing("useColor\": true", with: "useColor\": false")
+#endif
 }
 
 extension CarbonizerConfiguration {

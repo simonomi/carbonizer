@@ -73,7 +73,7 @@ struct TCL: Codable {
 	}
 }
 
-extension TCL: ProprietaryFileData {
+extension TCL: ProprietaryFileData, BinaryConvertible {
 	static let fileExtension = ".3cl.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked

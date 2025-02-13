@@ -33,7 +33,7 @@ struct DMG {
 }
 
 // MARK: packed
-extension DMG: ProprietaryFileData {
+extension DMG: ProprietaryFileData, BinaryConvertible {
 	static let fileExtension = ".dmg.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked

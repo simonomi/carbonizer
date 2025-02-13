@@ -272,7 +272,7 @@ struct DCL {
 }
 
 // MARK: packed
-extension DCL: ProprietaryFileData {
+extension DCL: ProprietaryFileData, BinaryConvertible {
 	static let fileExtension = ".dcl.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked

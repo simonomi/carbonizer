@@ -19,7 +19,7 @@ struct DEX {
 		var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
 	}
 	
-	static let knownCommands: [UInt32: CommandDefinition] = [
+	static let ff1Commands: [UInt32: CommandDefinition] = [
 		1:   "dialogue \(0, .dialogue)",
 		// 3: (#)
 		//     7025 freezes camera focus (?)
@@ -112,6 +112,16 @@ struct DEX {
 		// all the unknown commands as of rn 2 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 44 46 47 48 52 53 55 62 63 71 72 75 76 77 81 82 83 84 85 86 87 88 89 91 92 93 95 96 97 98 99 100 102 103 104 105 106 107 108 110 111 112 113 116 118 120 121 126 127 128 134 136 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205 206
 	]
 	
+	static let ffcCommands: [UInt32: CommandDefinition] = [:]
+	
+	static func knownCommands(for configuration: CarbonizerConfiguration) -> [UInt32: CommandDefinition] {
+		switch configuration.dexCommandList {
+			case .ff1: ff1Commands
+			case .ffc: ffcCommands
+			case .none: [:]
+		}
+	}
+	
 	enum Command {
 		case known(type: UInt32, definition: CommandDefinition, arguments: [Int32])
 		case unknown(type: UInt32, arguments: [Int32])
@@ -171,7 +181,7 @@ extension DEX: ProprietaryFileData {
 			.recursiveMap { Command($0, configuration: configuration) }
 	}
 	
-	init(_ data: Datastream) throws {
+	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
 		let fileLength = data.bytes.endIndex - data.offset
 		let string = try data.read(String.self, exactLength: fileLength)
 		
@@ -179,7 +189,7 @@ extension DEX: ProprietaryFileData {
 			.split(separator: "\n\n")
 			.map {
 				try $0.split(separator: "\n")
-					.map(DEX.Command.init)
+					.map { try DEX.Command($0, configuration: configuration) }
 			}
 	}
 	
@@ -297,21 +307,23 @@ extension DEX.CommandDefinition: ExpressibleByStringInterpolation {
 
 extension DEX {
 	static func checkKnownCommands() {
-		var allCommandsWithoutArguments = Set<[String]>()
-		
-		for command in knownCommands.values {
-			guard !allCommandsWithoutArguments.contains(command.textWithoutArguments) else {
-				print("\(.red)duplicate command text for \(command.textWithoutArguments) >:(\(.normal)")
-				preconditionFailure()
+		for commandList in [ff1Commands, ffcCommands] {
+			var allCommandsWithoutArguments = Set<[String]>()
+			
+			for command in commandList.values {
+				guard !allCommandsWithoutArguments.contains(command.textWithoutArguments) else {
+					print("\(.red)duplicate command text for \(command.textWithoutArguments) >:(\(.normal)")
+					preconditionFailure()
+				}
+				allCommandsWithoutArguments.insert(command.textWithoutArguments)
 			}
-			allCommandsWithoutArguments.insert(command.textWithoutArguments)
 		}
 	}
 }
 
 extension DEX.Command {
 	init(_ binaryCommand: DEX.Binary.Block.Command, configuration: CarbonizerConfiguration) {
-		self = if let definition = DEX.knownCommands[binaryCommand.type] {
+		self = if let definition = DEX.knownCommands(for: configuration)[binaryCommand.type] {
 			.known(
 				type: binaryCommand.type,
 				definition: definition,
@@ -325,7 +337,7 @@ extension DEX.Command {
 		}
 	}
 	
-	init(_ text: Substring) throws(DEX.Command.ParseError) {
+	init(_ text: Substring, configuration: CarbonizerConfiguration) throws(DEX.Command.ParseError) {
 		if text.hasPrefix("// ") {
 			self = .comment(String(text.dropFirst(3)))
 			return
@@ -338,7 +350,7 @@ extension DEX.Command {
 			throw .mismatchedAngleBrackets(requirement: text)
 		}
 		
-		if let (commandType, knownCommand) = DEX.knownCommands.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
+		if let (commandType, knownCommand) = DEX.knownCommands(for: configuration).first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
 			guard knownCommand.argumentIndicesFromText.count == arguments.count else {
 				throw
 					.incorrectArgumentCount(

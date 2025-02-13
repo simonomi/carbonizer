@@ -52,7 +52,7 @@ struct MPM {
 }
 
 // MARK: packed
-extension MPM: ProprietaryFileData {
+extension MPM: ProprietaryFileData, BinaryConvertible {
 	static let fileExtension = ".mpm.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
