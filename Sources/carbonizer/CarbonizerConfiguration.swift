@@ -1,7 +1,7 @@
 import ArgumentParser
 import Foundation
 
-struct CarbonizerConfiguration: Decodable {
+struct CarbonizerConfiguration {
 	var compressionMode: CompressionMode = .auto
 	var inputFiles: [String] = []
 	var outputFolder: String? = nil
@@ -23,7 +23,7 @@ struct CarbonizerConfiguration: Decodable {
 	
 	var experimental: ExperimentalOptions = ExperimentalOptions()
 	
-	struct ExperimentalOptions: Decodable {
+	struct ExperimentalOptions {
 		var hotReloading: Bool = false
 		var postProcessors: [String] = []
 		var dexDialogueLabeller: Bool = false
@@ -77,7 +77,7 @@ struct CarbonizerConfiguration: Decodable {
 		case ff1, ffc, none
 	}
 	
-	static let defaultConfiguration: String = """
+	static let defaultConfigurationString: String = """
 		{
 			"compressionMode": "auto", // pack, unpack, auto, ask
 			"inputFiles": [],
@@ -106,6 +106,64 @@ struct CarbonizerConfiguration: Decodable {
 #if os(Windows)
 		.replacing("useColor\": true", with: "useColor\": false")
 #endif
+	
+	static let defaultConfiguration = try! Self(decoding: defaultConfigurationString)
+}
+
+extension CarbonizerConfiguration: Decodable {
+	enum CodingKeys: CodingKey {
+		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, dexCommandList, fileTypes, experimental
+	}
+	
+	init(from decoder: any Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+		
+		// this is lazy to prevent infinite recursion
+		lazy var fallback = Self.defaultConfiguration
+		
+		compressionMode = try container.decodeIfPresent(CompressionMode.self,     forKey: .compressionMode) ??
+			fallback.compressionMode
+		inputFiles =      try container.decodeIfPresent([String].self,            forKey: .inputFiles) ??
+			fallback.inputFiles
+		outputFolder =    try container.decodeIfPresent(String.self,              forKey: .outputFolder) ??
+			fallback.outputFolder
+		overwriteOutput = try container.decodeIfPresent(Bool.self,                forKey: .overwriteOutput) ??
+			fallback.overwriteOutput
+		showProgress =    try container.decodeIfPresent(Bool.self,                forKey: .showProgress) ??
+			fallback.showProgress
+		keepWindowOpen =  try container.decodeIfPresent(KeepWindowOpen.self,      forKey: .keepWindowOpen) ??
+			fallback.keepWindowOpen
+		useColor =        try container.decodeIfPresent(Bool.self,                forKey: .useColor) ??
+			fallback.useColor
+		dexCommandList =  try container.decodeIfPresent(DEXCommandList.self,      forKey: .dexCommandList) ??
+			fallback.dexCommandList
+		fileTypes =       try container.decodeIfPresent([String].self,            forKey: .fileTypes) ??
+			fallback.fileTypes
+		experimental =    try container.decodeIfPresent(ExperimentalOptions.self, forKey: .experimental) ??
+			fallback.experimental
+	}
+}
+
+extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
+	enum CodingKeys: CodingKey {
+		case hotReloading, postProcessors, dexDialogueLabeller, dexBlockLabeller
+	}
+	
+	init(from decoder: any Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+		
+		// this is lazy to prevent infinite recursion
+		lazy var fallback = CarbonizerConfiguration.defaultConfiguration.experimental
+		
+		hotReloading =        try container.decodeIfPresent(Bool.self, forKey: .hotReloading) ??
+			fallback.hotReloading
+		postProcessors =      try container.decodeIfPresent([String].self, forKey: .postProcessors) ??
+			fallback.postProcessors
+		dexDialogueLabeller = try container.decodeIfPresent(Bool.self, forKey: .dexDialogueLabeller) ??
+			fallback.dexDialogueLabeller
+		dexBlockLabeller =    try container.decodeIfPresent(Bool.self, forKey: .dexBlockLabeller) ??
+			fallback.dexBlockLabeller
+	}
 }
 
 extension CarbonizerConfiguration {
@@ -114,7 +172,7 @@ extension CarbonizerConfiguration {
 		if path.exists() {
 			text = try String(contentsOf: path, encoding: .utf8)
 		} else {
-			text = Self.defaultConfiguration
+			text = Self.defaultConfigurationString
 			try text.write(to: path, atomically: true, encoding: .utf8)
 		}
 		
