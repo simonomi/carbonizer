@@ -30,7 +30,7 @@ struct DBS {
 	
 	var unknowns17: [Unknown]
 	
-	var requiredVivosaurs: [Int32]
+	var requiredVivosaurs: [Fighter.Vivosaur.ID]
 	
 	struct Arena {
 		var id: Int32
@@ -131,7 +131,7 @@ struct DBS {
 		@BinaryConvertible
 		struct Fighter {
 			var vivosaurCount: UInt32
-			var vivosaursOffset: UInt32
+			var vivosaursOffset: UInt32 = 0x38
 			
 			var name: Int32 // index into dtx
 			var rank: Int32
@@ -219,7 +219,7 @@ extension DBS: ProprietaryFileData, BinaryConvertible, Codable {
 		
 		unknowns17 = binary.unknowns17.map(Unknown.init)
 		
-		requiredVivosaurs = binary.requiredVivosaurs
+		requiredVivosaurs = binary.requiredVivosaurs.map(Fighter.Vivosaur.ID.init)
 	}
 }
 
@@ -230,7 +230,7 @@ extension DBS.Arena: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
-			let arenaName = try container.decode(String.self)
+			let arenaName = try container.decode(String.self).lowercased()
 			
 			guard let foundEntry = kasekiumNames.first(where: { $0.value == arenaName }) else {
 				todo("could not find arena named '\(arenaName)'")
@@ -258,7 +258,7 @@ extension DBS.Music: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
-			let musicName = try container.decode(String.self)
+			let musicName = try container.decode(String.self).lowercased()
 			
 			guard let foundEntry = musicNames.first(where: { $0.value == musicName }) else {
 				todo("could not find music named '\(musicName)'")
@@ -325,7 +325,7 @@ extension DBS.Fighter.Vivosaur.ID: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
-			let vivosaurName = try container.decode(String.self)
+			let vivosaurName = try container.decode(String.self).lowercased()
 			
 			guard let foundEntry = vivosaurNames.first(where: { $0.value == vivosaurName }) else {
 				todo("could not find vivosaur named '\(vivosaurName)'")
@@ -358,6 +358,90 @@ extension DBS.Binary: ProprietaryFileData {
 	static let packedStatus: PackedStatus = .packed
 	
 	init(_ dbs: DBS, configuration: CarbonizerConfiguration) {
-		todo()
+		music = dbs.music.id
+		
+		unknown3 = dbs.unknown3
+		unknown4 = dbs.unknown4
+		unknown5 = dbs.unknown5
+		unknown6 = dbs.unknown6
+		
+		unknown7 = dbs.unknown7
+		unknown8 = dbs.unknown8
+		unknown9 = dbs.unknown9
+		unknown10 = dbs.unknown10
+		
+		arena = dbs.arena.id
+		
+		unknown11 = dbs.unknown11
+		unknown12 = dbs.unknown12
+		unknown13 = dbs.unknown13
+		
+		unknown14 = dbs.unknown14
+		bpForWinning = dbs.bpForWinning
+		unknown16 = dbs.unknown16
+		
+		fighter1 = dbs.fighter1.map(Fighter.init)
+		fighter1Offset = fighter1 == nil ? 0 : 0x5c
+		
+		fighter2 = Fighter(dbs.fighter2)
+		fighter2Offset = 0x5c + (fighter1?.size() ?? 0)
+		
+		unknowns17 = dbs.unknowns17.map(Unknown.init)
+		unknowns17Count = UInt32(unknowns17.count)
+		unknowns17Offset = fighter2Offset + fighter2.size()
+		
+		requiredVivosaurs = dbs.requiredVivosaurs.map(\.id)
+		requiredVivosaurCount = UInt32(requiredVivosaurs.count)
+		requiredVivosaursOffset = unknowns17Offset + unknowns17Count * 8
+	}
+}
+
+extension DBS.Binary.Fighter {
+	init(_ fighter: DBS.Fighter) {
+		name = fighter.name.id
+		rank = fighter.rank
+		
+		unknown1 = fighter.unknown1
+		unknown2 = fighter.unknown2
+		
+		vivosaurs = fighter.vivosaurs.map(Vivosaur.init)
+		vivosaurCount = UInt32(vivosaurs.count)
+
+		aiSets = fighter.vivosaurs.map(\.aiSet)
+		vivosaurCount2 = UInt32(aiSets.count)
+		aiSetsOffset = vivosaursOffset + vivosaurCount * 0xC
+		
+		interLevelBattlePointsPerVivosaur = fighter.vivosaurs
+			.map(\.interLevelBattlePoints)
+			.map { UInt32($0 * 4096) }
+		vivosaurCount3 = UInt32(interLevelBattlePointsPerVivosaur.count)
+		interLevelBattlePointsPerVivosaurOffset = aiSetsOffset + vivosaurCount2 * 4
+		
+		movesUnlockedPerVivosaur = fighter.vivosaurs.map(\.movesUnlocked)
+		vivosaurCount4 = UInt32(movesUnlockedPerVivosaur.count)
+		movesUnlockedPerVivosaurOffset = interLevelBattlePointsPerVivosaurOffset + vivosaurCount3 * 4
+		
+		unknowns3 = fighter.unknowns3
+		unknowns3Count = UInt32(unknowns3.count)
+		unknowns3Offset = movesUnlockedPerVivosaurOffset + vivosaurCount4 * 4
+	}
+	
+	func size() -> UInt32 {
+		unknowns3Offset + unknowns3Count * 4
+	}
+}
+
+extension DBS.Binary.Fighter.Vivosaur {
+	init(_ vivosaur: DBS.Fighter.Vivosaur) {
+		id = vivosaur.id.id
+		level = vivosaur.level
+		unknown = vivosaur.unknown
+	}
+}
+
+extension DBS.Binary.Unknown {
+	init(_ unknown: DBS.Unknown) {
+		unknown1 = unknown.unknown1
+		unknown2 = unknown.unknown2
 	}
 }
