@@ -1,25 +1,25 @@
 let effectNames: [Int32: String] = [
-	1: "ugh",
-	2: "exclamation point",
-	3: "light bulb left",
-	4: "haha",
-	5: "three white lines left",
-	6: "grrr",
-	7: "three red lines",
-	8: "question mark left",
-	9: "thinking",
-	10: "heart left",
-	11: "dizzy",
-	12: "wha left/right",
-	13: "ellipses left",
-	14: "three white lines right",
-	15: "question mark right",
-	16: "crying",
-	17: "wha in/out",
-	18: "firework middle",
-	19: "firework left",
-	20: "firework midleft",
-	21: "heart right",
-	22: "ellipses right",
-	23: "light bulb right"
+	1: "ugh",                      // ase
+	2: "exclamation point",        // bikkuri
+	3: "light bulb left",          // denkyuu
+	4: "haha",                     // warai
+	5: "three white lines left",   // ase2
+	6: "grrr",                     // ikari
+	7: "three red lines",          // kiduki
+	8: "question mark left",       // hatena
+	9: "thinking",                 // gusyagusya
+	10: "heart left",              // heart
+	11: "dizzy",                   // kurukuru
+	12: "wha left/right",          // gangan
+	13: "ellipses left",           // mugon
+	14: "three white lines right", // ase2_2
+	15: "question mark right",     // hatena2
+	16: "crying",                  // nakimusi
+	17: "wha in/out",              // gagagangan
+	18: "firework middle",         // hanabi
+	19: "firework left",           // hanabi_02
+	20: "firework midleft",        // hanabi_03
+	21: "heart right",             // heart2
+	22: "ellipses right",          // mugon2
+	23: "light bulb right"         // denkyuu2
 ]

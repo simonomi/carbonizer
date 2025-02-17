@@ -92,7 +92,7 @@ func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueO
 		preconditionFailure("operators can only be used on properties")
 	}
 	
-	var components = [property]
+	var components = ["Int(\(property))"]
 	
 	for operatorArgument in operatorArguments {
 		let expression = operatorArgument.expression
@@ -127,7 +127,7 @@ func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueO
 			modifyingValue = integerLiteral.trimmedDescription
 		} else if let keypath = enumExpression.as(KeyPathExprSyntax.self) {
 			let expression = keypath.components.trimmedDescription.dropFirst() // remove trailing .
-			modifyingValue = "\(expression)"
+			modifyingValue = "Int(\(expression))"
 		} else {
 			preconditionFailure("associated value must be an integer literal or a keypath")
 		}

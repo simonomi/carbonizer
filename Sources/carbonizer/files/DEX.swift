@@ -482,7 +482,7 @@ extension DEX.ArgumentType {
 			case .fixedPoint:      parseFixedPoint(text)
 			case .fossil:          parseLookupTable(fossilNames, text: text) ?? parsePrefix(text)
 			case .frames:          parseSuffix(text)
-			case .image:           parsePrefix(text)
+			case .image:           parseLookupTable(imageNames, text: text) ?? parsePrefix(text)
 			case .map:             parseLookupTable(mapNames, text: text) ?? parsePrefix(text)
 			case .movement:        parseLookupTable(movementNames, text: text) ?? parsePrefix(text)
 			case .music:           parsePrefix(text)
@@ -546,7 +546,7 @@ extension DEX.ArgumentType {
 			case .fixedPoint:  formatFixedPoint(number)
 			case .fossil:      "\(fossilNames[number] ?? "fossil \(number)")"
 			case .frames:      "\(number) frames"
-			case .image:       "image \(number)"
+			case .image:       "\(imageNames[number] ?? "image \(number)")"
 			case .map:         "\(mapNames[number] ?? "map \(number)")"
 			case .movement:    "\(movementNames[number] ?? "movement \(number)")"
 			case .music:       "music \(number)"

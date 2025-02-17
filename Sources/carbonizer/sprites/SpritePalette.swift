@@ -33,4 +33,15 @@ struct SpritePalette {
 			data.write(rawValue)
 		}
 	}
+	
+	consuming func colorOrderSwapped() -> Self {
+		colors = colors.map {
+			let red = $0.raw & 0b11111
+			let green = $0.raw >> 5 & 0b11111
+			let blue = $0.raw >> 10 & 0b11111
+			
+			return RGB555Color(raw: red << 10 | green << 5 | blue)
+		}
+		return self
+	}
 }

@@ -76,11 +76,13 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				}
 				
 				let colorPaletteFile = colorPaletteArchive.files[Int(colorPaletteIndex)]
-				let colorPaletteData = colorPaletteFile.content as! Datastream
-				colorPaletteData.offset = 0 // multiple files use the same palette
+				let colorPaletteData = Datastream(colorPaletteFile.content as! Datastream) // copy so as not to modify the original
 				
 				do {
+					// TODO: palettes are swapping red and blue
+					// is this different between sprites and textures?
 					return try SpritePalette(colorPaletteData)
+						.colorOrderSwapped()
 				} catch {
 					throw BinaryParserError.whileReadingFile(
 						parent.name + "/" + file.name,
@@ -95,8 +97,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			
 			let bitmaps: [SpriteBitmap] = try mms.bitmap.indices.map { bitmapIndex in
 				let bitmapFile = bitmapArchive.files[Int(bitmapIndex)]
-				let bitmapData = bitmapFile.content as! Datastream
-				bitmapData.offset = 0 // multiple files use the same bitmap
+				let bitmapData = Datastream(bitmapFile.content as! Datastream) // copy so as not to modify the original
 				
 				do {
 					return try SpriteBitmap(bitmapData)
@@ -110,13 +111,12 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			}
 			
 			let animationFile = animationArchive.files[animationIndex]
-			let animationData = animationFile.content as! Datastream
-			animationData.offset = 0 // multiple files use the same animation
-			let animation = try animationData.read(SpriteAnimation.self)
-//			print(prettify(animation.commands))
+			let animationData = Datastream(animationFile.content as! Datastream) // copy so as not to modify the original
 			
 			let frames: [Bitmap]
 			do {
+				let animation = try animationData.read(SpriteAnimation.self)
+//				print(prettify(animation.commands))
 				frames = try animation.frames(palettes: palettes, bitmaps: bitmaps)
 			} catch {
 				throw BinaryParserError.whileReadingFile(
@@ -126,11 +126,18 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				)
 			}
 			
-			for (frameIndex, bitmap) in frames.enumerated() {
+			if frames.count == 1 {
 				folder.contents.append(ProprietaryFile(
-					name: "\(file.name) animation \(animationIndex) frame \(frameIndex)",
-					data: bitmap
+					name: "\(file.name) sprite \(animationIndex)",
+					data: frames[0]
 				))
+			} else {
+				for (frameIndex, bitmap) in frames.enumerated() {
+					folder.contents.append(ProprietaryFile(
+						name: "\(file.name) sprite \(animationIndex) frame \(frameIndex)",
+						data: bitmap
+					))
+				}
 			}
 			
 			

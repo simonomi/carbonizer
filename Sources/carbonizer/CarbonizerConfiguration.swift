@@ -86,7 +86,7 @@ struct CarbonizerConfiguration {
 			"dexCommandList": "ff1", // ff1, ffc, none
 			
 			// stable: DEP, DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
-			// experimental: 3CL, CHR, DBS, DCL, MFS, MMS
+			// experimental: 3CL, CHR, DBS, DCL, ECS, MFS, MMS
 			"fileTypes": ["DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
 			"experimental": {
@@ -123,8 +123,7 @@ extension CarbonizerConfiguration: Decodable {
 			fallback.compressionMode
 		inputFiles =      try container.decodeIfPresent([String].self,            forKey: .inputFiles) ??
 			fallback.inputFiles
-		outputFolder =    try container.decodeIfPresent(String.self,              forKey: .outputFolder) ??
-			fallback.outputFolder
+		outputFolder =    try container.decodeIfPresent(String.self,              forKey: .outputFolder) // no fallback because the default value is nil
 		overwriteOutput = try container.decodeIfPresent(Bool.self,                forKey: .overwriteOutput) ??
 			fallback.overwriteOutput
 		showProgress =    try container.decodeIfPresent(Bool.self,                forKey: .showProgress) ??

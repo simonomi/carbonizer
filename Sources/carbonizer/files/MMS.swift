@@ -26,7 +26,7 @@ struct MMS {
 		@Padding(bytes: 3)
 		
 		var unknownsCount: UInt32 // 0...12, 14...16
-		var unknownsOffset: UInt32 = 60
+		var unknownsOffset: UInt32 = 0x3C
 		
 		var animationIndexCount: UInt32
 		var animationIndexOffset: UInt32
