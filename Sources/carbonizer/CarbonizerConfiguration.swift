@@ -144,7 +144,7 @@ extension CarbonizerConfiguration: Decodable {
 
 extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 	enum CodingKeys: CodingKey {
-		case hotReloading, postProcessors, dexDialogueLabeller, dexBlockLabeller
+		case hotReloading, postProcessors, dexDialogueLabeller, dexBlockLabeller, dbsNameLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -161,7 +161,7 @@ extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 			fallback.dexDialogueLabeller
 		dexBlockLabeller =    try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
 			fallback.dexBlockLabeller
-		dbsNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
+		dbsNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
 			fallback.dbsNameLabeller
 	}
 }

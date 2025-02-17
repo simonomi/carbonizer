@@ -8,10 +8,10 @@ extension FileSystemObject {
 
 extension NDS {
 	mutating func setFile(at path: ArraySlice<String>, to content: any FileSystemObject) {
-		if let index = contents.firstIndex(where: { $0.name == path.first }) {
-			contents[index].setFile(at: path.dropFirst(), to: content)
+		if let index = contents.firstIndex(where: { $0.name == path.dropFirst().first }) {
+			contents[index].setFile(at: path.dropFirst(2), to: content)
 		} else if path.dropFirst().first?.hasPrefix(".") != true {
-			fatalError("not found: \(path.dropFirst().first ?? "nil")")
+			fatalError("not found: '\(path.dropFirst().first ?? "nil")'")
 		}
 	}
 }
@@ -25,7 +25,7 @@ extension Folder {
 				contents[index].setFile(at: path.dropFirst(), to: content)
 			}
 		} else if path.dropFirst().first?.hasPrefix(".") != true {
-			fatalError("not found: \(path.first ?? "nil")")
+			fatalError("not found: '\(path.first ?? "nil")'")
 		}
 	}
 }

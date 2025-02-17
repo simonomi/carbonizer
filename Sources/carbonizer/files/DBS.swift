@@ -11,7 +11,7 @@ struct DBS {
 	
 	var unknown7: Int32
 	var unknown8: Int32
-	var unknown9: Int32
+	var announcerDialogue: Int32
 	var unknown10: Int32
 	
 	var arena: Arena
@@ -44,8 +44,8 @@ struct DBS {
 		var name: Name
 		var rank: Int32
 		
-		var unknown1: Int32
-		var unknown2: Int32
+		var icon: Int32
+		var minimumVivosaurHealth: Int32
 		
 		var vivosaurs: [Vivosaur]
 		var unknowns3: [Int32]
@@ -58,7 +58,9 @@ struct DBS {
 		struct Vivosaur: Codable {
 			var id: ID
 			var level: Int32
-			var unknown: Int32
+			
+			var hideDinoMedal: Bool
+			var hideStats: Bool
 			
 			var aiSet: Int32
 			var interLevelBattlePoints: Double
@@ -147,8 +149,8 @@ struct DBS {
 			var unknowns3Count: UInt32 = 2
 			var unknowns3Offset: UInt32
 			
-			var unknown1: Int32
-			var unknown2: Int32 // nonzero in 0401
+			var icon: Int32
+			var minimumVivosaurHealth: Int32 // nonzero in 0401
 			
 			@Count(givenBy: \Self.vivosaurCount)
 			@Offset(givenBy: \Self.vivosaursOffset)
@@ -174,7 +176,7 @@ struct DBS {
 			struct Vivosaur {
 				var id: Int32
 				var level: Int32
-				var unknown: Int32
+				var hideStats: UInt32
 			}
 		}
 		
@@ -223,7 +225,7 @@ extension DBS: ProprietaryFileData, BinaryConvertible, Codable {
 		
 		unknown7 = binary.unknown7
 		unknown8 = binary.unknown8
-		unknown9 = binary.unknown9
+		announcerDialogue = binary.unknown9
 		unknown10 = binary.unknown10
 		
 		arena = Arena(id: binary.arena)
@@ -267,17 +269,18 @@ extension DBS.Arena: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
+			let arenaName: String
 			do {
-				let arenaName = try container.decode(String.self).lowercased()
-				
-				guard let foundEntry = kasekiumNames.first(where: { $0.value == arenaName }) else {
-					throw DBS.KeyNotFoundError.kasekiumNotFound(arenaName)
-				}
-				
-				id = foundEntry.key
+				arenaName = try container.decode(String.self)
 			} catch {
 				throw DBS.KeyNotFoundError.mismatchedType(for: "arena")
 			}
+			
+			guard let foundEntry = kasekiumNames.first(where: { $0.value.caseInsensitiveEquals(arenaName) }) else {
+				throw DBS.KeyNotFoundError.kasekiumNotFound(arenaName)
+			}
+			
+			id = foundEntry.key
 		}
 	}
 	
@@ -299,17 +302,18 @@ extension DBS.Music: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
+			let musicName: String
 			do {
-				let musicName = try container.decode(String.self).lowercased()
-				
-				guard let foundEntry = musicNames.first(where: { $0.value == musicName }) else {
-					throw DBS.KeyNotFoundError.musicNotFound(musicName)
-				}
-				
-				id = foundEntry.key
+				musicName = try container.decode(String.self)
 			} catch {
 				throw DBS.KeyNotFoundError.mismatchedType(for: "music")
 			}
+			
+			guard let foundEntry = musicNames.first(where: { $0.value.caseInsensitiveEquals(musicName) }) else {
+				throw DBS.KeyNotFoundError.musicNotFound(musicName)
+			}
+			
+			id = foundEntry.key
 		}
 	}
 	
@@ -329,8 +333,8 @@ extension DBS.Fighter {
 		name = Name(id: binary.name)
 		rank = binary.rank
 		
-		unknown1 = binary.unknown1
-		unknown2 = binary.unknown2
+		icon = binary.icon
+		minimumVivosaurHealth = binary.minimumVivosaurHealth
 		
 		guard binary.vivosaurs.count == binary.aiSets.count,
 			  binary.vivosaurs.count == binary.interLevelBattlePointsPerVivosaur.count,
@@ -356,7 +360,9 @@ extension DBS.Fighter.Vivosaur {
 	) {
 		id = ID(id: vivosaur.id)
 		level = vivosaur.level
-		unknown = vivosaur.unknown
+		
+		hideDinoMedal = vivosaur.hideStats & 1 > 0
+		hideStats = vivosaur.hideStats & 0b10 > 0
 		
 		self.aiSet = aiSet
 		self.interLevelBattlePoints = Double(interLevelBattlePoints) / 4096
@@ -371,17 +377,18 @@ extension DBS.Fighter.Vivosaur.ID: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
+			let vivosaurName: String
 			do {
-				let vivosaurName = try container.decode(String.self).lowercased()
-				
-				guard let foundEntry = vivosaurNames.first(where: { $0.value == vivosaurName }) else {
-					throw DBS.KeyNotFoundError.vivosaurNotFound(vivosaurName)
-				}
-				
-				id = foundEntry.key
+				vivosaurName = try container.decode(String.self)
 			} catch {
 				throw DBS.KeyNotFoundError.mismatchedType(for: "vivosaur")
 			}
+			
+			guard let foundEntry = vivosaurNames.first(where: { $0.value.caseInsensitiveEquals(vivosaurName) }) else {
+				throw DBS.KeyNotFoundError.vivosaurNotFound(vivosaurName)
+			}
+			
+			id = foundEntry.key
 		}
 	}
 	
@@ -417,7 +424,7 @@ extension DBS.Binary: ProprietaryFileData {
 		
 		unknown7 = dbs.unknown7
 		unknown8 = dbs.unknown8
-		unknown9 = dbs.unknown9
+		unknown9 = dbs.announcerDialogue
 		unknown10 = dbs.unknown10
 		
 		arena = dbs.arena.id
@@ -451,8 +458,8 @@ extension DBS.Binary.Fighter {
 		name = fighter.name.id
 		rank = fighter.rank
 		
-		unknown1 = fighter.unknown1
-		unknown2 = fighter.unknown2
+		icon = fighter.icon
+		minimumVivosaurHealth = fighter.minimumVivosaurHealth
 		
 		vivosaurs = fighter.vivosaurs.map(Vivosaur.init)
 		vivosaurCount = UInt32(vivosaurs.count)
@@ -485,7 +492,7 @@ extension DBS.Binary.Fighter.Vivosaur {
 	init(_ vivosaur: DBS.Fighter.Vivosaur) {
 		id = vivosaur.id.id
 		level = vivosaur.level
-		unknown = vivosaur.unknown
+		hideStats = (vivosaur.hideDinoMedal ? 1 : 0) + (vivosaur.hideStats ? 0b10 : 0)
 	}
 }
 
