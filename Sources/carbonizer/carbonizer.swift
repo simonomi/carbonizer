@@ -161,6 +161,15 @@ struct Carbonizer: AsyncParsableCommand {
 				)
 			}
 			
+			if configuration.experimental.dbsNameLabeller, action == .unpack {
+				let text = dtxRipper(processedFile)
+				processedFile = dbsNameLabeller(
+					processedFile,
+					text: text,
+					configuration: configuration
+				)
+			}
+			
 #if !IN_CI
 			print()
 			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)")

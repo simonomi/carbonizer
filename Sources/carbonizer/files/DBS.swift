@@ -50,7 +50,6 @@ struct DBS {
 		var vivosaurs: [Vivosaur]
 		var unknowns3: [Int32]
 		
-		// TODO: look up name in dtx to create labels (see rls)
 		struct Name: Codable {
 			var _label: String?
 			var id: Int32
@@ -237,7 +236,23 @@ extension DBS: ProprietaryFileData, BinaryConvertible, Codable {
 		bpForWinning = binary.bpForWinning
 		unknown16 = binary.unknown16
 		
-		fighter2 = Fighter(binary.fighter2, configuration: configuration)
+		// nil for 0587 and 0578
+		fighter1 = binary.fighter1.flatMap(Fighter.init)
+		
+		guard let fighter = Fighter(binary.fighter2) else {
+			let vivosaurCount = binary.fighter2.vivosaurs.count
+			let aiSetCount = binary.fighter2.aiSets.count
+			let interLevelBattlePointCount = binary.fighter2.interLevelBattlePointsPerVivosaur.count
+			let movesUnlockedCount = binary.fighter2.movesUnlockedPerVivosaur.count
+			
+			print("error in binary DBS file: mismatched numbers of vivosaurs, ai sets, inter-level battle points, and moves unlocked: \(vivosaurCount), \(aiSetCount), \(interLevelBattlePointCount), and \(movesUnlockedCount)")
+			
+			if configuration.keepWindowOpen.isTrueOnError {
+				waitForInput()
+			}
+			fatalError()
+		}
+		fighter2 = fighter
 		
 		unknowns17 = binary.unknowns17.map(Unknown.init)
 		
@@ -310,7 +325,7 @@ extension DBS.Music: Codable {
 }
 
 extension DBS.Fighter {
-	init(_ binary: DBS.Binary.Fighter, configuration: CarbonizerConfiguration) {
+	init?(_ binary: DBS.Binary.Fighter) {
 		name = Name(id: binary.name)
 		rank = binary.rank
 		
@@ -321,11 +336,8 @@ extension DBS.Fighter {
 			  binary.vivosaurs.count == binary.interLevelBattlePointsPerVivosaur.count,
 			  binary.vivosaurs.count == binary.movesUnlockedPerVivosaur.count
 		else {
-			print("error in binary DBS file: mismatched numbers of vivosaurs, ai sets, inter-level battle points, and moves unlocked: \(binary.vivosaurs.count), \(binary.aiSets.count), \(binary.interLevelBattlePointsPerVivosaur.count), and \(binary.movesUnlockedPerVivosaur.count)")
-			if configuration.keepWindowOpen.isTrueOnError {
-				waitForInput()
-			}
-			fatalError()
+//			print("warning: mismatched counts: \(binary.vivosaurs.count), \(binary.aiSets.count), \(binary.interLevelBattlePointsPerVivosaur.count), and \(binary.movesUnlockedPerVivosaur.count)")
+			return nil
 		}
 		
 		vivosaurs = zip(binary.vivosaurs, binary.aiSets, binary.interLevelBattlePointsPerVivosaur, binary.movesUnlockedPerVivosaur)

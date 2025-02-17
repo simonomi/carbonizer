@@ -2,32 +2,29 @@ import ArgumentParser
 import Foundation
 
 struct CarbonizerConfiguration {
-	var compressionMode: CompressionMode = .auto
-	var inputFiles: [String] = []
-	var outputFolder: String? = nil
-	var overwriteOutput: Bool = false
-	var showProgress: Bool = true
-	var keepWindowOpen: KeepWindowOpen = .onError
-#if os(Windows)
-	var useColor: Bool = false
-#else
-	var useColor: Bool = true
-#endif
-	var dexCommandList: DEXCommandList = .ff1
+	var compressionMode: CompressionMode
+	var inputFiles: [String]
+	var outputFolder: String?
+	var overwriteOutput: Bool
+	var showProgress: Bool
+	var keepWindowOpen: KeepWindowOpen
+	var useColor: Bool
+	var dexCommandList: DEXCommandList
 	
-	var fileTypes: [String] = ["DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"]
+	var fileTypes: [String]
 	
 	// TODO: skip/only extract
-//	var skipExtracting: [String] = []
-//	var onlyExtract: [String] = []
+//	var skipExtracting: [String]
+//	var onlyExtract: [String]
 	
-	var experimental: ExperimentalOptions = ExperimentalOptions()
+	var experimental: ExperimentalOptions
 	
 	struct ExperimentalOptions {
-		var hotReloading: Bool = false
-		var postProcessors: [String] = []
-		var dexDialogueLabeller: Bool = false
-		var dexBlockLabeller: Bool = false
+		var hotReloading: Bool
+		var postProcessors: [String]
+		var dexDialogueLabeller: Bool
+		var dexBlockLabeller: Bool
+		var dbsNameLabeller: Bool
 	}
 	
 	enum CompressionMode: String, EnumerableFlag, Decodable {
@@ -99,7 +96,8 @@ struct CarbonizerConfiguration {
 				"postProcessors": [],
 				
 				"dexDialogueLabeller": false,
-				"dexBlockLabeller": false
+				"dexBlockLabeller": false,
+				"dbsNameLabeller": false
 			}
 		}
 		"""
@@ -155,14 +153,16 @@ extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 		// this is lazy to prevent infinite recursion
 		lazy var fallback = CarbonizerConfiguration.defaultConfiguration.experimental
 		
-		hotReloading =        try container.decodeIfPresent(Bool.self, forKey: .hotReloading) ??
+		hotReloading =        try container.decodeIfPresent(Bool.self,     forKey: .hotReloading) ??
 			fallback.hotReloading
 		postProcessors =      try container.decodeIfPresent([String].self, forKey: .postProcessors) ??
 			fallback.postProcessors
-		dexDialogueLabeller = try container.decodeIfPresent(Bool.self, forKey: .dexDialogueLabeller) ??
+		dexDialogueLabeller = try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueLabeller) ??
 			fallback.dexDialogueLabeller
-		dexBlockLabeller =    try container.decodeIfPresent(Bool.self, forKey: .dexBlockLabeller) ??
+		dexBlockLabeller =    try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
 			fallback.dexBlockLabeller
+		dbsNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
+			fallback.dbsNameLabeller
 	}
 }
 
