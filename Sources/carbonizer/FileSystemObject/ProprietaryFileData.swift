@@ -50,6 +50,8 @@ func createFileData(
 		"DMS": DMS.self,
 		"DTX": DTX.self,
 		"ECS": ECS.self,
+		"GRD": GRD.self,
+		"MAP": MAP.self,
 		"MFS": MFS.self,
 		"MM3": MM3.self,
 		"MMS": MMS.self,

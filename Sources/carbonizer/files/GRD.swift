@@ -1,5 +1,8 @@
 import BinaryParser
 
+// map c zooms the camera ? and maybe more?
+// map g may have something to do with the rocks that spawn in digsites
+
 struct GRD {
 	@BinaryConvertible
 	struct Binary {
@@ -17,3 +20,23 @@ struct GRD {
 		var gridData: Datastream
 	}
 }
+
+extension GRD: ProprietaryFileData, BinaryConvertible, Codable {
+	static let fileExtension = ".grd.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+extension GRD.Binary: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	init(_ grd: GRD, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
