@@ -68,7 +68,7 @@ struct CarbonizerConfiguration {
 	enum KeepWindowOpen: String, Decodable {
 		case always, never, onError
 		
-		var onError: Bool {
+		var isTrueOnError: Bool {
 			self == .always || self == .onError
 		}
 	}

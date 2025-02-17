@@ -187,6 +187,28 @@ struct DBS {
 	}
 }
 
+extension DBS {
+	enum KeyNotFoundError: Error, CustomStringConvertible {
+		case vivosaurNotFound(String)
+		case kasekiumNotFound(String)
+		case musicNotFound(String)
+		case mismatchedType(for: String)
+		
+		var description: String {
+			switch self {
+				case .vivosaurNotFound(let name):
+					"could not find vivosaur named '\(name)'"
+				case .kasekiumNotFound(let name):
+					"could not find arena named '\(name)'"
+				case .musicNotFound(let name):
+					"could not find music named '\(name)'"
+				case .mismatchedType(for: let name):
+					"unexpected type for \(name): expected number or string"
+			}
+		}
+	}
+}
+
 extension DBS: ProprietaryFileData, BinaryConvertible, Codable {
 	static let fileExtension = ".dbs.json"
 	static let magicBytes = ""
@@ -215,7 +237,7 @@ extension DBS: ProprietaryFileData, BinaryConvertible, Codable {
 		bpForWinning = binary.bpForWinning
 		unknown16 = binary.unknown16
 		
-		fighter2 = Fighter(binary.fighter2)
+		fighter2 = Fighter(binary.fighter2, configuration: configuration)
 		
 		unknowns17 = binary.unknowns17.map(Unknown.init)
 		
@@ -230,13 +252,17 @@ extension DBS.Arena: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
-			let arenaName = try container.decode(String.self).lowercased()
-			
-			guard let foundEntry = kasekiumNames.first(where: { $0.value == arenaName }) else {
-				todo("could not find arena named '\(arenaName)'")
+			do {
+				let arenaName = try container.decode(String.self).lowercased()
+				
+				guard let foundEntry = kasekiumNames.first(where: { $0.value == arenaName }) else {
+					throw DBS.KeyNotFoundError.kasekiumNotFound(arenaName)
+				}
+				
+				id = foundEntry.key
+			} catch {
+				throw DBS.KeyNotFoundError.mismatchedType(for: "arena")
 			}
-			
-			id = foundEntry.key
 		}
 	}
 	
@@ -258,13 +284,17 @@ extension DBS.Music: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
-			let musicName = try container.decode(String.self).lowercased()
-			
-			guard let foundEntry = musicNames.first(where: { $0.value == musicName }) else {
-				todo("could not find music named '\(musicName)'")
+			do {
+				let musicName = try container.decode(String.self).lowercased()
+				
+				guard let foundEntry = musicNames.first(where: { $0.value == musicName }) else {
+					throw DBS.KeyNotFoundError.musicNotFound(musicName)
+				}
+				
+				id = foundEntry.key
+			} catch {
+				throw DBS.KeyNotFoundError.mismatchedType(for: "music")
 			}
-			
-			id = foundEntry.key
 		}
 	}
 	
@@ -280,7 +310,7 @@ extension DBS.Music: Codable {
 }
 
 extension DBS.Fighter {
-	init(_ binary: DBS.Binary.Fighter) {
+	init(_ binary: DBS.Binary.Fighter, configuration: CarbonizerConfiguration) {
 		name = Name(id: binary.name)
 		rank = binary.rank
 		
@@ -291,7 +321,11 @@ extension DBS.Fighter {
 			  binary.vivosaurs.count == binary.interLevelBattlePointsPerVivosaur.count,
 			  binary.vivosaurs.count == binary.movesUnlockedPerVivosaur.count
 		else {
-			todo("wrong number of things, print good error")
+			print("error in binary DBS file: mismatched numbers of vivosaurs, ai sets, inter-level battle points, and moves unlocked: \(binary.vivosaurs.count), \(binary.aiSets.count), \(binary.interLevelBattlePointsPerVivosaur.count), and \(binary.movesUnlockedPerVivosaur.count)")
+			if configuration.keepWindowOpen.isTrueOnError {
+				waitForInput()
+			}
+			fatalError()
 		}
 		
 		vivosaurs = zip(binary.vivosaurs, binary.aiSets, binary.interLevelBattlePointsPerVivosaur, binary.movesUnlockedPerVivosaur)
@@ -301,7 +335,7 @@ extension DBS.Fighter {
 	}
 }
 
-extension DBS.Fighter.Vivosaur { // TODO: vivosaur names
+extension DBS.Fighter.Vivosaur {
 	init(
 		_ vivosaur: DBS.Binary.Fighter.Vivosaur,
 		aiSet: Int32,
@@ -325,13 +359,17 @@ extension DBS.Fighter.Vivosaur.ID: Codable {
 		do {
 			id = try container.decode(Int32.self)
 		} catch {
-			let vivosaurName = try container.decode(String.self).lowercased()
-			
-			guard let foundEntry = vivosaurNames.first(where: { $0.value == vivosaurName }) else {
-				todo("could not find vivosaur named '\(vivosaurName)'")
+			do {
+				let vivosaurName = try container.decode(String.self).lowercased()
+				
+				guard let foundEntry = vivosaurNames.first(where: { $0.value == vivosaurName }) else {
+					throw DBS.KeyNotFoundError.vivosaurNotFound(vivosaurName)
+				}
+				
+				id = foundEntry.key
+			} catch {
+				throw DBS.KeyNotFoundError.mismatchedType(for: "vivosaur")
 			}
-			
-			id = foundEntry.key
 		}
 	}
 	

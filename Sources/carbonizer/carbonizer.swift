@@ -64,7 +64,7 @@ struct Carbonizer: AsyncParsableCommand {
 			}
 		} catch {
 			print("\(.red)error:\(.normal)", error)
-			if configuration.keepWindowOpen.onError {
+			if configuration.keepWindowOpen.isTrueOnError {
 				waitForInput()
 			}
 		}
