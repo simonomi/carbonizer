@@ -112,7 +112,9 @@ struct DEX {
 		// all the unknown commands as of rn 2 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 44 46 47 48 52 53 55 62 63 71 72 75 76 77 81 82 83 84 85 86 87 88 89 91 92 93 95 96 97 98 99 100 102 103 104 105 106 107 108 110 111 112 113 116 118 120 121 126 127 128 134 136 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205 206
 	]
 	
-	static let ffcCommands: [UInt32: CommandDefinition] = [:]
+	static let ffcCommands: [UInt32: CommandDefinition] = [
+		107: "dialogue \(0, .dialogue)",
+	]
 	
 	static func knownCommands(for configuration: CarbonizerConfiguration) -> [UInt32: CommandDefinition] {
 		switch configuration.dexCommandList {
