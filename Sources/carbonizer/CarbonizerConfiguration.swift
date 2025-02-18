@@ -86,7 +86,7 @@ struct CarbonizerConfiguration {
 			"dexCommandList": "ff1", // ff1, ffc, none
 			
 			// stable: BBG, DEP, DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
-			// experimental: 3CL, CHR, DBS, DCL, ECS, GRD, MAP, MFS, MMS
+			// experimental: 3CL, CHR, DBS, DCL, DML, ECS, GRD, MAP, MFS, MMS
 			"fileTypes": ["BBG", "DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
 			"experimental": {

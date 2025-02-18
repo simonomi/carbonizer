@@ -48,6 +48,7 @@ func createFileData(
 		"DEP": DEP.self,
 		"DEX": DEX.self,
 		"DMG": DMG.self,
+		"DML": DML.self,
 		"DMS": DMS.self,
 		"DTX": DTX.self,
 		"ECS": ECS.self,
