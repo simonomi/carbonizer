@@ -205,8 +205,8 @@ extension MAP: ProprietaryFileData, BinaryConvertible, Codable {
 	static let packedStatus: PackedStatus = .unpacked
 	
 	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		print(binary)
-//		todo()
+//		print(binary)
+		todo()
 	}
 }
 
