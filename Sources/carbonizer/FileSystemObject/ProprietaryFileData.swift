@@ -41,6 +41,7 @@ func createFileData(
 	configuration: CarbonizerConfiguration
 ) throws -> (any ProprietaryFileData)? {
 	let allFileTypes: [String: any ProprietaryFileData.Type] = [
+		"BBG": BBG.self,
 		"CHR": CHR.self,
 		"DBS": DBS.self,
 		"DCL": DCL.self,
