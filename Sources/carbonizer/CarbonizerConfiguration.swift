@@ -85,9 +85,9 @@ struct CarbonizerConfiguration {
 			"useColor": true,
 			"dexCommandList": "ff1", // ff1, ffc, none
 			
-			// stable: BBG, DEP, DEX, DMG, DMS, DTX, MAR, MM3, MPM, NDS, RLS
+			// stable: BBG, DEP, DEX, DMG, DMS, DTX, HML, MAR, MM3, MPM, NDS, RLS
 			// experimental: 3CL, CHR, DBS, DCL, DML, ECS, GRD, MAP, MFS, MMS
-			"fileTypes": ["BBG", "DEP", "DEX", "DMG", "DMS", "DTX", "MAR", "MM3", "MPM", "NDS", "RLS"],
+			"fileTypes": ["BBG", "DEP", "DEX", "DMG", "DMS", "DTX", "HML", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
 			"experimental": {
 				"hotReloading": false, // macOS only
