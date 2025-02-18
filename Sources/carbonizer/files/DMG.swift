@@ -70,6 +70,14 @@ extension DMG.Binary: ProprietaryFileData {
 	}
 }
 
+extension DMG.Binary.DMGString {
+	init(_ dmgString: DMG.DMGString) {
+		index = dmgString.index
+		string = dmgString.string
+	}
+}
+
+
 // MARK: unpacked
 extension DMG: Codable {
 	init(from decoder: Decoder) throws {
