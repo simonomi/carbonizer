@@ -520,3 +520,11 @@ func extractAngleBrackets(from text: Substring) -> ([Substring], [String])? {
 	
 	return (arguments, textWithoutArguments)
 }
+
+extension Dictionary {
+	func mergingIgnoringDuplicates(_ other: Self) -> Self {
+		// there's probably a better way but who cares
+		filter { !other.keys.contains($0.key) }
+			.merging(other.filter { !keys.contains($0.key) }) { _, _ in fatalError() }
+	}
+}

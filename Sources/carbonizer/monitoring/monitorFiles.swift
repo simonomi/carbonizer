@@ -14,6 +14,10 @@ struct PathMonitor {
 }
 
 func monitorFiles(in path: URL, with eventHandler: @escaping EventHandler) throws -> PathMonitor {
+	guard try path.type() == .folder else {
+		fatalError("cannot monitor file")
+	}
+	
 	let fileDescriptor = open(path.path(percentEncoded: false), O_EVTONLY)
 	
 	let source = DispatchSource.makeFileSystemObjectSource(

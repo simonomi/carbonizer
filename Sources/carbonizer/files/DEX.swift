@@ -1,6 +1,9 @@
 import BinaryParser
 import Foundation
 
+// TODO: parsing ffc with ff1's commands crashes instead of giving an error message
+// WHILE WRITING??
+
 struct DEX {
 	var commands: [[Command]]
 	
@@ -113,7 +116,8 @@ struct DEX {
 	]
 	
 	static let ffcCommands: [UInt32: CommandDefinition] = [
-		107: "dialogue \(0, .dialogue)",
+		71:  "dialogue \(0, .dialogue)",
+		107: "unowned dialogue \(0, .dialogue)",
 	]
 	
 	static func knownCommands(for configuration: CarbonizerConfiguration) -> [UInt32: CommandDefinition] {

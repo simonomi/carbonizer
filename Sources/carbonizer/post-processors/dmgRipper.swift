@@ -28,7 +28,7 @@ fileprivate func ripDMGs(_ data: any ProprietaryFileData) -> [UInt32: String] {
 fileprivate extension [[UInt32: String]] {
 	func forciblyMerged() -> [UInt32: String] {
 		reduce([:]) { partialResult, dialogue in
-			partialResult.merging(dialogue) { _, _ in fatalError() }
+			partialResult.mergingIgnoringDuplicates(dialogue)
 		}
 	}
 }
