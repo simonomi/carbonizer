@@ -77,10 +77,19 @@ extension Folder: FileSystemObject {
 		)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) throws -> Self {
+	func unpacked(path: [String], configuration: CarbonizerConfiguration) throws -> Self {
 		Folder(
 			name: name,
-			contents: try contents.map { try $0.unpacked(configuration: configuration) }
+			contents: try contents.map {
+				if configuration.shouldUnpack(path + [name, $0.name]) {
+					try $0.unpacked(
+						path: path + [name],
+						configuration: configuration
+					)
+				} else {
+					$0
+				}
+			}
 		)
 	}
 }

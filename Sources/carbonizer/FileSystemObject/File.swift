@@ -61,8 +61,7 @@ func createFile(
 		let magicBytes = try? data.read(String.self, exactLength: 3)
 		data.jump(to: marker)
 		
-											   /*  makes ffc work right  */
-		if magicBytes == MAR.Binary.magicBytes /*&& !name.contains("arc")*/ {
+		if magicBytes == MAR.Binary.magicBytes {
 			return PackedMAR(
 				name: name,
 				binary: try data.read(MAR.Binary.self),

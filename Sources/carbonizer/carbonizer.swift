@@ -63,7 +63,11 @@ struct Carbonizer: AsyncParsableCommand {
 				try main(with: configuration)
 			}
 		} catch {
-			print("\(.red)error:\(.normal)", error)
+			if configuration.useColor {
+				print("\(.red)error:\(.normal)", error)
+			} else {
+				print("error:", String(describing: error).removingANSIFontEffects())
+			}
 			if configuration.keepWindowOpen.isTrueOnError {
 				waitForInput()
 			}
@@ -103,7 +107,7 @@ struct Carbonizer: AsyncParsableCommand {
 				case .pack:
 					processedFile = file.packed(configuration: configuration)
 				case .unpack:
-					processedFile = try file.unpacked(configuration: configuration)
+					processedFile = try file.unpacked(path: [], configuration: configuration)
 				case nil:
 					print("Skipping file...")
 					continue

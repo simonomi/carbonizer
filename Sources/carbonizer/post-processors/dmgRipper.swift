@@ -1,6 +1,6 @@
 func dmgRipper(_ fileSystemObject: any FileSystemObject) -> [UInt32: String] {
 	switch fileSystemObject {
-		case is BinaryFile:
+		case is BinaryFile, is PackedMAR, is PackedNDS:
 			[:]
 		case let file as ProprietaryFile:
 			ripDMGs(file.data)
@@ -10,8 +10,6 @@ func dmgRipper(_ fileSystemObject: any FileSystemObject) -> [UInt32: String] {
 			nds.contents.map(dmgRipper).forciblyMerged()
 		case let folder as Folder:
 			folder.contents.map(dmgRipper).forciblyMerged()
-		case is PackedMAR, is PackedNDS:
-			fatalError("must be run on unpacked data")
 		default:
 			fatalError("unexpected fileSystemObject type: \(type(of: fileSystemObject))")
 	}

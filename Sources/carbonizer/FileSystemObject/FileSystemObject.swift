@@ -12,7 +12,7 @@ protocol FileSystemObject {
 	associatedtype Packed: FileSystemObject
 	func packed(configuration: CarbonizerConfiguration) -> Packed
 	associatedtype Unpacked: FileSystemObject
-	func unpacked(configuration: CarbonizerConfiguration) throws -> Unpacked
+	func unpacked(path: [String], configuration: CarbonizerConfiguration) throws -> Unpacked
 	
 	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self
 	

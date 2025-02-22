@@ -46,8 +46,8 @@ func dexDialogueLabeller(
 					dexDialogueLabeller($0, dialogue: dialogue, configuration: configuration)
 				}
 			)
-		case is PackedMAR, is PackedNDS:
-			fatalError("must be run on unpacked data")
+		case let packedMAR as PackedMAR: packedMAR
+		case let packedNDS as PackedNDS: packedNDS
 		case let fileSystemObject:
 			fatalError("unexpected fileSystemObject type: \(type(of: fileSystemObject))")
 	}

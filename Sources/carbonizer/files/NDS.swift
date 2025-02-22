@@ -195,8 +195,8 @@ extension NDS: FileSystemObject {
 		)
 	}
 	
-	consuming func unpacked(configuration: CarbonizerConfiguration) throws -> Self {
-		contents = try contents.map { try $0.unpacked(configuration: configuration) }
+	consuming func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> Self {
+		contents = try contents.map { try $0.unpacked(path: [], configuration: configuration) }
 		return self
 	}
 }
@@ -235,7 +235,7 @@ struct PackedNDS: FileSystemObject {
 	
 	func packed(configuration: CarbonizerConfiguration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) throws -> NDS {
+	func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> NDS {
 		try NDS(name: name, binary: binary, configuration: configuration)
 			.unpacked(configuration: configuration)
 	}

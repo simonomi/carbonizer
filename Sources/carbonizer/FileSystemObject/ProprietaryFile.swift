@@ -45,7 +45,7 @@ extension ProprietaryFile: FileSystemObject {
 		)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) throws -> Self {
+	func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> Self {
 		ProprietaryFile(
 			name: name,
 			metadata: metadata,

@@ -13,9 +13,8 @@ struct CarbonizerConfiguration {
 	
 	var fileTypes: [String]
 	
-	// TODO: skip/only extract
-//	var skipExtracting: [String]
-//	var onlyExtract: [String]
+	var onlyUnpack: [Glob]
+	var skipUnpacking: [Glob]
 	
 	var experimental: ExperimentalOptions
 	
@@ -89,6 +88,10 @@ struct CarbonizerConfiguration {
 			// experimental: 3CL, CHR, DBS, DCL, DML, ECS, GRD, MAP, MFS, MMS
 			"fileTypes": ["BBG", "DEP", "DEX", "DMG", "DMS", "DTX", "HML", "MAR", "MM3", "MPM", "NDS", "RLS"],
 			
+			// these options accept globs within an nds' contents ("text/japanese", "episode/*", "model/**", "**/arc*")
+			"onlyUnpack": [],
+			"skipUnpacking": [],
+			
 			"experimental": {
 				"hotReloading": false, // macOS only
 				
@@ -106,11 +109,21 @@ struct CarbonizerConfiguration {
 #endif
 	
 	static let defaultConfiguration = try! Self(decoding: defaultConfigurationString)
+	
+	func shouldUnpack(_ path: [String]) -> Bool {
+		if skipUnpacking.contains(where: { $0.matches(path) }) {
+			false
+		} else if onlyUnpack.isNotEmpty {
+			onlyUnpack.contains { $0.matches(path) }
+		} else {
+			true
+		}
+	}
 }
 
 extension CarbonizerConfiguration: Decodable {
 	enum CodingKeys: CodingKey {
-		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, dexCommandList, fileTypes, experimental
+		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, dexCommandList, fileTypes, onlyUnpack, skipUnpacking, experimental
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -136,6 +149,10 @@ extension CarbonizerConfiguration: Decodable {
 			fallback.dexCommandList
 		fileTypes =       try container.decodeIfPresent([String].self,            forKey: .fileTypes) ??
 			fallback.fileTypes
+		onlyUnpack =     try container.decodeIfPresent([Glob].self,               forKey: .onlyUnpack) ??
+			fallback.onlyUnpack
+		skipUnpacking =  try container.decodeIfPresent([Glob].self,               forKey: .skipUnpacking) ??
+			fallback.skipUnpacking
 		experimental =    try container.decodeIfPresent(ExperimentalOptions.self, forKey: .experimental) ??
 			fallback.experimental
 	}

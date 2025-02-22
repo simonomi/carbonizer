@@ -59,7 +59,7 @@ extension MAR: FileSystemObject {
 		)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) throws -> Self { self }
+	func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> Self { self }
 }
 
 struct PackedMAR: FileSystemObject {
@@ -95,7 +95,7 @@ struct PackedMAR: FileSystemObject {
 	
 	func packed(configuration: CarbonizerConfiguration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) throws -> MAR {
+	func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> MAR {
 		try MAR(
 			name: name,
 			binary: binary,
