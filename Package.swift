@@ -38,11 +38,6 @@ let package = Package(
 				.product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
 			]
 		),
-		// temporarily remove bc causing problems :/
-		// bc of https://github.com/swiftwasm/swift/issues/5375 ?
-//		.testTarget(
-//			name: "carbonizerTests",
-//			dependencies: ["carbonizer"]
-//		)
+		.testTarget(name: "carbonizerTests", dependencies: ["carbonizer"])
 	]
 )

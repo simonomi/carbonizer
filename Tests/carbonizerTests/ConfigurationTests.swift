@@ -6,6 +6,6 @@ import Foundation
 @Test
 func defaultConfiguration() throws {
 	_ = try CarbonizerConfiguration(
-		decoding: CarbonizerConfiguration.defaultConfiguration
+		decoding: CarbonizerConfiguration.defaultConfigurationString
 	)
 }
