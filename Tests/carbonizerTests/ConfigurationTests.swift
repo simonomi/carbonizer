@@ -4,7 +4,7 @@ import Foundation
 @testable import carbonizer
 
 @Test
-func defaultConfiguration() throws {
+func defaultConfigurationIsValid() throws {
 	_ = try CarbonizerConfiguration(
 		decoding: CarbonizerConfiguration.defaultConfigurationString
 	)
