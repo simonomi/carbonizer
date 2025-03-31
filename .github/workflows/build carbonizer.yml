@@ -17,11 +17,11 @@ jobs:
     - name: Set up Swift
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.0"
+        swift-version: "6.1"
     - name: Checkout
       uses: actions/checkout@v4
-#     - name: Test
-#       run: swift test -Xswiftc -DIN_CI
+    - name: Test
+      run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: >
         swift build -c release
@@ -42,11 +42,13 @@ jobs:
       id: swift-setup
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.0"
+        swift-version: "6.1"
+    - name: Check Swift Version
+      run: $SWIFT_VERSION = swift --version | Select-String -Pattern '\d+\.\d+(\.\d+)? | ForEach-Object { $_.Matches[0].Value }'
     - name: Checkout
       uses: actions/checkout@v4
-#     - name: Test
-#       run: swift test -Xswiftc -DIN_CI
+    - name: Test
+      run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: >
         swift build -c release
@@ -59,7 +61,7 @@ jobs:
         LICENSE.txt
         -C "$(swift build -c release --show-bin-path)"
         carbonizer.exe
-        -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\6.0.3\\usr\\bin"
+        -C "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes\\$(SWIFT_VERSION)\\usr\\bin"
         swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll swiftCRT.dll Foundation.dll swift_RegexParser.dll dispatch.dll BlocksRuntime.dll swiftDispatch.dll FoundationEssentials.dll FoundationInternationalization.dll _FoundationICU.dll swiftSynchronization.dll
     - name: Release
       uses: softprops/action-gh-release@v2
@@ -75,11 +77,11 @@ jobs:
       id: swift-setup
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.0"
+        swift-version: "6.1"
     - name: Checkout
       uses: actions/checkout@v4
-#     - name: Test
-#       run: swift test -Xswiftc -DIN_CI
+    - name: Test
+      run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: >
         swift build -c release

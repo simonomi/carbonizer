@@ -1,6 +1,12 @@
 import BinaryParser
 import Foundation
 
+// TODO: change to be like this
+//struct BBG {
+//	struct Packed { ... }
+//	struct Unpacked { ... }
+//}
+
 protocol ProprietaryFileData {
 	static var fileExtension: String { get }
 	static var magicBytes: String { get }
