@@ -1,6 +1,6 @@
 import Testing
 
-@testable import carbonizer
+@testable import Carbonizer
 
 @Test
 func defaultConfigurationIsValid() throws {
@@ -14,7 +14,7 @@ struct Globs {
 	// examples: "text/japanese", "episode/*", "model/**", "**/arc*"
 	@Test
 	func allLiterals() throws {
-		let glob = try #require(try CarbonizerConfiguration.Glob(raw: "text/japanese"))
+		let glob = try #require(try Glob(raw: "text/japanese"))
 		
 		#expect(glob.matches(["text", "japanese"]))
 		#expect(!glob.matches(["text", "notJapanese"]))
@@ -26,7 +26,7 @@ struct Globs {
 	
 	@Test
 	func simpleWildcard() throws {
-		let glob = try #require(try CarbonizerConfiguration.Glob(raw: "episode/*"))
+		let glob = try #require(try Glob(raw: "episode/*"))
 		
 		#expect(glob.matches(["episode", "0001"]))
 		#expect(glob.matches(["episode", "e0002"]))
@@ -37,7 +37,7 @@ struct Globs {
 	
 	@Test
 	func recursiveWildcard() throws {
-		let glob = try #require(try CarbonizerConfiguration.Glob(raw: "model/**"))
+		let glob = try #require(try Glob(raw: "model/**"))
 		
 		#expect(glob.matches(["model", "battle"]))
 		#expect(glob.matches(["model", "fieldchar"]))
@@ -48,7 +48,7 @@ struct Globs {
 	
 	@Test
 	func partialWildcard() throws {
-		let glob = try #require(try CarbonizerConfiguration.Glob(raw: "model/arc*"))
+		let glob = try #require(try Glob(raw: "model/arc*"))
 		
 		#expect(!glob.matches(["model", "battle"]))
 		#expect(glob.matches(["model", "arc"]))
@@ -60,7 +60,7 @@ struct Globs {
 	
 	@Test
 	func recursiveAndPartialWildcard() throws {
-		let glob = try #require(try CarbonizerConfiguration.Glob(raw: "**/arc*"))
+		let glob = try #require(try Glob(raw: "**/arc*"))
 		
 		#expect(!glob.matches(["model", "battle"]))
 		#expect(glob.matches(["model", "battle", "arc"]))

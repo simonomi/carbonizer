@@ -78,12 +78,10 @@ struct MAP {
 		var thingF: [ThingF]
 		
 		@Offset(givenBy: \Self.backgroundGradientTopOffset)
-		@Count(3)
-		var backgroundGradientTop: [UInt8]
+		var backgroundGradientTop: Color
 		
 		@Offset(givenBy: \Self.backgroundGradientBottomOffset)
-		@Count(3)
-		var backgroundGradientBottom: [UInt8]
+		var backgroundGradientBottom: Color
 		
 		@BinaryConvertible
 		struct ThingA {
@@ -195,6 +193,13 @@ struct MAP {
 			var unknown4: Int32 // fixed-point
 			var unknown5: Int32
 			var unknown6: Int32
+		}
+		
+		@BinaryConvertible
+		struct Color {
+			var red: UInt8
+			var green: UInt8
+			var blue: UInt8
 		}
 	}
 }
