@@ -1,3 +1,7 @@
+#if os(Linux)
+@preconcurrency import Glibc
+#endif
+
 import Foundation
 
 #if os(Windows)
