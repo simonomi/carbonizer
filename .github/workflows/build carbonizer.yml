@@ -64,3 +64,30 @@ jobs:
       with:
         draft: true
         files: carbonizer-Windows.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Swift
+      id: swift-setup
+      uses: SwiftyLab/setup-swift@latest
+      with:
+        swift-version: "6.0"
+    - name: Checkout
+      uses: actions/checkout@v4
+#     - name: Test
+#       run: swift test -Xswiftc -DIN_CI
+    - name: Build
+      run: >
+        swift build -c release
+        -static-executable
+        -static-stdlib
+        -Xswiftc -DIN_CI
+    - name: Package
+      run: tar -acf carbonizer-linux.zip -C "$(swift build -c release --show-bin-path)" carbonizer
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        draft: true
+        files: carbonizer-linux.zip
+
