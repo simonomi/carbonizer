@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   build-macos:
+    name: Build macOS
     runs-on: macos-15
     steps:
     - name: Set up Swift
@@ -34,6 +35,7 @@ jobs:
         files: carbonizer-macOS.zip
 
   build-windows:
+    name: Build Windows
     runs-on: windows-latest
     steps:
     - name: Set up Swift
@@ -66,6 +68,7 @@ jobs:
         files: carbonizer-Windows.zip
 
   build-linux:
+    name: Build Linux
     runs-on: ubuntu-latest
     steps:
     - name: Set up Swift
@@ -80,8 +83,7 @@ jobs:
     - name: Build
       run: >
         swift build -c release
-        -static-executable
-        -static-stdlib
+        --static-swift-stdlib
         -Xswiftc -DIN_CI
     - name: Package
       run: tar -acf carbonizer-linux.zip -C "$(swift build -c release --show-bin-path)" carbonizer
