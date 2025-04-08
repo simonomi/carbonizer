@@ -24,13 +24,19 @@ struct Carbonizer: AsyncParsableCommand {
 		let start = Date.now
 #endif
 		
+#if !IN_CI && os(macOS)
+		let configurationPath = URL(filePath: "/Users/simonomi/Desktop/config.json5")
+#else
 #if os(Windows)
+		let configurationFileExtension = "json"
+#else
+		let configurationFileExtension = "json5"
+#endif
+		
 		// TODO: dont let this just fallback, show an error if theres no url?
 		let configurationPath = Bundle.main.executableURL?
 			.deletingLastPathComponent()
-			.appending(component: "config.json") ?? URL(filePath: "config.json")
-#else
-		let configurationPath = URL(filePath: "/Users/simonomi/Desktop/config.json5")
+			.appending(component: "config.\(configurationFileExtension)") ?? URL(filePath: "config.\(configurationFileExtension)")
 #endif
 		
 		let configuration: CarbonizerConfiguration
