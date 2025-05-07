@@ -6,7 +6,7 @@ let package = Package(
 	name: "carbonizer",
  	platforms: [
  		.macOS(.v15),
-//		.custom("Windows", versionString: "11")
+		.custom("Windows", versionString: "11")
  	],
 	products: [
 		.executable(name: "carbonizer", targets: ["Carbonizer"])
