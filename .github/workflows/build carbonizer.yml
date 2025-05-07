@@ -55,7 +55,7 @@ jobs:
         -Xswiftc -DIN_CI
     - name: Download license
       run: curl -o LICENSE.txt "https://raw.githubusercontent.com/apple/swift/main/LICENSE.txt"
-    - name: Pack products
+    - name: Package
       run: >
         tar -acf carbonizer-Windows.zip
         LICENSE.txt
