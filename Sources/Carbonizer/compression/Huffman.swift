@@ -1,9 +1,5 @@
 import BinaryParser
 
-fileprivate func dropLowestBit<T: FixedWidthInteger>(of number: T) -> T {
-	number & ~1
-}
-
 // https://mgba-emu.github.io/gbatek/#huffuncompreadbycallback---swi-13h-ndsdsi
 enum Huffman {
 	static func compress(_ data: Datastream) -> Datastream {
@@ -99,6 +95,10 @@ enum Huffman {
 		
 		var rightIsData: Bool {
 			nodeData >> 6 & 1 > 0
+		}
+		
+		fileprivate func dropLowestBit<T: FixedWidthInteger>(of number: T) -> T {
+			number & ~1
 		}
 	}
 	
