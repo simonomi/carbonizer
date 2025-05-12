@@ -18,7 +18,6 @@ fileprivate let filePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Figh
 func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 	let inputFilePath = filePath(for: fileName)
 	
-	let originalData = try Data(contentsOf: inputFilePath)
 	let file = try fileSystemObject(contentsOf: inputFilePath, configuration: .defaultConfiguration)
 	
 	let repackedFile: any FileSystemObject = switch packedStatus {
@@ -37,6 +36,7 @@ func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 	let savePath = repackedFile.savePath(in: .temporaryDirectory, overwriting: true)
 	try repackedFile.write(into: .temporaryDirectory, overwriting: true)
 	
+	let originalData = try Data(contentsOf: inputFilePath)
 	let savedData = try Data(contentsOf: savePath)
 	
 	// TODO: compare metadata and file name

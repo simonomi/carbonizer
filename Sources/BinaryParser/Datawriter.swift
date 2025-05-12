@@ -1,8 +1,6 @@
 import Foundation
 
 final public class Datawriter {
-	public typealias Byte = UInt8
-	
 //	public private(set) var bytes: ArraySlice<Byte>
 	public var bytes: ArraySlice<Byte> // for inlinability
 	
@@ -204,8 +202,8 @@ extension Datawriter {
 }
 
 @usableFromInline
-//fileprivate let fillerByte: UInt8 = 0
-internal let fillerByte: UInt8 = 0 // for inlinability
+//fileprivate let fillerByte: Byte = 0
+internal let fillerByte: Byte = 0 // for inlinability
 
 // MARK: jump
 extension Datawriter {
@@ -214,7 +212,7 @@ extension Datawriter {
 		offset += Int(bytes)
 		
 		if offset > self.bytes.endIndex {
-			self.bytes.append(contentsOf: [Byte](repeating: fillerByte, count: offset - self.bytes.endIndex))
+			self.bytes.append(contentsOf: repeatElement(fillerByte, count: offset -  self.bytes.endIndex))
 		}
 	}
 	
@@ -223,8 +221,14 @@ extension Datawriter {
 		self.offset = offset.offest
 		
 		if self.offset > bytes.endIndex {
-			bytes.append(contentsOf: [Byte](repeating: fillerByte, count: self.offset - bytes.endIndex))
+			bytes.append(contentsOf: repeatElement(fillerByte, count: self.offset -  bytes.endIndex))
+		}
+	}
+	
+	@inlinable
+	public func fourByteAlign() {
+		if !offset.isMultiple(of: 4) {
+			jump(bytes: 4 - (offset % 4))
 		}
 	}
 }
-

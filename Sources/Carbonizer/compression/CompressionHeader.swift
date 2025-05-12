@@ -13,6 +13,12 @@ struct CompressionHeader: BinaryConvertible {
 		case invalidCompressionType(UInt8)
 	}
 	
+	init(dataSize: UInt8, type: CompressionType, decompressedSize: UInt32) {
+		self.dataSize = dataSize
+		self.type = type
+		self.decompressedSize = decompressedSize
+	}
+	
 	init(_ data: Datastream) throws {
 		let word = try data.read(UInt32.self)
 		

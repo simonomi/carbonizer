@@ -21,6 +21,8 @@ func todo(
 	}
 }
 
+typealias Byte = UInt8
+
 extension URL {
 #if os(Windows)
 	init(filePath: String) {
@@ -477,5 +479,11 @@ extension Dictionary {
 		// there's probably a better way but who cares
 		filter { !other.keys.contains($0.key) }
 			.merging(other.filter { !keys.contains($0.key) }) { _, _ in fatalError() }
+	}
+}
+
+extension Collection where Element: Equatable {
+	func isAllTheSame() -> Bool {
+		allSatisfy { $0 == first }
 	}
 }

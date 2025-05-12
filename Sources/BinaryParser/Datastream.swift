@@ -2,8 +2,6 @@ import Foundation
 
 /// Documentation
 final public class Datastream: BinaryConvertible, Codable {
-	public typealias Byte = UInt8
-	
 	public let bytes: ArraySlice<Byte> // for inlinability
 	
 //	public private(set) var offset: Int
