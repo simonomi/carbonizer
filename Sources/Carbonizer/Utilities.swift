@@ -483,7 +483,33 @@ extension Dictionary {
 }
 
 extension Collection where Element: Equatable {
-	func isAllTheSame() -> Bool {
+	func areAllTheSame() -> Bool {
 		allSatisfy { $0 == first }
+	}
+}
+
+extension Collection where Element == Byte {
+	func firstRunIndices(minCount: Int) -> Range<Index>? {
+		for index in indices.dropLast(minCount) {
+			let window = self[index..<self.index(index, offsetBy: minCount)]
+			if window.areAllTheSame() {
+				let endOfRun = self[index...].firstIndex { $0 != self[index] } ?? endIndex
+				
+				return index..<endOfRun
+			}
+		}
+		
+		return nil
+		
+		// TODO: is this faster? is it easier to read?
+//		indices
+//			.lazy
+//			.dropLast(minCount)
+//			.first { self[$0..<index($0, offsetBy: minCount)].areAllTheSame() }
+//			.map { index in
+//				let endOfRun = self[index...].firstIndex { $0 != self[index] } ?? endIndex
+//
+//				return index..<endOfRun
+//			}
 	}
 }

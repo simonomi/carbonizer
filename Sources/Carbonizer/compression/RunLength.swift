@@ -13,34 +13,31 @@ enum RunLength {
 		header.write(to: outputData)
 		
 		var index = inputData.startIndex
-		let endIndex = inputData.endIndex.advanced(by: -2)
-		var lastEndIndex = inputData.startIndex
-		while index < endIndex {
-			guard inputData[index..<index.advanced(by: 3)].isAllTheSame() else {
-				index += 1
-				continue
+		while let runIndices = inputData[index...].firstRunIndices(minCount: 3) {
+			let uncompressedBytes = inputData[index..<runIndices.lowerBound]
+			
+			for chunk in uncompressedBytes.chunked(maxSize: maxUncompressedCount) {
+				Flag(uncompressedByteCount: chunk.count).write(to: outputData)
+				outputData.write(chunk)
 			}
 			
-			let uncompressedBytes = inputData[lastEndIndex..<index]
-			for index in stride(from: uncompressedBytes.startIndex, to: uncompressedBytes.endIndex, by: maxUncompressedCount) {
-				let endIndex = min(index + maxUncompressedCount, uncompressedBytes.endIndex)
-				let smallerUncompressedBytes = uncompressedBytes[index..<endIndex]
-				let uncompressedFlag = Flag(uncompressedByteCount: smallerUncompressedBytes.count)
-				uncompressedFlag.write(to: outputData)
-				outputData.write(uncompressedBytes)
+			let compressedBytes = inputData[runIndices]
+			
+			for chunk in compressedBytes.chunked(maxSize: maxCompressedCount) {
+				Flag(compressedByteCount: chunk.count).write(to: outputData)
+				outputData.write(chunk.first!)
 			}
 			
-			let compressedBytes = inputData[index...].prefix { $0 == inputData[index] }
-			for index in stride(from: compressedBytes.startIndex, to: compressedBytes.endIndex, by: maxCompressedCount) {
-				let endIndex = min(index + maxCompressedCount, compressedBytes.endIndex)
-				let smallerCompressedBytes = compressedBytes[index..<endIndex]
-				let compressedFlag = Flag(compressedByteCount: smallerCompressedBytes.count)
-				compressedFlag.write(to: outputData)
-				outputData.write(smallerCompressedBytes[index])
-			}
+			index = runIndices.endIndex
+		}
+		
+		if index != inputData.endIndex {
+			let uncompressedBytes = inputData[index...]
 			
-			index = compressedBytes.endIndex
-			lastEndIndex = index
+			for chunk in uncompressedBytes.chunked(maxSize: maxUncompressedCount) {
+				Flag(uncompressedByteCount: chunk.count).write(to: outputData)
+				outputData.write(chunk)
+			}
 		}
 		
 		outputData.fourByteAlign()
@@ -85,6 +82,7 @@ enum RunLength {
 		var raw: Byte
 		
 		private static let compressionBit: Byte = 0b1000_0000
+		private static let byteCountMask: Byte = ~compressionBit
 		
 		init(_ raw: Byte) {
 			self.raw = raw
@@ -101,15 +99,14 @@ enum RunLength {
 		}
 		
 		var isCompressed: Bool {
-			raw >> 7 != 0
-//			raw & Self.compressionBit != 0
+			raw & Self.compressionBit != 0
 		}
 		
 		var byteCount: Int {
 			if isCompressed {
-				Int(raw & 0b0111_1111 + 3)
+				Int(raw & Self.byteCountMask) + 3
 			} else {
-				Int(raw & 0b0111_1111 + 1)
+				Int(raw & Self.byteCountMask) + 1
 			}
 		}
 		
