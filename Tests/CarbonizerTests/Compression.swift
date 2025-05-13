@@ -8,21 +8,29 @@ import BinaryParser
 struct Compression {
 	@Test(
 		arguments: [
-//			(.lzss, "first japanese chunk - decompressed", "first japanese chunk - lzss"),
+			(.lzss, "first japanese chunk - decompressed", "first japanese chunk - lzss"),
 //			(.huffman, "first japanese chunk - lzss", "first japanese chunk - huffman"),
 			(.runLength, "map c 0004 - decompressed", "map c 0004 - run length"),
 //			(.huffman, "map c 0004 - run length", "map c 0004 - huffman"),
 			(.runLength, "map e 0048 - decompressed", "map e 0048 - run length"),
 			(.runLength, "map g 0047 - decompressed", "map g 0047 - run length"),
 			(.runLength, "lorem ipsum - decompressed", "lorem ipsum - run length"),
-//			(.lzss, "lorem ipsum - decompressed", "lorem ipsum - lzss"),
+			(.lzss, "lorem ipsum - decompressed", "lorem ipsum - lzss"),
 //			(.huffman, "lorem ipsum - decompressed", "lorem ipsum - huffman"),
+//			(.huffman, "e0046 - lzss", "e0046 - huffman"),
+			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
 		] as [(MCM.CompressionType, String, String)]
 	)
 	func compress(_ type: MCM.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {
 		let inputData = try data(for: decompressedFileName)
 		
+//		let start = Date.now
+		
+		// lzss is *notably* slower, ~0.3–3s compared to ~0.001–0.01s
+		// thats 300x!!
 		let compressedInput = type.compress(inputData)
+		
+//		print("\(.yellow)compress", type, start.timeElapsed, "\(.normal)")
 		
 		let expectedURL: URL = .compressionDirectory
 			.appending(component: expectedFileName)
@@ -52,14 +60,20 @@ struct Compression {
 			(.runLength, "map e 0048 - run length", "map e 0048 - decompressed"),
 			(.runLength, "map g 0047 - run length", "map g 0047 - decompressed"),
 			(.runLength, "lorem ipsum - run length", "lorem ipsum - decompressed"),
-//			(.lzss, "lorem ipsum - lzss", "lorem ipsum - decompressed"),
+			(.lzss, "lorem ipsum - lzss", "lorem ipsum - decompressed"),
 //			(.huffman, "lorem ipsum - huffman", "lorem ipsum - decompressed"),
+			(.huffman, "e0046 - huffman", "e0046 - lzss"),
+			(.lzss, "e0046 - lzss", "e0046 - decompressed"),
 		] as [(MCM.CompressionType, String, String)]
 	)
 	func decompress(_ type: MCM.CompressionType, _ compressedFileName: String, _ expectedFileName: String) throws {
 		let inputData = try data(for: compressedFileName)
 		
+//		let start = Date.now
+		
 		let decompressedInput = try type.decompress(inputData)
+		
+//		print("\(.yellow)decompress", type, start.timeElapsed, "\(.normal)")
 		
 		let expectedURL: URL = .compressionDirectory
 			.appending(component: expectedFileName)

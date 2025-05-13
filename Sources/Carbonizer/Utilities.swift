@@ -55,6 +55,10 @@ extension Collection {
 	var isNotEmpty: Bool {
 		!isEmpty
 	}
+	
+	func max(by keyPath: KeyPath<Element, some Comparable>) -> Element? {
+		self.max { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
+	}
 }
 
 extension BinaryInteger {
@@ -486,9 +490,16 @@ extension Collection where Element: Equatable {
 	func areAllTheSame() -> Bool {
 		allSatisfy { $0 == first }
 	}
+	
+	func commonPrefix(with other: some Collection<Element>) -> SubSequence {
+		zip(indices, other.indices)
+			.first { self[$0] != other[$1] }
+			.map(\.0)
+			.map { self[..<$0] } ?? self[..<Swift.min(endIndex, index(startIndex, offsetBy: other.count))]
+	}
 }
 
-extension Collection where Element == Byte {
+extension Collection<Byte> {
 	func firstRunIndices(minCount: Int) -> Range<Index>? {
 		for index in indices.dropLast(minCount) {
 			let window = self[index..<self.index(index, offsetBy: minCount)]
@@ -500,16 +511,11 @@ extension Collection where Element == Byte {
 		}
 		
 		return nil
-		
-		// TODO: is this faster? is it easier to read?
-//		indices
-//			.lazy
-//			.dropLast(minCount)
-//			.first { self[$0..<index($0, offsetBy: minCount)].areAllTheSame() }
-//			.map { index in
-//				let endOfRun = self[index...].firstIndex { $0 != self[index] } ?? endIndex
-//
-//				return index..<endOfRun
-//			}
+	}
+}
+
+extension Date {
+	var timeElapsed: TimeInterval {
+		-timeIntervalSinceNow
 	}
 }

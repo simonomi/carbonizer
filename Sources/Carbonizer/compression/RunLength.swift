@@ -1,6 +1,9 @@
 import BinaryParser
 
 enum RunLength {
+	static let maxCompressedCount = Int(Byte.max) / 2 + 3
+	static let maxUncompressedCount = Int(Byte.max) / 2 + 1
+	
 	static func compress(_ inputData: Datastream) -> Datastream {
 		let inputData = inputData.bytes[inputData.offset...]
 		let outputData = Datawriter()
@@ -74,9 +77,6 @@ enum RunLength {
 		
 		return Datastream(outputData)
 	}
-	
-	static let maxCompressedCount = Int(Byte.max) / 2 + 3
-	static let maxUncompressedCount = Int(Byte.max) / 2 + 1
 	
 	struct Flag {
 		var raw: Byte
