@@ -42,7 +42,7 @@ enum LZSS {
 		
 		outputData.fourByteAlign()
 		
-		return Datastream(outputData.bytes)
+		return outputData.intoDatastream()
 	}
 	
 	static func decompress(_ inputData: Datastream) throws -> Datastream {

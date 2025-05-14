@@ -19,6 +19,8 @@ struct Compression {
 //			(.huffman, "lorem ipsum - decompressed", "lorem ipsum - huffman"),
 //			(.huffman, "e0046 - lzss", "e0046 - huffman"),
 			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
+			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"),
+//			(.huffman, "msg_1007 - decompressed", "msg_1007 - huffman"),
 		] as [(MCM.CompressionType, String, String)]
 	)
 	func compress(_ type: MCM.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {
@@ -64,6 +66,8 @@ struct Compression {
 //			(.huffman, "lorem ipsum - huffman", "lorem ipsum - decompressed"),
 			(.huffman, "e0046 - huffman", "e0046 - lzss"),
 			(.lzss, "e0046 - lzss", "e0046 - decompressed"),
+			(.huffman, "msg_0911 - huffman", "msg_0911 - decompressed"),
+			(.huffman, "msg_1007 - huffman", "msg_1007 - decompressed"),
 		] as [(MCM.CompressionType, String, String)]
 	)
 	func decompress(_ type: MCM.CompressionType, _ compressedFileName: String, _ expectedFileName: String) throws {

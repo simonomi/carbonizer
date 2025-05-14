@@ -15,9 +15,9 @@ enum RunLength {
 		)
 		header.write(to: outputData)
 		
-		var index = inputData.startIndex
-		while let runIndices = inputData[index...].firstRunIndices(minCount: 3) {
-			let uncompressedBytes = inputData[index..<runIndices.lowerBound]
+		var inputOffset = inputData.startIndex
+		while let runIndices = inputData[inputOffset...].firstRunIndices(minCount: 3) {
+			let uncompressedBytes = inputData[inputOffset..<runIndices.lowerBound]
 			
 			for chunk in uncompressedBytes.chunked(maxSize: maxUncompressedCount) {
 				Flag(uncompressedByteCount: chunk.count).write(to: outputData)
@@ -31,11 +31,11 @@ enum RunLength {
 				outputData.write(chunk.first!)
 			}
 			
-			index = runIndices.endIndex
+			inputOffset = runIndices.endIndex
 		}
 		
-		if index != inputData.endIndex {
-			let uncompressedBytes = inputData[index...]
+		if inputOffset != inputData.endIndex {
+			let uncompressedBytes = inputData[inputOffset...]
 			
 			for chunk in uncompressedBytes.chunked(maxSize: maxUncompressedCount) {
 				Flag(uncompressedByteCount: chunk.count).write(to: outputData)
@@ -45,7 +45,7 @@ enum RunLength {
 		
 		outputData.fourByteAlign()
 		
-		return Datastream(outputData.bytes)
+		return outputData.intoDatastream()
 	}
 	
 	static func decompress(_ inputData: Datastream) throws -> Datastream {
