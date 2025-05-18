@@ -158,7 +158,11 @@ extension NDS: FileSystemObject {
 			.savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(into path: URL, overwriting: Bool) throws {
+	func write(
+		into path: URL,
+		overwriting: Bool,
+		with configuration: CarbonizerConfiguration
+	) throws {
 		let encoder = JSONEncoder(.prettyPrinted, .sortedKeys)
 		
 		let header           = Datastream(try encoder.encode(header))
@@ -178,7 +182,7 @@ extension NDS: FileSystemObject {
 		]
 		
 		try Folder(name: name, contents: contents)
-			.write(into: path, overwriting: overwriting)
+			.write(into: path, overwriting: overwriting, with: configuration)
 	}
 	
 	func packedStatus() -> PackedStatus {
@@ -216,7 +220,11 @@ struct PackedNDS: FileSystemObject {
 		).savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(into path: URL, overwriting: Bool) throws {
+	func write(
+		into path: URL,
+		overwriting: Bool,
+		with configuration: CarbonizerConfiguration
+	) throws {
 		let writer = Datawriter()
 		writer.write(binary)
 		
@@ -225,7 +233,7 @@ struct PackedNDS: FileSystemObject {
 				name: name + Self.fileExtension,
 				data: writer.intoDatastream()
 			)
-			.write(into: path, overwriting: overwriting)
+			.write(into: path, overwriting: overwriting, with: configuration)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
@@ -321,7 +329,7 @@ extension NDS.Binary {
 			return writer.intoDatastream()
 		}
 		
-		precondition(files.count == header.fileAllocationTableSize / 8, "error: file added while unpacked")
+		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while unpacked")
 		
 		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(4)
 		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(4)

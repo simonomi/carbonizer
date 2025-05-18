@@ -5,7 +5,11 @@ protocol FileSystemObject {
 	var name: String { get }
 	
 	func savePath(in folder: URL, overwriting: Bool) -> URL
-	func write(into folder: URL, overwriting: Bool) throws
+	func write(
+		into folder: URL,
+		overwriting: Bool,
+		with configuration: CarbonizerConfiguration
+	) throws
 	
 	func packedStatus() -> PackedStatus
 	

@@ -37,15 +37,19 @@ extension MAR: FileSystemObject {
 		}
 	}
 	
-	func write(into folder: URL, overwriting: Bool) throws {
+	func write(
+		into folder: URL,
+		overwriting: Bool,
+		with configuration: CarbonizerConfiguration
+	) throws {
 		if files.count == 1, let file = files.first {
 			try ProprietaryFile(name: name, standaloneMCM: file)
-				.write(into: folder, overwriting: overwriting)
+				.write(into: folder, overwriting: overwriting, with: configuration)
 		} else {
 			try Folder(
 				name: name + Self.fileExtension,
 				contents: files.enumerated().map(ProprietaryFile.init)
-			).write(into: folder, overwriting: overwriting)
+			).write(into: folder, overwriting: overwriting, with: configuration)
 		}
 	}
 	
@@ -76,7 +80,11 @@ struct PackedMAR: FileSystemObject {
 		.savePath(in: directory, overwriting: overwriting)
 	}
 	
-	func write(into path: URL, overwriting: Bool) throws {
+	func write(
+		into path: URL,
+		overwriting: Bool,
+		with configuration: CarbonizerConfiguration
+	) throws {
 		let writer = Datawriter()
 		writer.write(binary)
 		
@@ -85,7 +93,7 @@ struct PackedMAR: FileSystemObject {
 				name: name,
 				data: writer.intoDatastream()
 			)
-			.write(into: path, overwriting: overwriting)
+			.write(into: path, overwriting: overwriting, with: configuration)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}

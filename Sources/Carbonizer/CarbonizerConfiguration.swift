@@ -10,6 +10,7 @@ struct CarbonizerConfiguration {
 	var keepWindowOpen: KeepWindowOpen
 	var useColor: Bool
 	var dexCommandList: DEXCommandList
+	var externalMetadata: Bool
 	
 	var fileTypes: [String]
 	
@@ -73,6 +74,7 @@ struct CarbonizerConfiguration {
 		case ff1, ffc, none
 	}
 	
+	// TODO: including the file types makes updating carbonizer not use new file types :/
 	static let defaultConfigurationString: String = """
 		{
 			"compressionMode": "auto", // pack, unpack, auto, ask
@@ -83,6 +85,7 @@ struct CarbonizerConfiguration {
 			"keepWindowOpen": "onError", // always, never, onError
 			"useColor": true,
 			"dexCommandList": "ff1", // ff1, ffc, none
+			"externalMetadata": false,
 			
 			// stable: BBG, DEP, DEX, DMG, DMS, DTX, HML, MAR, MM3, MPM, NDS, RLS
 			// experimental: 3CL, CHR, DBS, DCL, DML, ECS, GRD, MAP, MFS, MMS
@@ -123,7 +126,7 @@ struct CarbonizerConfiguration {
 
 extension CarbonizerConfiguration: Decodable {
 	enum CodingKeys: CodingKey {
-		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, dexCommandList, fileTypes, onlyUnpack, skipUnpacking, experimental
+		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, dexCommandList, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, experimental
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -132,28 +135,31 @@ extension CarbonizerConfiguration: Decodable {
 		// this is lazy to prevent infinite recursion
 		lazy var fallback = Self.defaultConfiguration
 		
-		compressionMode = try container.decodeIfPresent(CompressionMode.self,     forKey: .compressionMode) ??
+		compressionMode =  try container.decodeIfPresent(CompressionMode.self,     forKey: .compressionMode) ??
 			fallback.compressionMode
-		inputFiles =      try container.decodeIfPresent([String].self,            forKey: .inputFiles) ??
+		inputFiles =       try container.decodeIfPresent([String].self,            forKey: .inputFiles) ??
 			fallback.inputFiles
-		outputFolder =    try container.decodeIfPresent(String.self,              forKey: .outputFolder) // no fallback because the default value is nil
-		overwriteOutput = try container.decodeIfPresent(Bool.self,                forKey: .overwriteOutput) ??
+		outputFolder =     try container.decodeIfPresent(String.self,              forKey: .outputFolder) ??
+			nil
+		overwriteOutput =  try container.decodeIfPresent(Bool.self,                forKey: .overwriteOutput) ??
 			fallback.overwriteOutput
-		showProgress =    try container.decodeIfPresent(Bool.self,                forKey: .showProgress) ??
+		showProgress =     try container.decodeIfPresent(Bool.self,                forKey: .showProgress) ??
 			fallback.showProgress
-		keepWindowOpen =  try container.decodeIfPresent(KeepWindowOpen.self,      forKey: .keepWindowOpen) ??
+		keepWindowOpen =   try container.decodeIfPresent(KeepWindowOpen.self,      forKey: .keepWindowOpen) ??
 			fallback.keepWindowOpen
-		useColor =        try container.decodeIfPresent(Bool.self,                forKey: .useColor) ??
+		useColor =         try container.decodeIfPresent(Bool.self,                forKey: .useColor) ??
 			fallback.useColor
-		dexCommandList =  try container.decodeIfPresent(DEXCommandList.self,      forKey: .dexCommandList) ??
+		dexCommandList =   try container.decodeIfPresent(DEXCommandList.self,      forKey: .dexCommandList) ??
 			fallback.dexCommandList
-		fileTypes =       try container.decodeIfPresent([String].self,            forKey: .fileTypes) ??
+		externalMetadata = try container.decodeIfPresent(Bool.self,                forKey: .externalMetadata) ??
+			fallback.externalMetadata
+		fileTypes =        try container.decodeIfPresent([String].self,            forKey: .fileTypes) ??
 			fallback.fileTypes
-		onlyUnpack =     try container.decodeIfPresent([Glob].self,               forKey: .onlyUnpack) ??
+		onlyUnpack =       try container.decodeIfPresent([Glob].self,              forKey: .onlyUnpack) ??
 			fallback.onlyUnpack
-		skipUnpacking =  try container.decodeIfPresent([Glob].self,               forKey: .skipUnpacking) ??
+		skipUnpacking =    try container.decodeIfPresent([Glob].self,              forKey: .skipUnpacking) ??
 			fallback.skipUnpacking
-		experimental =    try container.decodeIfPresent(ExperimentalOptions.self, forKey: .experimental) ??
+		experimental =     try container.decodeIfPresent(ExperimentalOptions.self, forKey: .experimental) ??
 			fallback.experimental
 	}
 }

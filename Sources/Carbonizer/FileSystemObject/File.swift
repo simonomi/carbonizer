@@ -8,9 +8,7 @@ func createFile(
 	let name = path.lastPathComponent
 	let data = Datastream(try Data(contentsOf: path))
 	
-	let metadata = try path
-		.getCreationDate()
-		.flatMap(Metadata.init)
+	let metadata = try Metadata(forFileAt: path)
 	
 	let file = try createFile(
 		name: name,

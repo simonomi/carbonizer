@@ -198,3 +198,43 @@ extension ProprietaryFile {
 		data = mcm.content
 	}
 }
+
+extension MCM.CompressionType: Codable {
+	struct InvalidCompressionType: Error, CustomStringConvertible {
+		var rawString: String
+		
+		init(_ rawString: String) {
+			self.rawString = rawString
+		}
+		
+		var description: String {
+			"invalid compression type: '\(rawString)', expected one of 'none', 'run-length', 'lzss', or 'huffman'"
+		}
+	}
+	
+	init(from decoder: any Decoder) throws {
+		let rawString = try decoder.singleValueContainer().decode(String.self)
+		
+		self = switch rawString {
+			case "none": .none
+			case "run-length": .runLength
+			case "lzss": .lzss
+			case "huffman": .huffman
+			default: throw InvalidCompressionType(rawString)
+		}
+	}
+	
+	private var encodingString: String {
+		switch self {
+			case .none: "none"
+			case .runLength: "run-length"
+			case .lzss: "lzss"
+			case .huffman: "huffman"
+		}
+	}
+	
+	func encode(to encoder: any Encoder) throws {
+		var container = encoder.singleValueContainer()
+		try container.encode(encodingString)
+	}
+}

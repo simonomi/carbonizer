@@ -13,6 +13,7 @@ func createFolder(
 	
 	let contents = try contentPaths
 		.filter { !$0.lastPathComponent.starts(with: ".") }
+		.filter { $0.pathExtension != "metadata" }
 		.map { try fileSystemObject(contentsOf: $0, configuration: configuration) }
 		.sorted(by: \.name)
 	
@@ -58,10 +59,14 @@ extension Folder: FileSystemObject {
 		fatalError("unreachable")
 	}
 	
-	func write(into folder: URL, overwriting: Bool) throws {
+	func write(
+		into folder: URL,
+		overwriting: Bool,
+		with configuration: CarbonizerConfiguration
+	) throws {
 		let path = savePath(in: folder, overwriting: overwriting)
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
-		try contents.forEach { try $0.write(into: path, overwriting: overwriting) }
+		try contents.forEach { try $0.write(into: path, overwriting: overwriting, with: configuration) }
 	}
 	
 	func packedStatus() -> PackedStatus {

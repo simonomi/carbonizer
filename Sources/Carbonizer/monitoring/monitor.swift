@@ -26,7 +26,7 @@ extension Carbonizer {
 			
 			let packedData = fileData.packed(configuration: configuration)
 			let outputPath = packedData.savePath(in: outputFolder, overwriting: true)
-			try packedData.write(into: outputFolder, overwriting: true)
+			try packedData.write(into: outputFolder, overwriting: true, with: configuration)
 			
 			try shell("open \"\(outputPath.path(percentEncoded: false))\"")
 		}

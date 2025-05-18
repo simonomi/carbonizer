@@ -26,7 +26,11 @@ extension BinaryFile: FileSystemObject {
 		fatalError("unreachable")
 	}
 	
-	func write(into folder: URL, overwriting: Bool) throws {
+	func write(
+		into folder: URL,
+		overwriting: Bool,
+		with configuration: CarbonizerConfiguration
+	) throws {
 		let path = savePath(in: folder, overwriting: overwriting)
 		
 		do {
@@ -39,9 +43,19 @@ extension BinaryFile: FileSystemObject {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
 		
-		if let metadataDate = metadata?.asDate {
+		if let metadata {
 			do {
-				try path.setCreationDate(to: metadataDate)
+				if configuration.externalMetadata {
+					let metadataPath = path
+						.deletingPathExtension()
+						.appendingPathExtension("metadata")
+					
+					try JSONEncoder(.prettyPrinted, .sortedKeys)
+						.encode(metadata)
+						.write(to: metadataPath)
+				} else {
+					try path.setCreationDate(to: metadata.asDate)
+				}
 			} catch {
 				throw BinaryParserError.whileWriting(Metadata.self, error)
 			}

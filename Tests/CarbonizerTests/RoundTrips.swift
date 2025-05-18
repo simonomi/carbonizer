@@ -9,6 +9,7 @@ fileprivate let filePath = URL(filePath: "/Users/simonomi/ff1/output/Fossil Figh
 // - the root nds rom
 // - individual files, packed and unpacked
 // - mar folders, nds unpacked, and standalone mars (metadata!)
+// - the repacked rom! this can be done without any compression
 
 @Test(
 	arguments: [
@@ -34,7 +35,7 @@ func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 	}
 	
 	let savePath = repackedFile.savePath(in: .temporaryDirectory, overwriting: true)
-	try repackedFile.write(into: .temporaryDirectory, overwriting: true)
+	try repackedFile.write(into: .temporaryDirectory, overwriting: true, with: .defaultConfiguration)
 	
 	let originalData = try Data(contentsOf: inputFilePath)
 	let savedData = try Data(contentsOf: savePath)

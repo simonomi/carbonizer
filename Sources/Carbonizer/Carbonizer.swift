@@ -214,7 +214,11 @@ struct Carbonizer: AsyncParsableCommand {
 			let writeStart = Date.now
 #endif
 			
-			try processedFile.write(into: outputFolder, overwriting: configuration.overwriteOutput)
+			try processedFile.write(
+				into: outputFolder,
+				overwriting: configuration.overwriteOutput,
+				with: configuration
+			)
 			
 #if !IN_CI
 			print("\(.cyan)write", -writeStart.timeIntervalSinceNow, "\(.normal)")
