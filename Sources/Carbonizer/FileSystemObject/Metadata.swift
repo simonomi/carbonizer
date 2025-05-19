@@ -6,11 +6,20 @@ struct Metadata {
 	var maxChunkSize: UInt32 // 4 bits, then multiplied by 4kB
 	var index: UInt16 // 16 bits
 	
-	init(standalone: Bool, compression: (MCM.CompressionType, MCM.CompressionType), maxChunkSize: UInt32, index: UInt16) {
+	var huffmanCompressionInfo: [Huffman.CompressionInfo]
+	
+	init(
+		standalone: Bool,
+		compression: (MCM.CompressionType, MCM.CompressionType),
+		maxChunkSize: UInt32,
+		index: UInt16,
+		huffmanCompressionInfo: [Huffman.CompressionInfo]
+	) {
 		self.standalone = standalone
 		self.compression = compression
 		self.maxChunkSize = maxChunkSize
 		self.index = index
+		self.huffmanCompressionInfo = huffmanCompressionInfo
 	}
 	
 	init?(forFileAt path: URL) throws {
@@ -57,6 +66,8 @@ struct Metadata {
 		maxChunkSize = UInt32(maxChunkSizeBits) * 0x1000
 		
 		index = UInt16(indexBits)
+		
+		huffmanCompressionInfo = []
 	}
 	
 	var asDate: Date {
@@ -79,7 +90,7 @@ struct Metadata {
 
 extension Metadata: Codable {
 	enum CodingKeys: CodingKey {
-		case standalone, firstCompressionType, secondCompressionType, maxChunkSize, index
+		case standalone, firstCompressionType, secondCompressionType, maxChunkSize, index, huffmanCompressionInfo
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -94,15 +105,18 @@ extension Metadata: Codable {
 		
 		maxChunkSize = try container.decode(UInt32.self, forKey: .maxChunkSize)
 		index = try container.decode(UInt16.self, forKey: .index)
+		
+		huffmanCompressionInfo = try container.decode([Huffman.CompressionInfo].self, forKey: .huffmanCompressionInfo)
 	}
 	
 	func encode(to encoder: any Encoder) throws {
 		var container = encoder.container(keyedBy: CodingKeys.self)
 		
-		try container.encode(standalone,    forKey: .standalone)
-		try container.encode(compression.0, forKey: .firstCompressionType)
-		try container.encode(compression.1, forKey: .secondCompressionType)
-		try container.encode(maxChunkSize,  forKey: .maxChunkSize)
-		try container.encode(index,         forKey: .index)
+		try container.encode(standalone,             forKey: .standalone)
+		try container.encode(compression.0,          forKey: .firstCompressionType)
+		try container.encode(compression.1,          forKey: .secondCompressionType)
+		try container.encode(maxChunkSize,           forKey: .maxChunkSize)
+		try container.encode(index,                  forKey: .index)
+		try container.encode(huffmanCompressionInfo, forKey: .huffmanCompressionInfo)
 	}
 }

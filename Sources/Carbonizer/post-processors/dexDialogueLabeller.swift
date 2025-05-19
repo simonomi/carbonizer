@@ -19,6 +19,7 @@ func dexDialogueLabeller(
 						MCM(
 							compression: $0.compression,
 							maxChunkSize: $0.maxChunkSize,
+							huffmanCompressionInfo: $0.huffmanCompressionInfo,
 							content: label($0.content, with: dialogue) as any ProprietaryFileData
 						)
 					}

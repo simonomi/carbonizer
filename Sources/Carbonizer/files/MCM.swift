@@ -5,26 +5,28 @@ struct MCM {
 	var compression: (CompressionType, CompressionType)
 	var maxChunkSize: UInt32
 	
+	var huffmanCompressionInfo: [Huffman.CompressionInfo]
+	
 	var content: any ProprietaryFileData
 	
 	enum CompressionType: UInt8 {
 		case none, runLength, lzss, huffman
 		
-		var compress: (Datastream) -> Datastream {
+		func compress(_ data: Datastream, compressionInfo: Huffman.CompressionInfo?) -> Datastream {
 			switch self {
-				case .none:                identity
-				case .runLength: RunLength.compress
-				case .lzss:           LZSS.compress
-				case .huffman:     Huffman.compress
+				case .none:                         data
+				case .runLength: RunLength.compress(data)
+				case .lzss:           LZSS.compress(data)
+				case .huffman:     Huffman.compress(data, info: compressionInfo)
 			}
 		}
 		
-		var decompress: (Datastream) throws -> Datastream {
+		func decompress(_ data: Datastream) throws -> (Datastream, Huffman.CompressionInfo?) {
 			switch self {
-				case .none:                identity
-				case .runLength: RunLength.decompress
-				case .lzss:           LZSS.decompress
-				case .huffman:     Huffman.decompress
+				case .none:                               (data,  nil)
+				case .runLength: (try RunLength.decompress(data), nil)
+				case .lzss:           (try LZSS.decompress(data), nil)
+				case .huffman:      try Huffman.decompress(data)
 			}
 		}
 	}
@@ -76,9 +78,16 @@ extension MCM {
 		do {
 			// TODO: this can be optimized by having each chunk's
 			// decompression functions write to the same buffer
-			let data = try binary.chunks
+			let decompressedChunksAndInfo = try binary.chunks
 				.map(compression.0.decompress)
-				.map(compression.1.decompress)
+				.map { [compression] in (try compression.1.decompress($0), $1) }
+			
+			huffmanCompressionInfo = decompressedChunksAndInfo
+				.flatMap { [$0.1, $0.0.1] }
+				.compactMap { $0 }
+			
+			let data = decompressedChunksAndInfo
+				.map(\.0.0)
 				.joined()
 			
 #if compiler(>=6)
@@ -125,10 +134,15 @@ extension MCM.Binary {
 		
 		decompressedSize = UInt32(data.offset)
 		
-		chunks = data
+		let chunkedData = data
 			.intoDatastream()
 			.chunked(maxSize: Int(maxChunkSize))
+		
+		chunks = chunkedData
+//		let firstCompressionLayer = zip(chunkedData, mcm.huffmanCompressionInfo)
 //			.map(mcm.compression.1.compress)
+//		
+//		chunks = zip(firstCompressionLayer, mcm.huffmanCompressionInfo)
 //			.map(mcm.compression.0.compress)
 		
 		chunkCount = UInt32(chunks.count)
@@ -172,6 +186,7 @@ extension MCM {
 		
 		compression = metadata.compression
 		maxChunkSize = metadata.maxChunkSize
+		huffmanCompressionInfo = metadata.huffmanCompressionInfo
 	}
 }
 
@@ -182,7 +197,8 @@ extension ProprietaryFile {
 			standalone: false,
 			compression: mcm.compression,
 			maxChunkSize: mcm.maxChunkSize,
-			index: UInt16(index)
+			index: UInt16(index),
+			huffmanCompressionInfo: mcm.huffmanCompressionInfo
 		)
 		data = mcm.content
 	}
@@ -193,7 +209,8 @@ extension ProprietaryFile {
 			standalone: true,
 			compression: mcm.compression,
 			maxChunkSize: mcm.maxChunkSize,
-			index: 0
+			index: 0,
+			huffmanCompressionInfo: mcm.huffmanCompressionInfo
 		)
 		data = mcm.content
 	}

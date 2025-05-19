@@ -14,6 +14,7 @@ struct CompressionHeader: BinaryConvertible {
 	}
 	
 	init(dataSize: UInt8, type: CompressionType, decompressedSize: UInt32) {
+		precondition(decompressedSize >> 24 == 0, "decompressed file is too large")
 		self.dataSize = dataSize
 		self.type = type
 		self.decompressedSize = decompressedSize

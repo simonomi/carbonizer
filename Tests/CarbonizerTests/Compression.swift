@@ -9,18 +9,18 @@ struct Compression {
 	@Test(
 		arguments: [
 			(.lzss, "first japanese chunk - decompressed", "first japanese chunk - lzss"),
-//			(.huffman, "first japanese chunk - lzss", "first japanese chunk - huffman"),
+//			(.huffman, "first japanese chunk - lzss", "first japanese chunk - huffman"), // 4-bit
 			(.runLength, "map c 0004 - decompressed", "map c 0004 - run length"),
-//			(.huffman, "map c 0004 - run length", "map c 0004 - huffman"),
+//			(.huffman, "map c 0004 - run length", "map c 0004 - huffman"), // 8-bit
 			(.runLength, "map e 0048 - decompressed", "map e 0048 - run length"),
 			(.runLength, "map g 0047 - decompressed", "map g 0047 - run length"),
 			(.runLength, "lorem ipsum - decompressed", "lorem ipsum - run length"),
 			(.lzss, "lorem ipsum - decompressed", "lorem ipsum - lzss"),
 //			(.huffman, "lorem ipsum - decompressed", "lorem ipsum - huffman"),
-//			(.huffman, "e0046 - lzss", "e0046 - huffman"),
+//			(.huffman, "e0046 - lzss", "e0046 - huffman"), // 4-bit
 			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
-//			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"),
-//			(.huffman, "msg_1007 - decompressed", "msg_1007 - huffman"),
+			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"), // 8-bit
+//			(.huffman, "msg_1007 - decompressed", "msg_1007 - huffman"), // 8-bit
 		] as [(MCM.CompressionType, String, String)]
 	)
 	func compress(_ type: MCM.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {
@@ -30,7 +30,7 @@ struct Compression {
 		
 		// lzss is *notably* slower, ~0.3–3s compared to ~0.001–0.01s
 		// thats 300x!!
-		let compressedInput = type.compress(inputData)
+		let compressedInput = type.compress(inputData, compressionInfo: nil)
 		
 //		print("\(.yellow)compress", type, start.timeElapsed, "\(.normal)")
 		
@@ -75,7 +75,7 @@ struct Compression {
 		
 //		let start = Date.now
 		
-		let decompressedInput = try type.decompress(inputData)
+		let (decompressedInput, _) = try type.decompress(inputData)
 		
 //		print("\(.yellow)decompress", type, start.timeElapsed, "\(.normal)")
 		

@@ -2,9 +2,78 @@ import BinaryParser
 
 // https://mgba-emu.github.io/gbatek/#huffuncompreadbycallback---swi-13h-ndsdsi
 enum Huffman {
-	static func compress(_ inputData: Datastream) -> Datastream {
-		todo()
+	struct CompressionInfo: Codable {
+		var dataSize: UInt8
+		var tree: Node?
+		
+		indirect enum Node: Codable {
+			case symbol(Byte)
+			case branch(left: Self, right: Self)
+			
+			enum BranchCodingKeys: CodingKey {
+				case left, right
+			}
+			
+			init(from decoder: any Decoder) throws {
+				do {
+					let symbol = try decoder.singleValueContainer().decode(Byte.self)
+					
+					self = .symbol(symbol)
+				} catch {
+					let container = try decoder.container(keyedBy: BranchCodingKeys.self)
+					
+					let left = try container.decode(Self.self, forKey: .left)
+					let right = try container.decode(Self.self, forKey: .right)
+					
+					self = .branch(left: left, right: right)
+				}
+			}
+			
+			func encode(to encoder: any Encoder) throws {
+				switch self {
+					case .symbol(let byte):
+						var container = encoder.singleValueContainer()
+						try container.encode(byte)
+					case .branch(let left, let right):
+						var container = encoder.container(keyedBy: BranchCodingKeys.self)
+						
+						try container.encode(left, forKey: .left)
+						try container.encode(right, forKey: .right)
+				}
+			}
+			
+			init(
+				traversing data: ArraySlice<Byte>,
+				at currentOffset: Int,
+				isData: Bool = false
+			) {
+				let nodeData = data[currentOffset]
+				
+				if isData {
+					self = .symbol(nodeData)
+				} else {
+					let huffmanNode = Huffman.Node(nodeData: nodeData)
+					
+					self = .branch(
+						left: Self(
+							traversing: data,
+							at: huffmanNode.leftOffset(currentOffset: currentOffset),
+							isData: huffmanNode.leftIsData
+						),
+						right: Self(
+							traversing: data,
+							at: huffmanNode.rightOffset(currentOffset: currentOffset),
+							isData: huffmanNode.rightIsData
+						)
+					)
+				}
+			}
+		}
 	}
+	
+//	static func compress(_ inputData: Datastream, info: CompressionInfo?) -> Datastream {
+//		todo()
+//	}
 	
 	// this is a prototype version that somewhat works with certain files (4-bit compression)
 	// but still fails horribly with others (8-bit). im not sure how on earth the 8-bit
@@ -15,7 +84,7 @@ enum Huffman {
 	// ideally all we'd need to store is data size, which would still fit in the creation date,
 	// but to fit the entire tree, metadata will need to be its own file. having its own file is
 	// also just a nice feature to have for reliability (and linux systems), so let's do it!
-//	static func compress(_ inputData: Datastream) -> Datastream {
+//	static func compress(_ inputData: Datastream, info: CompressionInfo?) -> Datastream {
 //		let originalInputData = inputData.bytes[inputData.offset...]
 //		let outputData = Datawriter()
 //		
@@ -28,13 +97,12 @@ enum Huffman {
 //		// oh god is it based on how well its compressed??
 //		// add a flag in metadata for this?
 //		// theory: based on the number of unique bytes? whats the max?
+//		// - nope, both 4-bit and 8-bit have 0-256 unique bytes
 //		//  - or does it depend on the *shape* of the tree... grrrr
 //		
-//		let dataSize: UInt8 = if [244, 0x1d0, 0x6f0].contains(originalInputData.count) {
-//			8
-//		} else {
-//			4
-//		}
+//		// TODO: is defaulting to 8 the right behavior? probably not
+//		let dataSize = info?.dataSize ?? 8
+//		precondition(dataSize == 4 || dataSize == 8, "huffman data size must be 4 or 8")
 //		
 //		let header = CompressionHeader(
 //			dataSize: dataSize,
@@ -53,9 +121,13 @@ enum Huffman {
 //		
 //		// what the actual fucking algorithm did they use to make this tree
 //		
+//		// MARK: create tree
+//		
 //		let tree: CompressionNode
 //		
-//		if header.dataSize == 4 {
+//		if let givenTree = info?.tree {
+//			tree = CompressionNode(givenTree)
+//		} else if header.dataSize == 4 {
 //			var symbols = inputData
 //				.reduce(into: [:]) { partialResult, byte in
 //					partialResult[byte, default: 0] += 1
@@ -177,7 +249,9 @@ enum Huffman {
 //			tree = branches.first ?? symbols.first!
 //		}
 //		
-//		print(tree)
+////		print(tree)
+//		
+//		// MARK: write tree
 //		
 //		// rounded up to align to the nearest word
 //		let nodeCount = (tree.nodeCount() + 1).roundedUpToTheNearest(4) - 1
@@ -214,32 +288,34 @@ enum Huffman {
 //		
 //		outputData.fourByteAlign()
 //		
-////		let dictionary = tree.dictionary()
+//		// MARK: write data
+//		
+//		let dictionary = tree.dictionary()
 ////		print(dictionary)
 //		
-////		var currentWord: BitArray? = nil
-////		
-////		for byte in inputData { // e0046 stops too soon...?
-////			if currentWord == nil {
-////				currentWord = BitArray()
-////			}
-////			
-////			guard let newBits = dictionary[byte] else {
-////				fatalError("this should never happen... right?")
-////			}
-////			
-//////			print(String(byte, radix: 16, uppercase: true), newBits)
-////			
-////			if let overflow = currentWord!.append(contentsOf: newBits) {
-//////				print(currentWord!)
-////				currentWord!.write(to: outputData)
-////				currentWord = overflow
-////			}
-////		}
-////		
-////		currentWord?.write(to: outputData)
-////		
-////		outputData.fourByteAlign()
+//		var currentWord: BitArray? = nil
+//		
+//		for byte in inputData { // e0046 stops too soon...?
+//			if currentWord == nil {
+//				currentWord = BitArray()
+//			}
+//			
+//			guard let newBits = dictionary[byte] else {
+//				fatalError("this should never happen... right?")
+//			}
+//			
+////			print(String(byte, radix: 16, uppercase: true), newBits)
+//			
+//			if let overflow = currentWord!.append(contentsOf: newBits) {
+////				print(currentWord!)
+//				currentWord!.write(to: outputData)
+//				currentWord = overflow
+//			}
+//		}
+//		
+//		currentWord?.write(to: outputData)
+//		
+//		outputData.fourByteAlign()
 //		
 //		return outputData.intoDatastream()
 //	}
@@ -315,13 +391,32 @@ enum Huffman {
 		}
 		
 		// TODO: remove
-//		func hasChild(_ other: Self) -> Bool {
-//			switch kind {
-//				case .symbol: false
-//				case .branch(let left, let right):
-//					left == other || right == other || left.hasChild(other) || right.hasChild(other)
-//			}
-//		}
+		func hasChild(_ other: Self) -> Bool {
+			switch kind {
+				case .symbol: false
+				case .branch(let left, let right):
+					left == other || right == other || left.hasChild(other) || right.hasChild(other)
+			}
+		}
+		
+		init(kind: Kind, frequency: Int) {
+			self.kind = kind
+			self.frequency = frequency
+		}
+		
+		init(_ infoNode: Huffman.CompressionInfo.Node) {
+			frequency = 0 // frequency should only be used when *creating* the tree
+			
+			switch infoNode {
+				case .symbol(let byte):
+					kind = .symbol(byte)
+				case .branch(let left, let right):
+					kind = .branch(
+						left: Self(left),
+						right: Self(right)
+					)
+			}
+		}
 	}
 	
 	struct BitArray: CustomDebugStringConvertible {
@@ -419,7 +514,7 @@ enum Huffman {
 		}
 	}
 	
-	static func decompress(_ inputData: Datastream) throws -> Datastream {
+	static func decompress(_ inputData: Datastream) throws -> (Datastream, CompressionInfo) {
 		let base = inputData.offset
 		
 		let header = try inputData.read(CompressionHeader.self)
@@ -487,7 +582,15 @@ enum Huffman {
 			}
 		}
 		
-		return Datastream(outputData)
+		let tree: CompressionInfo.Node? = if header.dataSize == 8 {
+			CompressionInfo.Node(traversing: inputData, at: rootNodeOffset)
+		} else {
+			nil
+		}
+		
+		let compressionInfo = CompressionInfo(dataSize: header.dataSize, tree: tree)
+		
+		return (Datastream(outputData), compressionInfo)
 	}
 	
 	struct Node {
