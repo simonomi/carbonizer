@@ -331,14 +331,33 @@ extension NDS.Binary {
 		
 		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while unpacked")
 		
-		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(4)
-		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(4)
-		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)        .roundedUpToTheNearest(4)
-		header.arm7OverlayOffset =         (header.arm7Offset                + header.arm7Size)               .roundedUpToTheNearest(4)
-		header.fileNameTableOffset =       (header.arm7OverlayOffset         + header.arm7OverlaySize)        .roundedUpToTheNearest(4)
-		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)      .roundedUpToTheNearest(4)
-		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize).roundedUpToTheNearest(4)
-		let filesOffset =                  (header.iconBannerOffset          + 0x840)                         .roundedUpToTheNearest(4)
+		let offsetIncrement: UInt32 = 256
+		let iconBannerSize: UInt32 = 0x840
+		
+		// ok, the original ff1 rom has the following:
+		// 0x004000 header size
+		// 0x004000 arm9 offset
+		// 0x0793D0 arm9 size
+		// 0x07D400 arm9 overlay offset
+		// 0x000100 arm9 overlay size
+		// 0x119600 arm7 offset
+		// 0x02434C arm7 size
+		// 0x000000 arm7 overlay offset
+		// 0x000000 arm7 overlay size
+		// 0x13DA00 fnt offset
+		// 0x016D5F fnt size
+		// 0x154800 fat offset
+		// 0x0102B8 fat size
+		// 0x164C00 icon banner offset
+		
+		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(offsetIncrement)
+		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(offsetIncrement)
+		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)        .roundedUpToTheNearest(offsetIncrement)
+		header.arm7OverlayOffset =         (header.arm7Offset                + header.arm7Size)               .roundedUpToTheNearest(offsetIncrement)
+		header.fileNameTableOffset =       (header.arm7OverlayOffset         + header.arm7OverlaySize)        .roundedUpToTheNearest(offsetIncrement)
+		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)      .roundedUpToTheNearest(offsetIncrement)
+		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize).roundedUpToTheNearest(offsetIncrement)
+		let filesOffset =                  (header.iconBannerOffset          + iconBannerSize)                         .roundedUpToTheNearest(offsetIncrement)
 		
 		let fileSizes = files.map(\.bytes.count).map(UInt32.init)
 		fileAllocationTable = fileSizes.reduce(into: []) { fat, size in

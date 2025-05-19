@@ -9,6 +9,12 @@ extension URL {
 	static let compressionDirectory: URL = .testFileDirectory.appending(component: "compression")
 	
 	static let roundTripsDirectory: URL = .testFileDirectory.appending(component: "round trips")
+	
+#if IN_CI
+	static let wholeROMPath: URL? = nil
+#else
+	static let wholeROMPath: URL? = URL(filePath: "/Users/simonomi/ff1/Fossil Fighters.nds")
+#endif
 }
 
 extension Issue {

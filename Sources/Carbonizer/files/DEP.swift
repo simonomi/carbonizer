@@ -15,7 +15,8 @@ struct DEP {
 		var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
 	}
 	
-	// note: requirements with variadic arguments cannot have ANY of their arguments out of order
+	// requirements with variadic arguments may only have that variadic argument, and NO OTHERS
+	// this is because of some kinda hacky code in DEP.Block.Requirement.init(_: Substring)
 	static let knownRequirements: [UInt32: RequirementDefinition] = [
 		1:  "unconditional/always",
 		2:  "talked to \(0, .character)",
@@ -286,9 +287,13 @@ extension DEP.Block.Requirement {
 		
 		if let (requirementType, knownRequirement) = DEP.knownRequirements.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
 			let reorderedArguments: [Substring]
+			let argumentTypes: [DEP.ArgumentType]
 			
 			if knownRequirement.outputStringThingy.contains(where: \.isVariadic) {
 				reorderedArguments = arguments
+				
+				let variadicArgumentType = knownRequirement.argumentTypes.first!
+				argumentTypes = Array(repeating: variadicArgumentType, count: arguments.count)
 			} else {
 				guard knownRequirement.argumentIndicesFromText.count == arguments.count else {
 					throw .incorrectArgumentCount(
@@ -299,12 +304,13 @@ extension DEP.Block.Requirement {
 				}
 				
 				reorderedArguments = knownRequirement.argumentIndicesFromText.map { arguments[$0] }
+				argumentTypes = knownRequirement.argumentTypes
 			}
 			
 			self = .known(
 				type: requirementType,
 				definition: knownRequirement,
-				arguments: try zip(reorderedArguments, knownRequirement.argumentTypes)
+				arguments: try zip(reorderedArguments, argumentTypes)
 					.map { (argument, argumentType) throws(DEP.ParseError) in
 						guard let number = argumentType.parse(argument) else {
 							throw .failedToParse(argument, in: text)
