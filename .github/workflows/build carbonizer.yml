@@ -88,7 +88,33 @@ jobs:
         --static-swift-stdlib
         -Xswiftc -DIN_CI
     - name: Package
-      run: tar -azcf carbonizer-linux.zip -C "$(swift build -c release --show-bin-path)" carbonizer
+      run: tar -azcf carbonizer-linux-x86.zip -C "$(swift build -c release --show-bin-path)" carbonizer
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        draft: true
+        files: carbonizer-linux.zip
+
+  build-linux-arm:
+    name: Build Linux ARM
+    runs-on: ubuntu-24.04-arm
+    steps:
+    - name: Set up Swift
+      id: swift-setup
+      uses: SwiftyLab/setup-swift@latest
+      with:
+        swift-version: "6.1"
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Test
+      run: swift test -Xswiftc -DIN_CI
+    - name: Build
+      run: >
+        swift build -c release
+        --static-swift-stdlib
+        -Xswiftc -DIN_CI
+    - name: Package
+      run: tar -azcf carbonizer-linux-arm.zip -C "$(swift build -c release --show-bin-path)" carbonizer
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
