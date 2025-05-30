@@ -9,6 +9,7 @@ import Foundation
 // - mar folders, nds unpacked, and standalone mars (metadata!)
 // - the repacked rom! this can be done without any compression
 
+#if !IN_CI
 @Suite
 struct RoundTrips {
 	@Test(
@@ -123,3 +124,4 @@ fileprivate func filePath(for fileName: String) -> URL {
 	.appending(component: fileName)
 	.appendingPathExtension("bin")
 }
+#endif

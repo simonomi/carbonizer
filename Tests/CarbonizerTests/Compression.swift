@@ -4,6 +4,7 @@ import Foundation
 import BinaryParser
 @testable import Carbonizer
 
+#if !IN_CI
 @Suite
 struct Compression {
 	@Test(
@@ -101,3 +102,4 @@ fileprivate func data(for fileName: String) throws -> Datastream {
 			.appendingPathExtension("bin")
 	))
 }
+#endif
