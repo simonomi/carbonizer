@@ -71,9 +71,9 @@ enum Huffman {
 		}
 	}
 	
-//	static func compress(_ inputData: Datastream, info: CompressionInfo?) -> Datastream {
-//		todo()
-//	}
+	static func compress(_ inputData: Datastream, info: CompressionInfo?) -> Datastream {
+		todo()
+	}
 	
 	// this is a prototype version that somewhat works with certain files (4-bit compression)
 	// but still fails horribly with others (8-bit). im not sure how on earth the 8-bit

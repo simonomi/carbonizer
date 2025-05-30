@@ -123,15 +123,15 @@ struct Carbonizer: AsyncParsableCommand {
 				"Running post-processors",
 				configuration: configuration
 			)
-			let postProcessors: [String: PostProcessor] = [
-				"3clFinder": tclFinder,
-				"mm3Finder": mm3Finder,
-				"mmsFinder": mmsFinder,
-				"mpmFinder": mpmFinder
-			]
+//			let postProcessors: [String: PostProcessor] = [
+//				"3clFinder": tclFinder,
+//				"mm3Finder": mm3Finder,
+//				"mmsFinder": mmsFinder,
+//				"mpmFinder": mpmFinder
+//			]
 			
 			for postProcessorName in configuration.experimental.postProcessors {
-#if os(Windows)
+//#if os(Windows)
 				switch postProcessorName {
 					case "3clFinder":
 						processedFile = try processedFile.postProcessed(with: tclFinder)
@@ -145,14 +145,14 @@ struct Carbonizer: AsyncParsableCommand {
 						print("Could not find a post-processor named '\(postProcessorName)', skipping...")
 						continue
 				}
-#else
-				guard let postProcessor = postProcessors[postProcessorName] else {
-					print("Could not find a post-processor named '\(postProcessorName)', skipping...")
-					continue
-				}
-				
-				processedFile = try processedFile.postProcessed(with: postProcessor)
-#endif
+//#else
+//				guard let postProcessor = postProcessors[postProcessorName] else {
+//					print("Could not find a post-processor named '\(postProcessorName)', skipping...")
+//					continue
+//				}
+//				
+//				processedFile = try processedFile.postProcessed(with: postProcessor)
+//#endif
 			}
 			
 			if configuration.experimental.dexDialogueLabeller, action == .unpack {
