@@ -304,10 +304,6 @@ extension URL {
 	}
 #endif
 	
-#if os(Linux)
-	static let documentsDirectory = URL.homeDirectory.appending(component: "Documents")
-#endif
-	
 	func getModificationDate() throws -> Date? {
 		try FileManager.default.attributesOfItem(atPath: path(percentEncoded: false))[.modificationDate] as? Date
 	}

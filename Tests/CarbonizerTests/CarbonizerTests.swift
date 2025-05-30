@@ -2,6 +2,10 @@ import Foundation
 import Testing
 
 extension URL {
+#if os(Linux)
+	static let documentsDirectory = URL.homeDirectory.appending(component: "Documents")
+#endif
+	
 	static let testFileDirectory: URL = .documentsDirectory
 		.appending(component: "ff1")
 		.appending(component: "carbonizer-test-files")
