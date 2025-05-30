@@ -93,7 +93,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         draft: true
-        files: carbonizer-linux.zip
+        files: carbonizer-linux-x86.zip
 
   build-linux-arm:
     name: Build Linux ARM
@@ -119,5 +119,5 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         draft: true
-        files: carbonizer-linux.zip
+        files: carbonizer-linux-arm.zip
 

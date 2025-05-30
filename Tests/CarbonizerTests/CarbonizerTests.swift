@@ -2,7 +2,7 @@ import Foundation
 import Testing
 
 extension URL {
-#if os(Linux)
+#if os(Linux) || os(Windows)
 	static let documentsDirectory = URL.homeDirectory.appending(component: "Documents")
 #endif
 	
