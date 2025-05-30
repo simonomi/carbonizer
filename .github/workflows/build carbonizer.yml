@@ -88,7 +88,7 @@ jobs:
         --static-swift-stdlib
         -Xswiftc -DIN_CI
     - name: Package
-      run: tar -acf carbonizer-linux.zip -C "$(swift build -c release --show-bin-path)" carbonizer
+      run: tar -azcf carbonizer-linux.zip -C "$(swift build -c release --show-bin-path)" carbonizer
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
