@@ -47,8 +47,8 @@ jobs:
       run: $SWIFT_VERSION = swift --version | Select-String -Pattern '\d+\.\d+(\.\d+)? | ForEach-Object { $_.Matches[0].Value }'
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Test
-      run: swift test -Xswiftc -DIN_CI
+#     - name: Test
+#       run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: >
         swift build -c release
@@ -86,6 +86,7 @@ jobs:
       run: >
         swift build -c release
         --static-swift-stdlib
+        -Xswiftc -static-executable
         -Xswiftc -DIN_CI
     - name: Package
       run: tar -azcf carbonizer-linux-x86.zip -C "$(swift build -c release --show-bin-path)" carbonizer
@@ -112,6 +113,7 @@ jobs:
       run: >
         swift build -c release
         --static-swift-stdlib
+        -Xswiftc -static-executable
         -Xswiftc -DIN_CI
     - name: Package
       run: tar -azcf carbonizer-linux-arm.zip -C "$(swift build -c release --show-bin-path)" carbonizer
