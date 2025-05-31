@@ -1,69 +1,8 @@
 import BinaryParser
 
-struct DEP {
-	var blocks: [Block]
-	
-	enum ArgumentType {
-		// TODO: rename dep to something more fitting (address, variable, ?) (and do the same in dex)
-		case block, character, dep, door, firstNumberOnly, unknown, vivosaur
-	}
-	
-	struct RequirementDefinition {
-		var argumentTypes: [ArgumentType]
-		var outputStringThingy: [OutputStringThingyChunk]
-		var textWithoutArguments: [String]
-		var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
-	}
-	
-	// requirements with variadic arguments may only have that variadic argument, and NO OTHERS
-	// this is because of some kinda hacky code in DEP.Block.Requirement.init(_: Substring)
-	static let knownRequirements: [UInt32: RequirementDefinition] = [
-		1:  "unconditional/always",
-		2:  "talked to \(0, .character)",
-		3:  "entered through \(0, .door)",
-		13: "memory \(0, .dep) is \(1, .firstNumberOnly)",
-//		    56 8-# 0    requires being fighter level #
-//		    90 8-# 0    used to alternate hotel manager between dialogues
-		16: "memory \(0, .dep) is less than \(1, .firstNumberOnly)", // wait, < or <=? probably <
-//		    56 8-5 0    used to determine whether to spawn bullwort in his office
-		19: "memory 19 \(0..., .dep)",
-//		    requires an unknown 5
-		21: "memory 21 \(0..., .dep)",
-//		    requires NOT an unknown 5
-		36: "\(0, .block) has played", // is op 2 always 2?
-		38: "\(0, .block) has not played",
-		41: "has \(0, .vivosaur)",
-	]
-	
-	struct Block {
-		var id: Int32
-		var unknown1: Int32
-		var unknown2: Int32
-		var isComment: Bool
-		var requirements: [Requirement]
-		
-		enum Requirement {
-			case known(type: UInt32, definition: RequirementDefinition, arguments: [Argument])
-			case unknown(type: UInt32, arguments: [Argument])
-			case comment(String)
-
-			struct Argument {
-				var unknown1: UInt16
-				var unknown2: UInt8
-			}
-		}
-	}
-	
-	enum ParseError: Error {
-		case failedToParse(Substring, in: Substring)
-		case incorrectArgumentCount(requirement: Substring, actual: Int, expected: Int)
-		case unknownRequirement(Substring)
-		case blockMissingID(blockText: Substring)
-		case mismatchedAngleBrackets(requirement: Substring)
-	}
-	
+enum DEP {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "DEP"
 		
@@ -107,75 +46,84 @@ struct DEP {
 			}
 		}
 	}
-}
-
-extension DEP: ProprietaryFileData {
-	static let fileExtension = ".dep.txt"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		blocks = binary.blocks.map(Block.init)
-	}
-	
-	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
-		let fileLength = data.bytes.endIndex - data.offset
-		let string = try data.read(String.self, exactLength: fileLength)
+	struct Unpacked {
+		var blocks: [Block]
 		
-		blocks = try string
-			.split(separator: "\n\n")
-			.map(DEP.Block.init)
-	}
-	
-	func write(to data: Datawriter) {
-		let string = blocks
-			.map(String.init)
-			.joined(separator: "\n\n")
+		enum ArgumentType {
+			// TODO: rename dep to something more fitting (address, variable, ?) (and do the same in dex)
+			case block, character, dep, door, firstNumberOnly, unknown, vivosaur
+		}
 		
-		data.write(string, length: string.lengthOfBytes(using: .utf8))
-	}
-}
-
-extension DEP.Block {
-	init(_ binaryBlock: DEP.Binary.Block) {
-		id = binaryBlock.id
-		unknown1 = binaryBlock.unknown1
-		unknown2 = binaryBlock.unknown2
-		isComment = false
-		requirements = binaryBlock.requirements.map(Requirement.init)
-	}
-}
-
-extension DEP.Block.Requirement {
-	init(_ binaryRequirement: DEP.Binary.Block.Requirement) {
-		self = if let definition = DEP.knownRequirements[binaryRequirement.type] {
-			.known(
-				type: binaryRequirement.type,
-				definition: definition,
-				arguments: binaryRequirement.arguments.map(Argument.init)
-			)
-		} else {
-			.unknown(
-				type: binaryRequirement.type,
-				arguments: binaryRequirement.arguments.map(Argument.init)
-			)
+		struct RequirementDefinition {
+			var argumentTypes: [ArgumentType]
+			var outputStringThingy: [OutputStringThingyChunk]
+			var textWithoutArguments: [String]
+			var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
+		}
+		
+		// requirements with variadic arguments may only have that variadic argument, and NO OTHERS
+		// this is because of some kinda hacky code in DEP.Block.Requirement.init(_: Substring)
+		static let knownRequirements: [UInt32: RequirementDefinition] = [
+			1:  "unconditional/always",
+			2:  "talked to \(0, .character)",
+			3:  "entered through \(0, .door)",
+			13: "memory \(0, .dep) is \(1, .firstNumberOnly)",
+//			56 8-# 0    requires being fighter level #
+//			90 8-# 0    used to alternate hotel manager between dialogues
+			16: "memory \(0, .dep) is less than \(1, .firstNumberOnly)", // wait, < or <=? probably <
+//			56 8-5 0    used to determine whether to spawn bullwort in his office
+			19: "memory 19 \(0..., .dep)",
+//			requires an unknown 5
+			21: "memory 21 \(0..., .dep)",
+//			requires NOT an unknown 5
+			36: "\(0, .block) has played", // is op 2 always 2?
+			38: "\(0, .block) has not played",
+			41: "has \(0, .vivosaur)",
+		]
+		
+		struct Block {
+			var id: Int32
+			var unknown1: Int32
+			var unknown2: Int32
+			var isComment: Bool
+			var requirements: [Requirement]
+			
+			enum Requirement {
+				case known(type: UInt32, definition: RequirementDefinition, arguments: [Argument])
+				case unknown(type: UInt32, arguments: [Argument])
+				case comment(String)
+				
+				struct Argument {
+					var unknown1: UInt16
+					var unknown2: UInt8
+				}
+			}
+		}
+		
+		enum ParseError: Error {
+			case failedToParse(Substring, in: Substring)
+			case incorrectArgumentCount(requirement: Substring, actual: Int, expected: Int)
+			case unknownRequirement(Substring)
+			case blockMissingID(blockText: Substring)
+			case mismatchedAngleBrackets(requirement: Substring)
 		}
 	}
 }
 
-extension DEP.Block.Requirement.Argument {
-	init(_ binaryArgument: DEP.Binary.Block.Requirement.Argument) {
-		unknown1 = binaryArgument.unknown1
-		unknown2 = binaryArgument.unknown2
-	}
-}
-
-extension DEP.Binary: ProprietaryFileData {
+// MARK: packed
+extension DEP.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dep: DEP, configuration: CarbonizerConfiguration) {
-		blocks = dep.blocks.compactMap(Block.init)
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DEP.Unpacked {
+		DEP.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: DEP.Unpacked, configuration: CarbonizerConfiguration) {
+		blocks = unpacked.blocks.compactMap(Block.init)
 		blockCount = UInt32(blocks.count)
 		blockOffsets = makeOffsets(
 			start: blockOffsetsOffset + UInt32(blocks.count * 4),
@@ -184,15 +132,15 @@ extension DEP.Binary: ProprietaryFileData {
 	}
 }
 
-extension DEP.Binary.Block {
-	init?(_ depBlock: DEP.Block) {
-		guard !depBlock.isComment else { return nil }
+extension DEP.Packed.Block {
+	init?(_ unpacked: DEP.Unpacked.Block) {
+		guard !unpacked.isComment else { return nil }
 		
-		id = depBlock.id
-		unknown1 = depBlock.unknown1
-		unknown2 = depBlock.unknown2
+		id = unpacked.id
+		unknown1 = unpacked.unknown1
+		unknown2 = unpacked.unknown2
 		
-		requirements = depBlock.requirements.compactMap(Requirement.init)
+		requirements = unpacked.requirements.compactMap(Requirement.init)
 		requirementCount = UInt32(requirements.count)
 		requirementOffsets = makeOffsets(
 			start: requirementOffsetsOffset + UInt32(requirements.count * 4),
@@ -205,9 +153,9 @@ extension DEP.Binary.Block {
 	}
 }
 
-extension DEP.Binary.Block.Requirement {
-	init?(_ depRequirement: DEP.Block.Requirement) {
-		switch depRequirement {
+extension DEP.Packed.Block.Requirement {
+	init?(_ unpacked: DEP.Unpacked.Block.Requirement) {
+		switch unpacked {
 			case .known(let type, _, let arguments), .unknown(let type, let arguments):
 				self.type = type
 				argumentCount = UInt32(arguments.count)
@@ -222,15 +170,83 @@ extension DEP.Binary.Block.Requirement {
 	}
 }
 
-extension DEP.Binary.Block.Requirement.Argument {
-	init(_ depArgument: DEP.Block.Requirement.Argument) {
-		unknown1 = depArgument.unknown1
-		unknown2 = depArgument.unknown2
+extension DEP.Packed.Block.Requirement.Argument {
+	init(_ unpacked: DEP.Unpacked.Block.Requirement.Argument) {
+		unknown1 = unpacked.unknown1
+		unknown2 = unpacked.unknown2
 	}
 }
 
-extension DEP.Block {
-	init(_ text: Substring) throws(DEP.ParseError) {
+// MARK: unpacked
+extension DEP.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".dep.txt"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> DEP.Packed {
+		DEP.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DEP.Packed, configuration: CarbonizerConfiguration) {
+		blocks = packed.blocks.map(Block.init)
+	}
+	
+	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
+		let fileLength = data.bytes.endIndex - data.offset
+		let string = try data.read(String.self, exactLength: fileLength)
+		
+		blocks = try string
+			.split(separator: "\n\n")
+			.map(DEP.Unpacked.Block.init)
+	}
+	
+	func write(to data: Datawriter) {
+		let string = blocks
+			.map(String.init)
+			.joined(separator: "\n\n")
+		
+		data.write(string, length: string.lengthOfBytes(using: .utf8))
+	}
+}
+
+extension DEP.Unpacked.Block {
+	init(_ binaryBlock: DEP.Packed.Block) {
+		id = binaryBlock.id
+		unknown1 = binaryBlock.unknown1
+		unknown2 = binaryBlock.unknown2
+		isComment = false
+		requirements = binaryBlock.requirements.map(Requirement.init)
+	}
+}
+
+extension DEP.Unpacked.Block.Requirement {
+	init(_ binaryRequirement: DEP.Packed.Block.Requirement) {
+		self = if let definition = DEP.Unpacked.knownRequirements[binaryRequirement.type] {
+			.known(
+				type: binaryRequirement.type,
+				definition: definition,
+				arguments: binaryRequirement.arguments.map(Argument.init)
+			)
+		} else {
+			.unknown(
+				type: binaryRequirement.type,
+				arguments: binaryRequirement.arguments.map(Argument.init)
+			)
+		}
+	}
+}
+
+extension DEP.Unpacked.Block.Requirement.Argument {
+	init(_ binaryArgument: DEP.Packed.Block.Requirement.Argument) {
+		unknown1 = binaryArgument.unknown1
+		unknown2 = binaryArgument.unknown2
+	}
+}
+
+extension DEP.Unpacked.Block {
+	init(_ text: Substring) throws(DEP.Unpacked.ParseError) {
 		let lines = text.split(separator: "\n")
 		let firstLine = lines.first!
 		
@@ -254,7 +270,7 @@ extension DEP.Block {
 			)
 		}
 		
-		let parsedBlockArguments = try blockArguments.map { (argument) throws(DEP.ParseError) in
+		let parsedBlockArguments = try blockArguments.map { (argument) throws(DEP.Unpacked.ParseError) in
 			guard let number = Int32(argument) else {
 				throw .failedToParse(argument, in: text)
 			}
@@ -267,12 +283,12 @@ extension DEP.Block {
 		
 		requirements = try lines
 			.dropFirst()
-			.map(DEP.Block.Requirement.init)
+			.map(DEP.Unpacked.Block.Requirement.init)
 	}
 }
 
-extension DEP.Block.Requirement {
-	init(_ text: Substring) throws(DEP.ParseError) {
+extension DEP.Unpacked.Block.Requirement {
+	init(_ text: Substring) throws(DEP.Unpacked.ParseError) {
 		if text.hasPrefix("// ") {
 			self = .comment(String(text.dropFirst(3)))
 			return
@@ -285,9 +301,9 @@ extension DEP.Block.Requirement {
 			throw .mismatchedAngleBrackets(requirement: text)
 		}
 		
-		if let (requirementType, knownRequirement) = DEP.knownRequirements.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
+		if let (requirementType, knownRequirement) = DEP.Unpacked.knownRequirements.first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
 			let reorderedArguments: [Substring]
-			let argumentTypes: [DEP.ArgumentType]
+			let argumentTypes: [DEP.Unpacked.ArgumentType]
 			
 			if knownRequirement.outputStringThingy.contains(where: \.isVariadic) {
 				reorderedArguments = arguments
@@ -311,7 +327,7 @@ extension DEP.Block.Requirement {
 				type: requirementType,
 				definition: knownRequirement,
 				arguments: try zip(reorderedArguments, argumentTypes)
-					.map { (argument, argumentType) throws(DEP.ParseError) in
+					.map { (argument, argumentType) throws(DEP.Unpacked.ParseError) in
 						guard let number = argumentType.parse(argument) else {
 							throw .failedToParse(argument, in: text)
 						}
@@ -333,8 +349,8 @@ extension DEP.Block.Requirement {
 			
 			let parsedArguments = try arguments
 				.dropFirst()
-				.map { (argument) throws(DEP.ParseError) in
-					guard let value = DEP.ArgumentType.unknown.parse(argument) else {
+				.map { (argument) throws(DEP.Unpacked.ParseError) in
+					guard let value = DEP.Unpacked.ArgumentType.unknown.parse(argument) else {
 						throw .failedToParse(argument, in: text)
 					}
 					return value
@@ -349,7 +365,7 @@ extension DEP.Block.Requirement {
 }
 
 extension String {
-	init(_ block: DEP.Block) {
+	init(_ block: DEP.Unpacked.Block) {
 		let commentPrefix = block.isComment ? "// " : ""
 		
 		let header = "\(commentPrefix)block <\(block.id)>, unknowns: <\(block.unknown1)>, <\(block.unknown2)>"
@@ -359,10 +375,10 @@ extension String {
 		self = ([header] + requirements).joined(separator: "\n")
 	}
 	
-	init(_ requirement: DEP.Block.Requirement, isInComment: Bool) {
+	init(_ requirement: DEP.Unpacked.Block.Requirement, isInComment: Bool) {
 		guard !isInComment else {
 			let originalText = String(requirement, isInComment: false)
-			let comment: DEP.Block.Requirement = .comment(originalText)
+			let comment: DEP.Unpacked.Block.Requirement = .comment(originalText)
 			self = String(comment, isInComment: false)
 			return
 		}
@@ -391,7 +407,7 @@ extension String {
 				{
 					// TODO: make this good
 					let formattedArguments = arguments
-						.map(DEP.ArgumentType.unknown.format)
+						.map(DEP.Unpacked.ArgumentType.unknown.format)
 						.map { "<\($0)>" }
 						.joined(separator: " ")
 					
@@ -406,9 +422,9 @@ extension String {
 	}
 }
 
-extension DEP.Block.Requirement.Argument: Equatable {}
+extension DEP.Unpacked.Block.Requirement.Argument: Equatable {}
 
-extension DEP.ParseError: CustomStringConvertible {
+extension DEP.Unpacked.ParseError: CustomStringConvertible {
 	var description: String {
 		switch self {
 			case .failedToParse(let text, in: let requirement):
@@ -425,7 +441,7 @@ extension DEP.ParseError: CustomStringConvertible {
 	}
 }
 
-extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
+extension DEP.Unpacked.RequirementDefinition: ExpressibleByStringInterpolation {
 	enum OutputStringThingyChunk {
 		case text(String)
 		case argument(Int)
@@ -452,8 +468,8 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 		
 		enum Chunk {
 			case text(String)
-			case argument(Int, DEP.ArgumentType)
-			case arguments(PartialRangeFrom<Int>, DEP.ArgumentType)
+			case argument(Int, DEP.Unpacked.ArgumentType)
+			case arguments(PartialRangeFrom<Int>, DEP.Unpacked.ArgumentType)
 		}
 		
 		init(literalCapacity: Int, interpolationCount: Int) {
@@ -465,11 +481,11 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 			chunks.append(.text(literal))
 		}
 		
-		mutating func appendInterpolation(_ argumentNumber: Int, _ argumentType: DEP.ArgumentType) {
+		mutating func appendInterpolation(_ argumentNumber: Int, _ argumentType: DEP.Unpacked.ArgumentType) {
 			chunks.append(.argument(argumentNumber, argumentType))
 		}
 		
-		mutating func appendInterpolation(_ argumentRange: PartialRangeFrom<Int>, _ argumentType: DEP.ArgumentType) {
+		mutating func appendInterpolation(_ argumentRange: PartialRangeFrom<Int>, _ argumentType: DEP.Unpacked.ArgumentType) {
 			chunks.append(.arguments(argumentRange, argumentType))
 		}
 	}
@@ -483,7 +499,7 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 	
 	init(stringInterpolation: StringInterpolation) {
 		argumentTypes = stringInterpolation.chunks
-			.flatMap { (chunk: StringInterpolation.Chunk) -> [(index: Int, argumentType: DEP.ArgumentType)] in
+			.flatMap { (chunk: StringInterpolation.Chunk) -> [(index: Int, argumentType: DEP.Unpacked.ArgumentType)] in
 				switch chunk {
 					case .text: []
 					case .argument(let index, let argumentType): [(index, argumentType)]
@@ -514,22 +530,8 @@ extension DEP.RequirementDefinition: ExpressibleByStringInterpolation {
 	}
 }
 
-extension DEP {
-	static func checkKnownRequirements() {
-		var allRequirementsWithoutArguments = Set<[String]>()
-		
-		for requirement in knownRequirements.values {
-			guard !allRequirementsWithoutArguments.contains(requirement.textWithoutArguments) else {
-				print("\(.red)duplicate command text for \(requirement.textWithoutArguments) >:(\(.normal)")
-				preconditionFailure()
-			}
-			allRequirementsWithoutArguments.insert(requirement.textWithoutArguments)
-		}
-	}
-}
-
-extension DEP.ArgumentType {
-	func parse(_ text: Substring) -> DEP.Block.Requirement.Argument? {
+extension DEP.Unpacked.ArgumentType {
+	func parse(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
 		switch self {
 			case .block:           parseBlock(text)
 			case .character:       parseLookupTable(characterNames, text: text) ?? parsePrefix(text)
@@ -541,12 +543,12 @@ extension DEP.ArgumentType {
 		}
 	}
 	
-	private func parsePrefix(_ text: Substring) -> DEP.Block.Requirement.Argument? {
+	private func parsePrefix(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
 		text
 			.split(whereSeparator: \.isWhitespace)
 			.last
 			.flatMap { UInt16($0) }
-			.map { DEP.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
+			.map { DEP.Unpacked.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}
 	
 //	private func parseSuffix(_ text: Substring) -> DEP.Block.Requirement.Argument? {
@@ -557,15 +559,15 @@ extension DEP.ArgumentType {
 //			.map { DEP.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
 //	}
 	
-	private func parseLookupTable(_ table: [Int32: String], text: Substring) -> DEP.Block.Requirement.Argument? {
+	private func parseLookupTable(_ table: [Int32: String], text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
 		table
 			.first { $0.value.caseInsensitiveEquals(text) }
 			.map(\.key)
 			.map(UInt16.init)
-			.map { DEP.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
+			.map { DEP.Unpacked.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}
 	
-	private func parseBlock(_ text: Substring) -> DEP.Block.Requirement.Argument? {
+	private func parseBlock(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
 		if text.hasPrefix("block ") {
 			parseUnknown(text.dropFirst(6))
 		} else {
@@ -573,12 +575,12 @@ extension DEP.ArgumentType {
 		}
 	}
 	
-	private func parseFirstNumberOnly(_ text: Substring) -> DEP.Block.Requirement.Argument? {
+	private func parseFirstNumberOnly(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
 		UInt16(text)
-			.map { DEP.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
+			.map { DEP.Unpacked.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}
 	
-	private func parseUnknown(_ text: Substring) -> DEP.Block.Requirement.Argument? {
+	private func parseUnknown(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
 		let unknowns = text.split(separator: " ")
 		
 		guard unknowns.count == 2,
@@ -586,10 +588,10 @@ extension DEP.ArgumentType {
 			  let unknown2 = UInt8(unknowns[1])
 		else { return nil }
 		
-		return DEP.Block.Requirement.Argument(unknown1: unknown1, unknown2: unknown2)
+		return DEP.Unpacked.Block.Requirement.Argument(unknown1: unknown1, unknown2: unknown2)
 	}
 	
-	func format(_ argument: DEP.Block.Requirement.Argument) -> String {
+	func format(_ argument: DEP.Unpacked.Block.Requirement.Argument) -> String {
 		validate(argument)
 		return switch self {
 			case .block:           "block \(argument.unknown1) \(argument.unknown2)"
@@ -602,7 +604,7 @@ extension DEP.ArgumentType {
 		}
 	}
 	
-	func validate(_ argument: DEP.Block.Requirement.Argument) {
+	func validate(_ argument: DEP.Unpacked.Block.Requirement.Argument) {
 		switch self {
 			case .character, .door, .firstNumberOnly, .vivosaur:
 				// TODO: this should fail better

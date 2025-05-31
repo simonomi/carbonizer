@@ -1,33 +1,9 @@
 import BinaryParser
 
 // 3CL
-struct TCL: Codable {
-	var vivosaurs: [Vivosaur?]
-	
-	struct Vivosaur: Codable {
-		var animations: [Animation?]
-		
-		init?(animations: [Animation?]) {
-			if animations.allSatisfy({ $0 == nil }) { return nil }
-			
-			self.animations = animations
-		}
-		
-		struct Animation: Codable {
-			var model: TableEntry
-			var animation: TableEntry
-			var texture: TableEntry
-			
-			struct TableEntry: Codable {
-				var index: UInt32
-				var tableName: String
-			}
-		}
-	}
-	
-	
+enum TCL {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "3CL"
 		var vivosaurCount: UInt32
@@ -71,15 +47,63 @@ struct TCL: Codable {
 			}
 		}
 	}
+	
+	struct Unpacked: Codable {
+		var vivosaurs: [Vivosaur?]
+		
+		struct Vivosaur: Codable {
+			var animations: [Animation?]
+			
+			init?(animations: [Animation?]) {
+				if animations.allSatisfy({ $0 == nil }) { return nil }
+				
+				self.animations = animations
+			}
+			
+			struct Animation: Codable {
+				var model: TableEntry
+				var animation: TableEntry
+				var texture: TableEntry
+				
+				struct TableEntry: Codable {
+					var index: UInt32
+					var tableName: String
+				}
+			}
+		}
+	}
 }
 
-extension TCL: ProprietaryFileData, BinaryConvertible {
+// MARK: packed
+extension TCL.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> TCL.Unpacked {
+		TCL.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: TCL.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension TCL.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".3cl.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		vivosaurs = binary.vivosaurs.map {
+	func packed(configuration: CarbonizerConfiguration) -> TCL.Packed {
+		TCL.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: TCL.Packed, configuration: CarbonizerConfiguration) {
+		vivosaurs = packed.vivosaurs.map {
 			Vivosaur(
 				animations: $0.animations.map {
 					if $0.isValid > 0 {
@@ -103,14 +127,5 @@ extension TCL: ProprietaryFileData, BinaryConvertible {
 				}
 			)
 		}
-	}
-}
-
-extension TCL.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
-	
-	init(_ tcl: TCL, configuration: CarbonizerConfiguration) {
-		todo()
 	}
 }

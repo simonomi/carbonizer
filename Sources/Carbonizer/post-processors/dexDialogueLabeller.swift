@@ -11,12 +11,12 @@ func dexDialogueLabeller(
 				metadata: file.metadata,
 				data: label(file.data, with: dialogue) as any ProprietaryFileData
 			)
-		case let mar as MAR:
-			MAR(
+		case let mar as MAR.Unpacked:
+			MAR.Unpacked(
 				name: mar.name,
 				files: mar.files
 					.map {
-						MCM(
+						MCM.Unpacked(
 							compression: $0.compression,
 							maxChunkSize: $0.maxChunkSize,
 							huffmanCompressionInfo: $0.huffmanCompressionInfo,
@@ -24,8 +24,8 @@ func dexDialogueLabeller(
 						)
 					}
 			)
-		case let nds as NDS:
-			NDS(
+		case let nds as NDS.Unpacked:
+			NDS.Unpacked(
 				name: nds.name,
 				header: nds.header,
 				arm9: nds.arm9,
@@ -37,8 +37,7 @@ func dexDialogueLabeller(
 				iconBanner: nds.iconBanner,
 				contents: nds.contents.map {
 					dexDialogueLabeller($0, dialogue: dialogue, configuration: configuration)
-				},
-				configuration: configuration
+				}
 			)
 		case let folder as Folder:
 			Folder(
@@ -47,23 +46,23 @@ func dexDialogueLabeller(
 					dexDialogueLabeller($0, dialogue: dialogue, configuration: configuration)
 				}
 			)
-		case let packedMAR as PackedMAR: packedMAR
-		case let packedNDS as PackedNDS: packedNDS
+		case let packedMAR as MAR.Packed: packedMAR
+		case let packedNDS as NDS.Packed: packedNDS
 		case let fileSystemObject:
 			fatalError("unexpected fileSystemObject type: \(type(of: fileSystemObject))")
 	}
 }
 
 func label<P: ProprietaryFileData>(_ file: P, with dialogue: [UInt32: String]) -> P {
-	if let dex = file as? DEX {
+	if let dex = file as? DEX.Unpacked {
 		label(dex, with: dialogue) as! P
 	} else {
 		file
 	}
 }
 
-func label(_ dex: consuming DEX, with allDialogue: [UInt32: String]) -> DEX {
-	DEX(
+func label(_ dex: consuming DEX.Unpacked, with allDialogue: [UInt32: String]) -> DEX.Unpacked {
+	DEX.Unpacked(
 		commands: dex.commands.map {
 			$0.reduce(into: []) { partialResult, command in
 				let linesOfDialogue = command.linesOfDialogue()

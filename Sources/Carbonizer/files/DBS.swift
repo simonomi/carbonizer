@@ -2,83 +2,8 @@ import BinaryParser
 
 // https://github.com/opiter09/Fossil-Fighters-Documentation/blob/main/FF1/Battle%20Folder.txt
 struct DBS {
-	var music: Music
-	
-	var unknown3: Int32
-	var unknown4: Int32
-	var unknown5: Int32
-	var unknown6: Int32
-	
-	var unknown7: Int32
-	var unknown8: Int32
-	var announcerDialogue: Int32
-	var unknown10: Int32
-	
-	var arena: Arena
-	
-	var unknown11: Int32
-	var unknown12: Int32
-	var unknown13: Int32
-	
-	var unknown14: Int32
-	var bpForWinning: Int32
-	var unknown16: Int32
-	
-	var fighter1: Fighter?
-	
-	var fighter2: Fighter
-	
-	var unknowns17: [Unknown]
-	
-	var requiredVivosaurs: [Fighter.Vivosaur.ID]
-	
-	struct Arena {
-		var id: Int32
-	}
-	
-	struct Music {
-		var id: Int32
-	}
-	
-	struct Fighter: Codable {
-		var name: Name
-		var rank: Int32
-		
-		var icon: Int32
-		var minimumVivosaurHealth: Int32
-		
-		var vivosaurs: [Vivosaur]
-		var unknowns3: [Int32]
-		
-		struct Name: Codable {
-			var _label: String?
-			var id: Int32
-		}
-		
-		struct Vivosaur: Codable {
-			var id: ID
-			var level: Int32
-			
-			var hideDinoMedal: Bool
-			var hideStats: Bool
-			
-			var aiSet: Int32
-			var interLevelBattlePoints: Double
-			var movesUnlocked: Int32
-			
-			struct ID {
-				var id: Int32
-			}
-		}
-	}
-	
-	struct Unknown: Codable {
-		var unknown1: Int32
-		var unknown2: Int32
-	}
-	
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "DBS"
 		
@@ -186,9 +111,301 @@ struct DBS {
 			var unknown2: Int32
 		}
 	}
+	
+	struct Unpacked: Codable {
+		var music: Music
+		
+		var unknown3: Int32
+		var unknown4: Int32
+		var unknown5: Int32
+		var unknown6: Int32
+		
+		var unknown7: Int32
+		var unknown8: Int32
+		var announcerDialogue: Int32
+		var unknown10: Int32
+		
+		var arena: Arena
+		
+		var unknown11: Int32
+		var unknown12: Int32
+		var unknown13: Int32
+		
+		var unknown14: Int32
+		var bpForWinning: Int32
+		var unknown16: Int32
+		
+		var fighter1: Fighter?
+		
+		var fighter2: Fighter
+		
+		var unknowns17: [Unknown]
+		
+		var requiredVivosaurs: [Fighter.Vivosaur.ID]
+		
+		struct Arena {
+			var id: Int32
+		}
+		
+		struct Music {
+			var id: Int32
+		}
+		
+		struct Fighter: Codable {
+			var name: Name
+			var rank: Int32
+			
+			var icon: Int32
+			var minimumVivosaurHealth: Int32
+			
+			var vivosaurs: [Vivosaur]
+			var unknowns3: [Int32]
+			
+			struct Name: Codable {
+				var _label: String?
+				var id: Int32
+			}
+			
+			struct Vivosaur: Codable {
+				var id: ID
+				var level: Int32
+				
+				var hideDinoMedal: Bool
+				var hideStats: Bool
+				
+				var aiSet: Int32
+				var interLevelBattlePoints: Double
+				var movesUnlocked: Int32
+				
+				struct ID {
+					var id: Int32
+				}
+			}
+		}
+		
+		struct Unknown: Codable {
+			var unknown1: Int32
+			var unknown2: Int32
+		}
+	}
 }
 
-extension DBS {
+// MARK: packed
+extension DBS.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DBS.Unpacked {
+		DBS.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: DBS.Unpacked, configuration: CarbonizerConfiguration) {
+		music = unpacked.music.id
+		
+		unknown3 = unpacked.unknown3
+		unknown4 = unpacked.unknown4
+		unknown5 = unpacked.unknown5
+		unknown6 = unpacked.unknown6
+		
+		unknown7 = unpacked.unknown7
+		unknown8 = unpacked.unknown8
+		unknown9 = unpacked.announcerDialogue
+		unknown10 = unpacked.unknown10
+		
+		arena = unpacked.arena.id
+		
+		unknown11 = unpacked.unknown11
+		unknown12 = unpacked.unknown12
+		unknown13 = unpacked.unknown13
+		
+		unknown14 = unpacked.unknown14
+		bpForWinning = unpacked.bpForWinning
+		unknown16 = unpacked.unknown16
+		
+		fighter1 = unpacked.fighter1.map(Fighter.init)
+		fighter1Offset = fighter1 == nil ? 0 : 0x5c
+		
+		fighter2 = Fighter(unpacked.fighter2)
+		fighter2Offset = 0x5c + (fighter1?.size() ?? 0)
+		
+		unknowns17 = unpacked.unknowns17.map(Unknown.init)
+		unknowns17Count = UInt32(unknowns17.count)
+		unknowns17Offset = fighter2Offset + fighter2.size()
+		
+		requiredVivosaurs = unpacked.requiredVivosaurs.map(\.id)
+		requiredVivosaurCount = UInt32(requiredVivosaurs.count)
+		requiredVivosaursOffset = unknowns17Offset + unknowns17Count * 8
+	}
+}
+
+extension DBS.Packed.Fighter {
+	init(_ unpacked: DBS.Unpacked.Fighter) {
+		name = unpacked.name.id
+		rank = unpacked.rank
+		
+		icon = unpacked.icon
+		minimumVivosaurHealth = unpacked.minimumVivosaurHealth
+		
+		vivosaurs = unpacked.vivosaurs.map(Vivosaur.init)
+		vivosaurCount = UInt32(vivosaurs.count)
+		
+		aiSets = unpacked.vivosaurs.map(\.aiSet)
+		vivosaurCount2 = UInt32(aiSets.count)
+		aiSetsOffset = vivosaursOffset + vivosaurCount * 0xC
+		
+		interLevelBattlePointsPerVivosaur = unpacked.vivosaurs
+			.map(\.interLevelBattlePoints)
+			.map { UInt32($0 * 4096) }
+		vivosaurCount3 = UInt32(interLevelBattlePointsPerVivosaur.count)
+		interLevelBattlePointsPerVivosaurOffset = aiSetsOffset + vivosaurCount2 * 4
+		
+		movesUnlockedPerVivosaur = unpacked.vivosaurs.map(\.movesUnlocked)
+		vivosaurCount4 = UInt32(movesUnlockedPerVivosaur.count)
+		movesUnlockedPerVivosaurOffset = interLevelBattlePointsPerVivosaurOffset + vivosaurCount3 * 4
+		
+		unknowns3 = unpacked.unknowns3
+		unknowns3Count = UInt32(unknowns3.count)
+		unknowns3Offset = movesUnlockedPerVivosaurOffset + vivosaurCount4 * 4
+	}
+	
+	func size() -> UInt32 {
+		unknowns3Offset + unknowns3Count * 4
+	}
+}
+
+extension DBS.Packed.Fighter.Vivosaur {
+	init(_ unpacked: DBS.Unpacked.Fighter.Vivosaur) {
+		id = unpacked.id.id
+		level = unpacked.level
+		hideStats = (unpacked.hideDinoMedal ? 1 : 0) + (unpacked.hideStats ? 0b10 : 0)
+	}
+}
+
+extension DBS.Packed.Unknown {
+	init(_ unpacked: DBS.Unpacked.Unknown) {
+		unknown1 = unpacked.unknown1
+		unknown2 = unpacked.unknown2
+	}
+}
+
+
+// MARK: unpacked
+extension DBS.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".dbs.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> DBS.Packed {
+		DBS.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DBS.Packed, configuration: CarbonizerConfiguration) {
+		music = Music(id: packed.music)
+		
+		unknown3 = packed.unknown3
+		unknown4 = packed.unknown4
+		unknown5 = packed.unknown5
+		unknown6 = packed.unknown6
+		
+		unknown7 = packed.unknown7
+		unknown8 = packed.unknown8
+		announcerDialogue = packed.unknown9
+		unknown10 = packed.unknown10
+		
+		arena = Arena(id: packed.arena)
+		
+		unknown11 = packed.unknown11
+		unknown12 = packed.unknown12
+		unknown13 = packed.unknown13
+		
+		unknown14 = packed.unknown14
+		bpForWinning = packed.bpForWinning
+		unknown16 = packed.unknown16
+		
+		// nil for 0587 and 0578
+		fighter1 = packed.fighter1.flatMap(Fighter.init)
+		
+		guard let fighter = Fighter(packed.fighter2) else {
+			let vivosaurCount = packed.fighter2.vivosaurs.count
+			let aiSetCount = packed.fighter2.aiSets.count
+			let interLevelBattlePointCount = packed.fighter2.interLevelBattlePointsPerVivosaur.count
+			let movesUnlockedCount = packed.fighter2.movesUnlockedPerVivosaur.count
+			
+			print("error in binary DBS file: mismatched numbers of vivosaurs, ai sets, inter-level battle points, and moves unlocked: \(vivosaurCount), \(aiSetCount), \(interLevelBattlePointCount), and \(movesUnlockedCount)")
+			
+			if configuration.keepWindowOpen.isTrueOnError {
+				waitForInput()
+			}
+			fatalError()
+		}
+		fighter2 = fighter
+		
+		unknowns17 = packed.unknowns17.map(Unknown.init)
+		
+		requiredVivosaurs = packed.requiredVivosaurs.map(Fighter.Vivosaur.ID.init)
+	}
+}
+
+extension DBS.Unpacked.Fighter {
+	init?(_ packed: DBS.Packed.Fighter) {
+		name = Name(id: packed.name)
+		rank = packed.rank
+		
+		icon = packed.icon
+		minimumVivosaurHealth = packed.minimumVivosaurHealth
+		
+		guard packed.vivosaurs.count == packed.aiSets.count,
+			  packed.vivosaurs.count == packed.interLevelBattlePointsPerVivosaur.count,
+			  packed.vivosaurs.count == packed.movesUnlockedPerVivosaur.count
+		else {
+//			print("warning: mismatched counts: \(binary.vivosaurs.count), \(binary.aiSets.count), \(binary.interLevelBattlePointsPerVivosaur.count), and \(binary.movesUnlockedPerVivosaur.count)")
+			return nil
+		}
+		
+		vivosaurs = zip(
+			packed.vivosaurs,
+			packed.aiSets,
+			packed.interLevelBattlePointsPerVivosaur,
+			packed.movesUnlockedPerVivosaur
+		)
+		.map(Vivosaur.init)
+		
+		unknowns3 = packed.unknowns3
+	}
+}
+
+extension DBS.Unpacked.Fighter.Vivosaur {
+	init(
+		_ packed: DBS.Packed.Fighter.Vivosaur,
+		aiSet: Int32,
+		interLevelBattlePoints: UInt32,
+		movesUnlocked: Int32
+	) {
+		id = ID(id: packed.id)
+		level = packed.level
+		
+		hideDinoMedal = packed.hideStats & 1 > 0
+		hideStats = packed.hideStats & 0b10 > 0
+		
+		self.aiSet = aiSet
+		self.interLevelBattlePoints = Double(interLevelBattlePoints) / 4096
+		self.movesUnlocked = movesUnlocked
+	}
+}
+
+extension DBS.Unpacked.Unknown {
+	init(_ packed: DBS.Packed.Unknown) {
+		unknown1 = packed.unknown1
+		unknown2 = packed.unknown2
+	}
+}
+
+// MARK: unpacked codable
+extension DBS.Unpacked {
 	enum KeyNotFoundError: Error, CustomStringConvertible {
 		case vivosaurNotFound(String)
 		case kasekiumNotFound(String)
@@ -210,59 +427,7 @@ extension DBS {
 	}
 }
 
-extension DBS: ProprietaryFileData, BinaryConvertible, Codable {
-	static let fileExtension = ".dbs.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
-	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		music = Music(id: binary.music)
-		
-		unknown3 = binary.unknown3
-		unknown4 = binary.unknown4
-		unknown5 = binary.unknown5
-		unknown6 = binary.unknown6
-		
-		unknown7 = binary.unknown7
-		unknown8 = binary.unknown8
-		announcerDialogue = binary.unknown9
-		unknown10 = binary.unknown10
-		
-		arena = Arena(id: binary.arena)
-		
-		unknown11 = binary.unknown11
-		unknown12 = binary.unknown12
-		unknown13 = binary.unknown13
-		
-		unknown14 = binary.unknown14
-		bpForWinning = binary.bpForWinning
-		unknown16 = binary.unknown16
-		
-		// nil for 0587 and 0578
-		fighter1 = binary.fighter1.flatMap(Fighter.init)
-		
-		guard let fighter = Fighter(binary.fighter2) else {
-			let vivosaurCount = binary.fighter2.vivosaurs.count
-			let aiSetCount = binary.fighter2.aiSets.count
-			let interLevelBattlePointCount = binary.fighter2.interLevelBattlePointsPerVivosaur.count
-			let movesUnlockedCount = binary.fighter2.movesUnlockedPerVivosaur.count
-			
-			print("error in binary DBS file: mismatched numbers of vivosaurs, ai sets, inter-level battle points, and moves unlocked: \(vivosaurCount), \(aiSetCount), \(interLevelBattlePointCount), and \(movesUnlockedCount)")
-			
-			if configuration.keepWindowOpen.isTrueOnError {
-				waitForInput()
-			}
-			fatalError()
-		}
-		fighter2 = fighter
-		
-		unknowns17 = binary.unknowns17.map(Unknown.init)
-		
-		requiredVivosaurs = binary.requiredVivosaurs.map(Fighter.Vivosaur.ID.init)
-	}
-}
-
-extension DBS.Arena: Codable {
+extension DBS.Unpacked.Arena: Codable {
 	init(from decoder: any Decoder) throws {
 		let container = try decoder.singleValueContainer()
 		
@@ -273,11 +438,11 @@ extension DBS.Arena: Codable {
 			do {
 				arenaName = try container.decode(String.self)
 			} catch {
-				throw DBS.KeyNotFoundError.mismatchedType(for: "arena")
+				throw DBS.Unpacked.KeyNotFoundError.mismatchedType(for: "arena")
 			}
 			
 			guard let foundEntry = kasekiumNames.first(where: { $0.value.caseInsensitiveEquals(arenaName) }) else {
-				throw DBS.KeyNotFoundError.kasekiumNotFound(arenaName)
+				throw DBS.Unpacked.KeyNotFoundError.kasekiumNotFound(arenaName)
 			}
 			
 			id = foundEntry.key
@@ -295,7 +460,7 @@ extension DBS.Arena: Codable {
 	}
 }
 
-extension DBS.Music: Codable {
+extension DBS.Unpacked.Music: Codable {
 	init(from decoder: any Decoder) throws {
 		let container = try decoder.singleValueContainer()
 		
@@ -306,11 +471,11 @@ extension DBS.Music: Codable {
 			do {
 				musicName = try container.decode(String.self)
 			} catch {
-				throw DBS.KeyNotFoundError.mismatchedType(for: "music")
+				throw DBS.Unpacked.KeyNotFoundError.mismatchedType(for: "music")
 			}
 			
 			guard let foundEntry = musicNames.first(where: { $0.value.caseInsensitiveEquals(musicName) }) else {
-				throw DBS.KeyNotFoundError.musicNotFound(musicName)
+				throw DBS.Unpacked.KeyNotFoundError.musicNotFound(musicName)
 			}
 			
 			id = foundEntry.key
@@ -328,49 +493,7 @@ extension DBS.Music: Codable {
 	}
 }
 
-extension DBS.Fighter {
-	init?(_ binary: DBS.Binary.Fighter) {
-		name = Name(id: binary.name)
-		rank = binary.rank
-		
-		icon = binary.icon
-		minimumVivosaurHealth = binary.minimumVivosaurHealth
-		
-		guard binary.vivosaurs.count == binary.aiSets.count,
-			  binary.vivosaurs.count == binary.interLevelBattlePointsPerVivosaur.count,
-			  binary.vivosaurs.count == binary.movesUnlockedPerVivosaur.count
-		else {
-//			print("warning: mismatched counts: \(binary.vivosaurs.count), \(binary.aiSets.count), \(binary.interLevelBattlePointsPerVivosaur.count), and \(binary.movesUnlockedPerVivosaur.count)")
-			return nil
-		}
-		
-		vivosaurs = zip(binary.vivosaurs, binary.aiSets, binary.interLevelBattlePointsPerVivosaur, binary.movesUnlockedPerVivosaur)
-			.map(Vivosaur.init)
-		
-		unknowns3 = binary.unknowns3
-	}
-}
-
-extension DBS.Fighter.Vivosaur {
-	init(
-		_ vivosaur: DBS.Binary.Fighter.Vivosaur,
-		aiSet: Int32,
-		interLevelBattlePoints: UInt32,
-		movesUnlocked: Int32
-	) {
-		id = ID(id: vivosaur.id)
-		level = vivosaur.level
-		
-		hideDinoMedal = vivosaur.hideStats & 1 > 0
-		hideStats = vivosaur.hideStats & 0b10 > 0
-		
-		self.aiSet = aiSet
-		self.interLevelBattlePoints = Double(interLevelBattlePoints) / 4096
-		self.movesUnlocked = movesUnlocked
-	}
-}
-
-extension DBS.Fighter.Vivosaur.ID: Codable {
+extension DBS.Unpacked.Fighter.Vivosaur.ID: Codable {
 	init(from decoder: any Decoder) throws {
 		let container = try decoder.singleValueContainer()
 		
@@ -381,11 +504,11 @@ extension DBS.Fighter.Vivosaur.ID: Codable {
 			do {
 				vivosaurName = try container.decode(String.self)
 			} catch {
-				throw DBS.KeyNotFoundError.mismatchedType(for: "vivosaur")
+				throw DBS.Unpacked.KeyNotFoundError.mismatchedType(for: "vivosaur")
 			}
 			
 			guard let foundEntry = vivosaurNames.first(where: { $0.value.caseInsensitiveEquals(vivosaurName) }) else {
-				throw DBS.KeyNotFoundError.vivosaurNotFound(vivosaurName)
+				throw DBS.Unpacked.KeyNotFoundError.vivosaurNotFound(vivosaurName)
 			}
 			
 			id = foundEntry.key
@@ -400,105 +523,5 @@ extension DBS.Fighter.Vivosaur.ID: Codable {
 		} else {
 			try container.encode(id)
 		}
-	}
-}
-
-extension DBS.Unknown {
-	init(_ binary: DBS.Binary.Unknown) {
-		unknown1 = binary.unknown1
-		unknown2 = binary.unknown2
-	}
-}
-
-extension DBS.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
-	
-	init(_ dbs: DBS, configuration: CarbonizerConfiguration) {
-		music = dbs.music.id
-		
-		unknown3 = dbs.unknown3
-		unknown4 = dbs.unknown4
-		unknown5 = dbs.unknown5
-		unknown6 = dbs.unknown6
-		
-		unknown7 = dbs.unknown7
-		unknown8 = dbs.unknown8
-		unknown9 = dbs.announcerDialogue
-		unknown10 = dbs.unknown10
-		
-		arena = dbs.arena.id
-		
-		unknown11 = dbs.unknown11
-		unknown12 = dbs.unknown12
-		unknown13 = dbs.unknown13
-		
-		unknown14 = dbs.unknown14
-		bpForWinning = dbs.bpForWinning
-		unknown16 = dbs.unknown16
-		
-		fighter1 = dbs.fighter1.map(Fighter.init)
-		fighter1Offset = fighter1 == nil ? 0 : 0x5c
-		
-		fighter2 = Fighter(dbs.fighter2)
-		fighter2Offset = 0x5c + (fighter1?.size() ?? 0)
-		
-		unknowns17 = dbs.unknowns17.map(Unknown.init)
-		unknowns17Count = UInt32(unknowns17.count)
-		unknowns17Offset = fighter2Offset + fighter2.size()
-		
-		requiredVivosaurs = dbs.requiredVivosaurs.map(\.id)
-		requiredVivosaurCount = UInt32(requiredVivosaurs.count)
-		requiredVivosaursOffset = unknowns17Offset + unknowns17Count * 8
-	}
-}
-
-extension DBS.Binary.Fighter {
-	init(_ fighter: DBS.Fighter) {
-		name = fighter.name.id
-		rank = fighter.rank
-		
-		icon = fighter.icon
-		minimumVivosaurHealth = fighter.minimumVivosaurHealth
-		
-		vivosaurs = fighter.vivosaurs.map(Vivosaur.init)
-		vivosaurCount = UInt32(vivosaurs.count)
-
-		aiSets = fighter.vivosaurs.map(\.aiSet)
-		vivosaurCount2 = UInt32(aiSets.count)
-		aiSetsOffset = vivosaursOffset + vivosaurCount * 0xC
-		
-		interLevelBattlePointsPerVivosaur = fighter.vivosaurs
-			.map(\.interLevelBattlePoints)
-			.map { UInt32($0 * 4096) }
-		vivosaurCount3 = UInt32(interLevelBattlePointsPerVivosaur.count)
-		interLevelBattlePointsPerVivosaurOffset = aiSetsOffset + vivosaurCount2 * 4
-		
-		movesUnlockedPerVivosaur = fighter.vivosaurs.map(\.movesUnlocked)
-		vivosaurCount4 = UInt32(movesUnlockedPerVivosaur.count)
-		movesUnlockedPerVivosaurOffset = interLevelBattlePointsPerVivosaurOffset + vivosaurCount3 * 4
-		
-		unknowns3 = fighter.unknowns3
-		unknowns3Count = UInt32(unknowns3.count)
-		unknowns3Offset = movesUnlockedPerVivosaurOffset + vivosaurCount4 * 4
-	}
-	
-	func size() -> UInt32 {
-		unknowns3Offset + unknowns3Count * 4
-	}
-}
-
-extension DBS.Binary.Fighter.Vivosaur {
-	init(_ vivosaur: DBS.Fighter.Vivosaur) {
-		id = vivosaur.id.id
-		level = vivosaur.level
-		hideStats = (vivosaur.hideDinoMedal ? 1 : 0) + (vivosaur.hideStats ? 0b10 : 0)
-	}
-}
-
-extension DBS.Binary.Unknown {
-	init(_ unknown: DBS.Unknown) {
-		unknown1 = unknown.unknown1
-		unknown2 = unknown.unknown2
 	}
 }

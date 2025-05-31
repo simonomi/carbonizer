@@ -3,15 +3,14 @@ func dbsNameLabeller(
 	text: [String],
 	configuration: CarbonizerConfiguration
 ) -> any FileSystemObject {
-	var nds = fileSystemObject as! NDS
+	var nds = fileSystemObject as! NDS.Unpacked
 	let battleFolderIndex = nds.contents.firstIndex { $0.name == "battle" }!
 	var battleFolder = nds.contents[battleFolderIndex] as! Folder
 	
 	let episodeFiles = battleFolder.contents
-		.map { $0 as! MAR }
 		.map {
-			var mar = $0
-			var content = $0.files.first!.content as! DBS
+			var mar = $0 as! MAR.Unpacked
+			var content = mar.files.first!.content as! DBS.Unpacked
 			
 			if var fighter1 = content.fighter1 {
 				fighter1.name._label = text[safely: Int(fighter1.name.id)]

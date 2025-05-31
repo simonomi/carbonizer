@@ -1,16 +1,16 @@
 import BinaryParser
 
 func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
-	let file: MAR
+	let file: MAR.Unpacked
 	switch inputFile {
-		case let mar as MAR:
+		case let mar as MAR.Unpacked:
 			file = mar
 		case let other:
 			return [other]
 	}
 	
 	// any MAR with an mm3 should be standalone, so we're not skipping any here
-	guard let mm3 = file.files.first?.content as? MM3 else {
+	guard let mm3 = file.files.first?.content as? MM3.Unpacked else {
 		return [file]
 	}
 	
@@ -47,7 +47,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //	print(file.name)
 	
 	do {
-		let arc = parent.contents.first { $0.name == mm3.model.tableName }! as! MAR
+		let arc = parent.contents.first { $0.name == mm3.model.tableName }! as! MAR.Unpacked
 		
 		guard arc.files.indices.contains(Int(mm3.model.index)) else {
 			throw BinaryParserError.indexOutOfBounds(

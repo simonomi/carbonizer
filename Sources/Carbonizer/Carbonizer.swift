@@ -16,11 +16,6 @@ struct Carbonizer: AsyncParsableCommand {
 	
 	mutating func run() async throws {
 #if !IN_CI
-		DEX.checkKnownCommands()
-		DEP.checkKnownRequirements()
-#endif
-		
-#if !IN_CI
 		let start = Date.now
 #endif
 		

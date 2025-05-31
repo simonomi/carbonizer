@@ -2,9 +2,9 @@ import BinaryParser
 import Foundation
 
 func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
-	let file: MAR
+	let file: MAR.Unpacked
 	switch inputFile {
-		case let mar as MAR:
+		case let mar as MAR.Unpacked:
 			file = mar
 		case let other:
 			return [other]
@@ -14,12 +14,12 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	
 	var images = [ProprietaryFile]()
 	
-	for mpm in file.files.compactMap({ $0.content as? MPM }) {
+	for mpm in file.files.compactMap({ $0.content as? MPM.Unpacked }) {
 //		guard mpm.entry3 == nil else { continue }
 //		print(file.name)
 //		print(mpm.entry3 == nil)
 		
-		let colorPaletteArchive = parent.contents.first { $0.name == mpm.entry1.tableName } as! MAR
+		let colorPaletteArchive = parent.contents.first { $0.name == mpm.entry1.tableName } as! MAR.Unpacked
 		let colorPalette = colorPaletteArchive.files[Int(mpm.entry1.index)]
 		let colorPaletteData = colorPalette.content as! Datastream
 		colorPaletteData.offset = 0 // multiple files use the same palette
@@ -33,7 +33,7 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		// 1: 16, 2: 32, 4: 64, 8: 128, 16: 256
 		// unknown4 * 16 == palette size
 		
-		let bitmapArchive = parent.contents.first { $0.name == mpm.entry2.tableName } as! MAR
+		let bitmapArchive = parent.contents.first { $0.name == mpm.entry2.tableName } as! MAR.Unpacked
 		let bitmap = bitmapArchive.files[Int(mpm.entry2.index)]
 		let bitmapData = bitmap.content as! Datastream
 		
@@ -56,7 +56,7 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		
 		if mpm.entry3 != nil {
 //		if let entry3 = mpm.entry3 {
-//			let bgMapArchive = parent.contents.first { $0.name == entry3.tableName } as! MAR
+//			let bgMapArchive = parent.contents.first { $0.name == entry3.tableName } as! MAR.Unpacked
 //			let bgMap = bgMapArchive.files[Int(entry3.index)]
 //			let bgMapData = bgMap.content as! Datastream
 			

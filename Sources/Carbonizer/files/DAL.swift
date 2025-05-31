@@ -1,8 +1,8 @@
 import BinaryParser
 
-struct DAL {
+enum DAL {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "DAL"
 		var unknown1: UInt32 = 0x659
@@ -71,9 +71,21 @@ struct DAL {
 			}
 		}
 	}
+	
+	struct Unpacked: Codable {}
 }
 
-extension DAL.Binary.Attack.SecondaryEffect {
+extension DAL.Packed.Attack.PrimaryEffect {
+	enum Effect: UInt8 {
+		case nothing = 1, poison, sleep, scare, excite, confusion, enrage, counter, enflame, harden, quicken
+	}
+	
+	var effect: Effect {
+		Effect(rawValue: effectCode) ?? .nothing
+	}
+}
+
+extension DAL.Packed.Attack.SecondaryEffect {
 	enum Effect: UInt8 {
 		case nothing = 1, transformation, allZoneAttack, stealLPEqualToDamage, stealFP, spiteBlast, powerScale, knockToEZ, unused1, healWholeTeam, sacrifice, lawOfTheJungle, healOneAlly, unused2, cureAllStatuses, swapZones
 	}
@@ -83,12 +95,35 @@ extension DAL.Binary.Attack.SecondaryEffect {
 	}
 }
 
-extension DAL.Binary.Attack.PrimaryEffect {
-	enum Effect: UInt8 {
-		case nothing = 1, poison, sleep, scare, excite, confusion, enrage, counter, enflame, harden, quicken
+// MARK: packed
+extension DAL.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DAL.Unpacked {
+		DAL.Unpacked(self, configuration: configuration)
 	}
 	
-	var effect: Effect {
-		Effect(rawValue: effectCode) ?? .nothing
+	fileprivate init(_ unpacked: DAL.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension DAL.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".dal.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> DAL.Packed {
+		DAL.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DAL.Packed, configuration: CarbonizerConfiguration) {
+		todo()
 	}
 }

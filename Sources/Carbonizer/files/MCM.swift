@@ -1,38 +1,9 @@
 import BinaryParser
 import Foundation
 
-struct MCM {
-	var compression: (CompressionType, CompressionType)
-	var maxChunkSize: UInt32
-	
-	var huffmanCompressionInfo: [Huffman.CompressionInfo]
-	
-	var content: any ProprietaryFileData
-	
-	enum CompressionType: UInt8 {
-		case none, runLength, lzss, huffman
-		
-		func compress(_ data: Datastream, compressionInfo: Huffman.CompressionInfo?) -> Datastream {
-			switch self {
-				case .none:                         data
-				case .runLength: RunLength.compress(data)
-				case .lzss:           LZSS.compress(data)
-				case .huffman:     Huffman.compress(data, info: compressionInfo)
-			}
-		}
-		
-		func decompress(_ data: Datastream) throws -> (Datastream, Huffman.CompressionInfo?) {
-			switch self {
-				case .none:                               (data,  nil)
-				case .runLength: (try RunLength.decompress(data), nil)
-				case .lzss:           (try LZSS.decompress(data), nil)
-				case .huffman:      try Huffman.decompress(data)
-			}
-		}
-	}
-	
+enum MCM {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "MCM"
 		var decompressedSize: UInt32
@@ -48,76 +19,25 @@ struct MCM {
 		@EndOffset(givenBy: \Self.endOfFileOffset)
 		var chunks: [Datastream]
 	}
+	
+	struct Unpacked {
+		var compression: (CompressionType, CompressionType)
+		var maxChunkSize: UInt32
+		
+		var huffmanCompressionInfo: [Huffman.CompressionInfo]
+		
+		var content: any ProprietaryFileData
+		
+		enum CompressionType: UInt8 {
+			case none, runLength, lzss, huffman
+		}
+	}
 }
 
 // MARK: packed
-extension MCM {
-	struct DecompressionError: WrappingError, CustomStringConvertible {
-		var compression: (CompressionType, CompressionType)
-		var wrapped: any Error
-		
-		var joinedErrorPrefix: String { ">" }
-		
-		var description: String {
-			switch wrapped {
-				case let error as WrappingError:
-					"\(.bold)MCM\(.normal)\(error.joinedErrorPrefix)\(error)"
-				case let error:
-					"\(.bold)MCM\(.normal): \(error)"
-			}
-		}
-	}
-	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) throws {
-		compression = (
-			CompressionType(rawValue: binary.compressionType1) ?? .none,
-			CompressionType(rawValue: binary.compressionType2) ?? .none
-		)
-		maxChunkSize = binary.maxChunkSize
-		
-		do {
-			// TODO: this can be optimized by having each chunk's
-			// decompression functions write to the same buffer
-			let decompressedChunksAndInfo = try binary.chunks
-				.map(compression.0.decompress)
-				.map { [compression] in (try compression.1.decompress($0), $1) }
-			
-			huffmanCompressionInfo = decompressedChunksAndInfo
-				.flatMap { [$0.1, $0.0.1] }
-				.compactMap { $0 }
-			
-			let data = decompressedChunksAndInfo
-				.map(\.0.0)
-				.joined()
-			
-#if compiler(>=6)
-			content = try createFileData(
-				name: "",
-				data: data,
-				configuration: configuration
-			)?.unpacked(configuration: configuration) ?? data
-#else
-			let fileData = try createFileData(
-				name: "",
-				data: data,
-				configuration: configuration
-			)
-			
-			if let fileData {
-				content = fileData.unpacked() as any ProprietaryFileData
-			} else {
-				content = data
-			}
-#endif
-		} catch {
-			throw DecompressionError(compression: compression, wrapped: error)
-		}
-	}
-}
-
-extension MCM.Binary {
-	init(_ mcm: MCM, configuration: CarbonizerConfiguration) {
-		maxChunkSize = mcm.maxChunkSize
+extension MCM.Packed {
+	init(_ unpacked: MCM.Unpacked, configuration: CarbonizerConfiguration) {
+		maxChunkSize = unpacked.maxChunkSize
 		// TODO: turn back on once compression is implemented
 //		compressionType1 = mcm.compression.0.rawValue
 //		compressionType2 = mcm.compression.1.rawValue
@@ -125,12 +45,7 @@ extension MCM.Binary {
 		compressionType2 = 0
 		
 		let data = Datawriter()
-#if compiler(>=6)
-		mcm.content.packed(configuration: configuration).write(to: data)
-#else
-		let packedContent: any ProprietaryFileData = mcm.content.packed()
-		packedContent.write(to: data)
-#endif
+		unpacked.content.packed(configuration: configuration).write(to: data)
 		
 		decompressedSize = UInt32(data.offset)
 		
@@ -141,7 +56,7 @@ extension MCM.Binary {
 		chunks = chunkedData
 //		let firstCompressionLayer = zip(chunkedData, mcm.huffmanCompressionInfo)
 //			.map(mcm.compression.1.compress)
-//		
+//
 //		chunks = zip(firstCompressionLayer, mcm.huffmanCompressionInfo)
 //			.map(mcm.compression.0.compress)
 		
@@ -162,12 +77,60 @@ extension MCM.Binary {
 }
 
 // MARK: unpacked
-extension MCM {
+extension MCM.Unpacked {
+	struct DecompressionError: WrappingError, CustomStringConvertible {
+		var compression: (CompressionType, CompressionType)
+		var wrapped: any Error
+		
+		var joinedErrorPrefix: String { ">" }
+		
+		var description: String {
+			switch wrapped {
+				case let error as WrappingError:
+					"\(.bold)MCM\(.normal)\(error.joinedErrorPrefix)\(error)"
+				case let error:
+					"\(.bold)MCM\(.normal): \(error)"
+			}
+		}
+	}
+	
+	init(_ packed: MCM.Packed, configuration: CarbonizerConfiguration) throws {
+		compression = (
+			CompressionType(rawValue: packed.compressionType1) ?? .none,
+			CompressionType(rawValue: packed.compressionType2) ?? .none
+		)
+		maxChunkSize = packed.maxChunkSize
+		
+		do {
+			// TODO: this can be optimized by having each chunk's
+			// decompression functions write to the same buffer
+			let decompressedChunksAndInfo = try packed.chunks
+				.map(compression.0.decompress)
+				.map { [compression] in (try compression.1.decompress($0), $1) }
+			
+			huffmanCompressionInfo = decompressedChunksAndInfo
+				.flatMap { [$0.1, $0.0.1] }
+				.compactMap { $0 }
+			
+			let data = decompressedChunksAndInfo
+				.map(\.0.0)
+				.joined()
+			
+			content = try makeFileData(
+				name: "",
+				data: data,
+				configuration: configuration
+			)?.unpacked(configuration: configuration) ?? data
+		} catch {
+			throw DecompressionError(compression: compression, wrapped: error)
+		}
+	}
+	
 	enum NoMetadataError: Error {
 		case noMetadata(String)
 	}
 	
-	init?(_ file: any FileSystemObject) throws {
+	init?(_ file: any FileSystemObject) throws(NoMetadataError) {
 		let metadata: Metadata?
 		switch file {
 			case let proprietaryFile as ProprietaryFile:
@@ -191,7 +154,7 @@ extension MCM {
 }
 
 extension ProprietaryFile {
-	init(index: Int, mcm: MCM) {
+	init(index: Int, mcm: MCM.Unpacked) {
 		name = String(index).padded(toLength: 4, with: "0")
 		metadata = Metadata(
 			standalone: false,
@@ -203,7 +166,7 @@ extension ProprietaryFile {
 		data = mcm.content
 	}
 	
-	init(name: String, standaloneMCM mcm: MCM) {
+	init(name: String, standaloneMCM mcm: MCM.Unpacked) {
 		self.name = name
 		metadata = Metadata(
 			standalone: true,
@@ -216,7 +179,25 @@ extension ProprietaryFile {
 	}
 }
 
-extension MCM.CompressionType: Codable {
+extension MCM.Unpacked.CompressionType: Codable {
+	func compress(_ data: Datastream, compressionInfo: Huffman.CompressionInfo?) -> Datastream {
+		switch self {
+			case .none:                         data
+			case .runLength: RunLength.compress(data)
+			case .lzss:           LZSS.compress(data)
+			case .huffman:     Huffman.compress(data, info: compressionInfo)
+		}
+	}
+	
+	func decompress(_ data: Datastream) throws -> (Datastream, Huffman.CompressionInfo?) {
+		switch self {
+			case .none:                               (data,  nil)
+			case .runLength: (try RunLength.decompress(data), nil)
+			case .lzss:           (try LZSS.decompress(data), nil)
+			case .huffman:      try Huffman.decompress(data)
+		}
+	}
+	
 	struct InvalidCompressionType: Error, CustomStringConvertible {
 		var rawString: String
 		

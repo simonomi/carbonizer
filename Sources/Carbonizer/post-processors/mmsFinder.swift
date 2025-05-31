@@ -1,9 +1,9 @@
 import BinaryParser
 
 func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
-	let file: MAR
+	let file: MAR.Unpacked
 	switch inputFile {
-		case let mar as MAR:
+		case let mar as MAR.Unpacked:
 			file = mar
 		case let other:
 			return [other]
@@ -33,7 +33,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	
 	var folders = [Folder]()
 	
-	for mms in file.files.compactMap({ $0.content as? MMS }) {
+	for mms in file.files.compactMap({ $0.content as? MMS.Unpacked }) {
 //		guard mms.colorPalette.tableName == "cleaning_arc.bin" else { continue }
 		
 		// color palette notes
@@ -52,7 +52,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //				.joined(separator: "\n")
 //		)
 		
-		let animationArchive = parent.contents.first { $0.name == mms.animation.tableName } as! MAR
+		let animationArchive = parent.contents.first { $0.name == mms.animation.tableName } as! MAR.Unpacked
 		
 		precondition(mms.animation.indices.first == 0)
 		
@@ -64,7 +64,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			
 //			print("\(parent.name)/\(file.name)")
 			
-			let colorPaletteArchive = parent.contents.first { $0.name == mms.colorPalette.tableName } as! MAR
+			let colorPaletteArchive = parent.contents.first { $0.name == mms.colorPalette.tableName } as! MAR.Unpacked
 			
 			let palettes: [SpritePalette?] = try mms.colorPalette.indices.map { colorPaletteIndex in
 				if parent.name == "topmenu", [8, 9].contains(colorPaletteIndex) {
@@ -93,7 +93,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				
 			}
 			
-			let bitmapArchive = parent.contents.first { $0.name == mms.bitmap.tableName } as! MAR
+			let bitmapArchive = parent.contents.first { $0.name == mms.bitmap.tableName } as! MAR.Unpacked
 			
 			let bitmaps: [SpriteBitmap] = try mms.bitmap.indices.map { bitmapIndex in
 				let bitmapFile = bitmapArchive.files[Int(bitmapIndex)]

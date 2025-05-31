@@ -1,8 +1,8 @@
 import BinaryParser
 
-struct DNC {
+enum DNC {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "DNC"
 		
@@ -42,5 +42,40 @@ struct DNC {
 			var unknown1: UInt32
 			var unknown2: UInt32
 		}
+	}
+	
+	struct Unpacked: Codable {}
+}
+
+// MARK: packed
+extension DNC.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DNC.Unpacked {
+		DNC.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: DNC.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension DNC.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".dnc.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> DNC.Packed {
+		DNC.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DNC.Packed, configuration: CarbonizerConfiguration) {
+		todo()
 	}
 }

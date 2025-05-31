@@ -43,14 +43,6 @@ func identity<T>(_ value: T) -> T { value }
 //	try rhs(lhs)
 //}
 
-#if compiler(<6)
-extension Collection {
-	public func count(where predicate: (Element) throws -> Bool) rethrows -> Int {
-		try self.filter(predicate).count
-	}
-}
-#endif
-
 extension Collection {
 	var isNotEmpty: Bool {
 		!isEmpty
@@ -384,19 +376,11 @@ extension JSONDecoder {
 	}
 }
 
-#if compiler(>=6)
 extension FileHandle: @retroactive TextOutputStream {
 	public func write(_ string: String) {
 		write(Data(string.utf8))
 	}
 }
-#else
-extension FileHandle: TextOutputStream {
-	public func write(_ string: String) {
-		write(Data(string.utf8))
-	}
-}
-#endif
 
 func waitForInput() {
 	print("Press Enter to continue...", terminator: "")

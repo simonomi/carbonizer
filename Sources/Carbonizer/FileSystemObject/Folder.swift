@@ -17,17 +17,17 @@ func createFolder(
 		.map { try fileSystemObject(contentsOf: $0, configuration: configuration) }
 		.sorted(by: \.name)
 	
-	if configuration.fileTypes.contains(String(describing: MAR.self)),
-	   path.lastPathComponent.hasSuffix(MAR.fileExtension) 
+	if configuration.fileTypes.contains(MAR.Packed.Binary.magicBytes),
+	   path.lastPathComponent.hasSuffix(MAR.Unpacked.fileExtension)
 	{
-		return MAR(
-			name: String(path.lastPathComponent.dropLast(MAR.fileExtension.count)),
-			files: try contents.compactMap(MCM.init)
+		return MAR.Unpacked(
+			name: String(path.lastPathComponent.dropLast(MAR.Unpacked.fileExtension.count)),
+			files: try contents.compactMap(MCM.Unpacked.init)
 		)
 	}
 	
 	if contentPaths.contains(where: { $0.lastPathComponent == "header.json" }) {
-		return try NDS(
+		return try NDS.Unpacked(
 			name: path.lastPathComponent,
 			contents: contents,
 			configuration: configuration

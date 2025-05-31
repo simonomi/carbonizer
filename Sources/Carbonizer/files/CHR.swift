@@ -1,8 +1,8 @@
 import BinaryParser
 
-struct CHR {
+enum CHR {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "CHR"
 		
@@ -40,27 +40,39 @@ struct CHR {
 		@Offset(givenBy: \Self.someHeadOffset)
 		var someHeads: [UInt16]
 	}
+	
+	struct Unpacked: Codable {}
 }
 
-extension CHR: ProprietaryFileData, BinaryConvertible, Codable {
+// MARK: packed
+extension CHR.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> CHR.Unpacked {
+		CHR.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: CHR.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension CHR.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".chr.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		todo()
+	func packed(configuration: CarbonizerConfiguration) -> CHR.Packed {
+		CHR.Packed(self, configuration: configuration)
 	}
 	
-	enum CodingKeys: CodingKey {
-		// TODO: custom keys ?
-	}
-}
-
-extension CHR.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
 	
-	init(_ chr: CHR, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: CHR.Packed, configuration: CarbonizerConfiguration) {
 		todo()
 	}
 }

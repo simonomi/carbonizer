@@ -20,11 +20,11 @@ struct Compression {
 //			(.huffman, "lorem ipsum - decompressed", "lorem ipsum - huffman"),
 //			(.huffman, "e0046 - lzss", "e0046 - huffman"), // 4-bit
 			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
-			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"), // 8-bit
+//			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"), // 8-bit
 //			(.huffman, "msg_1007 - decompressed", "msg_1007 - huffman"), // 8-bit
-		] as [(MCM.CompressionType, String, String)]
+		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
-	func compress(_ type: MCM.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {
+	func compress(_ type: MCM.Unpacked.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {
 		let inputData = try data(for: decompressedFileName)
 		
 //		let start = Date.now
@@ -69,9 +69,9 @@ struct Compression {
 			(.lzss, "e0046 - lzss", "e0046 - decompressed"),
 			(.huffman, "msg_0911 - huffman", "msg_0911 - decompressed"),
 			(.huffman, "msg_1007 - huffman", "msg_1007 - decompressed"),
-		] as [(MCM.CompressionType, String, String)]
+		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
-	func decompress(_ type: MCM.CompressionType, _ compressedFileName: String, _ expectedFileName: String) throws {
+	func decompress(_ type: MCM.Unpacked.CompressionType, _ compressedFileName: String, _ expectedFileName: String) throws {
 		let inputData = try data(for: compressedFileName)
 		
 //		let start = Date.now

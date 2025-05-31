@@ -4,147 +4,11 @@ import Foundation
 // TODO: parsing ffc with ff1's commands crashes instead of giving an error message
 // WHILE WRITING??
 
-struct DEX {
-	var commands: [[Command]]
-	
-	enum ArgumentType {
-		case character, degrees, dep, dialogue, effect, fixedPoint, fossil, frames, image, map, movement, music, soundEffect, unknown, vivosaur
-	}
-	
-	struct CommandDefinition {
-		// used to parse each argument
-		var argumentTypes: [ArgumentType]
-		// used to generate output string
-		var outputStringThingy: [OutputStringThingyChunk]
-		// used to match command type
-		var textWithoutArguments: [String]
-		// used to reorder arguments when reading from string
-		var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
-	}
-	
-	static let ff1Commands: [UInt32: CommandDefinition] = [
-		1:   "dialogue \(0, .dialogue)",
-		// 3: (#)
-		//     7025 freezes camera focus (?)
-		4:   "memory 4 \(0, .unknown)", // wipes some stored dialogue answer. argument is the index in DEP
-		                                // possibly dep too but the 2nd number is always 0
-		5:   "memory 5 \(0, .dep)",
-		//     0xa00001d makes it possible to save
-		//     0x50000cf activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
-		//     0x5002d21 makes the samurai unable to battle
-		6:   "memory 6 \(0, .dep)",
-		//     0x500010f is set with 6 when resetting name, and 5 when resetting vivosaur
-		7:   "spawn \(0, .character) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
-//		8:   (<character>, #)
-		9:   "ambiguous spawn/move/teleport \(0, .character) \(1, .unknown) \(2, .unknown)",
-		10:  "teleport \(0, .character) to \(1, .character)",
-		14:  "despawn \(0, .character)",
-		// 16: (#, #)
-		20:  "fade out \(0, .frames)",
-		21:  "fade in \(0, .frames)",
-		22:  "fade out to white \(0, .frames)",
-		23:  "fade in from white \(0, .frames)",
-		// 26: (#)
-		// 27: (#) 44 makes the hotel person intercept you (which occurs in e0044) but doenst seem to just activate an episode
-		32:  "unowned dialogue \(0, .dialogue)",
-		33:  "dialogue with choice \(1, .dialogue), unknown: \(0, .unknown)", // 0 is block
-		34:  "turn \(0, .character) to \(1, .degrees)",
-		35:  "turn1 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
-		36:  "turn \(0, .character) towards \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
-		37:  "turn2 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
-		38:  "turn \(0, .character) towards \(1, .character) over \(3, .frames), unknowns: \(2, .unknown) \(4, .unknown)",
-		39:  "move \(0, .character) to \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
-		// 41: (character?, #, frames?, #) another move-to?
-		43:  "move \(0, .character) to position \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
-		44:  "unknown 44: \(0, .character) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",
-		45:  "move \(0, .character) by \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
-		// 46: (#, #, #.#, #, #)
-		50:  "smoothes out movement or something for \(0, .character)",
-		51:  "control \(0, .character)",
-		// 52: (#, #)
-		56:  "delay \(0, .frames)",
-		57:  "battle \(1, .unknown), unknown: \(0, .unknown)", // 1 is battle id
-		58:  "clean1 \(1, .fossil), unknown: \(0, .unknown)",
-		59:  "clean2 \(1, .fossil), unknown: \(0, .unknown)",
-		60:  "clean3 \(1, .fossil), unknown: \(0, .unknown)", // (used in fighter test in e0090)
-		61:  "angle camera from \(1, 2, .vector) at distance \(3, .fixedPoint) with fov: \(0, .fixedPoint) over \(4, .frames), unknown: \(5, .unknown)",
-		// 62: ()
-		//    often after diologue choices
-		//    often after battles
-		// 63: ()
-		70:  "memory 70 \(0, .dep), \(1, .unknown)",
-		//     writing to 0x9000007 sets the player's profile pic (0-7 is a-h)
-		80:  "make \(0, .character) follow \(1, .character)",
-		90:  "set level for level-up animation \(0, .unknown)",
-		112: "play animation \(1, .unknown) on \(0, .character)", // 1 is animation
-		114: "set \(0, .character) body model variant to \(1, .unknown)", // 1 is model variant
-		115: "set \(0, .character) head model variant to \(1, .unknown)", // 1 is model variant
-		// 116: (#) i think this stops music from playing, not sure if thats the main effect or just a side effect
-		117: "start music \(0, .music)",
-		// 118: ()
-		119: "start music 2 \(0, .music)",
-		// 120: ()
-		124: "fade music \(0, .frames)",
-		125: "play sound \(0, .soundEffect)",
-		// 128: (#, #)
-		129: "effect \(1, .effect) on \(0, .character)",
-		131: "clear effects on \(0, .character)",
-		135: "movement \(1, .movement) on \(0, .character)",
-		136: "unknown 136: \(0, .character) \(1, .unknown)",
-		//   136: 1 24 - makes hunter blush
-		138: "shake screen for \(2, .frames) with intensity: \(0, .unknown), gradual intensity: \(1, .unknown)",
-		// 141: (#)
-		142: "modify player name", // has back button
-		143: "set player name",
-		144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), unknown: \(1, .unknown)", // 1 is address/variable to write the result to
-		150: "level-up animation",
-		153: "fade in image \(0, .image) over \(1, .frames) on bottom screen, unknown: \(2, .unknown)", // TODO: is this actually top?
-		154: "fade out image over \(0, .frames), unknown: \(1, .unknown)",
-		155: "slide in image \(0, .image) over \(2, .frames), unknowns: \(1, .unknown) \(3, .unknown)",
-		157: "fade in image \(0, .image) over \(2, .frames), unknowns: \(1, .fixedPoint) \(3, .unknown)",
-		159: "fade in image \(0, .image) over \(1, .frames) on top screen, unknown: \(2, .unknown)", // TODO: is this actually bottom?
-		// 160: (#, #)
-		// 178: () suppresses "Fighter Area" corner tag?
-		//     used in e0302 before a fossil battle
-		191: "revive \(0, .vivosaur)",
-		194: "unknown 194: \(0, .character)",
-		// 195: (#, #)
-		200: "start turning \(0, .character) to follow \(1, .character)",
-		201: "stop turning \(0, .character)",
-		
-		// all the unknown commands as of rn 2 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 44 46 47 48 52 53 55 62 63 71 72 75 76 77 81 82 83 84 85 86 87 88 89 91 92 93 95 96 97 98 99 100 102 103 104 105 106 107 108 110 111 112 113 116 118 120 121 126 127 128 134 136 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205 206
-	]
-	
-	static let ffcCommands: [UInt32: CommandDefinition] = [
-		71:  "dialogue \(0, .dialogue)",
-		107: "unowned dialogue \(0, .dialogue)",
-	]
-	
-	static func knownCommands(for configuration: CarbonizerConfiguration) -> [UInt32: CommandDefinition] {
-		switch configuration.dexCommandList {
-			case .ff1: ff1Commands
-			case .ffc: ffcCommands
-			case .none: [:]
-		}
-	}
-	
-	enum Command {
-		case known(type: UInt32, definition: CommandDefinition, arguments: [Int32])
-		case unknown(type: UInt32, arguments: [Int32])
-		case comment(String)
-		
-		enum ParseError: Error {
-			case failedToParse(Substring, in: Substring)
-			case incorrectArgumentCount(command: Substring, actual: Int, expected: Int)
-			case unknownCommand(Substring)
-			case mismatchedAngleBrackets(requirement: Substring)
-		}
-	}
-	
+enum DEX {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
-		static let magicBytes = "DEX"
+		static let magicBytes = "DEX.Unpacked"
 		var numberOfBlocks: UInt32
 		var blockOffsetsStart: UInt32 = 0xC
 		@Count(givenBy: \Self.numberOfBlocks)
@@ -174,15 +38,222 @@ struct DEX {
 			}
 		}
 	}
+	
+	struct Unpacked {
+		var commands: [[Command]]
+		
+		enum ArgumentType {
+			case character, degrees, dep, dialogue, effect, fixedPoint, fossil, frames, image, map, movement, music, soundEffect, unknown, vivosaur
+		}
+		
+		struct CommandDefinition {
+			// used to parse each argument
+			var argumentTypes: [ArgumentType]
+			// used to generate output string
+			var outputStringThingy: [OutputStringThingyChunk]
+			// used to match command type
+			var textWithoutArguments: [String]
+			// used to reorder arguments when reading from string
+			var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
+		}
+		
+		static let ff1Commands: [UInt32: CommandDefinition] = [
+			1:   "dialogue \(0, .dialogue)",
+			// 3: (#)
+			//     7025 freezes camera focus (?)
+			4:   "memory 4 \(0, .unknown)", // wipes some stored dialogue answer. argument is the index in DEP
+			                                // possibly dep too but the 2nd number is always 0
+			5:   "memory 5 \(0, .dep)",
+			//     0xa00001d makes it possible to save
+			//     0x50000cf activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
+			//     0x5002d21 makes the samurai unable to battle
+			6:   "memory 6 \(0, .dep)",
+			//     0x500010f is set with 6 when resetting name, and 5 when resetting vivosaur
+			7:   "spawn \(0, .character) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
+			// 8:   (<character>, #)
+			9:   "ambiguous spawn/move/teleport \(0, .character) \(1, .unknown) \(2, .unknown)",
+			10:  "teleport \(0, .character) to \(1, .character)",
+			14:  "despawn \(0, .character)",
+			// 16: (#, #)
+			20:  "fade out \(0, .frames)",
+			21:  "fade in \(0, .frames)",
+			22:  "fade out to white \(0, .frames)",
+			23:  "fade in from white \(0, .frames)",
+			// 26: (#)
+			// 27: (#) 44 makes the hotel person intercept you (which occurs in e0044) but doenst seem to just activate an episode
+			32:  "unowned dialogue \(0, .dialogue)",
+			33:  "dialogue with choice \(1, .dialogue), unknown: \(0, .unknown)", // 0 is block
+			34:  "turn \(0, .character) to \(1, .degrees)",
+			35:  "turn1 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
+			36:  "turn \(0, .character) towards \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
+			37:  "turn2 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
+			38:  "turn \(0, .character) towards \(1, .character) over \(3, .frames), unknowns: \(2, .unknown) \(4, .unknown)",
+			39:  "move \(0, .character) to \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
+			// 41: (character?, #, frames?, #) another move-to?
+			43:  "move \(0, .character) to position \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
+			44:  "unknown 44: \(0, .character) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",
+			45:  "move \(0, .character) by \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
+			// 46: (#, #, #.#, #, #)
+			50:  "smoothes out movement or something for \(0, .character)",
+			51:  "control \(0, .character)",
+			// 52: (#, #)
+			56:  "delay \(0, .frames)",
+			57:  "battle \(1, .unknown), unknown: \(0, .unknown)", // 1 is battle id
+			58:  "clean1 \(1, .fossil), unknown: \(0, .unknown)",
+			59:  "clean2 \(1, .fossil), unknown: \(0, .unknown)",
+			60:  "clean3 \(1, .fossil), unknown: \(0, .unknown)", // (used in fighter test in e0090)
+			61:  "angle camera from \(1, 2, .vector) at distance \(3, .fixedPoint) with fov: \(0, .fixedPoint) over \(4, .frames), unknown: \(5, .unknown)",
+			// 62: ()
+			//    often after diologue choices
+			//    often after battles
+			// 63: ()
+			70:  "memory 70 \(0, .dep), \(1, .unknown)",
+			//     writing to 0x9000007 sets the player's profile pic (0-7 is a-h)
+			80:  "make \(0, .character) follow \(1, .character)",
+			90:  "set level for level-up animation \(0, .unknown)",
+			112: "play animation \(1, .unknown) on \(0, .character)", // 1 is animation
+			114: "set \(0, .character) body model variant to \(1, .unknown)", // 1 is model variant
+			115: "set \(0, .character) head model variant to \(1, .unknown)", // 1 is model variant
+			// 116: (#) i think this stops music from playing, not sure if thats the main effect or just a side effect
+			117: "start music \(0, .music)",
+			// 118: ()
+			119: "start music 2 \(0, .music)",
+			// 120: ()
+			124: "fade music \(0, .frames)",
+			125: "play sound \(0, .soundEffect)",
+			// 128: (#, #)
+			129: "effect \(1, .effect) on \(0, .character)",
+			131: "clear effects on \(0, .character)",
+			135: "movement \(1, .movement) on \(0, .character)",
+			136: "unknown 136: \(0, .character) \(1, .unknown)",
+			//   1 24 - makes hunter blush
+			138: "shake screen for \(2, .frames) with intensity: \(0, .unknown), gradual intensity: \(1, .unknown)",
+			// 141: (#)
+			142: "modify player name", // has back button
+			143: "set player name",
+			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), unknown: \(1, .unknown)", // 1 is address/variable to write the result to
+			150: "level-up animation",
+			153: "fade in image \(0, .image) over \(1, .frames) on bottom screen, unknown: \(2, .unknown)", // TODO: is this actually top?
+			154: "fade out image over \(0, .frames), unknown: \(1, .unknown)",
+			155: "slide in image \(0, .image) over \(2, .frames), unknowns: \(1, .unknown) \(3, .unknown)",
+			157: "fade in image \(0, .image) over \(2, .frames), unknowns: \(1, .fixedPoint) \(3, .unknown)",
+			159: "fade in image \(0, .image) over \(1, .frames) on top screen, unknown: \(2, .unknown)", // TODO: is this actually bottom?
+			// 160: (#, #)
+			// 178: () suppresses "Fighter Area" corner tag?
+			//     used in e0302 before a fossil battle
+			191: "revive \(0, .vivosaur)",
+			194: "unknown 194: \(0, .character)",
+			// 195: (#, #)
+			200: "start turning \(0, .character) to follow \(1, .character)",
+			201: "stop turning \(0, .character)",
+			
+			// all the unknown commands as of rn 2 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 44 46 47 48 52 53 55 62 63 71 72 75 76 77 81 82 83 84 85 86 87 88 89 91 92 93 95 96 97 98 99 100 102 103 104 105 106 107 108 110 111 112 113 116 118 120 121 126 127 128 134 136 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205 206
+		]
+		
+		static let ffcCommands: [UInt32: CommandDefinition] = [
+			71:  "dialogue \(0, .dialogue)",
+			107: "unowned dialogue \(0, .dialogue)",
+		]
+		
+		static func knownCommands(for configuration: CarbonizerConfiguration) -> [UInt32: CommandDefinition] {
+			switch configuration.dexCommandList {
+				case .ff1: ff1Commands
+				case .ffc: ffcCommands
+				case .none: [:]
+			}
+		}
+		
+		enum Command {
+			case known(type: UInt32, definition: CommandDefinition, arguments: [Int32])
+			case unknown(type: UInt32, arguments: [Int32])
+			case comment(String)
+			
+			enum ParseError: Error {
+				case failedToParse(Substring, in: Substring)
+				case incorrectArgumentCount(command: Substring, actual: Int, expected: Int)
+				case unknownCommand(Substring)
+				case mismatchedAngleBrackets(requirement: Substring)
+			}
+		}
+	}
 }
 
-extension DEX: ProprietaryFileData {
+// MARK: packed
+extension DEX.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DEX.Unpacked {
+		DEX.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: DEX.Unpacked, configuration: CarbonizerConfiguration) {
+		numberOfBlocks = UInt32(unpacked.commands.count)
+		
+		blocks = unpacked.commands.map(Block.init)
+		
+		blockOffsets = makeOffsets(
+			start: blockOffsetsStart + numberOfBlocks * 4,
+			sizes: blocks.map { $0.size() }
+		)
+	}
+}
+
+extension DEX.Packed.Block {
+	init(_ commands: [DEX.Unpacked.Command]) {
+		self.commands = commands.compactMap(Command.init)
+		
+		numberOfCommands = UInt32(self.commands.count)
+		
+		commandOffsets = makeOffsets(
+			start: offsetsOffset + numberOfCommands * 4,
+			sizes: self.commands.map(\.size)
+		)
+	}
+	
+	func size() -> UInt32 {
+		8 + 4 * numberOfCommands + commands.map(\.size).sum()
+	}
+}
+
+extension DEX.Packed.Block.Command {
+	init?(_ command: DEX.Unpacked.Command) {
+		guard let typeAndArguments = command.typeAndArguments else { return nil }
+		(type, arguments) = typeAndArguments
+		numberOfArguments = UInt32(arguments.count)
+	}
+	
+	var size: UInt32 {
+		12 + UInt32(arguments.count * 4)
+	}
+}
+
+extension DEX.Unpacked.Command {
+	var typeAndArguments: (UInt32, [Int32])? {
+		switch self {
+			case .known(let type, _, let arguments): (type, arguments)
+			case .unknown(let type, let arguments): (type, arguments)
+			case .comment: nil
+		}
+	}
+}
+
+// MARK: unpacked
+extension DEX.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dex.txt"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		commands = binary.blocks
+	func packed(configuration: CarbonizerConfiguration) -> DEX.Packed {
+		DEX.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DEX.Packed, configuration: CarbonizerConfiguration) {
+		commands = packed.blocks
 			.map(\.commands)
 			.recursiveMap { Command($0, configuration: configuration) }
 	}
@@ -195,7 +266,7 @@ extension DEX: ProprietaryFileData {
 			.split(separator: "\n\n")
 			.map {
 				try $0.split(separator: "\n")
-					.map { try DEX.Command($0, configuration: configuration) }
+					.map { try DEX.Unpacked.Command($0, configuration: configuration) }
 			}
 	}
 	
@@ -209,23 +280,7 @@ extension DEX: ProprietaryFileData {
 	}
 }
 
-extension DEX.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
-	
-	init(_ dex: DEX, configuration: CarbonizerConfiguration) {
-		numberOfBlocks = UInt32(dex.commands.count)
-		
-		blocks = dex.commands.map(Block.init)
-		
-		blockOffsets = makeOffsets(
-			start: blockOffsetsStart + numberOfBlocks * 4,
-			sizes: blocks.map { $0.size() }
-		)
-	}
-}
-
-extension DEX.CommandDefinition: ExpressibleByStringInterpolation {
+extension DEX.Unpacked.CommandDefinition: ExpressibleByStringInterpolation {
 	enum OutputStringThingyChunk {
 		case text(String)
 		case argument(Int)
@@ -245,7 +300,7 @@ extension DEX.CommandDefinition: ExpressibleByStringInterpolation {
 		
 		enum Chunk {
 			case text(String)
-			case argument(Int, DEX.ArgumentType)
+			case argument(Int, DEX.Unpacked.ArgumentType)
 			case vector(Int, Int)
 		}
 		
@@ -258,7 +313,7 @@ extension DEX.CommandDefinition: ExpressibleByStringInterpolation {
 			chunks.append(.text(literal))
 		}
 		
-		mutating func appendInterpolation(_ argumentNumber: Int, _ argumentType: DEX.ArgumentType) {
+		mutating func appendInterpolation(_ argumentNumber: Int, _ argumentType: DEX.Unpacked.ArgumentType) {
 			chunks.append(.argument(argumentNumber, argumentType))
 		}
 		
@@ -280,7 +335,7 @@ extension DEX.CommandDefinition: ExpressibleByStringInterpolation {
 	
 	init(stringInterpolation: StringInterpolation) {
 		argumentTypes = stringInterpolation.chunks
-			.flatMap { (chunk: StringInterpolation.Chunk) -> [(index: Int, argumentType: DEX.ArgumentType)] in
+			.flatMap { (chunk: StringInterpolation.Chunk) -> [(index: Int, argumentType: DEX.Unpacked.ArgumentType)] in
 				switch chunk {
 					case .text: []
 					case .argument(let index, let argumentType): [(index, argumentType)]
@@ -311,25 +366,9 @@ extension DEX.CommandDefinition: ExpressibleByStringInterpolation {
 	}
 }
 
-extension DEX {
-	static func checkKnownCommands() {
-		for commandList in [ff1Commands, ffcCommands] {
-			var allCommandsWithoutArguments = Set<[String]>()
-			
-			for command in commandList.values {
-				guard !allCommandsWithoutArguments.contains(command.textWithoutArguments) else {
-					print("\(.red)duplicate command text for \(command.textWithoutArguments) >:(\(.normal)")
-					preconditionFailure()
-				}
-				allCommandsWithoutArguments.insert(command.textWithoutArguments)
-			}
-		}
-	}
-}
-
-extension DEX.Command {
-	init(_ binaryCommand: DEX.Binary.Block.Command, configuration: CarbonizerConfiguration) {
-		self = if let definition = DEX.knownCommands(for: configuration)[binaryCommand.type] {
+extension DEX.Unpacked.Command {
+	init(_ binaryCommand: DEX.Packed.Block.Command, configuration: CarbonizerConfiguration) {
+		self = if let definition = DEX.Unpacked.knownCommands(for: configuration)[binaryCommand.type] {
 			.known(
 				type: binaryCommand.type,
 				definition: definition,
@@ -343,7 +382,7 @@ extension DEX.Command {
 		}
 	}
 	
-	init(_ text: Substring, configuration: CarbonizerConfiguration) throws(DEX.Command.ParseError) {
+	init(_ text: Substring, configuration: CarbonizerConfiguration) throws(DEX.Unpacked.Command.ParseError) {
 		if text.hasPrefix("// ") {
 			self = .comment(String(text.dropFirst(3)))
 			return
@@ -356,7 +395,7 @@ extension DEX.Command {
 			throw .mismatchedAngleBrackets(requirement: text)
 		}
 		
-		if let (commandType, knownCommand) = DEX.knownCommands(for: configuration).first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
+		if let (commandType, knownCommand) = DEX.Unpacked.knownCommands(for: configuration).first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
 			guard knownCommand.argumentIndicesFromText.count == arguments.count else {
 				throw
 					.incorrectArgumentCount(
@@ -372,7 +411,7 @@ extension DEX.Command {
 				type: commandType,
 				definition: knownCommand,
 				arguments: try zip(reorderedArguments, knownCommand.argumentTypes)
-					.map { (argument, argumentType) throws(DEX.Command.ParseError) in
+					.map { (argument, argumentType) throws(DEX.Unpacked.Command.ParseError) in
 						guard let number = argumentType.parse(argument) else {
 							throw .failedToParse(argument, in: text)
 						}
@@ -384,8 +423,8 @@ extension DEX.Command {
 				throw .unknownCommand(text)
 			}
 			
-			let parsedArguments = try arguments.map { (argument) throws(DEX.Command.ParseError) in
-				guard let value = DEX.ArgumentType.unknown.parse(argument) else {
+			let parsedArguments = try arguments.map { (argument) throws(DEX.Unpacked.Command.ParseError) in
+				guard let value = DEX.Unpacked.ArgumentType.unknown.parse(argument) else {
 					throw .failedToParse(argument, in: text)
 				}
 				return value
@@ -402,14 +441,6 @@ extension DEX.Command {
 		}
 	}
 	
-	var typeAndArguments: (UInt32, [Int32])? {
-		switch self {
-			case .known(let type, _, let arguments): (type, arguments)
-			case .unknown(let type, let arguments): (type, arguments)
-			case .comment: nil
-		}
-	}
-	
 	func linesOfDialogue() -> [Int32] {
 		guard case .known(_, let definition, let arguments) = self else { return [] }
 		
@@ -421,7 +452,7 @@ extension DEX.Command {
 	}
 }
 
-extension DEX.Command.ParseError: CustomStringConvertible {
+extension DEX.Unpacked.Command.ParseError: CustomStringConvertible {
 	var description: String {
 		switch self {
 			case .failedToParse(let text, in: let command):
@@ -437,7 +468,7 @@ extension DEX.Command.ParseError: CustomStringConvertible {
 }
 
 extension String {
-	init(_ command: DEX.Command) {
+	init(_ command: DEX.Unpacked.Command) {
 		self = switch command {
 			case .known(_, let definition, let arguments):
 				definition.outputStringThingy.reduce(into: "") { partialResult, chunk in
@@ -462,7 +493,7 @@ extension String {
 				{
 					// TODO: make this good
 					let formattedArguments = arguments
-						.map(DEX.ArgumentType.unknown.format)
+						.map(DEX.Unpacked.ArgumentType.unknown.format)
 						.map { "<\($0)>" }
 						.joined(separator: " ")
 					
@@ -477,7 +508,7 @@ extension String {
 	}
 }
 
-extension DEX.ArgumentType {
+extension DEX.Unpacked.ArgumentType {
 	func parse(_ text: Substring) -> Int32? {
 		switch self {
 			case .character:       parseLookupTable(characterNames, text: text) ?? parsePrefix(text)
@@ -587,34 +618,5 @@ extension DEX.ArgumentType {
 		} else {
 			String(number)
 		}
-	}
-}
-
-extension DEX.Binary.Block {
-	init(_ commands: [DEX.Command]) {
-		self.commands = commands.compactMap(Command.init)
-		
-		numberOfCommands = UInt32(self.commands.count)
-		
-		commandOffsets = makeOffsets(
-			start: offsetsOffset + numberOfCommands * 4,
-			sizes: self.commands.map(\.size)
-		)
-	}
-	
-	func size() -> UInt32 {
-		8 + 4 * numberOfCommands + commands.map(\.size).sum()
-	}
-}
-
-extension DEX.Binary.Block.Command {
-	init?(_ command: DEX.Command) {
-		guard let typeAndArguments = command.typeAndArguments else { return nil }
-		(type, arguments) = typeAndArguments
-		numberOfArguments = UInt32(arguments.count)
-	}
-	
-	var size: UInt32 {
-		12 + UInt32(arguments.count * 4)
 	}
 }

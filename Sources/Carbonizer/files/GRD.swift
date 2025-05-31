@@ -3,9 +3,9 @@ import BinaryParser
 // map c zooms the camera ? and maybe more?
 // map g may have something to do with the rocks that spawn in digsites
 
-struct GRD {
+enum GRD {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "GRD"
 		
@@ -19,23 +19,39 @@ struct GRD {
 		@Length(givenBy: \Self.numberOfBytes)
 		var gridData: Datastream
 	}
+	
+	struct Unpacked: Codable {}
 }
 
-extension GRD: ProprietaryFileData, BinaryConvertible, Codable {
-	static let fileExtension = ".grd.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
+// MARK: packed
+extension GRD.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> GRD.Unpacked {
+		GRD.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: GRD.Unpacked, configuration: CarbonizerConfiguration) {
 		todo()
 	}
 }
 
-extension GRD.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
+// MARK: unpacked
+extension GRD.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".grd.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ grd: GRD, configuration: CarbonizerConfiguration) {
+	func packed(configuration: CarbonizerConfiguration) -> GRD.Packed {
+		GRD.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: GRD.Packed, configuration: CarbonizerConfiguration) {
 		todo()
 	}
 }

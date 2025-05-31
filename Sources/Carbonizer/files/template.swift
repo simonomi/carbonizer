@@ -1,34 +1,49 @@
 import BinaryParser
 
 // replace FILETYPE with the magic bytes
-// and FILETYPE_LOWERCASE the same but lowercase
+// and FILE_EXTENSION the same but lowercase
 
-struct FILETYPE {
+enum FILETYPE {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "FILETYPE"
 		
 		// data
 	}
-}
-
-extension FILETYPE: ProprietaryFileData, BinaryConvertible, Codable {
-	static let fileExtension = ".FILETYPE_LOWERCASE.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		todo()
-	}
+	struct Unpacked: Codable {}
 }
 
-extension FILETYPE.Binary: ProprietaryFileData {
+// MARK: packed
+extension FILETYPE.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ FILETYPE_LOWERCASE: FILETYPE, configuration: CarbonizerConfiguration) {
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> FILETYPE.Unpacked {
+		FILETYPE.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: FILETYPE.Unpacked, configuration: CarbonizerConfiguration) {
 		todo()
 	}
 }
 
+// MARK: unpacked
+extension FILETYPE.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".FILE_EXTENSION.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> FILETYPE.Packed {
+		FILETYPE.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: FILETYPE.Packed, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}

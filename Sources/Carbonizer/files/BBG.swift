@@ -1,18 +1,8 @@
 import BinaryParser
 
-struct BBG {
-	var kasekiums: [Kasekium]
-	
-	struct Kasekium: Codable {
-		var index: Int32
-		
-		var imageFile: String
-		
-		var modelFile: String
-	}
-	
+enum BBG {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "BBG"
 		
@@ -40,32 +30,33 @@ struct BBG {
 			var modelFile: String
 		}
 	}
-}
-
-extension BBG: ProprietaryFileData, BinaryConvertible {
-	static let fileExtension = ".bbg.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		kasekiums = binary.kasekiums.map(Kasekium.init)
+	struct Unpacked {
+		var kasekiums: [Kasekium]
+		
+		struct Kasekium: Codable {
+			var index: Int32
+			
+			var imageFile: String
+			
+			var modelFile: String
+		}
 	}
 }
 
-extension BBG.Kasekium {
-	init(_ binary: BBG.Binary.Kasekium) {
-		index = binary.index
-		imageFile = binary.imageFile
-		modelFile = binary.modelFile
-	}
-}
-
-extension BBG.Binary: ProprietaryFileData {
+// MARK: packed
+extension BBG.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ bbg: BBG, configuration: CarbonizerConfiguration) {
-		kasekiums = bbg.kasekiums.map(Kasekium.init)
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> BBG.Unpacked {
+		BBG.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: BBG.Unpacked, configuration: CarbonizerConfiguration) {
+		kasekiums = unpacked.kasekiums.map(Kasekium.init)
 		kasekiumCount = UInt32(kasekiums.count)
 		kasekiumOffsets = makeOffsets(
 			start: kasekiumOffsetsOffset + kasekiumCount * 4,
@@ -75,11 +66,11 @@ extension BBG.Binary: ProprietaryFileData {
 	}
 }
 
-extension BBG.Binary.Kasekium {
-	init(_ kasekium: BBG.Kasekium) {
-		index = kasekium.index
-		imageFile = kasekium.imageFile
-		modelFile = kasekium.modelFile
+extension BBG.Packed.Kasekium {
+	init(_ unpacked: BBG.Unpacked.Kasekium) {
+		index = unpacked.index
+		imageFile = unpacked.imageFile
+		modelFile = unpacked.modelFile
 		modelFileOffset = imageFileOffset + UInt32(imageFile.utf8CString.count.roundedUpToTheNearest(4))
 	}
 	
@@ -88,16 +79,38 @@ extension BBG.Binary.Kasekium {
 	}
 }
 
-extension BBG: Codable {
-	init(from decoder: any Decoder) throws {
-		let container = try decoder.singleValueContainer()
-		kasekiums = try container.decode([BBG.Kasekium].self)
+// MARK: unpacked
+extension BBG.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".bbg.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> BBG.Packed {
+		BBG.Packed(self, configuration: configuration)
 	}
 	
-	func encode(to encoder: any Encoder) throws {
-		var container = encoder.singleValueContainer()
-		try container.encode(kasekiums)
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: BBG.Packed, configuration: CarbonizerConfiguration) {
+		kasekiums = packed.kasekiums.map(Kasekium.init)
 	}
 }
 
+extension BBG.Unpacked.Kasekium {
+	init(_ packed: BBG.Packed.Kasekium) {
+		index = packed.index
+		imageFile = packed.imageFile
+		modelFile = packed.modelFile
+	}
+}
 
+// MARK: unpacked codable
+extension BBG.Unpacked: Codable {
+	init(from decoder: any Decoder) throws {
+		kasekiums = try [BBG.Unpacked.Kasekium](from: decoder)
+	}
+	
+	func encode(to encoder: any Encoder) throws {
+		try kasekiums.encode(to: encoder)
+	}
+}

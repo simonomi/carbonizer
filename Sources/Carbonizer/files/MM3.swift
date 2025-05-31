@@ -1,17 +1,8 @@
 import BinaryParser
 
-struct MM3 {
-	var model: TableEntry
-	var animation: TableEntry
-	var texture: TableEntry
-	
-	struct TableEntry {
-		var index: UInt32
-		var tableName: String
-	}
-	
+enum MM3 {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "MM3"
 		var modelIndex: UInt32
@@ -27,33 +18,38 @@ struct MM3 {
 		@Offset(givenBy: \Self.textureTableNameOffset)
 		var textureTableName: String
 	}
-}
-
-// MARK: packed
-extension MM3: ProprietaryFileData, BinaryConvertible {
-	static let fileExtension = ".mm3.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ packed: Binary, configuration: CarbonizerConfiguration) {
-		model = TableEntry(index: packed.modelIndex, tableName: packed.modelTableName)
-		animation = TableEntry(index: packed.animationIndex, tableName: packed.animationTableName)
-		texture = TableEntry(index: packed.textureIndex, tableName: packed.textureTableName)
+	struct Unpacked {
+		var model: TableEntry
+		var animation: TableEntry
+		var texture: TableEntry
+		
+		struct TableEntry {
+			var index: UInt32
+			var tableName: String
+		}
 	}
 }
 
-extension MM3.Binary: ProprietaryFileData {
+// MARK: packed
+extension MM3.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ mm3: MM3, configuration: CarbonizerConfiguration) {
-		modelIndex = mm3.model.index
-		animationIndex = mm3.animation.index
-		textureIndex = mm3.texture.index
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> MM3.Unpacked {
+		MM3.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: MM3.Unpacked, configuration: CarbonizerConfiguration) {
+		modelIndex = unpacked.model.index
+		animationIndex = unpacked.animation.index
+		textureIndex = unpacked.texture.index
 		
-		modelTableName = mm3.model.tableName
-		animationTableName = mm3.animation.tableName
-		textureTableName = mm3.texture.tableName
+		modelTableName = unpacked.model.tableName
+		animationTableName = unpacked.animation.tableName
+		textureTableName = unpacked.texture.tableName
 		
 		modelTableNameOffset = 0x1C
 		animationTableNameOffset = modelTableNameOffset + UInt32(animationTableName.utf8CString.count)
@@ -62,7 +58,26 @@ extension MM3.Binary: ProprietaryFileData {
 }
 
 // MARK: unpacked
-extension MM3: Codable {
+extension MM3.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".mm3.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> MM3.Packed {
+		MM3.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: MM3.Packed, configuration: CarbonizerConfiguration) {
+		model = TableEntry(index: packed.modelIndex, tableName: packed.modelTableName)
+		animation = TableEntry(index: packed.animationIndex, tableName: packed.animationTableName)
+		texture = TableEntry(index: packed.textureIndex, tableName: packed.textureTableName)
+	}
+}
+
+// MARK: unpacked codable
+extension MM3.Unpacked: Codable {
 	enum CodingKeys: String, CodingKey {
 		case model = "model"
 		case animation = "animation"
@@ -70,7 +85,7 @@ extension MM3: Codable {
 	}
 }
 
-extension MM3.TableEntry: Codable {
+extension MM3.Unpacked.TableEntry: Codable {
 	enum CodingKeys: String, CodingKey {
 		case index =     "index"
 		case tableName = "table name"

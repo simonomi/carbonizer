@@ -1,8 +1,8 @@
 import BinaryParser
 
-struct AST {
+enum AST {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "AST"
 		
@@ -29,12 +29,47 @@ struct AST {
 			@Count(givenBy: \Self.indexCount)
 			@Offset(givenBy: \Self.indexOffset)
 			var indices: [UInt32] // indices into btl_ai
-			// 29, 30, 39, 57, 81, 82, 84, 86,  88, 102, 110, 146, 148,      272, 273, 274
-			// 10, 17, 29, 30, 57, 81, 83, 85,  87,  89, 103, 111, 147, 149, 272, 273, 274
-			// 10, 17, 29, 30, 57, 81, 83, 85,  87,  89, 103, 111, 147, 149, 272, 273, 274
-			//  4, 23, 25, 81, 82, 84, 86, 88, 102, 110, 146, 148,           272, 273, 274
-			// 10, 23, 25, 81, 83, 85, 87, 89, 103, 111, 147, 149,           272, 273, 274
-			// 10, 23, 25, 81, 83, 85, 87, 89, 103, 111, 147, 149,           272, 273, 274
+								  // 29, 30, 39, 57, 81, 82, 84, 86,  88, 102, 110, 146, 148,      272, 273, 274
+								  // 10, 17, 29, 30, 57, 81, 83, 85,  87,  89, 103, 111, 147, 149, 272, 273, 274
+								  // 10, 17, 29, 30, 57, 81, 83, 85,  87,  89, 103, 111, 147, 149, 272, 273, 274
+								  //  4, 23, 25, 81, 82, 84, 86, 88, 102, 110, 146, 148,           272, 273, 274
+								  // 10, 23, 25, 81, 83, 85, 87, 89, 103, 111, 147, 149,           272, 273, 274
+								  // 10, 23, 25, 81, 83, 85, 87, 89, 103, 111, 147, 149,           272, 273, 274
 		}
+	}
+	
+	struct Unpacked: Codable {}
+}
+
+// MARK: packed
+extension AST.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> AST.Unpacked {
+		AST.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: AST.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension AST.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".ast.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> AST.Packed {
+		AST.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: AST.Packed, configuration: CarbonizerConfiguration) {
+		todo()
 	}
 }

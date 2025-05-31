@@ -6,7 +6,7 @@ extension FileSystemObject {
 	}
 }
 
-extension NDS {
+extension NDS.Unpacked {
 	mutating func setFile(at path: ArraySlice<String>, to content: any FileSystemObject) {
 		if let index = contents.firstIndex(where: { $0.name == path.dropFirst().first }) {
 			contents[index].setFile(at: path.dropFirst(2), to: content)

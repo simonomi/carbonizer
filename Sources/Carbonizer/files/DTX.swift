@@ -1,10 +1,8 @@
 import BinaryParser
 
-struct DTX {
-	var strings: [String]
-	
+enum DTX {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "DTX"
 		var stringCount: UInt32
@@ -15,39 +13,56 @@ struct DTX {
 		@Offsets(givenBy: \Self.indices)
 		var strings: [String]
 	}
-}
-
-// MARK: packed
-extension DTX: ProprietaryFileData, BinaryConvertible {
-	static let fileExtension = ".dtx.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		strings = binary.strings
+	struct Unpacked {
+		var strings: [String]
 	}
 }
 
-extension DTX.Binary: ProprietaryFileData {
+// MARK: packed
+extension DTX.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dtx: DTX, configuration: CarbonizerConfiguration) {
-		stringCount = UInt32(dtx.strings.count)
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DTX.Unpacked {
+		DTX.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: DTX.Unpacked, configuration: CarbonizerConfiguration) {
+		stringCount = UInt32(unpacked.strings.count)
 
 		indices = makeOffsets(
 			start: indicesOffset + stringCount * 4,
-			sizes: dtx.strings
+			sizes: unpacked.strings
 				.map(\.utf8CString.count)
 				.map(UInt32.init)
 		)
 		
-		strings = dtx.strings
+		strings = unpacked.strings
 	}
 }
 
 // MARK: unpacked
-extension DTX: Codable {
+extension DTX.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".dtx.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> DTX.Packed {
+		DTX.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DTX.Packed, configuration: CarbonizerConfiguration) {
+		strings = packed.strings
+	}
+}
+
+// MARK: unpacked codable
+extension DTX.Unpacked: Codable {
 	init(from decoder: Decoder) throws {
 		strings = try [String](from: decoder)
 	}

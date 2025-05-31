@@ -1,11 +1,11 @@
 import BinaryParser
 import Foundation
 
-extension [NDS.Binary.FileNameTable.SubEntry]: BinaryConvertible {
+extension [NDS.Packed.Binary.FileNameTable.SubEntry]: BinaryConvertible {
 	public init(_ data: Datastream) throws {
 		self = []
 		while last?.typeAndNameLength != 0 {
-			append(try data.read(NDS.Binary.FileNameTable.SubEntry.self))
+			append(try data.read(NDS.Packed.Binary.FileNameTable.SubEntry.self))
 		}
 		removeLast()
 	}
@@ -16,14 +16,14 @@ extension [NDS.Binary.FileNameTable.SubEntry]: BinaryConvertible {
 }
 
 extension Datawriter {
-	func write(_ data: [NDS.Binary.FileNameTable.SubEntry]) {
+	func write(_ data: [NDS.Packed.Binary.FileNameTable.SubEntry]) {
 		data.write(to: self)
 	}
 }
 
-typealias CompleteFNT = [UInt16 : [NDS.Binary.FileNameTable.SubEntry]]
+typealias CompleteFNT = [UInt16 : [NDS.Packed.Binary.FileNameTable.SubEntry]]
 
-extension NDS.Binary.FileNameTable {
+extension NDS.Packed.Binary.FileNameTable {
 	func completeTable() -> CompleteFNT {
 		let folderIds = (0..<rootFolder.parentId)
 			.map { $0 + 0xF000 }
@@ -43,7 +43,7 @@ extension NDS.Binary.FileNameTable {
 	}
 }
 
-extension NDS.Binary.FileNameTable.SubEntry {
+extension NDS.Packed.Binary.FileNameTable.SubEntry {
 	enum FileOrFolder { case file, folder }
 	var type: FileOrFolder {
 		if self.typeAndNameLength < 0x80 {
@@ -86,7 +86,7 @@ extension NDS.Binary.FileNameTable.SubEntry {
 	}
 }
 
-extension NDS.Binary.Header {
+extension NDS.Packed.Binary.Header {
 	enum CodingKeys: String, CodingKey {
 		case gameTitle =                         "game title"
 		case gamecode =                          "gamecode"
@@ -132,7 +132,7 @@ extension NDS.Binary.Header {
 	}
 }
 
-extension NDS.Binary.OverlayTableEntry {
+extension NDS.Packed.Binary.OverlayTableEntry {
 	enum CodingKeys: String, CodingKey {
 		case id =                                "overlay ID"
 		case loadAddress =                       "load address"
@@ -145,7 +145,7 @@ extension NDS.Binary.OverlayTableEntry {
 	}
 }
 
-extension NDS.Binary.FileNameTable {
+extension NDS.Packed.Binary.FileNameTable {
 	init(_ files: [any FileSystemObject], firstFileId: UInt16) {
 		let allFolders = files.getAllFolders()
 		let folderIds = Dictionary(uniqueKeysWithValues:
@@ -164,7 +164,7 @@ extension NDS.Binary.FileNameTable {
 		
 		func createSubEntry(_ fileSystemObject: any FileSystemObject) -> SubEntry {
 			switch fileSystemObject {
-				case is ProprietaryFile, is BinaryFile, is MAR, is PackedMAR:
+				case is ProprietaryFile, is BinaryFile, is MAR.Unpacked, is MAR.Packed:
 					fileId += 1
 					subTableOffset += fileSystemObject.name.utf8CString.count
 					return SubEntry(.file, name: fileSystemObject.name)
@@ -207,7 +207,7 @@ extension NDS.Binary.FileNameTable {
 	}
 }
 
-extension NDS.Binary.FileNameTable.SubEntry {
+extension NDS.Packed.Binary.FileNameTable.SubEntry {
 	init(_ type: FileOrFolder, name: String, id: UInt16? = nil) {
 		let typeModifier = type == .folder ? 0x80 : 0
 		typeAndNameLength = UInt8(name.utf8.count + typeModifier)
@@ -224,8 +224,8 @@ extension [any FileSystemObject] {
 			switch $0 {
 				case let proprietaryFile as ProprietaryFile: [proprietaryFile]
 				case let binaryFile as BinaryFile: [binaryFile]
-				case let mar as MAR: [mar]
-				case let packedMAR as PackedMAR: [packedMAR]
+				case let mar as MAR.Unpacked: [mar]
+				case let packedMAR as MAR.Packed: [packedMAR]
 				case let folder as Folder:
 					folder.contents.getAllFiles()
 				default:

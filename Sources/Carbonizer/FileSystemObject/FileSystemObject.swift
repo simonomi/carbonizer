@@ -15,6 +15,7 @@ protocol FileSystemObject {
 	
 	associatedtype Packed: FileSystemObject
 	func packed(configuration: CarbonizerConfiguration) -> Packed
+	
 	associatedtype Unpacked: FileSystemObject
 	func unpacked(path: [String], configuration: CarbonizerConfiguration) throws -> Unpacked
 	

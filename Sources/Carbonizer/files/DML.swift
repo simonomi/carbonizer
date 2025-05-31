@@ -1,8 +1,8 @@
 import BinaryParser
 
-struct DML {
+enum DML {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "DML"
 		
@@ -27,24 +27,39 @@ struct DML {
 			var era: UInt8
 		}
 	}
+	
+	struct Unpacked: Codable {}
 }
 
-extension DML: ProprietaryFileData, BinaryConvertible, Codable {
+// MARK: packed
+extension DML.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DML.Unpacked {
+		DML.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: DML.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension DML.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dml.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		todo()
+	func packed(configuration: CarbonizerConfiguration) -> DML.Packed {
+		DML.Packed(self, configuration: configuration)
 	}
-}
-
-extension DML.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dml: DML, configuration: CarbonizerConfiguration) {
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DML.Packed, configuration: CarbonizerConfiguration) {
 		todo()
 	}
 }
-

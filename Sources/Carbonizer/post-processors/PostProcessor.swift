@@ -6,7 +6,7 @@ extension FileSystemObject {
 	}
 }
 
-extension NDS {
+extension NDS.Unpacked {
 	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self {
 		contents = try contents.map { try $0.postProcessed(with: postProcessor) }
 		return self
@@ -17,7 +17,7 @@ extension Folder {
 	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self {
 		contents = try contents.flatMap {
 			switch $0 {
-				case let nds as NDS:
+				case let nds as NDS.Unpacked:
 					[try nds.postProcessed(with: postProcessor)]
 				case let folder as Folder:
 					[try folder.postProcessed(with: postProcessor)]

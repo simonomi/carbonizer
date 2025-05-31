@@ -1,7 +1,7 @@
 func dtxRipper(_ fileSystemObject: any FileSystemObject) -> [String] {
-	let nds = fileSystemObject as! NDS
+	let nds = fileSystemObject as! NDS.Unpacked
 	let text = nds.contents.first { $0.name == "text" } as! Folder
-	let japanese = text.contents.first { $0.name == "japanese" }! as! MAR
-	let dtx = japanese.files.first!.content as! DTX
+	let japanese = text.contents.first { $0.name == "japanese" }! as! MAR.Unpacked
+	let dtx = japanese.files.first!.content as! DTX.Unpacked
 	return dtx.strings
 }

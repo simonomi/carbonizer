@@ -1,10 +1,8 @@
 import BinaryParser
 
-struct MFS {
-	var somethings: [Binary.Something]
-	
+enum MFS {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "MFS"
 		var someCount: UInt32
@@ -56,20 +54,42 @@ struct MFS {
 			}
 		}
 	}
+	
+	struct Unpacked: Codable {}
 }
 
 // MARK: packed
-extension MFS: ProprietaryFileData, BinaryConvertible {
+extension MFS.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> MFS.Unpacked {
+		MFS.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: MFS.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension MFS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".mfs.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		somethings = binary.noClue
+	func packed(configuration: CarbonizerConfiguration) -> MFS.Packed {
+		MFS.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: MFS.Packed, configuration: CarbonizerConfiguration) {
+		guard packed.someCount == 3 else { return }
 		
-		guard binary.someCount == 3 else { return }
-		
-		let something = binary.noClue.first!
+		let something = packed.noClue.first!
 		
 		guard something.letterLength == 16 else { return }
 		
@@ -84,30 +104,4 @@ extension MFS: ProprietaryFileData, BinaryConvertible {
 			print(letterString)
 		}
 	}
-}
-
-func stringToImage(_ string: String, _ length: Int = 8) -> String {
-	string
-		.split(separator: " ")
-		.map { Int($0, radix: 16)! }
-		.map { String($0, radix: 2) }
-		.map { $0.padded(toLength: length, with: "0") }
-		.joined(separator: "\n")
-		.replacing("0", with: " ")
-		.replacing("1", with: "█")
-}
-
-
-extension MFS.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
-	
-	init(_ mfs: MFS, configuration: CarbonizerConfiguration) {
-		todo()
-	}
-}
-
-// MARK: unpacked
-extension MFS: Codable {
-	// TODO: custom codingkeys?
 }

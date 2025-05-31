@@ -1,11 +1,8 @@
 import BinaryParser
 
-struct ECS {
-	var effectNames: [String]
-	var imageNames: [String]
-	
+enum ECS {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "ECS"
 		
@@ -166,7 +163,7 @@ struct ECS {
 		
 		@BinaryConvertible
 		struct ThingC {
-			 // various sizes...
+			// various sizes...
 		}
 		
 		@BinaryConvertible
@@ -281,26 +278,39 @@ struct ECS {
 			var donationPoints: Int32
 		}
 	}
+	
+	struct Unpacked: Codable {}
 }
 
-extension ECS: ProprietaryFileData, BinaryConvertible, Codable {
+// MARK: packed
+extension ECS.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> ECS.Unpacked {
+		ECS.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: ECS.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension ECS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".ecs.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-//		print(binary)
-		
-		effectNames = binary.effectNames.map(\.effectName)
-		imageNames = binary.imageNames.map(\.imageName)
+	func packed(configuration: CarbonizerConfiguration) -> ECS.Packed {
+		ECS.Packed(self, configuration: configuration)
 	}
-}
-
-extension ECS.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
-	init(_ ecs: ECS, configuration: CarbonizerConfiguration) {
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: ECS.Packed, configuration: CarbonizerConfiguration) {
 		todo()
 	}
 }

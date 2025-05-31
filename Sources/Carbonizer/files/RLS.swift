@@ -1,42 +1,8 @@
 import BinaryParser
 
-struct RLS {
-	var kasekis: [Kaseki?]
-	
-	struct Kaseki: Equatable {
-		var _label: String?
-		
-		var isEntry: Bool
-		var unknown1: Bool
-		var unbreakable: Bool
-		var destroyable: Bool
-		
-		var unknown2: UInt8
-		var unknown3: UInt8
-		
-		var fossilImage: UInt32
-		var rockImage: UInt32
-		var fossilConfig: UInt32
-		var rockConfig: UInt32
-		var buyPrice: UInt32
-		var sellPrice: UInt32
-		
-		var unknown6: UInt32
-		var unknown7: UInt32
-		var fossilName: UInt32
-		
-		var time: UInt32
-		var passingScore: UInt32
-		
-		var unknown9: UInt32
-		
-		var unknownsCount: UInt32
-		var unknownsOffset: UInt32
-		var unknowns: [UInt32]
-	}
-	
+enum RLS {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "RLS"
 		var kasekiCount: UInt32
@@ -91,71 +57,68 @@ struct RLS {
 			// - only 2867 for goyle
 		}
 	}
+	
+	struct Unpacked {
+		var kasekis: [Kaseki?]
+		
+		struct Kaseki: Equatable {
+			var _label: String?
+			
+			var isEntry: Bool
+			var unknown1: Bool
+			var unbreakable: Bool
+			var destroyable: Bool
+			
+			var unknown2: UInt8
+			var unknown3: UInt8
+			
+			var fossilImage: UInt32
+			var rockImage: UInt32
+			var fossilConfig: UInt32
+			var rockConfig: UInt32
+			var buyPrice: UInt32
+			var sellPrice: UInt32
+			
+			var unknown6: UInt32
+			var unknown7: UInt32
+			var fossilName: UInt32
+			
+			var time: UInt32
+			var passingScore: UInt32
+			
+			var unknown9: UInt32
+			
+			var unknownsCount: UInt32
+			var unknownsOffset: UInt32
+			var unknowns: [UInt32]
+		}
+	}
 }
 
 // MARK: packed
-extension RLS: ProprietaryFileData, BinaryConvertible {
-	static let fileExtension = ".rls.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
-	
-	init(_ packed: Binary, configuration: CarbonizerConfiguration) {
-		kasekis = packed.kasekis.enumerated().map(Kaseki.init)
-	}
-}
-
-extension RLS.Kaseki {
-	init?(index: Int, _ kaseki: RLS.Binary.Kaseki) {
-		_label = fossilNames[Int32(index)]
-		
-		isEntry = kaseki.isEntry > 0
-		guard isEntry else { return nil }
-		unknown1 = kaseki.unknown1 > 0
-		unbreakable = kaseki.unbreakable > 0
-		destroyable = kaseki.destroyable > 0
-		
-		unknown2 = kaseki.unknown2
-		unknown3 = kaseki.unknown3
-		
-		fossilImage = kaseki.fossilImage
-		rockImage = kaseki.rockImage
-		fossilConfig = kaseki.fossilConfig
-		rockConfig = kaseki.rockConfig
-		buyPrice = kaseki.buyPrice
-		sellPrice = kaseki.sellPrice
-		
-		unknown6 = kaseki.unknown6
-		unknown7 = kaseki.unknown7
-		fossilName = kaseki.fossilName
-		
-		time = kaseki.time
-		passingScore = kaseki.passingScore
-		
-		unknown9 = kaseki.unknown9
-		
-		unknownsCount = kaseki.unknownsCount
-		unknownsOffset = kaseki.unknownsOffset
-		unknowns = kaseki.unknowns
-	}
-}
-
-extension RLS.Binary: ProprietaryFileData {
+extension RLS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ rls: RLS, configuration: CarbonizerConfiguration) {
-		kasekiCount = UInt32(rls.kasekis.count)
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> RLS.Unpacked {
+		RLS.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: RLS.Unpacked, configuration: CarbonizerConfiguration) {
+		kasekiCount = UInt32(unpacked.kasekis.count)
 		
 		offsets = makeOffsets(
 			start: offsetsStart + kasekiCount * 4,
-			sizes: rls.kasekis.map(\.size)
+			sizes: unpacked.kasekis.map(\.size)
 		)
 		
-		kasekis = rls.kasekis.map(Kaseki.init)
+		kasekis = unpacked.kasekis.map(Kaseki.init)
 	}
 }
 
-extension RLS.Kaseki? {
+extension RLS.Unpacked.Kaseki? {
 	var size: UInt32 {
 		if self == nil {
 			68
@@ -165,10 +128,10 @@ extension RLS.Kaseki? {
 	}
 }
 
-extension RLS.Binary.Kaseki {
-	init(_ kaseki: RLS.Kaseki?) {
+extension RLS.Packed.Kaseki {
+	init(_ kaseki: RLS.Unpacked.Kaseki?) {
 		guard let kaseki else {
-			self = RLS.Binary.Kaseki(isEntry: 0, unknown1: 0, unbreakable: 0, destroyable: 0, unknown2: 0, unknown3: 0, unknown4: 0, unknown5: 0, fossilImage: 0, rockImage: 0, fossilConfig: 0, rockConfig: 0, buyPrice: 0, sellPrice: 0, unknown6: 0, unknown7: 0, fossilName: 0, unknown8: 0, time: 0, passingScore: 0, unknown9: 0, unknownsCount: 0, unknownsOffset: 0x44, unknowns: [])
+			self = RLS.Packed.Kaseki(isEntry: 0, unknown1: 0, unbreakable: 0, destroyable: 0, unknown2: 0, unknown3: 0, unknown4: 0, unknown5: 0, fossilImage: 0, rockImage: 0, fossilConfig: 0, rockConfig: 0, buyPrice: 0, sellPrice: 0, unknown6: 0, unknown7: 0, fossilName: 0, unknown8: 0, time: 0, passingScore: 0, unknown9: 0, unknownsCount: 0, unknownsOffset: 0x44, unknowns: [])
 			return
 		}
 		
@@ -203,7 +166,23 @@ extension RLS.Binary.Kaseki {
 }
 
 // MARK: unpacked
-extension RLS: Codable {
+extension RLS.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".rls.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> RLS.Packed {
+		RLS.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: RLS.Packed, configuration: CarbonizerConfiguration) {
+		kasekis = packed.kasekis.enumerated().map(Kaseki.init)
+	}
+}
+
+extension RLS.Unpacked: Codable {
 	init(from decoder: Decoder) throws {
 		kasekis = try [Kaseki?](from: decoder)
 	}
@@ -213,7 +192,43 @@ extension RLS: Codable {
 	}
 }
 
-extension RLS.Kaseki: Codable {
+extension RLS.Unpacked.Kaseki {
+	init?(index: Int, _ kaseki: RLS.Packed.Kaseki) {
+		_label = fossilNames[Int32(index)]
+		
+		isEntry = kaseki.isEntry > 0
+		guard isEntry else { return nil }
+		unknown1 = kaseki.unknown1 > 0
+		unbreakable = kaseki.unbreakable > 0
+		destroyable = kaseki.destroyable > 0
+		
+		unknown2 = kaseki.unknown2
+		unknown3 = kaseki.unknown3
+		
+		fossilImage = kaseki.fossilImage
+		rockImage = kaseki.rockImage
+		fossilConfig = kaseki.fossilConfig
+		rockConfig = kaseki.rockConfig
+		buyPrice = kaseki.buyPrice
+		sellPrice = kaseki.sellPrice
+		
+		unknown6 = kaseki.unknown6
+		unknown7 = kaseki.unknown7
+		fossilName = kaseki.fossilName
+		
+		time = kaseki.time
+		passingScore = kaseki.passingScore
+		
+		unknown9 = kaseki.unknown9
+		
+		unknownsCount = kaseki.unknownsCount
+		unknownsOffset = kaseki.unknownsOffset
+		unknowns = kaseki.unknowns
+	}
+}
+
+// MARK: unpacked codable
+extension RLS.Unpacked.Kaseki: Codable {
 	enum CodingKeys: String, CodingKey {
 		case _label =         "_label"
 		

@@ -1,19 +1,8 @@
 import BinaryParser
 
-struct KIL {
-	var keyItems: [KeyItem?]
-	
-	struct KeyItem: Codable {
-		var index1: UInt16
-		var index2: UInt16
-		
-		// TODO: kilLabeller
-		var _label1: String?
-		var _label2: String?
-	}
-	
+enum KIL {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "KIL"
 		
@@ -31,52 +20,78 @@ struct KIL {
 			var unknown: UInt32 = 0
 		}
 	}
-}
-
-extension KIL: ProprietaryFileData, BinaryConvertible {
-	static let fileExtension = ".kil.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		keyItems = binary.keyItems.map(KeyItem.init)
-	}
-}
-
-extension KIL.KeyItem {
-	init?(_ binary: KIL.Binary.KeyItem) {
-		guard binary.index1 != 0, binary.index2 != 0 else { return nil }
+	struct Unpacked {
+		var keyItems: [KeyItem?]
 		
-		index1 = binary.index1
-		index2 = binary.index2
+		struct KeyItem: Codable {
+			var index1: UInt16
+			var index2: UInt16
+			
+			// TODO: kilLabeller
+			var _label1: String?
+			var _label2: String?
+		}
 	}
 }
 
-extension KIL.Binary: ProprietaryFileData {
+// MARK: packed
+extension KIL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ kil: KIL, configuration: CarbonizerConfiguration) {
-		keyItems = kil.keyItems.map(KeyItem.init)
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> KIL.Unpacked {
+		KIL.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: KIL.Unpacked, configuration: CarbonizerConfiguration) {
+		keyItems = unpacked.keyItems.map(KeyItem.init)
 		keyItemCount = UInt32(keyItems.count)
 	}
 }
 
-extension KIL.Binary.KeyItem {
-	init(_ keyItem: KIL.KeyItem?) {
-		index1 = keyItem?.index1 ?? 0
-		index2 = keyItem?.index2 ?? 0
+extension KIL.Packed.KeyItem {
+	init(_ unpacked: KIL.Unpacked.KeyItem?) {
+		index1 = unpacked?.index1 ?? 0
+		index2 = unpacked?.index2 ?? 0
 	}
 }
 
-extension KIL: Codable {
+// MARK: unpacked
+extension KIL.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".kil.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> KIL.Packed {
+		KIL.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: KIL.Packed, configuration: CarbonizerConfiguration) {
+		keyItems = packed.keyItems.map(KeyItem.init)
+	}
+}
+
+extension KIL.Unpacked.KeyItem {
+	init?(_ packed: KIL.Packed.KeyItem) {
+		guard packed.index1 != 0, packed.index2 != 0 else { return nil }
+		
+		index1 = packed.index1
+		index2 = packed.index2
+	}
+}
+
+// MARK: unpacked codable
+extension KIL.Unpacked: Codable {
 	init(from decoder: any Decoder) throws {
-		let container = try decoder.singleValueContainer()
-		keyItems = try container.decode([KIL.KeyItem?].self)
+		keyItems = try [KIL.Unpacked.KeyItem?](from: decoder)
 	}
 	
 	func encode(to encoder: any Encoder) throws {
-		var container = encoder.singleValueContainer()
-		try container.encode(keyItems)
+		try keyItems.encode(to: encoder)
 	}
 }

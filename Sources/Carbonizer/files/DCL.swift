@@ -1,21 +1,8 @@
 import BinaryParser
 
-struct DCL {
-	var unknown1: UInt32
-	var unknown2: UInt32
-	var unknown3: UInt32
-	var unknown4: UInt32
-	var unknown5: UInt32
-	var unknown6: UInt32
-	var unknown7: UInt32
-	var unknown8: UInt32
-	
-	var vivosaurs: [Vivosaur]
-	
-	struct Vivosaur: Codable {}
-	
+enum DCL {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "DCL"
 		
@@ -269,68 +256,80 @@ struct DCL {
 			}
 		}
 	}
+	
+	struct Unpacked: Codable {
+		var unknown1: UInt32
+		var unknown2: UInt32
+		var unknown3: UInt32
+		var unknown4: UInt32
+		var unknown5: UInt32
+		var unknown6: UInt32
+		var unknown7: UInt32
+		var unknown8: UInt32
+		
+		var vivosaurs: [Vivosaur]
+		
+		struct Vivosaur: Codable {}
+	}
 }
 
 // MARK: packed
-extension DCL: ProprietaryFileData, BinaryConvertible {
+extension DCL.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DCL.Unpacked {
+		DCL.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: DCL.Unpacked, configuration: CarbonizerConfiguration) {
+		unknown1 = unpacked.unknown1
+		unknown2 = unpacked.unknown2
+		unknown3 = unpacked.unknown3
+		unknown4 = unpacked.unknown4
+		unknown5 = unpacked.unknown5
+		unknown6 = unpacked.unknown6
+		unknown7 = unpacked.unknown7
+		unknown8 = unpacked.unknown8
+		
+		vivosaurCount = UInt32(unpacked.vivosaurs.count)
+		
+//		vivosaurs = unpacked.vivosaurs.map(Vivosaur.init)
+		
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension DCL.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dcl.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		unknown1 = binary.unknown1
-		unknown2 = binary.unknown2
-		unknown3 = binary.unknown3
-		unknown4 = binary.unknown4
-		unknown5 = binary.unknown5
-		unknown6 = binary.unknown6
-		unknown7 = binary.unknown7
-		unknown8 = binary.unknown8
-		
-		vivosaurs = binary.vivosaurs.map(Vivosaur.init)
+	func packed(configuration: CarbonizerConfiguration) -> DCL.Packed {
+		DCL.Packed(self, configuration: configuration)
 	}
-}
-
-extension DCL.Vivosaur {
-	init(_ packed: DCL.Binary.Vivosaur) {}
-}
-
-extension DCL.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dcl: DCL, configuration: CarbonizerConfiguration) {
-		unknown1 = dcl.unknown1
-		unknown2 = dcl.unknown2
-		unknown3 = dcl.unknown3
-		unknown4 = dcl.unknown4
-		unknown5 = dcl.unknown5
-		unknown6 = dcl.unknown6
-		unknown7 = dcl.unknown7
-		unknown8 = dcl.unknown8
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DCL.Packed, configuration: CarbonizerConfiguration) {
+		unknown1 = packed.unknown1
+		unknown2 = packed.unknown2
+		unknown3 = packed.unknown3
+		unknown4 = packed.unknown4
+		unknown5 = packed.unknown5
+		unknown6 = packed.unknown6
+		unknown7 = packed.unknown7
+		unknown8 = packed.unknown8
 		
-		vivosaurCount = UInt32(dcl.vivosaurs.count)
-		
-//		vivosaurs = dcl.vivosaurs.map(Vivosaur.init)
-		
-		todo()
+		vivosaurs = packed.vivosaurs.map(Vivosaur.init)
 	}
 }
 
-// triggers a compiler bug in swift 5 mode with @Include
-#if compiler(>=6)
-extension DCL.Binary.Vivosaur {
-	init(_ unpacked: DCL.Vivosaur) {
+extension DCL.Unpacked.Vivosaur {
+	init(_ packed: DCL.Packed.Vivosaur) {
 		todo()
 	}
-}
-#endif
-
-// MARK: unpacked
-extension DCL: Codable {
-	// TODO: custom codable implementation?
-}
-
-fileprivate func nameForVivosaur(_ vivosaur: DCL.Binary.Vivosaur) -> String {
-	vivosaurNames[vivosaur.id]!
 }

@@ -1,8 +1,8 @@
 import BinaryParser
 
-struct MAP {
+enum MAP {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "MAP"
 		
@@ -21,7 +21,7 @@ struct MAP {
 		var unknown7: Int32
 		var unknown8: Int32
 		var unknown9: Int32 // fixed-point?
-		// 0x30
+							// 0x30
 		var unknown10: Int32 // fixed-point?
 		var unknown11: Int32 // fixed-point?
 		var thingBCount: UInt32
@@ -202,24 +202,39 @@ struct MAP {
 			var blue: UInt8
 		}
 	}
+	
+	struct Unpacked: Codable {}
 }
 
-extension MAP: ProprietaryFileData, BinaryConvertible, Codable {
-	static let fileExtension = ".map.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
+// MARK: packed
+extension MAP.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
 	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-//		print(binary)
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> MAP.Unpacked {
+		MAP.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: MAP.Unpacked, configuration: CarbonizerConfiguration) {
 		todo()
 	}
 }
 
-extension MAP.Binary: ProprietaryFileData {
-	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
+// MARK: unpacked
+extension MAP.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".map.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
 	
-	init(_ MAP: MAP, configuration: CarbonizerConfiguration) {
+	func packed(configuration: CarbonizerConfiguration) -> MAP.Packed {
+		MAP.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: MAP.Packed, configuration: CarbonizerConfiguration) {
 		todo()
 	}
 }

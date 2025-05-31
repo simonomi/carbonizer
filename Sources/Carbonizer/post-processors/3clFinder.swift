@@ -1,16 +1,16 @@
 import BinaryParser
 
 func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
-	let file: MAR
+	let file: MAR.Unpacked
 	switch inputFile {
-		case let mar as MAR:
+		case let mar as MAR.Unpacked:
 			file = mar
 		case let other:
 			return [other]
 	}
 	
 	// the only MAR with a 3cl has it as its first file
-	guard let tcl = file.files.first?.content as? TCL else {
+	guard let tcl = file.files.first?.content as? TCL.Unpacked else {
 		return [file]
 	}
 	
@@ -22,7 +22,7 @@ func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			for (animationId, vivosaurAnimation) in animations.enumerated() {
 				guard let vivosaurAnimation else { continue }
 				
-				let arc = parent.contents.first { $0.name == vivosaurAnimation.model.tableName }! as! MAR
+				let arc = parent.contents.first { $0.name == vivosaurAnimation.model.tableName }! as! MAR.Unpacked
 				
 				guard arc.files.indices.contains(Int(vivosaurAnimation.model.index)) else {
 					throw BinaryParserError.indexOutOfBounds(

@@ -2,18 +2,11 @@ import BinaryParser
 
 // $f - finish current dialogue box
 
-struct DMG {
-	var strings: [DMGString]
-	
-	struct DMGString: Codable {
-		var index: UInt32
-		var string: String
-	}
-	
+enum DMG {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
-		static let magicBytes = "DMG"
+		static let magicBytes = "DMG.Unpacked"
 		var stringCount: UInt32
 		var indicesOffset: UInt32 = 0xC
 		@Count(givenBy: \Self.stringCount)
@@ -30,56 +23,77 @@ struct DMG {
 			var string: String
 		}
 	}
+	
+	struct Unpacked {
+		var strings: [DMGString]
+		
+		struct DMGString: Codable {
+			var index: UInt32
+			var string: String
+		}
+	}
 }
 
 // MARK: packed
-extension DMG: ProprietaryFileData, BinaryConvertible {
-	static let fileExtension = ".dmg.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
-	
-	init(_ binary: Binary, configuration: CarbonizerConfiguration) {
-		strings = binary.strings.map(DMGString.init)
-	}
-}
-
-extension DMG.DMGString {
-	init(_ dmgStringBinary: DMG.Binary.DMGString) {
-		index = dmgStringBinary.index
-		string = dmgStringBinary.string
-	}
-}
-
-extension DMG.Binary: ProprietaryFileData {
+extension DMG.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	init(_ dmg: DMG, configuration: CarbonizerConfiguration) {
-		stringCount = UInt32(dmg.strings.count)
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> DMG.Unpacked {
+		DMG.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: DMG.Unpacked, configuration: CarbonizerConfiguration) {
+		stringCount = UInt32(unpacked.strings.count)
 		
 		indices = makeOffsets(
 			start: indicesOffset + stringCount * 4,
-			sizes: dmg.strings
+			sizes: unpacked.strings
 				.map(\.string.utf8CString.count)
 				.map { $0 + 8 }
 				.map(UInt32.init),
 			alignedTo: 4
 		)
 		
-		strings = dmg.strings.map(DMG.Binary.DMGString.init)
+		strings = unpacked.strings.map(DMG.Packed.DMGString.init)
 	}
 }
 
-extension DMG.Binary.DMGString {
-	init(_ dmgString: DMG.DMGString) {
-		index = dmgString.index
-		string = dmgString.string
+extension DMG.Packed.DMGString {
+	init(_ unpacked: DMG.Unpacked.DMGString) {
+		index = unpacked.index
+		string = unpacked.string
 	}
 }
-
 
 // MARK: unpacked
-extension DMG: Codable {
+extension DMG.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".dmg.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> DMG.Packed {
+		DMG.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: DMG.Packed, configuration: CarbonizerConfiguration) {
+		strings = packed.strings.map(DMGString.init)
+	}
+}
+
+extension DMG.Unpacked.DMGString {
+	init(_ packed: DMG.Packed.DMGString) {
+		index = packed.index
+		string = packed.string
+	}
+}
+
+// MARK: unpacked codable
+extension DMG.Unpacked: Codable {
 	init(from decoder: Decoder) throws {
 		strings = try [DMGString](from: decoder)
 	}

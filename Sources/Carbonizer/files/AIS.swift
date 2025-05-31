@@ -1,8 +1,8 @@
 import BinaryParser
 
-struct AIS {
+enum AIS {
 	@BinaryConvertible
-	struct Binary {
+	struct Packed {
 		@Include
 		static let magicBytes = "AIS"
 		
@@ -22,5 +22,40 @@ struct AIS {
 				"(\(unknown1), \(unknown2))"
 			}
 		}
+	}
+	
+	struct Unpacked: Codable {}
+}
+
+// MARK: packed
+extension AIS.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> AIS.Unpacked {
+		AIS.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: AIS.Unpacked, configuration: CarbonizerConfiguration) {
+		todo()
+	}
+}
+
+// MARK: unpacked
+extension AIS.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".ais.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: CarbonizerConfiguration) -> AIS.Packed {
+		AIS.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	
+	fileprivate init(_ packed: AIS.Packed, configuration: CarbonizerConfiguration) {
+		todo()
 	}
 }

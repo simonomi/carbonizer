@@ -2,7 +2,7 @@ import Foundation
 
 struct Metadata {
 	var standalone: Bool // 1 bit
-	var compression: (MCM.CompressionType, MCM.CompressionType) // 2 bits, 2 bits
+	var compression: (MCM.Unpacked.CompressionType, MCM.Unpacked.CompressionType) // 2 bits, 2 bits
 	var maxChunkSize: UInt32 // 4 bits, then multiplied by 4kB
 	var index: UInt16 // 16 bits
 	
@@ -10,7 +10,7 @@ struct Metadata {
 	
 	init(
 		standalone: Bool,
-		compression: (MCM.CompressionType, MCM.CompressionType),
+		compression: (MCM.Unpacked.CompressionType, MCM.Unpacked.CompressionType),
 		maxChunkSize: UInt32,
 		index: UInt16,
 		huffmanCompressionInfo: [Huffman.CompressionInfo]
@@ -59,8 +59,8 @@ struct Metadata {
 		standalone = standaloneBit > 0
 		
 		compression = (
-			MCM.CompressionType(rawValue: UInt8(compression1Bits)) ?? .none,
-			MCM.CompressionType(rawValue: UInt8(compression2Bits)) ?? .none
+			MCM.Unpacked.CompressionType(rawValue: UInt8(compression1Bits)) ?? .none,
+			MCM.Unpacked.CompressionType(rawValue: UInt8(compression2Bits)) ?? .none
 		)
 		
 		maxChunkSize = UInt32(maxChunkSizeBits) * 0x1000
@@ -99,8 +99,8 @@ extension Metadata: Codable {
 		standalone = try container.decode(Bool.self, forKey: .standalone)
 		
 		compression = (
-			try container.decode(MCM.CompressionType.self, forKey: .firstCompressionType),
-			try container.decode(MCM.CompressionType.self, forKey: .secondCompressionType)
+			try container.decode(MCM.Unpacked.CompressionType.self, forKey: .firstCompressionType),
+			try container.decode(MCM.Unpacked.CompressionType.self, forKey: .secondCompressionType)
 		)
 		
 		maxChunkSize = try container.decode(UInt32.self, forKey: .maxChunkSize)

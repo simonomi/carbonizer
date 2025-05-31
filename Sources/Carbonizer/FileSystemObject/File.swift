@@ -18,11 +18,11 @@ func createFile(
 	)
 	
 	if metadata?.standalone == true {
-		guard let mcm = try MCM(file) else {
+		guard let mcm = try MCM.Unpacked(file) else {
 			throw ExtraneousMetadataError(on: path)
 		}
 		
-		return MAR(name: file.name, files: [mcm])
+		return MAR.Unpacked(name: file.name, files: [mcm])
 	} else {
 		return file
 	}
@@ -46,11 +46,10 @@ func createFile(
 	data: Datastream,
 	configuration: CarbonizerConfiguration
 ) throws -> any FileSystemObject {
-	if configuration.fileTypes.contains("NDS"), name.hasSuffix(PackedNDS.fileExtension) {
-		return PackedNDS(
-			name: String(name.dropLast(PackedNDS.fileExtension.count)),
-			binary: try data.read(NDS.Binary.self),
-			configuration: configuration
+	if configuration.fileTypes.contains("NDS"), name.hasSuffix(NDS.Packed.fileExtension) {
+		return NDS.Packed(
+			name: String(name.dropLast(NDS.Packed.fileExtension.count)),
+			binary: try data.read(NDS.Packed.Binary.self)
 		)
 	}
 	
@@ -59,16 +58,15 @@ func createFile(
 		let magicBytes = try? data.read(String.self, exactLength: 3)
 		data.jump(to: marker)
 		
-		if magicBytes == MAR.Binary.magicBytes {
-			return PackedMAR(
+		if magicBytes == MAR.Packed.Binary.magicBytes {
+			return MAR.Packed(
 				name: name,
-				binary: try data.read(MAR.Binary.self),
-				configuration: configuration
+				binary: try data.read(MAR.Packed.Binary.self)
 			)
 		}
 	}
 	
-	let fileData = try createFileData(
+	let fileData = try makeFileData(
 		name: name,
 		data: data,
 		configuration: configuration
