@@ -8,7 +8,7 @@ enum DEX {
 	@BinaryConvertible
 	struct Packed {
 		@Include
-		static let magicBytes = "DEX.Unpacked"
+		static let magicBytes = "DEX"
 		var numberOfBlocks: UInt32
 		var blockOffsetsStart: UInt32 = 0xC
 		@Count(givenBy: \Self.numberOfBlocks)

@@ -6,7 +6,7 @@ enum DMG {
 	@BinaryConvertible
 	struct Packed {
 		@Include
-		static let magicBytes = "DMG.Unpacked"
+		static let magicBytes = "DMG"
 		var stringCount: UInt32
 		var indicesOffset: UInt32 = 0xC
 		@Count(givenBy: \Self.stringCount)
