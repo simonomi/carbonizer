@@ -8,6 +8,7 @@ struct Bitmap {
 	
 	@BinaryConvertible
 	struct Color {
+		// it's BGRA bc blender ignores the header info and assumes its BGRA no matter what
 		var blue: UInt8
 		var green: UInt8
 		var red: UInt8
@@ -41,9 +42,9 @@ extension Bitmap: BinaryConvertible {
 		data.write(UInt32(0x500)) // px/m (y)
 		data.write(UInt32.zero) // colors used (all)
 		data.write(UInt32.zero) // colors important (all)
-		data.write(UInt32(0x000000FF)) // red mask
+		data.write(UInt32(0x00FF0000)) // red mask
 		data.write(UInt32(0x0000FF00)) // green mask
-		data.write(UInt32(0x00FF0000)) // blue mask
+		data.write(UInt32(0x000000FF)) // blue mask
 		data.write(UInt32(0xFF000000)) // alpha mask
 		
 		data.write("Win ", length: 4) // color space (default)

@@ -73,7 +73,7 @@ extension Datawriter {
 		
 		let newBytes = (0..<byteWidth)
 			.map { (data >> ($0 * 8)) & 0xFF }
-			.map(Byte.init)
+			.map { Byte($0) }
 		
 		if offset == bytes.endIndex {
 			bytes.insert(contentsOf: newBytes, at: offset)

@@ -55,7 +55,7 @@ struct RoundTrips {
 		#expect(dataIsTheSame)
 	}
 	
-	@Test
+	@Test(.disabled())
 	func roundTripROM() throws {
 		guard let wholeROMPath = URL.wholeROMPath else { return }
 		

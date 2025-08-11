@@ -61,7 +61,7 @@ struct XMLNode {
 			kind: kind,
 			id: id,
 			attributes: attributes,
-			body: .raw(children.map(String.init).joined(separator: " "))
+			body: .raw(children.map { String($0) }.joined(separator: " "))
 		)
 	}
 	

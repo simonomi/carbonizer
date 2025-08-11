@@ -63,12 +63,13 @@ enum DEX {
 			//     7025 freezes camera focus (?)
 			4:   "memory 4 \(0, .unknown)", // wipes some stored dialogue answer. argument is the index in DEP
 			                                // possibly dep too but the 2nd number is always 0
+			                                // mark dialogue as not played!!!!!!!!!! (and possibly other things)
 			5:   "memory 5 \(0, .dep)",
-			//     0xa00001d makes it possible to save
-			//     0x50000cf activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
-			//     0x5002d21 makes the samurai unable to battle
+			//     0xa00001d <29 10> makes it possible to save
+			//     0x50000cf <207 5> activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
+			//     0x5002d21 <11553 5> makes the samurai unable to battle
 			6:   "memory 6 \(0, .dep)",
-			//     0x500010f is set with 6 when resetting name, and 5 when resetting vivosaur
+			//     0x500010f <271 5> is set with 6 when resetting name, and 5 when resetting vivosaur
 			7:   "spawn \(0, .character) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
 			// 8:   (<character>, #)
 			9:   "ambiguous spawn/move/teleport \(0, .character) \(1, .unknown) \(2, .unknown)",
@@ -82,7 +83,7 @@ enum DEX {
 			// 26: (#)
 			// 27: (#) 44 makes the hotel person intercept you (which occurs in e0044) but doenst seem to just activate an episode
 			32:  "unowned dialogue \(0, .dialogue)",
-			33:  "dialogue with choice \(1, .dialogue), unknown: \(0, .unknown)", // 0 is block
+			33:  "dialogue with choice \(1, .dialogue), unknown: \(0, .unknown)", // 0 is the memory location for the answer
 			34:  "turn \(0, .character) to \(1, .degrees)",
 			35:  "turn1 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
 			36:  "turn \(0, .character) towards \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
@@ -108,7 +109,7 @@ enum DEX {
 			//    often after battles
 			// 63: ()
 			70:  "memory 70 \(0, .dep), \(1, .unknown)",
-			//     writing to 0x9000007 sets the player's profile pic (0-7 is a-h)
+			//     writing to 0x9000007 <7 9> sets the player's profile pic (0-7 is a-h)
 			80:  "make \(0, .character) follow \(1, .character)",
 			90:  "set level for level-up animation \(0, .unknown)",
 			112: "play animation \(1, .unknown) on \(0, .character)", // 1 is animation
@@ -131,7 +132,7 @@ enum DEX {
 			// 141: (#)
 			142: "modify player name", // has back button
 			143: "set player name",
-			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), unknown: \(1, .unknown)", // 1 is address/variable to write the result to
+			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .dep)",
 			150: "level-up animation",
 			153: "fade in image \(0, .image) over \(1, .frames) on bottom screen, unknown: \(2, .unknown)", // TODO: is this actually top?
 			154: "fade out image over \(0, .frames), unknown: \(1, .unknown)",

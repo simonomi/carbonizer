@@ -73,10 +73,15 @@ enum DEP {
 //			90 8-# 0    used to alternate hotel manager between dialogues
 			16: "memory \(0, .dep) is less than \(1, .firstNumberOnly)", // wait, < or <=? probably <
 //			56 8-5 0    used to determine whether to spawn bullwort in his office
+			// 13/16 memory types are 8 and 9
 			19: "memory 19 \(0..., .dep)",
 //			requires an unknown 5
+			// requires yes/first
+			// memory types 5, 6, and 10
 			21: "memory 21 \(0..., .dep)",
 //			requires NOT an unknown 5
+			// requires no/second
+			// memory types 5, 6, 7, and 10
 			36: "\(0, .block) has played", // is op 2 always 2?
 			38: "\(0, .block) has not played",
 			41: "has \(0, .vivosaur)",

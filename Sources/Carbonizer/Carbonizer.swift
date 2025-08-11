@@ -1,10 +1,15 @@
 import ArgumentParser
 import Foundation
 
+// TODO: list
+// - add a .carbonizer file or smthn to contain the version number
+//   - if trying to pack from too old a version (semver or smthn), give an error
+//   - also the list of file types, so if some file types were extracted they need to be repacked
+
 @main
 struct Carbonizer: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
-		abstract: "A Fossil Fighters ROM-hacking tool.",
+		abstract: "A Fossil Fighters ROM-hacking tool",
 		discussion: "By default, carbonizer automatically determines whether to pack or unpack each input. It does this by looking at file extensions, magic bytes, and metadata"
 	)
 	

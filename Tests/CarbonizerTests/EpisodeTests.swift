@@ -8,7 +8,7 @@ func knownCommandsAreValid(commandList: [UInt32: DEX.Unpacked.CommandDefinition]
 	
 	for command in commandList.values {
 		guard !allCommandsWithoutArguments.contains(command.textWithoutArguments) else {
-			try Issue.failure("\(.red)duplicate command text for \(command.textWithoutArguments) >:(\(.normal)")
+			try Issue.failure("\(ANSIFontEffect.red)duplicate command text for \(command.textWithoutArguments) >:(\(ANSIFontEffect.normal)")
 		}
 		allCommandsWithoutArguments.insert(command.textWithoutArguments)
 	}
@@ -20,7 +20,7 @@ func checkKnownRequirements() throws {
 	
 	for requirement in DEP.Unpacked.knownRequirements.values {
 		guard !allRequirementsWithoutArguments.contains(requirement.textWithoutArguments) else {
-			try Issue.failure("\(.red)duplicate command text for \(requirement.textWithoutArguments) >:(\(.normal)")
+			try Issue.failure("\(ANSIFontEffect.red)duplicate command text for \(requirement.textWithoutArguments) >:(\(ANSIFontEffect.normal)")
 		}
 		allRequirementsWithoutArguments.insert(requirement.textWithoutArguments)
 	}
