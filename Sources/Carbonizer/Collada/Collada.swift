@@ -266,14 +266,9 @@ extension Collada {
 			.map(Array.init)
 			.transposed()
 		
-		let frameCount = Int(animationData.keyframeCount)
-		guard frameCount == Int(animationData.keyframes.frameCount) else {
-			// keyframeCount >= keyframes.frameCount
-			// usually they mismatch bc frameCount is 1
-			// except o09warp1_01, where it's 300 vs 61
-			throw ColladaError(description: "keyframeCount doesn't match keyframes.frameCount")
-		}
-		precondition(frameCount == Int(animationData.keyframes.frameCount))
+		// this can differ from animationData.keyFrameCount, but it's *always* <=, so use it
+		// if it's different, it's usually 1, except in o09warp1_01 for some reason
+		let frameCount = Int(animationData.keyframes.frameCount)
 		
 		precondition(boneCount == transforms.count)
 		
