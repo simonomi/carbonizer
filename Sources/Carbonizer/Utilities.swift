@@ -111,7 +111,11 @@ func zip<S: Sequence, T: Sequence, U: Sequence, V: Sequence>(
 		.map { ($0, $1.0, $1.1.0, $1.1.1) }
 }
 
-func makeOffsets(start: UInt32, sizes: [UInt32], alignedTo alignment: UInt32 = 1) -> [UInt32] {
+func makeOffsets(
+	start: UInt32,
+	sizes: some Collection<UInt32>,
+	alignedTo alignment: UInt32 = 1
+) -> [UInt32] {
 	if sizes.isEmpty {
 		[]
 	} else {

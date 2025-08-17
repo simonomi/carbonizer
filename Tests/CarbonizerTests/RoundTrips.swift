@@ -24,13 +24,14 @@ struct RoundTrips {
 //			("msg_0911", .packed),
 //			("msg_1007", .packed),
 			("arcdin 3cl", .packed),
+			("excavate_defs", .packed)
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 		let inputFilePath = filePath(for: fileName)
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
-//		configurationWithFileTypes.fileTypes.append("3CL")
+		configurationWithFileTypes.fileTypes.append("ECS")
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)
 		

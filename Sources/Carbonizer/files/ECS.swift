@@ -7,14 +7,13 @@ enum ECS {
 		static let magicBytes = "ECS"
 		
 		var thingACount: UInt32
-		var thingAOffsetsOffset: UInt32
+		var thingAOffsetsOffset: UInt32 = 0xC4
 		
-		// these (until 0x20) may be 16-bit
-		var unknown1: Int32
+		var unknown1: Int32 // fixed-point
 		// 0x10
-		var unknown2: Int32
-		var unknown3: Int32
-		var unknown4: Int32
+		var unknown2: Int32 // fixed-point
+		var unknown3: Int32 // fixed-point
+		var unknown4: Int32 // fixed-point
 		var unknown5: Int32
 		// 0x20
 		var unknown6: Int32
@@ -22,38 +21,38 @@ enum ECS {
 		var unknown8: Int32
 		
 		var thingBCount: UInt32
-		var thingBOffset: UInt32
+		var thingBOffset: UInt32 = 0x118
 		
 		var unknown9: Int32
 		
 		var thingCCount: UInt32
-		var thingCOffsetsOffset: UInt32
+		var thingCOffsetsOffset: UInt32 = 0x124
 		
 		// 0x40
-		var thingDCount: Int32
-		var thingDOffset: UInt32
-		var thingECount: Int32
-		var thingEOffset: UInt32
+		var jewelRockIDCount: UInt32
+		var jewelRockIDsOffset: UInt32 = 0xCE0
+		var droppingRockIDCount: UInt32
+		var droppingRockIDsOffset: UInt32 = 0xD58
 		// 0x50
-		var thingFCount: Int32
-		var thingFOffset: UInt32
-		var effectNameCount: Int32
-		var effectNameOffsetsOffset: UInt32
+		var thingFCount: UInt32
+		var thingFOffset: UInt32 = 0xDD0
+		var effectNameCount: UInt32
+		var effectNameOffsetsOffset: UInt32 = 0xDDC
 		// 0x60
 		var imageCount: UInt32
-		var imageNamesOffsetsOffset: UInt32
-		var thingICount: UInt32
-		var thingIOffset: UInt32
+		var imageNameOffsetsOffset: UInt32 = 0xF70
+		var kl33nLevelCount: UInt32
+		var kl33nLevelsOffset: UInt32 = 0x21FC
 		// 0x70
 		var thingJCount: UInt32
-		var thingJOffset: UInt32
-		var thingKOffset: UInt32
-		var charactersOffset: UInt32
+		var thingJOffset: UInt32 = 0x235C
+		var thingKOffset: UInt32 = 0x2424
+		var charactersOffset: UInt32 = 0x2464
 		// 0x80
-		var thingMOffset: UInt32
-		var thingNOffset: UInt32
+		var thingMOffset: UInt32 = 0x37E8
+		var thingNOffset: UInt32 = 0x3848
 		var thingOCount: UInt32
-		var thingOOffset: UInt32
+		var thingOOffset: UInt32 = 0x384C
 		// 0x90
 		var unknown10: Int32
 		var unknown11: Int32
@@ -66,11 +65,11 @@ enum ECS {
 		var unknown17: Int32
 		// 0xb0
 		var thingPCount: UInt32
-		var thingPOffset: UInt32
-		var thingQOffset: UInt32
+		var thingPOffset: UInt32 = 0x3C0C
+		var thingQOffset: UInt32 = 0x3C18
 		var donationPointsCount: UInt32
 		// 0xc0
-		var donationPointsOffset: UInt32
+		var donationPointsOffset: UInt32 = 0x3C58
 		
 		@Count(givenBy: \Self.thingACount)
 		@Offset(givenBy: \Self.thingAOffsetsOffset)
@@ -90,13 +89,13 @@ enum ECS {
 		@Offsets(givenBy: \Self.thingCOffsets)
 		var thingCs: [ThingC]
 		
-		@Count(givenBy: \Self.thingDCount)
-		@Offset(givenBy: \Self.thingDOffset)
-		var thingDs: [Int32] // jewel rocks
+		@Count(givenBy: \Self.jewelRockIDCount)
+		@Offset(givenBy: \Self.jewelRockIDsOffset)
+		var jewelRockIDs: [Int32]
 		
-		@Count(givenBy: \Self.thingECount)
-		@Offset(givenBy: \Self.thingEOffset)
-		var thingEs: [Int32] // dropping rocks
+		@Count(givenBy: \Self.droppingRockIDCount)
+		@Offset(givenBy: \Self.droppingRockIDsOffset)
+		var droppingRockIDs: [Int32]
 		
 		@Count(givenBy: \Self.thingFCount)
 		@Offset(givenBy: \Self.thingFOffset)
@@ -110,15 +109,15 @@ enum ECS {
 		var effectNames: [EffectName]
 		
 		@Count(givenBy: \Self.imageCount)
-		@Offset(givenBy: \Self.imageNamesOffsetsOffset)
-		var imageNamesOffsets: [UInt32]
+		@Offset(givenBy: \Self.imageNameOffsetsOffset)
+		var imageNameOffsets: [UInt32]
 		
-		@Offsets(givenBy: \Self.imageNamesOffsets)
+		@Offsets(givenBy: \Self.imageNameOffsets)
 		var imageNames: [ImageName]
 		
-		@Count(givenBy: \Self.thingICount)
-		@Offset(givenBy: \Self.thingIOffset)
-		var thingIs: [ThingI]
+		@Count(givenBy: \Self.kl33nLevelCount)
+		@Offset(givenBy: \Self.kl33nLevelsOffset)
+		var kl33nLevels: [KL33NLevel]
 		
 		@Count(givenBy: \Self.thingJCount)
 		@Offset(givenBy: \Self.thingJOffset)
@@ -163,7 +162,12 @@ enum ECS {
 		
 		@BinaryConvertible
 		struct ThingC {
-			// various sizes...
+			var count: UInt32
+			var offset: UInt32 = 0x8
+			
+			@Count(givenBy: \Self.count)
+			@Offset(givenBy: \Self.offset)
+			var things: [Int32] // all zero!
 		}
 		
 		@BinaryConvertible
@@ -183,19 +187,24 @@ enum ECS {
 		}
 		
 		@BinaryConvertible
-		struct ThingI {
-			var index: Int32
+		struct KL33NLevel {
+			var level: Int32
 			
-			var unknown1: Int32
-			var unknown2: Int32
+			// these seem to be counting up? like 0/10 10/30 30/70...
+			var requiredFossilsCleaned: Int32
+			var nextLevelAt: Int32
+			
+			var cleaningScoreLowerBound: Int32 // fixed point
+			var cleaningScoreUpperBound: Int32 // fixed point
+			
+			var higherScoreProbability: Int32 // fixed point
+			
+			var higherScoreLowerBound: Int32 // fixed point
+			var higherScoreUpperBound: Int32 // fixed point
+			
+			var unknown1: Int32  // fixed point? always 0
+			var unknown2: Int32 // fixed point
 			var unknown3: Int32 // fixed point
-			var unknown4: Int32 // fixed point
-			var unknown5: Int32
-			var unknown6: Int32 // fixed point
-			var unknown7: Int32 // fixed point
-			var unknown8: Int32
-			var unknown9: Int32 // fixed point
-			var unknown10: Int32 // fixed point
 		}
 		
 		@BinaryConvertible
@@ -213,15 +222,16 @@ enum ECS {
 		@BinaryConvertible
 		struct Characters {
 			var characterCount: UInt32
-			var characterOffset: UInt32
+			var characterOffset: UInt32 = 0x24
 			
 			var thingACount: UInt32
-			var thingAOffset: UInt32
+			var thingAOffset: UInt32 = 0x1378
 			
-			var unknown1: Int32
-			var unknown2: Int32
-			var unknown3: Int32
+			var unknown1: Int32 // fixed-point
+			var unknown2: Int32 // fixed-point
+			var unknown3: Int32 // fixed-point
 			var unknown4: Int32
+			var unknown5: Int32
 			
 			@Count(givenBy: \Self.characterCount)
 			@Offset(givenBy: \Self.characterOffset)
@@ -232,13 +242,14 @@ enum ECS {
 			
 			@Count(givenBy: \Self.thingACount)
 			@Offset(givenBy: \Self.thingAOffset)
-			var thingAs: [Int32]
+			var thingAs: [Int32] // fixed-point
 			
 			@BinaryConvertible
 			struct Character {
 				var nameOffset: UInt32 = 0x10
 				var color1Offset: UInt32
 				var color2Offset: UInt32
+				var unknown: Int32
 				
 				@Offset(givenBy: \Self.nameOffset)
 				var name: String
@@ -279,7 +290,166 @@ enum ECS {
 		}
 	}
 	
-	struct Unpacked: Codable {}
+	struct Unpacked: Codable {
+		var unknown1: Double
+		var unknown2: Double
+		var unknown3: Double
+		var unknown4: Double
+		var unknown5: Int32
+		var unknown6: Int32
+		var unknown7: Int32
+		var unknown8: Int32
+		
+		var unknown9: Int32
+		
+		var unknown10: Double
+		var unknown11: Double
+		var unknown12: Int32
+		var unknown13: Int32
+		var unknown14: Int32
+		var unknown15: Int32
+		var unknown16: Int32
+		var unknown17: Int32
+		
+		var thingAOffsets: [UInt32]
+		
+		var thingAs: [ThingA]
+		
+		var thingBs: [Int32]
+		
+		var thingCOffsets: [UInt32]
+		
+		var thingCs: [ThingC]
+		
+		var jewelRockIDs: [Int32]
+		
+		var droppingRockIDs: [Int32]
+		
+		var thingFs: [Int32]
+		
+		var effectNameOffsets: [UInt32]
+		
+		var effectNames: [EffectName]
+		
+		var imageNameOffsets: [UInt32]
+		
+		var imageNames: [ImageName]
+		
+		var kl33nLevels: [KL33NLevel]
+		
+		var thingJs: [ThingJ]
+		
+		var thingK: ThingK
+		
+		var characters: Characters
+		
+		var thingM: ThingM
+		
+		var thingN: ThingN
+		
+		var thingOs: [Int32]
+		
+		var thingPs: [Int32]
+		
+		var thingQ: ThingQ
+		
+		var donationPoints: [DonationPointForScore]
+		
+		struct ThingA: Codable {
+			var unknown1: Int32
+			var unknown2: Int32
+			var unknown3: Int32
+			var unknown4: Int32
+			var unknown5: Int32
+			var unknown6: Int32
+		}
+		
+		struct ThingC: Codable {
+			var things: [Int32]
+		}
+		
+		struct EffectName {
+			var effectName: String
+		}
+		
+		struct ImageName {
+			var imageName: String
+		}
+		
+		struct KL33NLevel: Codable {
+			var level: Int32
+			
+			var requiredFossilsCleaned: Int32
+			var nextLevelAt: Int32
+			
+			var cleaningScoreLowerBound: Double
+			var cleaningScoreUpperBound: Double
+			
+			var higherScoreProbability: Double
+			
+			var higherScoreLowerBound: Double
+			var higherScoreUpperBound: Double
+			
+			var unknown1: Double
+			var unknown2: Double
+			var unknown3: Double
+		}
+		
+		struct ThingJ: Codable {
+			var index: Int32
+			var unknown: Int32
+		}
+		
+		struct ThingK: Codable {
+			var unknowns: [UInt32]
+		}
+		
+		struct Characters: Codable {
+			var unknown1: Double
+			var unknown2: Double
+			var unknown3: Double
+			var unknown4: Int32
+			var unknown5: Int32
+			
+			var characterOffsets: [UInt32]
+			
+			var characters: [Character]
+			
+			var thingAs: [Double]
+			
+			struct Character: Codable {
+				var name: String
+				var color1: Color
+				var color2: Color
+				var unknown: Int32
+				
+				struct Color {
+					var red: UInt8
+					var green: UInt8
+					var blue: UInt8
+				}
+			}
+		}
+		
+		struct ThingM: Codable {
+			var unknowns: [Int32]
+		}
+		
+		struct ThingN: Codable {
+			var unknown1: UInt16
+			var unknown2: UInt16
+		}
+		
+		struct ThingQ: Codable {
+			var unknowns: [Int32]
+		}
+		
+		struct DonationPointForScore: Codable {
+			var lowerBound: Int32
+			var upperBound: Int32
+			var donationPoints: Int32
+		}
+	}
 }
 
 // MARK: packed
@@ -294,7 +464,212 @@ extension ECS.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: ECS.Unpacked, configuration: CarbonizerConfiguration) {
-		todo()
+		thingACount = UInt32(unpacked.thingAs.count)
+		
+		unknown1 = Int32(unpacked.unknown1 * 4096)
+		unknown2 = Int32(unpacked.unknown2 * 4096)
+		unknown3 = Int32(unpacked.unknown3 * 4096)
+		unknown4 = Int32(unpacked.unknown4 * 4096)
+		unknown5 = unpacked.unknown5
+		unknown6 = unpacked.unknown6
+		unknown7 = unpacked.unknown7
+		unknown8 = unpacked.unknown8
+		
+		thingBCount = UInt32(unpacked.thingBs.count)
+		
+		unknown9 = unpacked.unknown9
+		
+		thingCCount = UInt32(unpacked.thingCs.count)
+		jewelRockIDCount = UInt32(unpacked.jewelRockIDs.count)
+		droppingRockIDCount = UInt32(unpacked.droppingRockIDs.count)
+		thingFCount = UInt32(unpacked.thingFs.count)
+		effectNameCount = UInt32(unpacked.effectNames.count)
+		imageCount = UInt32(unpacked.imageNames.count)
+		kl33nLevelCount = UInt32(unpacked.kl33nLevels.count)
+		thingJCount = UInt32(unpacked.thingJs.count)
+		thingOCount = UInt32(unpacked.thingOs.count)
+		
+		unknown10 = Int32(unpacked.unknown10 * 4096)
+		unknown11 = Int32(unpacked.unknown11 * 4096)
+		unknown12 = unpacked.unknown12
+		unknown13 = unpacked.unknown13
+		unknown14 = unpacked.unknown14
+		unknown15 = unpacked.unknown15
+		unknown16 = unpacked.unknown16
+		unknown17 = unpacked.unknown17
+		thingPCount = UInt32(unpacked.thingPs.count)
+		donationPointsCount = UInt32(unpacked.donationPoints.count)
+		
+		thingAOffsets = unpacked.thingAOffsets
+		
+		thingAs = unpacked.thingAs.map(ThingA.init)
+		
+		thingBs = unpacked.thingBs
+		
+		thingCOffsets = unpacked.thingCOffsets
+		
+		thingCs = unpacked.thingCs.map(ThingC.init)
+		
+		jewelRockIDs = unpacked.jewelRockIDs
+		
+		droppingRockIDs = unpacked.droppingRockIDs
+		
+		thingFs = unpacked.thingFs
+		
+		effectNameOffsets = unpacked.effectNameOffsets
+		
+		effectNames = unpacked.effectNames.map(EffectName.init)
+		
+		imageNameOffsets = unpacked.imageNameOffsets
+		
+		imageNames = unpacked.imageNames.map(ImageName.init)
+		
+		kl33nLevels = unpacked.kl33nLevels.map(KL33NLevel.init)
+		
+		thingJs = unpacked.thingJs.map(ThingJ.init)
+		
+		thingK = ThingK(unpacked.thingK)
+		
+		characters = Characters(unpacked.characters)
+		
+		thingM = ThingM(unpacked.thingM)
+		
+		thingN = ThingN(unpacked.thingN)
+		
+		thingOs = unpacked.thingOs
+		
+		thingPs = unpacked.thingPs
+		
+		thingQ = ThingQ(unpacked.thingQ)
+		
+		donationPoints = unpacked.donationPoints.map(DonationPointForScore.init)
+	}
+}
+
+extension ECS.Packed.ThingA {
+	init(_ unpacked: ECS.Unpacked.ThingA) {
+		unknown1 = unpacked.unknown1
+		unknown2 = unpacked.unknown2
+		unknown3 = unpacked.unknown3
+		unknown4 = unpacked.unknown4
+		unknown5 = unpacked.unknown5
+		unknown6 = unpacked.unknown6
+	}
+}
+
+extension ECS.Packed.ThingC {
+	init(_ unpacked: ECS.Unpacked.ThingC) {
+		count = UInt32(unpacked.things.count)
+		things = unpacked.things
+	}
+}
+
+extension ECS.Packed.EffectName {
+	init(_ unpacked: ECS.Unpacked.EffectName) {
+		effectName = unpacked.effectName
+	}
+}
+
+extension ECS.Packed.ImageName {
+	init(_ unpacked: ECS.Unpacked.ImageName) {
+		imageName = unpacked.imageName
+	}
+}
+
+extension ECS.Packed.KL33NLevel {
+	init(_ unpacked: ECS.Unpacked.KL33NLevel) {
+		level = unpacked.level
+		
+		requiredFossilsCleaned = unpacked.requiredFossilsCleaned
+		nextLevelAt = unpacked.nextLevelAt
+		
+		cleaningScoreLowerBound = Int32(unpacked.cleaningScoreLowerBound * 4096)
+		cleaningScoreUpperBound = Int32(unpacked.cleaningScoreUpperBound * 4096)
+		
+		higherScoreProbability = Int32(unpacked.higherScoreProbability * 4096)
+		
+		higherScoreLowerBound = Int32(unpacked.higherScoreLowerBound * 4096)
+		higherScoreUpperBound = Int32(unpacked.higherScoreUpperBound * 4096)
+		
+		unknown1 = Int32(unpacked.unknown1 * 4096)
+		unknown2 = Int32(unpacked.unknown2 * 4096)
+		unknown3 = Int32(unpacked.unknown3 * 4096)
+	}
+}
+
+extension ECS.Packed.ThingJ {
+	init(_ unpacked: ECS.Unpacked.ThingJ) {
+		index = unpacked.index
+		unknown = unpacked.unknown
+	}
+}
+
+extension ECS.Packed.ThingK {
+	init(_ unpacked: ECS.Unpacked.ThingK) {
+		unknowns = unpacked.unknowns
+	}
+}
+
+extension ECS.Packed.Characters {
+	init(_ unpacked: ECS.Unpacked.Characters) {
+		unknown1 = Int32(unpacked.unknown1 * 4096)
+		unknown2 = Int32(unpacked.unknown2 * 4096)
+		unknown3 = Int32(unpacked.unknown3 * 4096)
+		unknown4 = unpacked.unknown4
+		unknown5 = unpacked.unknown5
+		
+		characterOffsets = unpacked.characterOffsets
+		
+		characterCount = UInt32(unpacked.characters.count)
+		characters = unpacked.characters.map(Character.init)
+		
+		thingACount = UInt32(unpacked.thingAs.count)
+		thingAs = unpacked.thingAs.map { Int32($0 * 4096) }
+	}
+}
+
+extension ECS.Packed.Characters.Character {
+	init(_ unpacked: ECS.Unpacked.Characters.Character) {
+		name = unpacked.name
+		color1 = unpacked.color1.bytes
+		color2 = unpacked.color2.bytes
+		unknown = unpacked.unknown
+		
+		color1Offset = nameOffset + UInt32(name.utf8CString.count.roundedUpToTheNearest(4))
+		color2Offset = color1Offset + 4
+	}
+}
+
+extension ECS.Unpacked.Characters.Character.Color {
+	var bytes: [UInt8] {
+		[red, green, blue]
+	}
+}
+
+extension ECS.Packed.ThingM {
+	init(_ unpacked: ECS.Unpacked.ThingM) {
+		unknowns = unpacked.unknowns
+	}
+}
+
+extension ECS.Packed.ThingN {
+	init(_ unpacked: ECS.Unpacked.ThingN) {
+		unknown1 = unpacked.unknown1
+		unknown2 = unpacked.unknown2
+	}
+}
+
+extension ECS.Packed.ThingQ {
+	init(_ unpacked: ECS.Unpacked.ThingQ) {
+		unknowns = unpacked.unknowns
+	}
+}
+
+extension ECS.Packed.DonationPointForScore {
+	init(_ unpacked: ECS.Unpacked.DonationPointForScore) {
+		lowerBound = unpacked.lowerBound
+		upperBound = unpacked.upperBound
+		donationPoints = unpacked.donationPoints
 	}
 }
 
@@ -311,6 +686,242 @@ extension ECS.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
 	
 	fileprivate init(_ packed: ECS.Packed, configuration: CarbonizerConfiguration) {
-		todo()
+		unknown1 = Double(packed.unknown1) / 4096
+		unknown2 = Double(packed.unknown2) / 4096
+		unknown3 = Double(packed.unknown3) / 4096
+		unknown4 = Double(packed.unknown4) / 4096
+		unknown5 = packed.unknown5
+		unknown6 = packed.unknown6
+		unknown7 = packed.unknown7
+		unknown8 = packed.unknown8
+		
+		unknown9 = packed.unknown9
+		
+		unknown10 = Double(packed.unknown10) / 4096
+		unknown11 = Double(packed.unknown11) / 4096
+		unknown12 = packed.unknown12
+		unknown13 = packed.unknown13
+		unknown14 = packed.unknown14
+		unknown15 = packed.unknown15
+		unknown16 = packed.unknown16
+		unknown17 = packed.unknown17
+		
+		thingAOffsets = packed.thingAOffsets
+		
+		thingAs = packed.thingAs.map(ThingA.init)
+		
+		thingBs = packed.thingBs
+		
+		thingCOffsets = packed.thingCOffsets
+		
+		thingCs = packed.thingCs.map(ThingC.init)
+		
+		jewelRockIDs = packed.jewelRockIDs
+		
+		droppingRockIDs = packed.droppingRockIDs
+		
+		thingFs = packed.thingFs
+		
+		effectNameOffsets = packed.effectNameOffsets
+		
+		effectNames = packed.effectNames.map(EffectName.init)
+		
+		imageNameOffsets = packed.imageNameOffsets
+		
+		imageNames = packed.imageNames.map(ImageName.init)
+		
+		kl33nLevels = packed.kl33nLevels.map(KL33NLevel.init)
+		
+		thingJs = packed.thingJs.map(ThingJ.init)
+		
+		thingK = ThingK(packed.thingK)
+		
+		characters = Characters(packed.characters)
+		
+		thingM = ThingM(packed.thingM)
+		
+		thingN = ThingN(packed.thingN)
+		
+		thingOs = packed.thingOs
+		
+		thingPs = packed.thingPs
+		
+		thingQ = ThingQ(packed.thingQ)
+		
+		donationPoints = packed.donationPoints.map(DonationPointForScore.init)
+	}
+}
+
+extension ECS.Unpacked.ThingA {
+	init(_ packed: ECS.Packed.ThingA) {
+		unknown1 = packed.unknown1
+		unknown2 = packed.unknown2
+		unknown3 = packed.unknown3
+		unknown4 = packed.unknown4
+		unknown5 = packed.unknown5
+		unknown6 = packed.unknown6
+	}
+}
+
+extension ECS.Unpacked.ThingC {
+	init(_ packed: ECS.Packed.ThingC) {
+		things = packed.things
+	}
+}
+
+extension ECS.Unpacked.EffectName: Codable {
+	init(_ packed: ECS.Packed.EffectName) {
+		effectName = packed.effectName
+	}
+	
+	init(from decoder: any Decoder) throws {
+		effectName = try String(from: decoder)
+	}
+	
+	func encode(to encoder: any Encoder) throws {
+		try effectName.encode(to: encoder)
+	}
+}
+
+extension ECS.Unpacked.ImageName: Codable {
+	init(_ packed: ECS.Packed.ImageName) {
+		imageName = packed.imageName
+	}
+	
+	init(from decoder: any Decoder) throws {
+		imageName = try String(from: decoder)
+	}
+	
+	func encode(to encoder: any Encoder) throws {
+		try imageName.encode(to: encoder)
+	}
+}
+
+extension ECS.Unpacked.KL33NLevel {
+	init(_ packed: ECS.Packed.KL33NLevel) {
+		level = packed.level
+		
+		requiredFossilsCleaned = packed.requiredFossilsCleaned
+		nextLevelAt = packed.nextLevelAt
+		
+		cleaningScoreLowerBound = Double(packed.cleaningScoreLowerBound) / 4096
+		cleaningScoreUpperBound = Double(packed.cleaningScoreUpperBound) / 4096
+		
+		higherScoreProbability = Double(packed.higherScoreProbability) / 4096
+		higherScoreLowerBound = Double(packed.higherScoreLowerBound) / 4096
+		higherScoreUpperBound = Double(packed.higherScoreUpperBound) / 4096
+		
+		unknown1 = Double(packed.unknown1) / 4096
+		unknown2 = Double(packed.unknown2) / 4096
+		unknown3 = Double(packed.unknown3) / 4096
+	}
+}
+
+extension ECS.Unpacked.ThingJ {
+	init(_ packed: ECS.Packed.ThingJ) {
+		index = packed.index
+		unknown = packed.unknown
+	}
+}
+
+extension ECS.Unpacked.ThingK {
+	init(_ packed: ECS.Packed.ThingK) {
+		unknowns = packed.unknowns
+	}
+}
+
+extension ECS.Unpacked.Characters {
+	init(_ packed: ECS.Packed.Characters) {
+		unknown1 = Double(packed.unknown1) / 4096
+		unknown2 = Double(packed.unknown2) / 4096
+		unknown3 = Double(packed.unknown3) / 4096
+		unknown4 = packed.unknown4
+		unknown5 = packed.unknown5
+		
+		characterOffsets = packed.characterOffsets
+		
+		characters = packed.characters.map(Character.init)
+		
+		thingAs = packed.thingAs.map { Double($0) / 4096 }
+	}
+}
+
+extension ECS.Unpacked.Characters.Character {
+	init(_ packed: ECS.Packed.Characters.Character) {
+		name = packed.name
+		color1 = Color(packed.color1)
+		color2 = Color(packed.color2)
+		unknown = packed.unknown
+	}
+}
+
+extension ECS.Unpacked.Characters.Character.Color: Codable {
+	init(_ bytes: [UInt8]) {
+		guard bytes.count == 3 else {
+			todo("throw error")
+		}
+		
+		red = bytes[0]
+		green = bytes[1]
+		blue = bytes[2]
+	}
+	
+	init(_ string: String) {
+		guard string.count == 7, string.hasPrefix("#") else {
+			todo("throw error")
+		}
+		
+		guard let red = UInt8(string.dropFirst().prefix(2), radix: 16),
+			  let green = UInt8(string.dropFirst(3).prefix(2), radix: 16),
+			  let blue = UInt8(string.dropFirst(5).prefix(2), radix: 16)
+		else {
+			todo("throw error")
+		}
+		
+		self.red = red
+		self.green = green
+		self.blue = blue
+	}
+	
+	var hexCode: String {
+		"#" +
+		String(red, radix: 16).padded(toLength: 2, with: "0", from: .leading) +
+		String(green, radix: 16).padded(toLength: 2, with: "0", from: .leading) +
+		String(blue, radix: 16).padded(toLength: 2, with: "0", from: .leading)
+	}
+	
+	init(from decoder: any Decoder) throws {
+		self = Self(try String(from: decoder))
+	}
+	
+	func encode(to encoder: any Encoder) throws {
+		try hexCode.encode(to: encoder)
+	}
+}
+
+extension ECS.Unpacked.ThingM {
+	init(_ packed: ECS.Packed.ThingM) {
+		unknowns = packed.unknowns
+	}
+}
+
+extension ECS.Unpacked.ThingN {
+	init(_ packed: ECS.Packed.ThingN) {
+		unknown1 = packed.unknown1
+		unknown2 = packed.unknown2
+	}
+}
+
+extension ECS.Unpacked.ThingQ {
+	init(_ packed: ECS.Packed.ThingQ) {
+		unknowns = packed.unknowns
+	}
+}
+
+extension ECS.Unpacked.DonationPointForScore {
+	init(_ packed: ECS.Packed.DonationPointForScore) {
+		lowerBound = packed.lowerBound
+		upperBound = packed.upperBound
+		donationPoints = packed.donationPoints
 	}
 }

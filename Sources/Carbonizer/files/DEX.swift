@@ -84,7 +84,7 @@ enum DEX {
 			// 26: (#)
 			// 27: (#) 44 makes the hotel person intercept you (which occurs in e0044) but doenst seem to just activate an episode
 			32:  "unowned dialogue \(0, .dialogue)",
-			33:  "dialogue with choice \(1, .dialogue), unknown: \(0, .unknown)", // 0 is the memory location for the answer
+			33:  "dialogue with choice \(1, .dialogue), unknown: \(0, .unknown)", // 0 is the memory location for the answer?
 			34:  "turn \(0, .character) to \(1, .degrees)",
 			35:  "turn1 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
 			36:  "turn \(0, .character) towards \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
