@@ -69,3 +69,7 @@ public macro EndOffset<S, T: BinaryInteger>(givenBy offset: KeyPath<S, T>) = #ex
 /// Include a static property as if it were a non-static property
 @attached(peer)
 public macro Include() = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
+
+/// Align to the nearest 4 bytes
+@attached(peer)
+public macro FourByteAlign() = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")

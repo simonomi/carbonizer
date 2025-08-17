@@ -71,6 +71,7 @@ func parseBinding(_ binding: PatternBindingSyntax, with attributes: Attributes) 
 		expected: expected, 
 		length: attributes.length,
 		ifCondition: attributes.ifCondition,
-		endOffset: attributes.endOffset
+		endOffset: attributes.endOffset,
+		fourByteAlign: attributes.fourByteAlign
 	)
 }

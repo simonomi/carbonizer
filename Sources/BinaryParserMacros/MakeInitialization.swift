@@ -88,6 +88,8 @@ extension Property {
 				"data.jump(to: base + \(offset.value))\n"
 			} else if let padding {
 				"data.jump(bytes: \(padding.value))\n"
+			} else if fourByteAlign {
+				"data.fourByteAlign()\n"
 			} else {
 				""
 			}

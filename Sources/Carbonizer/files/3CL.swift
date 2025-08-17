@@ -45,7 +45,8 @@ enum TCL {
 				@Offset(givenBy: \Self.textureTableNameOffset)
 				var textureTableName: String
 				
-				// TODO: round to the nearest 4-bytes
+				@FourByteAlign
+				var fourByteAlign: ()
 			}
 		}
 	}

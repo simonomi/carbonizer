@@ -364,6 +364,9 @@ extension Datastream {
 			Datastream(bytes[start..<end])
 		}
 	}
+	
+	@inlinable
+	public func read(_: ()) throws {}
 }
 
 // MARK: offset

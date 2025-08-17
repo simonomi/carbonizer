@@ -9,9 +9,11 @@ struct Attributes {
 	var ifCondition: String?
 	var endOffset: ValueOrProperty?
 	var isStatic: Bool
+	var fourByteAlign: Bool
 	
 	init(from attributes: AttributeListSyntax, isStatic: Bool) throws {
 		self.isStatic = isStatic
+		fourByteAlign = false
 		
 		for attribute in attributes.compactMap(AttributeSyntax.init) {
 			try parseAttribute(attribute)

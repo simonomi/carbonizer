@@ -176,6 +176,9 @@ extension Datawriter {
 			write(item)
 		}
 	}
+	
+	@inlinable
+	public func write(_: ()) {}
 }
 
 // MARK: offset

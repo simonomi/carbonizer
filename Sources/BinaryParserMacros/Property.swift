@@ -9,6 +9,7 @@ struct Property {
 	var length: ValueOrProperty?
 	var ifCondition: String?
 	var endOffset: ValueOrProperty?
+	var fourByteAlign: Bool
 	
 	enum Size {
 		case auto

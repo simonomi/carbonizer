@@ -56,6 +56,12 @@ extension Attributes {
 			}
 			
 			ifCondition = try parseIfCondition(arguments)
+		} else if attributeName == "FourByteAlign" {
+			guard fourByteAlign == false else {
+				throw AttributeParsingError.duplicateAttribute("FourByteAlign")
+			}
+			
+			fourByteAlign = true
 		}
 	}
 }
