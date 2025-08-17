@@ -36,8 +36,9 @@ struct VertexData {
 						 // 0, 0x100, 0x101, 0x102
 	var unknown4: UInt32 // 1, 2, 3, 4, 5, 6, 9
 	var unknown5: UInt32 // lots of values 1...300
+						 // number of keyframes?
 	
-	var unknown6: UInt32 // usually half of 0x8??
+	var unknown6: UInt32 // usually half of 0x8 (commandsLength)??
 	
 	@Offset(givenBy: \Self.commandsOffset)
 	@Length(givenBy: \Self.commandsLength)

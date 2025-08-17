@@ -40,10 +40,11 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	guard !windowsBlocklist.contains(file.name) else { return [file] }
 #endif
 	
-//	guard file.name == "cha01a_01" else { return [file] }
+//	guard file.name == "cha01a_01" || file.name == "cha01a_30" else { return [file] }
 //	guard file.name == "cha01a_02" else { return [file] }
 //	guard file.name == "head01a" else { return [file] }
 	
+//	print()
 //	print(file.name)
 	
 	do {

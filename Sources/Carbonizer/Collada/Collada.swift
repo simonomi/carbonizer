@@ -26,6 +26,8 @@ fileprivate struct CommandParsingState {
 	var vertexMode: GPUCommand.VertexMode?
 	var bone: Int = -1
 	
+	var worldRootBoneCount: Int = 0
+	
 	var textureVertex: SIMD2<Double> = .zero // ?
 	var textureScale: SIMD2<Double> = .one
 	var material: String? // ?
@@ -266,6 +268,9 @@ extension Collada {
 		
 		let frameCount = Int(animationData.keyframeCount)
 		guard frameCount == Int(animationData.keyframes.frameCount) else {
+			// keyframeCount >= keyframes.frameCount
+			// usually they mismatch bc frameCount is 1
+			// except o09warp1_01, where it's 300 vs 61
 			throw ColladaError(description: "keyframeCount doesn't match keyframes.frameCount")
 		}
 		precondition(frameCount == Int(animationData.keyframes.frameCount))
@@ -521,7 +526,7 @@ fileprivate func parseCommand(
 		case .matrixMode(_): () // ignore for now
 		case .matrixPop(_): () // ignore for now
 		case .matrixRestore(let index):
-			state.bone = Int(index) - 5
+			state.bone = Int(index) - 5 + state.worldRootBoneCount
 		case .matrixIdentity:
 			state.bone = -1 // TODO: this should be handled wayyyy better
 							// wait or is this accidentally right??
@@ -562,7 +567,9 @@ fileprivate func parseCommand(
 		case .vertexEnd:
 			state.commitVertices(to: &result)
 		case .unknown50(_, _): () // ignore for now
-		case .unknown51(_, _): () // ignore for now
+		case .unknown51(_, let bytes):
+			state.worldRootBoneCount = Int(bytes[12]) // idk, this byte just seems to be the number of 'world_root' bones
+			// theres more to do here probably
 		case .commandsStart(_): ()
 		case .unknown53(_, _, _): () // ignore for now
 		case .commandsEnd: ()
