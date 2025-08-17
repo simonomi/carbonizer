@@ -13,38 +13,42 @@ import Foundation
 @Suite
 struct RoundTrips {
 	@Test(
-		.disabled("without compression, these will always fail"),
+//		.disabled("without compression, these will always fail"),
 		arguments: [
 //			("japanese", .packed),
 //			("map c 0004", .packed),
-			("map e 0048", .packed),
-			("map g 0047", .packed),
+//			("map e 0048", .packed),
+//			("map g 0047", .packed),
 //			("e0046", .packed),
-			("episode 0002", .packed),
+//			("episode 0002", .packed),
 //			("msg_0911", .packed),
 //			("msg_1007", .packed),
+			("arcdin 3cl", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 		let inputFilePath = filePath(for: fileName)
 		
-		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: .defaultConfiguration)
+		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
+		configurationWithFileTypes.fileTypes.append("3CL")
+		
+		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)
 		
 		let repackedFile: any FileSystemObject = switch packedStatus {
 			case .packed:
 				try file
-					.unpacked(path: [], configuration: .defaultConfiguration)
-					.packed(configuration: .defaultConfiguration)
+					.unpacked(path: [], configuration: configurationWithFileTypes)
+					.packed(configuration: configurationWithFileTypes)
 			case .unpacked:
 				try file
-					.packed(configuration: .defaultConfiguration)
-					.unpacked(path: [], configuration: .defaultConfiguration)
+					.packed(configuration: configurationWithFileTypes)
+					.unpacked(path: [], configuration: configurationWithFileTypes)
 			case .unknown, .contradictory:
 				try Issue.failure("packed status must be either packed or unpacked")
 		}
 		
 		let savePath = repackedFile.savePath(in: .temporaryDirectory, overwriting: true)
-		try repackedFile.write(into: .temporaryDirectory, overwriting: true, with: .defaultConfiguration)
+		try repackedFile.write(into: .temporaryDirectory, overwriting: true, with: configurationWithFileTypes)
 		
 		let originalData = try Data(contentsOf: inputFilePath)
 		let savedData = try Data(contentsOf: savePath)
@@ -52,7 +56,7 @@ struct RoundTrips {
 		// TODO: compare metadata and file name
 		
 		let dataIsTheSame = originalData == savedData
-		#expect(dataIsTheSame)
+		#expect(dataIsTheSame, "nvim -d \"\(inputFilePath.path(percentEncoded: false))\" \"\(savePath.path(percentEncoded: false))\"")
 	}
 	
 	@Test(.disabled())

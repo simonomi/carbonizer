@@ -52,7 +52,7 @@ extension MM3.Packed: ProprietaryFileData {
 		textureTableName = unpacked.texture.tableName
 		
 		modelTableNameOffset = 0x1C
-		animationTableNameOffset = modelTableNameOffset + UInt32(animationTableName.utf8CString.count)
+		animationTableNameOffset = modelTableNameOffset + UInt32(animationTableName.utf8CString.count) // TODO: are these the right offsets??
 		textureTableNameOffset = animationTableNameOffset + UInt32(textureTableName.utf8CString.count)
 	}
 }

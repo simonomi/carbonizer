@@ -7,7 +7,7 @@ enum TCL {
 		@Include
 		static let magicBytes = "3CL"
 		var vivosaurCount: UInt32
-		var indicesOffset: UInt32
+		var indicesOffset: UInt32 = 0xC
 		
 		@Count(givenBy: \Self.vivosaurCount)
 		@Offset(givenBy: \Self.indicesOffset)
@@ -18,8 +18,8 @@ enum TCL {
 		
 		@BinaryConvertible
 		struct Vivosaur {
-			var animationCount: UInt32
-			var indicesOffset: UInt32
+			var animationCount: UInt32 // always 8, at least in ff1
+			var indicesOffset: UInt32 = 0x8
 			
 			@Count(givenBy: \Self.animationCount)
 			@Offset(givenBy: \Self.indicesOffset)
@@ -44,6 +44,8 @@ enum TCL {
 				var animationTableName: String
 				@Offset(givenBy: \Self.textureTableNameOffset)
 				var textureTableName: String
+				
+				// TODO: round to the nearest 4-bytes
 			}
 		}
 	}
@@ -86,7 +88,80 @@ extension TCL.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: TCL.Unpacked, configuration: CarbonizerConfiguration) {
-		todo()
+		vivosaurCount = UInt32(unpacked.vivosaurs.count)
+		
+		vivosaurs = unpacked.vivosaurs.map { Vivosaur($0) }
+		
+		vivosaurOffsets = makeOffsets(
+			start: indicesOffset + 4 * vivosaurCount,
+			sizes: vivosaurs.map { $0.size() }
+		)
+	}
+}
+
+extension TCL.Packed.Vivosaur {
+	fileprivate init(_ unpacked: TCL.Unpacked.Vivosaur?) {
+		// always 8, at least in ff1
+		animationCount = UInt32(unpacked?.animations.count ?? 8)
+		
+		if let unpacked {
+			animations = unpacked.animations.map { Animation($0) }
+		} else {
+			animations = repeatElement(nil, count: Int(animationCount)).map { Animation($0) }
+		}
+		
+		animationOffsets = makeOffsets(
+			start: indicesOffset + 4 * animationCount,
+			sizes: animations.map(\.size)
+		)
+	}
+	
+	func size() -> UInt32 {
+		0x8 + animationCount * 4 + animations.map(\.size).sum()
+	}
+}
+
+extension TCL.Packed.Vivosaur.Animation {
+	static let null = Self(nil)
+	
+	fileprivate init(_ unpacked: TCL.Unpacked.Vivosaur.Animation?) {
+		guard let unpacked else {
+			isValid = 0
+			modelIndex = 0
+			modelTableNameOffset = 0
+			animationIndex = 0
+			animationTableNameOffset = 0
+			textureIndex = 0
+			textureTableNameOffset = 0
+			
+			modelTableName = ""
+			animationTableName = ""
+			textureTableName = ""
+			return
+		}
+		
+		modelTableName = unpacked.model.tableName
+		animationTableName = unpacked.animation.tableName
+		textureTableName = unpacked.texture.tableName
+		
+		isValid = 1
+		
+		modelIndex = unpacked.model.index
+		modelTableNameOffset = 0x1C
+		
+		animationIndex = unpacked.animation.index
+		animationTableNameOffset = modelTableNameOffset + UInt32(modelTableName.utf8CString.count.roundedUpToTheNearest(4))
+		
+		textureIndex = unpacked.texture.index
+		textureTableNameOffset = animationTableNameOffset + UInt32(animationTableName.utf8CString.count.roundedUpToTheNearest(4))
+	}
+	
+	var size: UInt32 {
+		if isValid > 0 {
+			UInt32(28 + modelTableName.utf8CString.count.roundedUpToTheNearest(4) + animationTableName.utf8CString.count.roundedUpToTheNearest(4) + textureTableName.utf8CString.count.roundedUpToTheNearest(4))
+		} else {
+			28
+		}
 	}
 }
 
