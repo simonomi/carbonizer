@@ -59,6 +59,7 @@ enum DEX {
 		
 		static let ff1Commands: [UInt32: CommandDefinition] = [
 			1:   "dialogue \(0, .dialogue)",
+			2:   "centered dialogue \(0, .dialogue)",
 			// 3: (#)
 			//     7025 freezes camera focus (?)
 			4:   "memory 4 \(0, .unknown)", // wipes some stored dialogue answer. argument is the index in DEP
