@@ -26,7 +26,8 @@ func makeFileData(
 		"MMS": MMS.Unpacked.self,
 		"MPM": MPM.Unpacked.self,
 		"RLS": RLS.Unpacked.self,
-		"3CL": TCL.Unpacked.self
+		"3CL": TCL.Unpacked.self,
+		"SHP": SHP.Unpacked.self
 	]
 	
 	let fileTypes: [any ProprietaryFileData.Type] = allFileTypes

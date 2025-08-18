@@ -6,7 +6,7 @@ enum SHP {
 		@Include
 		static let magicBytes = "SHP"
 		var firstCount: UInt32
-		var firstOffset: UInt32
+		var firstOffset: UInt32 = 0x14
 		var secondCount: UInt32
 		var secondOffset: UInt32
 		
@@ -25,7 +25,10 @@ enum SHP {
 		}
 	}
 	
-	struct Unpacked: Codable {}
+	struct Unpacked: Codable {
+		var firsts: [UInt32]
+		var seconds: [UInt32]
+	}
 }
 
 // MARK: packed
@@ -40,7 +43,13 @@ extension SHP.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: SHP.Unpacked, configuration: CarbonizerConfiguration) {
-		todo()
+		firstCount = UInt32(unpacked.firsts.count)
+		secondCount = UInt32(unpacked.seconds.count)
+		secondOffset = firstOffset + 8 * firstCount
+		
+		firsts = unpacked.firsts.map { Entry(unknown2: $0) }
+		
+		seconds = unpacked.seconds.map { Entry(unknown2: $0) }
 	}
 }
 
@@ -57,6 +66,7 @@ extension SHP.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
 	
 	fileprivate init(_ packed: SHP.Packed, configuration: CarbonizerConfiguration) {
-		todo()
+		firsts = packed.firsts.map(\.unknown2)
+		seconds = packed.seconds.map(\.unknown2)
 	}
 }

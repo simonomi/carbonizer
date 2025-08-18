@@ -24,7 +24,9 @@ struct RoundTrips {
 //			("msg_0911", .packed),
 //			("msg_1007", .packed),
 			("arcdin 3cl", .packed),
-			("excavate_defs", .packed)
+			("excavate_defs", .packed),
+			("shop 0001", .packed),
+			("shop 0002", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
