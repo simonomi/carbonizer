@@ -21,18 +21,23 @@ enum RLS {
 			var destroyable: UInt8
 			
 			var unknown2: UInt8 // only high for special vivos
+								// setting to >0 makes it uncleanable
 			var unknown3: UInt8 // only 0 for droppings and some specials
 			var unknown4: UInt8 = 0
 			var unknown5: UInt8 = 0
 			
 			var fossilImage: UInt32
 			var rockImage: UInt32
-			var fossilConfig: UInt32 // can be negative ?
-			var rockConfig: UInt32
+			
+			var fossilHardness: UInt32 // fixed-point
+			var rockHardness: UInt32 // fixed-point
+			
 			var buyPrice: UInt32
 			var sellPrice: UInt32
 			
 			var unknown6: UInt32 // 100 for jewels, 0 else
+								 // selling price before cleaning?
+								 // - nope—changing it doesnt work
 			var unknown7: UInt32 // 1 for jewels, 2 for droppings, 0 else
 			var fossilName: UInt32 // jewels/droppings only
 			var unknown8: UInt32 = 0
@@ -42,19 +47,19 @@ enum RLS {
 			
 			var unknown9: UInt32 // same as unknown2
 			
-			var unknownsCount: UInt32
+			var unknownsCount: UInt32 // always 2 for valid vivos
 			var unknownsOffset: UInt32 = 0x44
 			@Count(givenBy: \Self.unknownsCount)
 			@Offset(givenBy: \Self.unknownsOffset)
-			var unknowns: [UInt32]
+			var unknowns: [UInt32] // 1st is resistance to being hit NEXT TO like damage resistance?
+								   // shockwave damage
+								   // 2nd is for drill resistance? somehow??
 			
 			// unknowns[0]:
-			// - 1638, 2048, 2458
-			// - difference: 410
+			// - 0.4, 0.5, 0.6
 			// unknowns[1]:
-			// - 2048, 2867
-			// - difference: 819
-			// - only 2867 for goyle
+			// - 0.5, 0.7
+			// - only 0.7 for goyle
 		}
 	}
 	
@@ -70,12 +75,14 @@ enum RLS {
 			var destroyable: Bool
 			
 			var unknown2: UInt8
-			var unknown3: UInt8
+			var unknown3: Bool
 			
 			var fossilImage: UInt32
 			var rockImage: UInt32
-			var fossilConfig: UInt32
-			var rockConfig: UInt32
+			
+			var fossilHardness: Double
+			var rockHardness: Double
+			
 			var buyPrice: UInt32
 			var sellPrice: UInt32
 			
@@ -90,7 +97,7 @@ enum RLS {
 			
 			var unknownsCount: UInt32
 			var unknownsOffset: UInt32
-			var unknowns: [UInt32]
+			var unknowns: [Double]
 		}
 	}
 }
@@ -131,7 +138,7 @@ extension RLS.Unpacked.Kaseki? {
 extension RLS.Packed.Kaseki {
 	init(_ kaseki: RLS.Unpacked.Kaseki?) {
 		guard let kaseki else {
-			self = RLS.Packed.Kaseki(isEntry: 0, unknown1: 0, unbreakable: 0, destroyable: 0, unknown2: 0, unknown3: 0, unknown4: 0, unknown5: 0, fossilImage: 0, rockImage: 0, fossilConfig: 0, rockConfig: 0, buyPrice: 0, sellPrice: 0, unknown6: 0, unknown7: 0, fossilName: 0, unknown8: 0, time: 0, passingScore: 0, unknown9: 0, unknownsCount: 0, unknownsOffset: 0x44, unknowns: [])
+			self = RLS.Packed.Kaseki(isEntry: 0, unknown1: 0, unbreakable: 0, destroyable: 0, unknown2: 0, unknown3: 0, unknown4: 0, unknown5: 0, fossilImage: 0, rockImage: 0, fossilHardness: 0, rockHardness: 0, buyPrice: 0, sellPrice: 0, unknown6: 0, unknown7: 0, fossilName: 0, unknown8: 0, time: 0, passingScore: 0, unknown9: 0, unknownsCount: 0, unknownsOffset: 0x44, unknowns: [])
 			return
 		}
 		
@@ -141,12 +148,14 @@ extension RLS.Packed.Kaseki {
 		destroyable = kaseki.destroyable ? 1 : 0
 		
 		unknown2 = kaseki.unknown2
-		unknown3 = kaseki.unknown3
+		unknown3 = kaseki.unknown3 ? 1 : 0
 		
 		fossilImage = kaseki.fossilImage
 		rockImage = kaseki.rockImage
-		fossilConfig = kaseki.fossilConfig
-		rockConfig = kaseki.rockConfig
+		
+		fossilHardness = UInt32(kaseki.fossilHardness * 4096)
+		rockHardness = UInt32(kaseki.rockHardness * 4096)
+		
 		buyPrice = kaseki.buyPrice
 		sellPrice = kaseki.sellPrice
 		
@@ -161,7 +170,7 @@ extension RLS.Packed.Kaseki {
 		
 		unknownsCount = kaseki.unknownsCount
 		unknownsOffset = kaseki.unknownsOffset
-		unknowns = kaseki.unknowns
+		unknowns = kaseki.unknowns.map { UInt32($0 * 4096) }
 	}
 }
 
@@ -203,12 +212,14 @@ extension RLS.Unpacked.Kaseki {
 		destroyable = kaseki.destroyable > 0
 		
 		unknown2 = kaseki.unknown2
-		unknown3 = kaseki.unknown3
+		unknown3 = kaseki.unknown3 > 0
 		
 		fossilImage = kaseki.fossilImage
 		rockImage = kaseki.rockImage
-		fossilConfig = kaseki.fossilConfig
-		rockConfig = kaseki.rockConfig
+		
+		fossilHardness = Double(kaseki.fossilHardness) / 4096
+		rockHardness = Double(kaseki.rockHardness) / 4096
+		
 		buyPrice = kaseki.buyPrice
 		sellPrice = kaseki.sellPrice
 		
@@ -223,7 +234,7 @@ extension RLS.Unpacked.Kaseki {
 		
 		unknownsCount = kaseki.unknownsCount
 		unknownsOffset = kaseki.unknownsOffset
-		unknowns = kaseki.unknowns
+		unknowns = kaseki.unknowns.map { Double($0) / 4096 }
 	}
 }
 
@@ -242,8 +253,10 @@ extension RLS.Unpacked.Kaseki: Codable {
 		
 		case fossilImage =    "fossil image"
 		case rockImage =      "rock image"
-		case fossilConfig =   "fossil config"
-		case rockConfig =     "rock config"
+		
+		case fossilHardness = "fossil hardness"
+		case rockHardness =   "rock hardness"
+		
 		case buyPrice =       "buy price"
 		case sellPrice =      "sell price"
 		
