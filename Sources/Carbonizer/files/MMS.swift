@@ -47,6 +47,9 @@ enum MMS {
 		var bitmapIndices: [UInt32]
 		@Offset(givenBy: \Self.bitmapNameOffset)
 		var bitmapName: String
+		
+		@FourByteAlign
+		var fourByteAlign: ()
 	}
 	
 	struct Unpacked: Codable {
@@ -83,7 +86,7 @@ extension MMS.Packed: ProprietaryFileData {
 		colorPaletteType = unpacked.colorPaletteType
 		
 		unknowns = unpacked.unknowns
-		unknownsCount = UInt32(unknowns.count)
+		unknownsCount = UInt32(unknowns.count) / 4
 		
 		animationIndices = unpacked.animation.indices
 		colorPaletteIndices = unpacked.colorPalette.indices
@@ -100,10 +103,10 @@ extension MMS.Packed: ProprietaryFileData {
 		animationIndexOffset = unknownsOffset + unknownsCount * 16
 		animationNameOffset = animationIndexOffset + animationIndexCount * 4
 		
-		colorPaletteIndexOffset = animationNameOffset + UInt32(animationName.utf8CString.count)
+		colorPaletteIndexOffset = animationNameOffset + UInt32(animationName.utf8CString.count).roundedUpToTheNearest(4)
 		colorPaletteNameOffset = colorPaletteIndexOffset + colorPaletteIndexCount * 4
 		
-		bitmapIndexOffset = colorPaletteNameOffset + UInt32(colorPaletteName.utf8CString.count)
+		bitmapIndexOffset = colorPaletteNameOffset + UInt32(colorPaletteName.utf8CString.count).roundedUpToTheNearest(4)
 		bitmapNameOffset = bitmapIndexOffset + bitmapIndexCount * 4
 	}
 }
