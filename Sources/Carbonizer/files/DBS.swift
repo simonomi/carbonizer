@@ -173,7 +173,7 @@ struct DBS {
 				var hideDinoMedal: Bool
 				var hideStats: Bool
 				
-				var aiSet: Int32
+				var aiSet: Int32?
 				var interLevelBattlePoints: Double
 				var movesUnlocked: Int32
 				
@@ -251,7 +251,7 @@ extension DBS.Packed.Fighter {
 		vivosaurs = unpacked.vivosaurs.map(Vivosaur.init)
 		vivosaurCount = UInt32(vivosaurs.count)
 		
-		aiSets = unpacked.vivosaurs.map(\.aiSet)
+		aiSets = unpacked.vivosaurs.compactMap(\.aiSet)
 		vivosaurCount2 = UInt32(aiSets.count)
 		aiSetsOffset = vivosaursOffset + vivosaurCount * 0xC
 		
@@ -326,23 +326,10 @@ extension DBS.Unpacked: ProprietaryFileData {
 		bpForWinning = packed.bpForWinning
 		unknown16 = packed.unknown16
 		
-		// nil for 0587 and 0578
-		fighter1 = packed.fighter1.flatMap(Fighter.init)
+		// nil for 0578
+		fighter1 = packed.fighter1.map { Fighter($0, configuration: configuration) }
 		
-		guard let fighter = Fighter(packed.fighter2) else {
-			let vivosaurCount = packed.fighter2.vivosaurs.count
-			let aiSetCount = packed.fighter2.aiSets.count
-			let interLevelBattlePointCount = packed.fighter2.interLevelBattlePointsPerVivosaur.count
-			let movesUnlockedCount = packed.fighter2.movesUnlockedPerVivosaur.count
-			
-			print("error in binary DBS file: mismatched numbers of vivosaurs, ai sets, inter-level battle points, and moves unlocked: \(vivosaurCount), \(aiSetCount), \(interLevelBattlePointCount), and \(movesUnlockedCount)")
-			
-			if configuration.keepWindowOpen.isTrueOnError {
-				waitForInput()
-			}
-			fatalError()
-		}
-		fighter2 = fighter
+		fighter2 = Fighter(packed.fighter2, configuration: configuration)
 		
 		unknowns17 = packed.unknowns17.map(Unknown.init)
 		
@@ -351,28 +338,32 @@ extension DBS.Unpacked: ProprietaryFileData {
 }
 
 extension DBS.Unpacked.Fighter {
-	init?(_ packed: DBS.Packed.Fighter) {
+	init(_ packed: DBS.Packed.Fighter, configuration: CarbonizerConfiguration) {
 		name = Name(id: packed.name)
 		rank = packed.rank
 		
 		icon = packed.icon
 		minimumVivosaurHealth = packed.minimumVivosaurHealth
 		
-		guard packed.vivosaurs.count == packed.aiSets.count,
-			  packed.vivosaurs.count == packed.interLevelBattlePointsPerVivosaur.count,
+		guard packed.vivosaurs.count == packed.interLevelBattlePointsPerVivosaur.count,
 			  packed.vivosaurs.count == packed.movesUnlockedPerVivosaur.count
 		else {
-//			print("warning: mismatched counts: \(binary.vivosaurs.count), \(binary.aiSets.count), \(binary.interLevelBattlePointsPerVivosaur.count), and \(binary.movesUnlockedPerVivosaur.count)")
-			return nil
+			print("error in binary DBS file: mismatched numbers of vivosaurs, inter-level battle points, and moves unlocked: \(packed.vivosaurs.count), \(packed.interLevelBattlePointsPerVivosaur.count), and \(packed.movesUnlockedPerVivosaur.count)")
+			
+			if configuration.keepWindowOpen.isTrueOnError {
+				waitForInput()
+			}
+			fatalError()
 		}
 		
-		vivosaurs = zip(
-			packed.vivosaurs,
-			packed.aiSets,
-			packed.interLevelBattlePointsPerVivosaur,
-			packed.movesUnlockedPerVivosaur
-		)
-		.map(Vivosaur.init)
+		vivosaurs = packed.vivosaurs.indices.map { index in
+			Vivosaur(
+				packed.vivosaurs[index],
+				aiSet: packed.aiSets[safely: index],
+				interLevelBattlePoints: packed.interLevelBattlePointsPerVivosaur[index],
+				movesUnlocked: packed.movesUnlockedPerVivosaur[index]
+			)
+		}
 		
 		unknowns3 = packed.unknowns3
 	}
@@ -381,7 +372,7 @@ extension DBS.Unpacked.Fighter {
 extension DBS.Unpacked.Fighter.Vivosaur {
 	init(
 		_ packed: DBS.Packed.Fighter.Vivosaur,
-		aiSet: Int32,
+		aiSet: Int32?,
 		interLevelBattlePoints: UInt32,
 		movesUnlocked: Int32
 	) {
