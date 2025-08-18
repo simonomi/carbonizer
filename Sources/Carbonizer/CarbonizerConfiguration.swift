@@ -87,9 +87,9 @@ struct CarbonizerConfiguration {
 			"dexCommandList": "ff1", // ff1, ffc, none
 			"externalMetadata": false,
 			
-			// stable: 3CL, BBG, DEP, DEX, DMG, DMS, DTX, ECS, HML, MAR, MM3, MMS, MPM, NDS, RLS, SHP
-			// experimental: CHR, DBS, DCL, DML, GRD, MAP, MFS
-			"fileTypes": ["3CL", "BBG", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "HML", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			// stable: 3CL, BBG, CHR, DEP, DEX, DMG, DMS, DTX, ECS, HML, MAR, MM3, MMS, MPM, NDS, RLS, SHP
+			// experimental: DBS, DCL, DML, GRD, MAP, MFS
+			"fileTypes": ["3CL", "BBG", "CHR", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "HML", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
 			// these options accept globs within an nds' contents ("text/japanese", "episode/*", "model/**", "**/arc*")
 			"onlyUnpack": [],
