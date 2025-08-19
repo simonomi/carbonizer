@@ -506,3 +506,9 @@ extension Date {
 		-timeIntervalSinceNow
 	}
 }
+
+extension Sequence {
+	func interspersed(with element: Element) -> JoinedSequence<[[Element]]> {
+		map { [$0] }.joined(separator: [element])
+	}
+}

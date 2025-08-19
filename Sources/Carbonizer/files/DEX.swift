@@ -502,10 +502,15 @@ extension String {
 					return "unknown <\(type)>: \(formattedArguments)"
 				}()
 			case .comment(let string):
-				("// " + string)
-					.replacing("\n", with: "\n// ")
-					.replacing(/\ *\n/, with: "\n")
-					.replacing(/\ $/, with: "")
+				string.split(separator: "\n", omittingEmptySubsequences: false)
+					.map {
+						if $0.isEmpty {
+							"//"
+						} else {
+							"// " + $0
+						}
+					}
+					.joined(separator: "\n")
 		}
 	}
 }

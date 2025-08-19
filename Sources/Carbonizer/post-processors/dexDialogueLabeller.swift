@@ -66,7 +66,11 @@ func label(_ dex: consuming DEX.Unpacked, with allDialogue: [UInt32: String]) ->
 		commands: dex.commands.map {
 			$0.reduce(into: []) { partialResult, command in
 				let linesOfDialogue = command.linesOfDialogue()
-					.compactMap { allDialogue[UInt32($0)] }
+					.map {
+						allDialogue[UInt32($0)] // only dialogue 1139 in e0105 is nil
+					}
+					.interspersed(with: "---")
+					.compactMap { $0 }
 				
 				for lineOfDialogue in linesOfDialogue {
 					partialResult.append(.comment(lineOfDialogue))
