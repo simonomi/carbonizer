@@ -78,33 +78,86 @@ struct CarbonizerConfiguration {
 	// TODO: including the file types makes updating carbonizer not use new file types :/
 	static let defaultConfigurationString: String = """
 		{
+			// auto 
 			"compressionMode": "auto", // pack, unpack, auto, ask
+			
 			"inputFiles": [],
+			
+			// where any output files will be placed 
 			"outputFolder": null,
+			
+			// whether to overwrite any already-existing output files
 			"overwriteOutput": false,
+			
 			"showProgress": true,
+			
 			"keepWindowOpen": "onError", // always, never, onError
+			
+			// enables pretty colorful output! not all terminals support colors though :( 
 			"useColor": true,
+			
+			// ff1 and ffc use different commands in their DEX files (episode folder), you should
+			// pick the one that matches the game you're unpacking. setting this to none may
+			// fix some weird bugs if something unexpected occurs (but it'll make episode files
+			// less readable)
 			"dexCommandList": "ff1", // ff1, ffc, none
+			
+			// stores metadata for MAR files in a separate file, rather than the creation
+			// date. this can avoid some problems, but creates a bunch of annoying extra files.
+			// required to make MAR packing work on linux
 			"externalMetadata": false,
 			
+			// basically required for anything useful: NDS, MAR
+			//
 			// stable: 3CL, BBG, CHR, DBS, DEP, DEX, DMG, DMS, DTX, ECS, HML, MAR, MM3, MMS, MPM, NDS, RLS, SHP
 			// experimental: DCL, DML, GRD, MAP, MFS
 			"fileTypes": ["3CL", "BBG", "CHR", "DBS", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "HML", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
+			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
+			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
+			// to accidentally skip a file you want to edit!
+			//
 			// these options accept globs within an nds' contents ("text/japanese", "episode/*", "model/**", "**/arc*")
+			// file names in globs may contain one wildcard "arc*", but not two "*arc*"
 			"onlyUnpack": [],
 			"skipUnpacking": [],
 			
 			"experimental": {
 				"hotReloading": false, // macOS only
 				
-				// 3clFinder, mm3Finder, mmsFinder, mpmFinder
+				// enablying any post-processor will make the resulting unpacked folder fail to
+				// repack! 
+				//
+				// 3clFinder: extract vivosaur 3D model files
+				//            make sure to enable the 3CL file type or nothing will happen
+				// mm3Finder: extract non-vivosaur 3D model files
+				//            make sure to enable the MM3 file type or nothing will happen
+				// mmsFinder: extract sprites (motion folder)
+				//            make sure to enable the MMS file type or nothing will happen
+				// mpmFinder: extract images (image folder)
+				//            make sure to enablethe  MPM file type or nothing will happen
 				"postProcessors": [],
 				
+				// adds comments to DEX files that show the dialogue used in a given command 
+				// 
+				// make sure to enable the DEX and DMG file types or nothing will happen 
 				"dexDialogueLabeller": false,
+				
+				// allows editing the comments made by dexDialogueLabeller, which will be
+				// saved to the correct MSG file. new lines of dialogue cannot be added
+				//
+				// make sure to enable the DEX and DMG file types or nothing will happen 
 				"dexDialogueSaver": false,
+				
+				// labels the blocks of commands in DEX files with their block number. this number
+				// is used by DEP files to control when a block triggers 
+				//
+				// make sure to enable both the DEX and DEP file types or nothing will happen 
 				"dexBlockLabeller": false,
+				
+				// adds labels for the names of fighters in DBS files (battle folder)
+				//
+				// make sure to enable both the DBS and DTX file types or nothing will happen
 				"dbsNameLabeller": false
 			}
 		}
