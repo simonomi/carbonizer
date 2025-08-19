@@ -97,7 +97,7 @@ struct Carbonizer: AsyncParsableCommand {
 			let readStart = Date.now
 #endif
 			
-			let file = try fileSystemObject(contentsOf: filePath, configuration: configuration)
+			var file = try fileSystemObject(contentsOf: filePath, configuration: configuration)
 			
 #if !IN_CI
 			print()
@@ -107,6 +107,50 @@ struct Carbonizer: AsyncParsableCommand {
 #endif
 			
 			let action = compressionMode.action(packedStatus: file.packedStatus())
+			
+			if configuration.experimental.dexDialogueSaver, action == .pack {
+				let updatedDialogueWithConflicts = try dexDialogueRipper(file)
+				
+				let updatedDialogue = updatedDialogueWithConflicts.mapValues {
+					switch $0 {
+						case .one(let line):
+							return line
+						case .conflict(let lines):
+							let lines = lines.sorted()
+							
+							let dialogueOptions = lines
+								.enumerated()
+								.map {
+									if configuration.useColor {
+										"\(.cyan)\($0 + 1). \(.brightRed)'\($1)'\(.normal)"
+									} else {
+										"\($0 + 1). '\($1)'"
+									}
+								}
+								.joined(separator: "\n")
+							
+							print("Conflicting dialogue:\n\(dialogueOptions)\nWhich would you like to pick?", terminator: " ")
+							
+							guard let choiceNumber = readLine().flatMap(Int.init),
+								  let choice = lines[safely: choiceNumber - 1]
+							else {
+								print("Invalid response, please input a number matching one of the given options")
+								if configuration.keepWindowOpen.isTrueOnError {
+									waitForInput()
+								}
+								Self.exit(withError: nil)
+							}
+							
+							return choice
+					}
+				}
+				
+				file = dexDialogueSaver(
+					file,
+					updatedDialogue: updatedDialogue,
+					configuration: configuration
+				)
+			}
 			
 			var processedFile: any FileSystemObject
 			switch action {

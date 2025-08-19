@@ -67,7 +67,7 @@ func label(_ dex: consuming DEX.Unpacked, with allDialogue: [UInt32: String]) ->
 			$0.reduce(into: []) { partialResult, command in
 				let linesOfDialogue = command.linesOfDialogue()
 					.map {
-						allDialogue[UInt32($0)] // only dialogue 1139 in e0105 is nil
+						allDialogue[$0] // only dialogue 1139 in e0105 is nil
 					}
 					.interspersed(with: "---")
 					.compactMap { $0 }

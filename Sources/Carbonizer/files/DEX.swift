@@ -443,14 +443,14 @@ extension DEX.Unpacked.Command {
 		}
 	}
 	
-	func linesOfDialogue() -> [Int32] {
+	func linesOfDialogue() -> [UInt32] {
 		guard case .known(_, let definition, let arguments) = self else { return [] }
 		
 		return definition.argumentTypes
 			.indices { $0 == .dialogue }
 			.ranges
 			.map(\.lowerBound)
-			.map { arguments[$0] }
+			.map { UInt32(arguments[$0]) }
 	}
 }
 

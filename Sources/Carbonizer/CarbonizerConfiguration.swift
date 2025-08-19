@@ -23,6 +23,7 @@ struct CarbonizerConfiguration {
 		var hotReloading: Bool
 		var postProcessors: [String]
 		var dexDialogueLabeller: Bool
+		var dexDialogueSaver: Bool
 		var dexBlockLabeller: Bool
 		var dbsNameLabeller: Bool
 	}
@@ -102,6 +103,7 @@ struct CarbonizerConfiguration {
 				"postProcessors": [],
 				
 				"dexDialogueLabeller": false,
+				"dexDialogueSaver": false,
 				"dexBlockLabeller": false,
 				"dbsNameLabeller": false
 			}
@@ -166,7 +168,7 @@ extension CarbonizerConfiguration: Decodable {
 
 extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 	enum CodingKeys: CodingKey {
-		case hotReloading, postProcessors, dexDialogueLabeller, dexBlockLabeller, dbsNameLabeller
+		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -181,6 +183,8 @@ extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 			fallback.postProcessors
 		dexDialogueLabeller = try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueLabeller) ??
 			fallback.dexDialogueLabeller
+		dexDialogueSaver = try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueSaver) ??
+			fallback.dexDialogueSaver
 		dexBlockLabeller =    try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
 			fallback.dexBlockLabeller
 		dbsNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
