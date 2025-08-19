@@ -19,8 +19,8 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //		print(file.name)
 //		print(mpm.entry3 == nil)
 		
-		let colorPaletteArchive = parent.contents.first { $0.name == mpm.entry1.tableName } as! MAR.Unpacked
-		let colorPalette = colorPaletteArchive.files[Int(mpm.entry1.index)]
+		let colorPaletteArchive = parent.contents.first { $0.name == mpm.palette.tableName } as! MAR.Unpacked
+		let colorPalette = colorPaletteArchive.files[Int(mpm.palette.index)]
 		let colorPaletteData = colorPalette.content as! Datastream
 		colorPaletteData.offset = 0 // multiple files use the same palette
 		let palette = try Palette(colorPaletteData)
@@ -33,8 +33,8 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		// 1: 16, 2: 32, 4: 64, 8: 128, 16: 256
 		// unknown4 * 16 == palette size
 		
-		let bitmapArchive = parent.contents.first { $0.name == mpm.entry2.tableName } as! MAR.Unpacked
-		let bitmap = bitmapArchive.files[Int(mpm.entry2.index)]
+		let bitmapArchive = parent.contents.first { $0.name == mpm.bitmap.tableName } as! MAR.Unpacked
+		let bitmap = bitmapArchive.files[Int(mpm.bitmap.index)]
 		let bitmapData = bitmap.content as! Datastream
 		
 		let bitmapFile = Bitmap(
@@ -54,7 +54,7 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		)
 		
 		
-		if mpm.entry3 != nil {
+		if mpm.bgMap != nil {
 //		if let entry3 = mpm.entry3 {
 //			let bgMapArchive = parent.contents.first { $0.name == entry3.tableName } as! MAR.Unpacked
 //			let bgMap = bgMapArchive.files[Int(entry3.index)]

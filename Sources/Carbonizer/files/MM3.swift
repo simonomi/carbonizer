@@ -5,16 +5,22 @@ enum MM3 {
 	struct Packed {
 		@Include
 		static let magicBytes = "MM3"
+		
 		var modelIndex: UInt32
 		var modelTableNameOffset: UInt32
+		
 		var animationIndex: UInt32
 		var animationTableNameOffset: UInt32
+		
 		var textureIndex: UInt32
 		var textureTableNameOffset: UInt32
+		
 		@Offset(givenBy: \Self.modelTableNameOffset)
 		var modelTableName: String
+		
 		@Offset(givenBy: \Self.animationTableNameOffset)
 		var animationTableName: String
+		
 		@Offset(givenBy: \Self.textureTableNameOffset)
 		var textureTableName: String
 	}

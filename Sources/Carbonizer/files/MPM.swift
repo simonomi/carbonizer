@@ -8,24 +8,32 @@ enum MPM {
 		var unknown1: UInt32
 		var unknown2: UInt32
 		var unknown3: UInt32
+		
 		var width: UInt32
 		var height: UInt32
+		
 		var unknown4: UInt32
 		var unknown5: UInt32
 		var unknown6: UInt32
-		var index1: UInt32
-		var tableFileName1Offset: UInt32 = 0x3C
-		var index2: UInt32
-		var tableFileName2Offset: UInt32
-		var index3: UInt32
-		var tableFileName3Offset: UInt32
-		@Offset(givenBy: \Self.tableFileName1Offset)
-		var tableFileName1: String
-		@Offset(givenBy: \Self.tableFileName2Offset)
-		var tableFileName2: String
-		@If(\Self.tableFileName3Offset, is: .notEqualTo(0))
-		@Offset(givenBy: \Self.tableFileName3Offset)
-		var tableFileName3: String?
+		
+		var paletteIndex: UInt32
+		var paletteTableNameOffset: UInt32 = 0x3C
+		
+		var bitmapIndex: UInt32
+		var bitmapTableNameOffset: UInt32
+		
+		var bgMapIndex: UInt32
+		var bgMapTableNameOffset: UInt32
+		
+		@Offset(givenBy: \Self.paletteTableNameOffset)
+		var paletteTableName: String
+		
+		@Offset(givenBy: \Self.bitmapTableNameOffset)
+		var bitmapTableName: String
+		
+		@If(\Self.bgMapTableNameOffset, is: .notEqualTo(0))
+		@Offset(givenBy: \Self.bgMapTableNameOffset)
+		var bgMapTableName: String?
 	}
 	
 	struct Unpacked {
@@ -42,9 +50,9 @@ enum MPM {
 		var unknown5: UInt32
 		var unknown6: UInt32
 		
-		var entry1: TableEntry
-		var entry2: TableEntry
-		var entry3: TableEntry?
+		var palette: TableEntry
+		var bitmap: TableEntry
+		var bgMap: TableEntry?
 		
 		struct TableEntry {
 			var index: UInt32
@@ -76,17 +84,17 @@ extension MPM.Packed: ProprietaryFileData {
 		unknown5 = unpacked.unknown5
 		unknown6 = unpacked.unknown6
 		
-		index1 = unpacked.entry1.index
-		index2 = unpacked.entry2.index
-		index3 = unpacked.entry3?.index ?? 0
+		paletteIndex = unpacked.palette.index
+		bitmapIndex = unpacked.bitmap.index
+		bgMapIndex = unpacked.bgMap?.index ?? 0
 		
-		tableFileName1 = unpacked.entry1.tableName
-		tableFileName2 = unpacked.entry2.tableName
-		tableFileName3 = unpacked.entry3?.tableName
+		paletteTableName = unpacked.palette.tableName
+		bitmapTableName = unpacked.bitmap.tableName
+		bgMapTableName = unpacked.bgMap?.tableName
 		
-		tableFileName2Offset = tableFileName1Offset + UInt32(tableFileName2.utf8CString.count)
-		tableFileName3Offset = tableFileName3.map { [tableFileName2Offset] in
-			tableFileName2Offset + UInt32($0.utf8CString.count)
+		bitmapTableNameOffset = paletteTableNameOffset + UInt32(bitmapTableName.utf8CString.count)
+		bgMapTableNameOffset = bgMapTableName.map { [bitmapTableNameOffset] in
+			bitmapTableNameOffset + UInt32($0.utf8CString.count)
 		} ?? 0
 	}
 }
@@ -115,10 +123,10 @@ extension MPM.Unpacked: ProprietaryFileData {
 		unknown5 = packed.unknown5
 		unknown6 = packed.unknown6
 		
-		entry1 = TableEntry(index: packed.index1, tableName: packed.tableFileName1)
-		entry2 = TableEntry(index: packed.index2, tableName: packed.tableFileName2)
-		entry3 = packed.tableFileName3.map {
-			TableEntry(index: packed.index3, tableName: $0)
+		palette = TableEntry(index: packed.paletteIndex, tableName: packed.paletteTableName)
+		bitmap = TableEntry(index: packed.bitmapIndex, tableName: packed.bitmapTableName)
+		bgMap = packed.bgMapTableName.map {
+			TableEntry(index: packed.bgMapIndex, tableName: $0)
 		}
 	}
 }
@@ -137,9 +145,9 @@ extension MPM.Unpacked: Codable {
 		case unknown5 = "unknown 5"
 		case unknown6 = "unknown 6"
 		
-		case entry1 = "entry 1"
-		case entry2 = "entry 2"
-		case entry3 = "entry 3"
+		case palette = "palette"
+		case bitmap = "bitmap"
+		case bgMap = "BG map"
 	}
 }
 

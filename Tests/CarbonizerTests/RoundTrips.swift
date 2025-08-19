@@ -13,8 +13,8 @@ import Foundation
 @Suite
 struct RoundTrips {
 	@Test(
-//		.disabled("without compression, these will always fail"),
 		arguments: [
+			// without compression, these will always fail (they're MARs)
 //			("japanese", .packed),
 //			("map c 0004", .packed),
 //			("map e 0048", .packed),
