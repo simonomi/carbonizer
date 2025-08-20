@@ -45,8 +45,10 @@ jobs:
     #     swift-version: "6.1"
       uses: compnerd/gha-setup-swift@main
       with:
-        branch: swift-6.1-release
-        tag: 6.1-RELEASE
+        branch: swift-6.1.2-release
+        tag: 6.1.2-RELEASE
+    - name: list swift runtimes
+      run: dir "C:\\Users\\runneradmin\\AppData\\Local\\Programs\\Swift\\Runtimes"
     - name: Checkout
       uses: actions/checkout@v4
 #     - name: Test
