@@ -57,6 +57,7 @@ enum DEX {
 			var argumentIndicesFromText: [Int] // this is the mapping of the binary order to text order TODO: rename
 		}
 		
+		// any time these are updated, also update fftechwiki
 		static let ff1Commands: [UInt32: CommandDefinition] = [
 			1:   "dialogue \(0, .dialogue)",
 			2:   "centered dialogue \(0, .dialogue)",
@@ -84,7 +85,7 @@ enum DEX {
 			// 26: (#)
 			// 27: (#) 44 makes the hotel person intercept you (which occurs in e0044) but doenst seem to just activate an episode
 			32:  "unowned dialogue \(0, .dialogue)",
-			33:  "dialogue with choice \(1, .dialogue), unknown: \(0, .unknown)", // 0 is the memory location for the answer?
+			33:  "dialogue with choice \(1, .dialogue), storing result at \(0, .dep)",
 			34:  "turn \(0, .character) to \(1, .degrees)",
 			35:  "turn1 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
 			36:  "turn \(0, .character) towards \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
@@ -114,6 +115,7 @@ enum DEX {
 			80:  "make \(0, .character) follow \(1, .character)",
 			90:  "set level for level-up animation \(0, .unknown)",
 			112: "play animation \(1, .unknown) on \(0, .character)", // 1 is animation
+			                                                          // TODO: make animation type
 			114: "set \(0, .character) body model variant to \(1, .unknown)", // 1 is model variant
 			115: "set \(0, .character) head model variant to \(1, .unknown)", // 1 is model variant
 			// 116: (#) i think this stops music from playing, not sure if thats the main effect or just a side effect
@@ -129,7 +131,7 @@ enum DEX {
 			135: "movement \(1, .movement) on \(0, .character)",
 			136: "unknown 136: \(0, .character) \(1, .unknown)",
 			//   1 24 - makes hunter blush
-			138: "shake screen for \(2, .frames) with intensity: \(0, .unknown), gradual intensity: \(1, .unknown)",
+			138: "shake screen for \(2, .frames) with intensity: \(0, .unknown), gradual intensity: \(1, .unknown)", // TODO: make int types for these ?
 			// 141: (#)
 			142: "modify player name", // has back button
 			143: "set player name",
@@ -152,6 +154,7 @@ enum DEX {
 			// all the unknown commands as of rn 2 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 44 46 47 48 52 53 55 62 63 71 72 75 76 77 81 82 83 84 85 86 87 88 89 91 92 93 95 96 97 98 99 100 102 103 104 105 106 107 108 110 111 112 113 116 118 120 121 126 127 128 134 136 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205 206
 		]
 		
+		// any time these are updated, also update fftechwiki
 		static let ffcCommands: [UInt32: CommandDefinition] = [
 			71:  "dialogue \(0, .dialogue)",
 			107: "unowned dialogue \(0, .dialogue)",

@@ -170,7 +170,10 @@ struct SpriteAnimation: BinaryConvertible {
 	
 	func frames(palettes: [SpritePalette?], bitmaps: [SpriteBitmap]) throws -> [Bitmap] {
 		// cant parse 7s
-		if commands.contains(where: \.isUnknown) { return [] }
+		if commands.contains(where: \.isUnknown) {
+			print("unknown animation command")
+			return []
+		}
 		
 		func dontWantToParse(_ command: Command) -> Bool {
 			switch command {
@@ -179,7 +182,10 @@ struct SpriteAnimation: BinaryConvertible {
 			}
 		}
 		
-		if commands.contains(where: dontWantToParse) { return [] }
+		if commands.contains(where: dontWantToParse) {
+			print("dont want to parse this frame")
+			return []
+		}
 		
 		var frames = [Bitmap]()
 		

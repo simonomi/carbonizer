@@ -19,6 +19,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	if file.name == "hit_little.bin" { return [file] } // has bitmaps index 3 4 5 6 but only has 1?
 	if parent.name == "ui_shop", file.name == "cont_rbot.bin" { return [file] } // 1st palette is malformed
 	
+//	guard parent.name == "battle_creature" else {
 //	guard file.name == "mike_test.bin" else {
 //	guard file.name == "cont_rbot.bin" else {
 //	guard file.name == "new_x_ray.bin" else {
@@ -62,7 +63,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		for animationIndex in mms.animation.indices.map(Int.init).dropFirst() {
 			if parent.name == "ui_shop", file.name == "hold_cursor.bin", animationIndex == 1 { continue } // 1st palette is malformed
 			
-//			print("\(parent.name)/\(file.name)")
+			print("\(parent.name)/\(file.name)")
 			
 			let colorPaletteArchive = parent.contents.first { $0.name == mms.colorPalette.tableName } as! MAR.Unpacked
 			
@@ -79,10 +80,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				let colorPaletteData = Datastream(colorPaletteFile.content as! Datastream) // copy so as not to modify the original
 				
 				do {
-					// TODO: palettes are swapping red and blue
-					// is this different between sprites and textures?
 					return try SpritePalette(colorPaletteData)
-						.colorOrderSwapped()
 				} catch {
 					throw BinaryParserError.whileReadingFile(
 						parent.name + "/" + file.name,
