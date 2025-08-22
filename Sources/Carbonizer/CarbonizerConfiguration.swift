@@ -146,6 +146,7 @@ struct CarbonizerConfiguration {
 	]}
 	
 	// TODO: including the file types makes updating carbonizer not use new file types :/
+	// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns
 	static let defaultConfigurationString: String = """
 		{
 			// auto 

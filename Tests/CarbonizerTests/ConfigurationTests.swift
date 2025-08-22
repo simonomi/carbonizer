@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 
 @testable import Carbonizer
 
@@ -72,5 +73,13 @@ struct Globs {
 		#expect(glob.matches(["notModel", "arc"]))
 		#expect(glob.matches(["image", "arcdin"]))
 		#expect(glob.matches(["image", "one", "two", "three", "arcdin"]))
+	}
+	
+	@Test
+	func onlyUnpackConfiguration() throws {
+		let rawConfiguration = #"{ "onlyUnpack": ["model/fieldchar/**"] }"#.data(using: .utf8)!
+		let configuration = try JSONDecoder().decode(CarbonizerConfiguration.self, from: rawConfiguration)
+		
+		#expect(configuration.shouldUnpack(["model", "fieldchar", "cha01a_01"]))
 	}
 }
