@@ -6,7 +6,9 @@ func makeFileData(
 	configuration: CarbonizerConfiguration
 ) throws -> (any ProprietaryFileData)? {
 	let allFileTypes: [String: any ProprietaryFileData.Type] = [
+		"3CL": TCL.Unpacked.self,
 		"BBG": BBG.Unpacked.self,
+		"BCO": BCO.Unpacked.self,
 		"CHR": CHR.Unpacked.self,
 		"DBS": DBS.Unpacked.self,
 		"DCL": DCL.Unpacked.self,
@@ -26,7 +28,6 @@ func makeFileData(
 		"MMS": MMS.Unpacked.self,
 		"MPM": MPM.Unpacked.self,
 		"RLS": RLS.Unpacked.self,
-		"3CL": TCL.Unpacked.self,
 		"SHP": SHP.Unpacked.self
 	]
 	

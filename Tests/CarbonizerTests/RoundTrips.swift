@@ -37,13 +37,16 @@ struct RoundTrips {
 			("battle 0269", .packed),
 			("battle 0587", .packed),
 			("battle 0605", .packed),
+			("creature_offset_defs", .packed),
+//			("creature_defs", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 		let inputFilePath = filePath(for: fileName)
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
-		configurationWithFileTypes.fileTypes.append("DBS")
+		configurationWithFileTypes.fileTypes.append("BCO")
+//		configurationWithFileTypes.fileTypes.append("DCL")
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)
 		
