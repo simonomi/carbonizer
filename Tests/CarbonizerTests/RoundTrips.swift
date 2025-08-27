@@ -45,8 +45,7 @@ struct RoundTrips {
 		let inputFilePath = filePath(for: fileName)
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
-		configurationWithFileTypes.fileTypes.append("BCO")
-//		configurationWithFileTypes.fileTypes.append("DCL")
+		configurationWithFileTypes.fileTypes.append("DCL")
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)
 		
