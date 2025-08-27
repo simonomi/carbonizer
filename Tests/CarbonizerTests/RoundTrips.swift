@@ -39,6 +39,7 @@ struct RoundTrips {
 			("battle 0605", .packed),
 			("creature_offset_defs", .packed),
 //			("creature_defs", .packed),
+			("kaseki_defs", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {

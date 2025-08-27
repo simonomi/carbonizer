@@ -10,7 +10,7 @@ protocol ProprietaryFileData {
 	func packed(configuration: CarbonizerConfiguration) -> Packed
 	
 	associatedtype Unpacked: ProprietaryFileData
-	func unpacked(configuration: CarbonizerConfiguration) -> Unpacked
+	func unpacked(configuration: CarbonizerConfiguration) throws -> Unpacked
 	
 	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws
 	func write(to data: Datawriter)

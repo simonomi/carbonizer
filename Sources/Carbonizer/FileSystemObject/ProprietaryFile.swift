@@ -53,7 +53,7 @@ extension ProprietaryFile: FileSystemObject {
 		ProprietaryFile(
 			name: name,
 			metadata: metadata,
-			data: data.unpacked(configuration: configuration) as any ProprietaryFileData
+			data: try data.unpacked(configuration: configuration) as any ProprietaryFileData
 		)
 	}
 }
