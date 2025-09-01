@@ -201,6 +201,16 @@ struct Carbonizer: AsyncParsableCommand {
 			
 			if configuration.experimental.dexDialogueLabeller, action == .unpack {
 				let dialogue = dmgRipper(processedFile)
+				
+//				struct Line: Codable {
+//					var index: UInt32
+//					var string: String
+//				}
+//				
+//				try JSONEncoder(.prettyPrinted)
+//					.encode(dialogue.map(Line.init))
+//					.write(to: URL(filePath: "/tmp/output.json")!)
+				
 				processedFile = dexDialogueLabeller(
 					processedFile,
 					dialogue: dialogue,

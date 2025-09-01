@@ -202,9 +202,9 @@ enum ECS {
 			var higherScoreLowerBound: Int32 // fixed point
 			var higherScoreUpperBound: Int32 // fixed point
 			
-			var unknown1: Int32  // fixed point? always 0
-			var unknown2: Int32 // fixed point
-			var unknown3: Int32 // fixed point
+			var otherScoreProbability: Int32  // fixed point? always 0
+			var otherScoreLowerBound: Int32 // fixed point
+			var otherScoreUpperBound: Int32 // fixed point
 		}
 		
 		@BinaryConvertible
@@ -383,16 +383,18 @@ enum ECS {
 			var nextLevelAt: Int32
 			
 			var cleaningScoreLowerBound: Double
-			var cleaningScoreUpperBound: Double
+			var cleaningScoreUpperBound: Double // not included
 			
 			var higherScoreProbability: Double
 			
 			var higherScoreLowerBound: Double
-			var higherScoreUpperBound: Double
+			var higherScoreUpperBound: Double // not included
 			
-			var unknown1: Double
-			var unknown2: Double
-			var unknown3: Double
+			var otherScoreProbability: Double // uses the same random number as higher score, so
+											  // setting them both to 50% always overrides default score
+											  // but higher score gets prioirity, so both 100% chooses higher
+			var otherScoreLowerBound: Double
+			var otherScoreUpperBound: Double
 		}
 		
 		struct ThingJ: Codable {
@@ -591,9 +593,9 @@ extension ECS.Packed.KL33NLevel {
 		higherScoreLowerBound = Int32(unpacked.higherScoreLowerBound * 4096)
 		higherScoreUpperBound = Int32(unpacked.higherScoreUpperBound * 4096)
 		
-		unknown1 = Int32(unpacked.unknown1 * 4096)
-		unknown2 = Int32(unpacked.unknown2 * 4096)
-		unknown3 = Int32(unpacked.unknown3 * 4096)
+		otherScoreProbability = Int32(unpacked.otherScoreProbability * 4096)
+		otherScoreLowerBound = Int32(unpacked.otherScoreLowerBound * 4096)
+		otherScoreUpperBound = Int32(unpacked.otherScoreUpperBound * 4096)
 	}
 }
 
@@ -811,9 +813,9 @@ extension ECS.Unpacked.KL33NLevel {
 		higherScoreLowerBound = Double(packed.higherScoreLowerBound) / 4096
 		higherScoreUpperBound = Double(packed.higherScoreUpperBound) / 4096
 		
-		unknown1 = Double(packed.unknown1) / 4096
-		unknown2 = Double(packed.unknown2) / 4096
-		unknown3 = Double(packed.unknown3) / 4096
+		otherScoreProbability = Double(packed.otherScoreProbability) / 4096
+		otherScoreLowerBound = Double(packed.otherScoreLowerBound) / 4096
+		otherScoreUpperBound = Double(packed.otherScoreUpperBound) / 4096
 	}
 }
 

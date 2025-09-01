@@ -1,7 +1,7 @@
 import Foundation
 
 #if os(macOS)
-typealias EventHandler = (URL) throws -> Void
+typealias EventHandler = @MainActor (URL) async throws -> Void
 
 struct PathMonitor {
 	var sources: [any DispatchSourceFileSystemObject]
@@ -13,7 +13,10 @@ struct PathMonitor {
 	}
 }
 
-func monitorFiles(in path: URL, with eventHandler: @escaping EventHandler) throws -> PathMonitor {
+func monitorFiles(
+	in path: URL,
+	with eventHandler: sending @escaping @isolated(any) EventHandler
+) throws -> PathMonitor {
 	guard try path.type() == .folder else {
 		fatalError("cannot monitor file")
 	}
@@ -38,10 +41,13 @@ func monitorFiles(in path: URL, with eventHandler: @escaping EventHandler) throw
 		
 //		print(latestModifiedPath as Any, lastDate)
 		
-		do {
-			try eventHandler(latestModifiedPath)
-		} catch {
-			print(error)
+		Task { [eventHandler] in
+			do {
+				try await Task.sleep(for: .seconds(0.1)) // give sime time for any editing to finish
+				try await eventHandler(latestModifiedPath)
+			} catch {
+				print(error)
+			}
 		}
 	}
 	
