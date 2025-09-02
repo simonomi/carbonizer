@@ -43,7 +43,36 @@ enum DEX {
 		var commands: [[Command]]
 		
 		enum ArgumentType {
+			// TODO: add boolean and integer
 			case character, degrees, dep, dialogue, effect, fixedPoint, fossil, frames, image, map, movement, music, soundEffect, unknown, vivosaur
+			// notes on dep:
+			// - two numbers, a u16 and u8 (is the u8 actually a u16?)
+			// - u16 is lower bits, u8 is upper (>> 24)
+			// - i list them u16 u8, should i swap that?
+			// - 2nd number seems to be a type maybe?
+			// - all 2nd numbers: 0, 2, 5, 6, 7, 8, 9, 10
+			//   - 0: used for flag4s, dialogue with choice (both kinds) result
+			//     dep: never (read with 8? maybe 9?)
+			//   - 2: never
+			//     dep: has played, has not played (blocks)
+			//   - 3: never
+			//     dep: has played, has not played (blocks)
+			//   - 5: used for flag5 and flag6
+			//     dep: 19 20 21 22 (boolean)
+			//   - 6: used for flag5 and flag6
+			//     dep: 19 20 21 22 (boolean)
+			//   - 7: used for flag5
+			//     dep: 20 21 (boolean)
+			//   - 8: flag70
+			//     dep: 7 8 9 10 11 13 14 15 17 18 19 21 (aka 7-11 13-15 17-19 21) (numerical AND boolean)
+			//   - 9: flag70
+			//     dep: 7 8 9 10 11 13 14 15 16 17 18 (aka 7-11 13-18) (aka numerical comparisons)
+			//   - 10: flag5 flag6
+			//     dep: flag19 flag21
+			// <59 8> might be mask shop result? or maybe previous mask?
+			// <4 9> might be current mask?
+			// <2 9> == 1 means your case is size 8
+			// <9 9> may be number of fossil rocks
 		}
 		
 		struct CommandDefinition {
@@ -63,15 +92,22 @@ enum DEX {
 			2:   "centered dialogue \(0, .dialogue)",
 			// 3: (#)
 			//     7025 freezes camera focus (?)
-			4:   "memory 4 \(0, .unknown)", // wipes some stored dialogue answer. argument is the index in DEP
-			                                // possibly dep too but the 2nd number is always 0
-			                                // mark dialogue as not played!!!!!!!!!! (and possibly other things)
-			5:   "memory 5 \(0, .dep)",
+			4:   "flag 4 \(0, .dep)",
+			// wipes some stored dialogue answer. argument is the index in DEP
+			// possibly dep too but the 2nd number is always 0
+			// mark dialogue as not played!!!!!!!!!! (and possibly other things)
+			// clear?? flag? but how is it different than flag 6?
+			5:   "flag 5 \(0, .dep)",
 			//     0xa00001d <29 10> makes it possible to save
 			//     0x50000cf <207 5> activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
 			//     0x5002d21 <11553 5> makes the samurai unable to battle
-			6:   "memory 6 \(0, .dep)",
-			//     0x500010f <271 5> is set with 6 when resetting name, and 5 when resetting vivosaur
+			//     activates DEP's unknown 19
+			//     set true?
+			//     memory types 5, 6, 7, 10
+			6:   "flag 6 \(0, .dep)",
+			//     0x500010f <271 5> is set with memory 6 when resetting name, and memory 5 when resetting vivosaur
+			//     set false?
+			//     memory types 5, 6, 10
 			7:   "spawn \(0, .character) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
 			// 8:   (<character>, #)
 			9:   "ambiguous spawn/move/teleport \(0, .character) \(1, .unknown) \(2, .unknown)",
@@ -109,13 +145,24 @@ enum DEX {
 			// 62: ()
 			//    often after diologue choices
 			//    often after battles
+			//    after sue asks where to go, removing memory but keeping 62 makes camera low, but without 62 camera resets properly
 			// 63: ()
-			70:  "memory 70 \(0, .dep), \(1, .unknown)",
+			70:  "flag 70 \(0, .dep) \(1, .unknown)",
 			//     writing to 0x9000007 <7 9> sets the player's profile pic (0-7 is a-h)
+			//     memory location <7 9> is player profile pic
+			//     set flag to?
+			71:  "add \(1, .unknown) to flag \(0, .dep)",
+			72:  "subtract \(1, .unknown) from flag \(0, .dep)",
+			// 75 (flag, flag) (set flag to?)
 			80:  "make \(0, .character) follow \(1, .character)",
+			82:  "make \(0, .character) wander randomly, waiting between \(1, .frames) and \(2, .frames), walking speed \(3, .fixedPoint), distance up to \(4, .fixedPoint)",
+			86: "make \(0, .character) chase player, detection range \(1, .fixedPoint), run distance \(2, .fixedPoint), chasing speed \(3, .fixedPoint), returning speed \(4, .fixedPoint), cooldown \(5, .frames)",
 			90:  "set level for level-up animation \(0, .unknown)",
-			112: "play animation \(1, .unknown) on \(0, .character)", // 1 is animation
-			                                                          // TODO: make animation type
+			97:  "set \(0, .vivosaur) fossil scores to \(1, .unknown) \(2, .unknown) \(3, .unknown) \(4, .unknown)", // TODO: number type
+			// 106: mask shop
+			107: "give \(0, .fossil), dark: \(1, .unknown), red: \(2, .unknown)", // TODO: 1 and 2 are booleans
+			108: "give \(0, .fossil) without message, dark: \(1, .unknown), red: \(2, .unknown)", // TODO: 1 and 2 are booleans
+			112: "play animation \(1, .unknown) on \(0, .character)", // TODO: number type
 			114: "set \(0, .character) body model variant to \(1, .unknown)", // 1 is model variant
 			115: "set \(0, .character) head model variant to \(1, .unknown)", // 1 is model variant
 			// 116: (#) i think this stops music from playing, not sure if thats the main effect or just a side effect
@@ -145,11 +192,12 @@ enum DEX {
 			// 160: (#, #)
 			// 178: () suppresses "Fighter Area" corner tag?
 			//     used in e0302 before a fossil battle
-			191: "revive \(0, .vivosaur)",
+			191: "show revival screen for \(0, .vivosaur)",
 			194: "unknown 194: \(0, .character)",
 			// 195: (#, #)
 			200: "start turning \(0, .character) to follow \(1, .character)",
 			201: "stop turning \(0, .character)",
+			206: "set \(0, .vivosaur) battle points to \(1, .unknown)" // TODO: number type
 			
 			// all the unknown commands as of rn 2 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 44 46 47 48 52 53 55 62 63 71 72 75 76 77 81 82 83 84 85 86 87 88 89 91 92 93 95 96 97 98 99 100 102 103 104 105 106 107 108 110 111 112 113 116 118 120 121 126 127 128 134 136 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205 206
 		]

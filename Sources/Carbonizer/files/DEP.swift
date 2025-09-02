@@ -17,7 +17,8 @@ enum DEP {
 		@BinaryConvertible
 		struct Block {
 			var id: Int32
-			var unknown1: Int32
+			
+			var unknown1: Int32 // 0 for and, 1 for or!
 			var unknown2: Int32
 			
 			var requirementCount: UInt32
@@ -37,6 +38,8 @@ enum DEP {
 				@Offset(givenBy: \Self.argumentsOffset)
 				var arguments: [Argument]
 				
+				// TODO: this should be a uint32 instead, right?
+				// wait, is this backwards from DEX's dep?? how strange
 				@BinaryConvertible
 				struct Argument {
 					var unknown1: UInt16
@@ -51,7 +54,7 @@ enum DEP {
 		var blocks: [Block]
 		
 		enum ArgumentType {
-			// TODO: rename dep to something more fitting (address, variable, ?) (and do the same in dex)
+			// TODO: rename dep to something more fitting (flag?) (and do the same in dex)
 			case block, character, dep, door, firstNumberOnly, unknown, vivosaur
 		}
 		
@@ -68,22 +71,53 @@ enum DEP {
 			1:  "unconditional/always",
 			2:  "talked to \(0, .character)",
 			3:  "entered through \(0, .door)",
-			13: "memory \(0, .dep) is \(1, .firstNumberOnly)",
-//			56 8-# 0    requires being fighter level #
-//			90 8-# 0    used to alternate hotel manager between dialogues
-			16: "memory \(0, .dep) is less than \(1, .firstNumberOnly)", // wait, < or <=? probably <
-//			56 8-5 0    used to determine whether to spawn bullwort in his office
+			5:  "caught by \(0, .character)",
+			6:  "unknown 6 \(0, .vivosaur)", // in unused code to give the chickens
+			7:  "flag \(0, .dep) equals \(1, .dep)",
+			8:  "flag \(0, .dep) does not equal \(1, .dep)",
+			9:  "flag \(0, .dep) is less than \(1, .dep)",
+			10: "flag \(0, .dep) is less than or equal to \(1, .dep)",
+			// 10 (flag, flag) yes for nil nil, not for 8 7 or 7 7 or 6 7 or 0 0
+			11: "flag \(0, .dep) is greater than \(1, .dep)",
+			// 12 is never used, but i bet its >=
+			13: "flag \(0, .dep) is \(1, .firstNumberOnly)",
+//			<56 8> <# 0>    requires being fighter level #
+//			<90 8> <# 0>    used to alternate hotel manager between dialogues
+			14: "flag \(0, .dep) is not \(1, .firstNumberOnly)",
+			15: "flag \(0, .dep) is less than number \(1, .firstNumberOnly)",
+			// 15 // yes for nil 7, no for 7 7 and 6 7 and 8 7, pretty sure this is <, but not sure why weird
+			// changing unknown2 affects this???
+			16: "flag \(0, .dep) is less than or equal to number \(1, .firstNumberOnly)",
+			// wait, < or <=? probably <= right???
+			// same test results as 9 and 15: triggers for nil but not once set??
+//			<56 8> <5 0>    used to determine whether to spawn bullwort in his office
 			// 13/16 memory types are 8 and 9
-			19: "memory 19 \(0..., .dep)",
-//			requires an unknown 5
+			17: "flag \(0, .dep) is greater than number \(1, .firstNumberOnly)",
+			// 17 (flag, number)? >?
+			18: "flag \(0, .dep) is greater than or equal to number \(1, .firstNumberOnly)",
+			// 18 (flag, number)? this also seems like >=??
+			19: "flag 19 \(0..., .dep)",
+//			requires an unknown 5 (&&, right?)
 			// requires yes/first
+			// require true?
+			// notably NOT same as checking == 1 (or != 0)... right?
 			// memory types 5, 6, and 10
-			21: "memory 21 \(0..., .dep)",
-//			requires NOT an unknown 5
+			20: "flag 20 \(0..., .dep)",
+			// requires an unknown5, but || ?
+			21: "flag 21 \(0..., .dep)",
+//			requires NOT an unknown 5 (&&)
 			// requires no/second
+			// require false?
+			// notably NOT same as checking == 0... right?
 			// memory types 5, 6, 7, and 10
-			36: "\(0, .block) has played", // is op 2 always 2?
-			38: "\(0, .block) has not played",
+			22: "flag 22 \(0..., .dep)",
+			// 22: requires NOT an unknown5, but ||
+			23: "unknown 23 \(0, .firstNumberOnly)",
+			// used to trigger rex and snivels when you get close enough to them (chapter 4)
+			36: "\(0, .block) has played", // op 2 is always 2 or 3
+			37: "at least one of \(0..., .block) has played",
+			38: "\(0, .block) has not played", // op 2 is always 2 or 3
+			39: "none of \(0..., .block) have played",
 			41: "has \(0, .vivosaur)",
 		]
 		
