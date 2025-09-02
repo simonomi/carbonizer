@@ -43,9 +43,8 @@ enum DEX {
 		var commands: [[Command]]
 		
 		enum ArgumentType {
-			// TODO: add boolean and integer
-			case character, degrees, dep, dialogue, effect, fixedPoint, fossil, frames, image, map, movement, music, soundEffect, unknown, vivosaur
-			// notes on dep:
+			case boolean, character, degrees, flag, dialogue, effect, fixedPoint, fossil, frames, image, integer, map, movement, music, soundEffect, unknown, vivosaur
+			// notes on flags:
 			// - two numbers, a u16 and u8 (is the u8 actually a u16?)
 			// - u16 is lower bits, u8 is upper (>> 24)
 			// - i list them u16 u8, should i swap that?
@@ -92,19 +91,19 @@ enum DEX {
 			2:   "centered dialogue \(0, .dialogue)",
 			// 3: (#)
 			//     7025 freezes camera focus (?)
-			4:   "flag 4 \(0, .dep)",
+			4:   "flag 4 \(0, .flag)",
 			// wipes some stored dialogue answer. argument is the index in DEP
 			// possibly dep too but the 2nd number is always 0
 			// mark dialogue as not played!!!!!!!!!! (and possibly other things)
 			// clear?? flag? but how is it different than flag 6?
-			5:   "flag 5 \(0, .dep)",
+			5:   "flag 5 \(0, .flag)",
 			//     0xa00001d <29 10> makes it possible to save
 			//     0x50000cf <207 5> activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
 			//     0x5002d21 <11553 5> makes the samurai unable to battle
 			//     activates DEP's unknown 19
 			//     set true?
 			//     memory types 5, 6, 7, 10
-			6:   "flag 6 \(0, .dep)",
+			6:   "flag 6 \(0, .flag)",
 			//     0x500010f <271 5> is set with memory 6 when resetting name, and memory 5 when resetting vivosaur
 			//     set false?
 			//     memory types 5, 6, 10
@@ -121,7 +120,7 @@ enum DEX {
 			// 26: (#)
 			// 27: (#) 44 makes the hotel person intercept you (which occurs in e0044) but doenst seem to just activate an episode
 			32:  "unowned dialogue \(0, .dialogue)",
-			33:  "dialogue with choice \(1, .dialogue), storing result at \(0, .dep)",
+			33:  "dialogue with choice \(1, .dialogue), storing result at \(0, .flag)",
 			34:  "turn \(0, .character) to \(1, .degrees)",
 			35:  "turn1 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
 			36:  "turn \(0, .character) towards \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
@@ -147,24 +146,24 @@ enum DEX {
 			//    often after battles
 			//    after sue asks where to go, removing memory but keeping 62 makes camera low, but without 62 camera resets properly
 			// 63: ()
-			70:  "flag 70 \(0, .dep) \(1, .unknown)",
+			70:  "flag 70 \(0, .flag) \(1, .integer)",
 			//     writing to 0x9000007 <7 9> sets the player's profile pic (0-7 is a-h)
 			//     memory location <7 9> is player profile pic
 			//     set flag to?
-			71:  "add \(1, .unknown) to flag \(0, .dep)",
-			72:  "subtract \(1, .unknown) from flag \(0, .dep)",
+			71:  "add \(1, .integer) to flag \(0, .flag)",
+			72:  "subtract \(1, .integer) from flag \(0, .flag)",
 			// 75 (flag, flag) (set flag to?)
 			80:  "make \(0, .character) follow \(1, .character)",
 			82:  "make \(0, .character) wander randomly, waiting between \(1, .frames) and \(2, .frames), walking speed \(3, .fixedPoint), distance up to \(4, .fixedPoint)",
 			86: "make \(0, .character) chase player, detection range \(1, .fixedPoint), run distance \(2, .fixedPoint), chasing speed \(3, .fixedPoint), returning speed \(4, .fixedPoint), cooldown \(5, .frames)",
-			90:  "set level for level-up animation \(0, .unknown)",
-			97:  "set \(0, .vivosaur) fossil scores to \(1, .unknown) \(2, .unknown) \(3, .unknown) \(4, .unknown)", // TODO: number type
+			90:  "set level for level-up animation \(0, .integer)",
+			97:  "set \(0, .vivosaur) fossil scores to \(1, .integer) \(2, .integer) \(3, .integer) \(4, .integer)",
 			// 106: mask shop
-			107: "give \(0, .fossil), dark: \(1, .unknown), red: \(2, .unknown)", // TODO: 1 and 2 are booleans
-			108: "give \(0, .fossil) without message, dark: \(1, .unknown), red: \(2, .unknown)", // TODO: 1 and 2 are booleans
-			112: "play animation \(1, .unknown) on \(0, .character)", // TODO: number type
-			114: "set \(0, .character) body model variant to \(1, .unknown)", // 1 is model variant
-			115: "set \(0, .character) head model variant to \(1, .unknown)", // 1 is model variant
+			107: "give \(0, .fossil), dark: \(1, .boolean), red: \(2, .boolean)",
+			108: "give \(0, .fossil) without message, dark: \(1, .boolean), red: \(2, .boolean)",
+			112: "play animation \(1, .integer) on \(0, .character)",
+			114: "set \(0, .character) body model variant to \(1, .integer)",
+			115: "set \(0, .character) head model variant to \(1, .integer)",
 			// 116: (#) i think this stops music from playing, not sure if thats the main effect or just a side effect
 			117: "start music \(0, .music)",
 			// 118: ()
@@ -178,11 +177,11 @@ enum DEX {
 			135: "movement \(1, .movement) on \(0, .character)",
 			136: "unknown 136: \(0, .character) \(1, .unknown)",
 			//   1 24 - makes hunter blush
-			138: "shake screen for \(2, .frames) with intensity: \(0, .unknown), gradual intensity: \(1, .unknown)", // TODO: make int types for these ?
+			138: "shake screen for \(2, .frames) with intensity: \(0, .integer), gradual intensity: \(1, .integer)",
 			// 141: (#)
 			142: "modify player name", // has back button
 			143: "set player name",
-			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .dep)",
+			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .flag)",
 			150: "level-up animation",
 			153: "fade in image \(0, .image) over \(1, .frames) on bottom screen, unknown: \(2, .unknown)", // TODO: is this actually top?
 			154: "fade out image over \(0, .frames), unknown: \(1, .unknown)",
@@ -197,9 +196,9 @@ enum DEX {
 			// 195: (#, #)
 			200: "start turning \(0, .character) to follow \(1, .character)",
 			201: "stop turning \(0, .character)",
-			206: "set \(0, .vivosaur) battle points to \(1, .unknown)" // TODO: number type
+			206: "set \(0, .vivosaur) battle points to \(1, .integer)"
 			
-			// all the unknown commands as of rn 2 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 44 46 47 48 52 53 55 62 63 71 72 75 76 77 81 82 83 84 85 86 87 88 89 91 92 93 95 96 97 98 99 100 102 103 104 105 106 107 108 110 111 112 113 116 118 120 121 126 127 128 134 136 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205 206
+			// all the unknown commands as of rn 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 46 47 48 52 53 55 62 63 75 76 77 81 83 84 85 87 88 89 91 92 93 95 96 98 99 100 102 103 104 105 106 110 111 113 116 118 120 121 126 127 128 134 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205
 		]
 		
 		// any time these are updated, also update fftechwiki
@@ -569,15 +568,17 @@ extension String {
 extension DEX.Unpacked.ArgumentType {
 	func parse(_ text: Substring) -> Int32? {
 		switch self {
+			case .boolean:         parseBoolean(text)
 			case .character:       parseLookupTable(characterNames, text: text) ?? parsePrefix(text)
 			case .degrees:         parseSuffix(text)
-			case .dep:             parseDEP(text)
+			case .flag:            parseFlag(text)
 			case .dialogue:        parsePrefix(text)
 			case .effect:          parseLookupTable(effectNames, text: text) ?? parsePrefix(text)
 			case .fixedPoint:      parseFixedPoint(text)
 			case .fossil:          parseLookupTable(fossilNames, text: text) ?? parsePrefix(text)
 			case .frames:          parseSuffix(text)
 			case .image:           parseLookupTable(imageNames, text: text) ?? parsePrefix(text)
+			case .integer:         Int32(text)
 			case .map:             parseLookupTable(mapNames, text: text) ?? parsePrefix(text)
 			case .movement:        parseLookupTable(movementNames, text: text) ?? parsePrefix(text)
 			case .music:           parsePrefix(text)
@@ -607,7 +608,15 @@ extension DEX.Unpacked.ArgumentType {
 			.map(\.key)
 	}
 	
-	private func parseDEP(_ text: Substring) -> Int32? {
+	private func parseBoolean(_ text: Substring) -> Int32? {
+		switch text {
+			case "false": 0
+			case "true": 1
+			default: nil
+		}
+	}
+	
+	private func parseFlag(_ text: Substring) -> Int32? {
 		let components = text.split(separator: " ")
 		guard components.count == 2,
 			  let unknown1 = Int32(components[0]),
@@ -633,15 +642,17 @@ extension DEX.Unpacked.ArgumentType {
 	
 	func format(_ number: Int32) -> String {
 		switch self {
+			case .boolean:     formatBoolean(number)
 			case .character:   "\(characterNames[number] ?? "character \(number)")"
 			case .degrees:     "\(number) degrees"
-			case .dep:         formatDEP(number)
+			case .flag:        formatFlag(number)
 			case .dialogue:    "dialogue \(number)"
 			case .effect:      "\(effectNames[number] ?? "effect \(number)")"
 			case .fixedPoint:  formatFixedPoint(number)
 			case .fossil:      "\(fossilNames[number] ?? "fossil \(number)")"
 			case .frames:      "\(number) frames"
 			case .image:       "\(imageNames[number] ?? "image \(number)")"
+			case .integer:     "\(number)"
 			case .map:         "\(mapNames[number] ?? "map \(number)")"
 			case .movement:    "\(movementNames[number] ?? "movement \(number)")"
 			case .music:       "music \(number)"
@@ -651,7 +662,18 @@ extension DEX.Unpacked.ArgumentType {
 		}
 	}
 	
-	private func formatDEP(_ number: Int32) -> String {
+	private func formatBoolean(_ number: Int32) -> String {
+		switch number {
+			case 0: return "false"
+			case 1: return "true"
+			default:
+				print("invalid boolean in DEX file: \(.red)\(number)\(.normal), expected \(.green)0\(.normal) or \(.green)1\(.normal)")
+				waitForInput()
+				fatalError()
+		}
+	}
+	
+	private func formatFlag(_ number: Int32) -> String {
 		let unknown1 = UInt16(truncatingIfNeeded: number)
 		let unknown2 = UInt8(truncatingIfNeeded: number >> 24)
 		

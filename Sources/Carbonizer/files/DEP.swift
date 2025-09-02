@@ -54,8 +54,7 @@ enum DEP {
 		var blocks: [Block]
 		
 		enum ArgumentType {
-			// TODO: rename dep to something more fitting (flag?) (and do the same in dex)
-			case block, character, dep, door, firstNumberOnly, unknown, vivosaur
+			case block, character, flag, door, firstNumberOnly, unknown, vivosaur
 		}
 		
 		struct RequirementDefinition {
@@ -73,44 +72,44 @@ enum DEP {
 			3:  "entered through \(0, .door)",
 			5:  "caught by \(0, .character)",
 			6:  "unknown 6 \(0, .vivosaur)", // in unused code to give the chickens
-			7:  "flag \(0, .dep) equals \(1, .dep)",
-			8:  "flag \(0, .dep) does not equal \(1, .dep)",
-			9:  "flag \(0, .dep) is less than \(1, .dep)",
-			10: "flag \(0, .dep) is less than or equal to \(1, .dep)",
+			7:  "flag \(0, .flag) equals \(1, .flag)",
+			8:  "flag \(0, .flag) does not equal \(1, .flag)",
+			9:  "flag \(0, .flag) is less than \(1, .flag)",
+			10: "flag \(0, .flag) is less than or equal to \(1, .flag)",
 			// 10 (flag, flag) yes for nil nil, not for 8 7 or 7 7 or 6 7 or 0 0
-			11: "flag \(0, .dep) is greater than \(1, .dep)",
+			11: "flag \(0, .flag) is greater than \(1, .flag)",
 			// 12 is never used, but i bet its >=
-			13: "flag \(0, .dep) is \(1, .firstNumberOnly)",
+			13: "flag \(0, .flag) is \(1, .firstNumberOnly)",
 //			<56 8> <# 0>    requires being fighter level #
 //			<90 8> <# 0>    used to alternate hotel manager between dialogues
-			14: "flag \(0, .dep) is not \(1, .firstNumberOnly)",
-			15: "flag \(0, .dep) is less than number \(1, .firstNumberOnly)",
+			14: "flag \(0, .flag) is not \(1, .firstNumberOnly)",
+			15: "flag \(0, .flag) is less than number \(1, .firstNumberOnly)",
 			// 15 // yes for nil 7, no for 7 7 and 6 7 and 8 7, pretty sure this is <, but not sure why weird
 			// changing unknown2 affects this???
-			16: "flag \(0, .dep) is less than or equal to number \(1, .firstNumberOnly)",
+			16: "flag \(0, .flag) is less than or equal to number \(1, .firstNumberOnly)",
 			// wait, < or <=? probably <= right???
 			// same test results as 9 and 15: triggers for nil but not once set??
 //			<56 8> <5 0>    used to determine whether to spawn bullwort in his office
 			// 13/16 memory types are 8 and 9
-			17: "flag \(0, .dep) is greater than number \(1, .firstNumberOnly)",
+			17: "flag \(0, .flag) is greater than number \(1, .firstNumberOnly)",
 			// 17 (flag, number)? >?
-			18: "flag \(0, .dep) is greater than or equal to number \(1, .firstNumberOnly)",
+			18: "flag \(0, .flag) is greater than or equal to number \(1, .firstNumberOnly)",
 			// 18 (flag, number)? this also seems like >=??
-			19: "flag 19 \(0..., .dep)",
+			19: "flag 19 \(0..., .flag)",
 //			requires an unknown 5 (&&, right?)
 			// requires yes/first
 			// require true?
 			// notably NOT same as checking == 1 (or != 0)... right?
 			// memory types 5, 6, and 10
-			20: "flag 20 \(0..., .dep)",
+			20: "flag 20 \(0..., .flag)",
 			// requires an unknown5, but || ?
-			21: "flag 21 \(0..., .dep)",
+			21: "flag 21 \(0..., .flag)",
 //			requires NOT an unknown 5 (&&)
 			// requires no/second
 			// require false?
 			// notably NOT same as checking == 0... right?
 			// memory types 5, 6, 7, and 10
-			22: "flag 22 \(0..., .dep)",
+			22: "flag 22 \(0..., .flag)",
 			// 22: requires NOT an unknown5, but ||
 			23: "unknown 23 \(0, .firstNumberOnly)",
 			// used to trigger rex and snivels when you get close enough to them (chapter 4)
@@ -574,7 +573,7 @@ extension DEP.Unpacked.ArgumentType {
 		switch self {
 			case .block:           parseBlock(text)
 			case .character:       parseLookupTable(characterNames, text: text) ?? parsePrefix(text)
-			case .dep:             parseUnknown(text)
+			case .flag:            parseUnknown(text)
 			case .door:            parseLookupTable(doorNames, text: text) ?? parsePrefix(text)
 			case .firstNumberOnly: parseFirstNumberOnly(text)
 			case .unknown:         parseUnknown(text)
@@ -635,7 +634,7 @@ extension DEP.Unpacked.ArgumentType {
 		return switch self {
 			case .block:           "block \(argument.unknown1) \(argument.unknown2)"
 			case .character:       "\(characterNames[Int32(argument.unknown1)] ?? "character \(argument.unknown1)")"
-			case .dep:             "\(argument.unknown1) \(argument.unknown2)"
+			case .flag:            "\(argument.unknown1) \(argument.unknown2)"
 			case .door:            "\(doorNames[Int32(argument.unknown1)] ?? "door \(argument.unknown1)")"
 			case .firstNumberOnly: "\(argument.unknown1)"
 			case .unknown:         "\(argument.unknown1) \(argument.unknown2)"
