@@ -43,7 +43,7 @@ enum DEX {
 		var commands: [[Command]]
 		
 		enum ArgumentType {
-			case boolean, character, degrees, flag, dialogue, effect, fixedPoint, fossil, frames, image, integer, map, movement, music, soundEffect, unknown, vivosaur
+			case boolean, character, degrees, dialogue, effect, fixedPoint, flag, fossil, frames, image, integer, map, movement, music, soundEffect, unknown, vivosaur
 			// notes on flags:
 			// - two numbers, a u16 and u8 (is the u8 actually a u16?)
 			// - u16 is lower bits, u8 is upper (>> 24)
