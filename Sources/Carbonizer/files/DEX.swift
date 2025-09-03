@@ -69,7 +69,14 @@ enum DEX {
 			//     dep: 7 8 9 10 11 13 14 15 16 17 18 (aka 7-11 13-18) (aka numerical comparisons)
 			//     player stats/settings (money, mask, dp, sonar upgrades)
 			//   - 10: flag5 flag6
-			//     dep: flag19 flag21
+			//     dep: flag19 flag21 <>   SDf
+			// <12202 0> is used for battle results (read with 5)
+			// <274 0/8> is used for dialogue
+			// <218-223 6> may have smthn to do with case size
+			// <15 7> being set with flag5 gives digadig mask
+			// <16 7> being set with flag5 gives chieftain mask
+			// <2 7> being set with flag5 gives hip-shaker mask
+			// - 7 is masks
 			// <59 8> might be mask shop result? or maybe previous mask?
 			// <56 8> is probably chapter number
 			// <62 8> number of sonar upgrades left
@@ -86,10 +93,6 @@ enum DEX {
 			// <31 9> is sonar fossil chips (2 is 10000 G, 3 is 35000 G)
 			// <32 9> is sonar fossil filters (2 is 5000 G, 3 is 8000 G)
 			// - 9 seems to be player stats
-			// <15 7> being set with flag5 gives digadig mask
-			// <16 7> being set with flag5 gives chieftain mask
-			// <2 7> being set with flag5 gives hip-shaker mask
-			// <218-223 6> may have smthn to do with case size
 		}
 		
 		struct CommandDefinition {
@@ -107,7 +110,8 @@ enum DEX {
 		static let ff1Commands: [UInt32: CommandDefinition] = [
 			1:   "dialogue \(0, .dialogue)",
 			2:   "centered dialogue \(0, .dialogue)",
-			// 3: (#)
+			3:   "unknown 3 \(0, .flag)", // (flag is a block)
+			//    marks a block as having played/not played?
 			//     7025 freezes camera focus (?)
 			4:   "clear flag \(0, .flag)",
 			// wipes some stored dialogue answer. argument is the index in DEP
@@ -127,7 +131,7 @@ enum DEX {
 			//     memory types 5, 6, 10
 			7:   "spawn \(0, .character) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
 			// 8:   (character??, #)
-			9:   "ambiguous spawn/move/teleport \(0, .character) \(1, .unknown) \(2, .unknown)",
+			9:   "spawn \(0, .character) in slot \(1, .integer) facing \(2, .degrees)",
 			10:  "teleport \(0, .character) to \(1, .character)",
 			14:  "despawn \(0, .character)",
 			// 16: (#, #)
@@ -158,7 +162,7 @@ enum DEX {
 			// 52: (#, #)
 			55:  "dialogue \(2, .dialogue) with choice, storing result at \(1, .flag), unknown: \(0, .unknown)",
 			56:  "delay \(0, .frames)",
-			57:  "battle \(1, .unknown), unknown: \(0, .unknown)", // 1 is battle id
+			57:  "battle \(1, .integer), storing result at \(0, .flag)", // TODO: create battle id type?
 			58:  "clean1 \(1, .fossil), unknown: \(0, .unknown)",
 			59:  "clean2 \(1, .fossil), unknown: \(0, .unknown)",
 			60:  "clean3 \(1, .fossil), unknown: \(0, .unknown)", // (used in fighter test in e0090)

@@ -148,12 +148,12 @@ extension NDS.Packed.Binary.OverlayTableEntry {
 extension NDS.Packed.Binary.FileNameTable {
 	init(_ files: [any FileSystemObject], firstFileId: UInt16) {
 		let allFolders = files.getAllFolders()
-		let folderIds = Dictionary(uniqueKeysWithValues:
-									allFolders
-			.enumerated()
-			.map { index, folder in
-				(folder, UInt16(index + 0xF001))
-			}
+		let folderIds = Dictionary(
+			uniqueKeysWithValues: allFolders
+				.enumerated()
+				.map { index, folder in
+					(folder, UInt16(index + 0xF001))
+				}
 		)
 		let foldersWithIds = folderIds
 			.sorted(by: \.value)

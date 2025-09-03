@@ -28,7 +28,7 @@ func checkKnownRequirements() throws {
 }
 
 @Test(
-//	.disabled("only enable when needed")
+	.disabled("only enable when needed")
 )
 func exportDEXCommands() throws {
 	struct Command: Encodable {

@@ -1,3 +1,4 @@
+// TODO: rename to entities
 let characterNames: [Int32: String] = [
 	1:   "Hunter",
 //	2:   "Fake Dr. Diggins", // only ever despawned?? (in e0004:60)

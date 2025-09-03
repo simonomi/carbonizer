@@ -70,6 +70,7 @@ enum DEP {
 			1:  "unconditional/always",
 			2:  "talked to \(0, .character)",
 			3:  "went through \(0, .door)",
+			//  actually collided with??
 			5:  "caught by \(0, .character)",
 			6:  "unknown 6 \(0, .vivosaur)",
 			// in unused code to give the chickens
@@ -112,7 +113,7 @@ enum DEP {
 			// memory types 5, 6, 7, and 10
 			22: "any flag false \(0..., .flag)",
 			// 22: requires NOT an unknown5, but ||
-			23: "unknown 23 \(0, .firstNumberOnly)",
+			23: "\(0, .character) is spawned in",
 			// used to trigger rex and snivels when you get close enough to them (chapter 4)
 			36: "\(0, .block) has played", // op 2 is always 2 or 3
 			37: "at least one of \(0..., .block) has played",

@@ -249,7 +249,12 @@ enum ECS {
 				var nameOffset: UInt32 = 0x10
 				var color1Offset: UInt32
 				var color2Offset: UInt32
-				var unknown: Int32
+				var dialogueSound: Int32 // 170: boy
+										 // 171: girl
+										 // 172: dinaurian
+										 // 173: unused
+										 // 174: other
+										 // 913: KL-33N
 				
 				@Offset(givenBy: \Self.nameOffset)
 				var name: String
@@ -423,7 +428,7 @@ enum ECS {
 				var name: String
 				var color1: Color
 				var color2: Color
-				var unknown: Int32
+				var dialogueSound: Int32
 				
 				struct Color {
 					var red: UInt8
@@ -635,7 +640,7 @@ extension ECS.Packed.Characters.Character {
 		name = unpacked.name
 		color1 = unpacked.color1.bytes
 		color2 = unpacked.color2.bytes
-		unknown = unpacked.unknown
+		dialogueSound = unpacked.dialogueSound
 		
 		color1Offset = nameOffset + UInt32(name.utf8CString.count.roundedUpToTheNearest(4))
 		color2Offset = color1Offset + 4
@@ -853,7 +858,7 @@ extension ECS.Unpacked.Characters.Character {
 		name = packed.name
 		color1 = Color(packed.color1)
 		color2 = Color(packed.color2)
-		unknown = packed.unknown
+		dialogueSound = packed.dialogueSound
 	}
 }
 
