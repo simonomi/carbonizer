@@ -62,16 +62,34 @@ enum DEX {
 			//     dep: 19 20 21 22 (boolean)
 			//   - 7: used for flag5
 			//     dep: 20 21 (boolean)
+			//     MASKS!!!!!!!!!!
 			//   - 8: flag70
 			//     dep: 7 8 9 10 11 13 14 15 17 18 19 21 (aka 7-11 13-15 17-19 21) (numerical AND boolean)
 			//   - 9: flag70
 			//     dep: 7 8 9 10 11 13 14 15 16 17 18 (aka 7-11 13-18) (aka numerical comparisons)
+			//     player stats/settings (money, mask, dp, sonar upgrades)
 			//   - 10: flag5 flag6
 			//     dep: flag19 flag21
 			// <59 8> might be mask shop result? or maybe previous mask?
-			// <4 9> might be current mask?
+			// <56 8> is probably chapter number
+			// <62 8> number of sonar upgrades left
+			// <67 8> number of cleaning upgrades left
+			// <68 8> number of case upgrades (1:8, 2:16, 3:24, 4:32, 5:48)
 			// <2 9> == 1 means your case is size 8
+			// <3 9> is money
+			// <4 9> is current mask
+			// <7 9> is player pfp (hunter variant??)
 			// <9 9> may be number of fossil rocks
+			// <19 9> is donation points
+			// <26 9> may be number of oasis seeds? no probably not
+			// <30 9> is sonar monitor upgrades (2 is 800 G, 3 is 3500 G)
+			// <31 9> is sonar fossil chips (2 is 10000 G, 3 is 35000 G)
+			// <32 9> is sonar fossil filters (2 is 5000 G, 3 is 8000 G)
+			// - 9 seems to be player stats
+			// <15 7> being set with flag5 gives digadig mask
+			// <16 7> being set with flag5 gives chieftain mask
+			// <2 7> being set with flag5 gives hip-shaker mask
+			// <218-223 6> may have smthn to do with case size
 		}
 		
 		struct CommandDefinition {
@@ -91,24 +109,24 @@ enum DEX {
 			2:   "centered dialogue \(0, .dialogue)",
 			// 3: (#)
 			//     7025 freezes camera focus (?)
-			4:   "flag 4 \(0, .flag)",
+			4:   "clear flag \(0, .flag)",
 			// wipes some stored dialogue answer. argument is the index in DEP
 			// possibly dep too but the 2nd number is always 0
 			// mark dialogue as not played!!!!!!!!!! (and possibly other things)
 			// clear?? flag? but how is it different than flag 6?
-			5:   "flag 5 \(0, .flag)",
+			5:   "set flag \(0, .flag) to true",
 			//     0xa00001d <29 10> makes it possible to save
 			//     0x50000cf <207 5> activates wendy's dialogue and skips the hotel manager's first dialogue (softlock)
 			//     0x5002d21 <11553 5> makes the samurai unable to battle
 			//     activates DEP's unknown 19
 			//     set true?
 			//     memory types 5, 6, 7, 10
-			6:   "flag 6 \(0, .flag)",
+			6:   "set flag \(0, .flag) to false",
 			//     0x500010f <271 5> is set with memory 6 when resetting name, and memory 5 when resetting vivosaur
 			//     set false?
 			//     memory types 5, 6, 10
 			7:   "spawn \(0, .character) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
-			// 8:   (<character>, #)
+			// 8:   (character??, #)
 			9:   "ambiguous spawn/move/teleport \(0, .character) \(1, .unknown) \(2, .unknown)",
 			10:  "teleport \(0, .character) to \(1, .character)",
 			14:  "despawn \(0, .character)",
@@ -127,53 +145,62 @@ enum DEX {
 			37:  "turn2 \(0, .character) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
 			38:  "turn \(0, .character) towards \(1, .character) over \(3, .frames), unknowns: \(2, .unknown) \(4, .unknown)",
 			39:  "move \(0, .character) to \(1, .character) over \(2, .frames), unknown: \(3, .unknown)",
-			// 41: (character?, #, frames?, #) another move-to?
+			// 41: (character?, #, frames?, #) another move-to? last # is probably smoothing
 			43:  "move \(0, .character) to position \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
 			44:  "unknown 44: \(0, .character) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",
 			45:  "move \(0, .character) by \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
 			// 46: (#, #, #.#, #, #)
+			47:  "turn \(0, .character) by \(1, .degrees), then move by \(2, .fixedPoint) over \(3, .frames). unknown: \(4, .unknown)",
+			// 4 seems to add a delay before they actually start moving? like theyre slow and then fast
+			// its basically a smoothing (ease in/out) effect
 			50:  "smoothes out movement or something for \(0, .character)",
 			51:  "control \(0, .character)",
 			// 52: (#, #)
+			55:  "dialogue \(2, .dialogue) with choice, storing result at \(1, .flag), unknown: \(0, .unknown)",
 			56:  "delay \(0, .frames)",
 			57:  "battle \(1, .unknown), unknown: \(0, .unknown)", // 1 is battle id
 			58:  "clean1 \(1, .fossil), unknown: \(0, .unknown)",
 			59:  "clean2 \(1, .fossil), unknown: \(0, .unknown)",
 			60:  "clean3 \(1, .fossil), unknown: \(0, .unknown)", // (used in fighter test in e0090)
 			61:  "angle camera from \(1, 2, .vector) at distance \(3, .fixedPoint) with fov: \(0, .fixedPoint) over \(4, .frames), unknown: \(5, .unknown)",
-			// 62: ()
+			62:  "unknown 62",
 			//    often after diologue choices
 			//    often after battles
 			//    after sue asks where to go, removing memory but keeping 62 makes camera low, but without 62 camera resets properly
-			// 63: ()
-			70:  "flag 70 \(0, .flag) \(1, .integer)",
-			//     writing to 0x9000007 <7 9> sets the player's profile pic (0-7 is a-h)
-			//     memory location <7 9> is player profile pic
-			//     set flag to?
+			63:  "unknown 63",
+			70:  "set flag \(0, .flag) to \(1, .integer)",
 			71:  "add \(1, .integer) to flag \(0, .flag)",
 			72:  "subtract \(1, .integer) from flag \(0, .flag)",
-			// 75 (flag, flag) (set flag to?)
+			75:  "set flag \(0, .flag) to flag \(1, .flag)",
 			80:  "make \(0, .character) follow \(1, .character)",
 			82:  "make \(0, .character) wander randomly, waiting between \(1, .frames) and \(2, .frames), walking speed \(3, .fixedPoint), distance up to \(4, .fixedPoint)",
 			86: "make \(0, .character) chase player, detection range \(1, .fixedPoint), run distance \(2, .fixedPoint), chasing speed \(3, .fixedPoint), returning speed \(4, .fixedPoint), cooldown \(5, .frames)",
-			90:  "set level for level-up animation \(0, .integer)",
+			90:  "set fighter level to \(0, .integer)",
+			91:  "set case page count to \(0, .integer)",
 			97:  "set \(0, .vivosaur) fossil scores to \(1, .integer) \(2, .integer) \(3, .integer) \(4, .integer)",
-			// 106: mask shop
+			102: "open fossil rock buying shop",
+			103: "open fossil rock selling shop",
+			104: "open mask buying shop",
+//			105: (#)  // does... nothing? arg 0 and 3+ crashes
+			106: "open mask wearing shop",
 			107: "give \(0, .fossil), dark: \(1, .boolean), red: \(2, .boolean)",
 			108: "give \(0, .fossil) without message, dark: \(1, .boolean), red: \(2, .boolean)",
 			112: "play animation \(1, .integer) on \(0, .character)",
+			113: "loop animation \(1, .integer) on \(0, .character)",
 			114: "set \(0, .character) body model variant to \(1, .integer)",
 			115: "set \(0, .character) head model variant to \(1, .integer)",
-			// 116: (#) i think this stops music from playing, not sure if thats the main effect or just a side effect
+			// 116: (#) this has some effect on music, but the number isnt a music id
 			117: "start music \(0, .music)",
-			// 118: ()
+			118: "start ambient music",
 			119: "start music 2 \(0, .music)",
 			// 120: ()
+			// always(?) used near a fade out/fade in, usually after a unknown116
 			124: "fade music \(0, .frames)",
 			125: "play sound \(0, .soundEffect)",
-			// 128: (#, #)
+			128: "unknown 128, unknowns: \(0, .unknown) \(1, .frames)",
 			129: "effect \(1, .effect) on \(0, .character)",
 			131: "clear effects on \(0, .character)",
+			134: "wait for a-press",
 			135: "movement \(1, .movement) on \(0, .character)",
 			136: "unknown 136: \(0, .character) \(1, .unknown)",
 			//   1 24 - makes hunter blush
@@ -182,23 +209,32 @@ enum DEX {
 			142: "modify player name", // has back button
 			143: "set player name",
 			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .flag)",
+			145: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .flag), unknown: \(3, .unknown)",
 			150: "level-up animation",
 			153: "fade in image \(0, .image) over \(1, .frames) on bottom screen, unknown: \(2, .unknown)", // TODO: is this actually top?
 			154: "fade out image over \(0, .frames), unknown: \(1, .unknown)",
 			155: "slide in image \(0, .image) over \(2, .frames), unknowns: \(1, .unknown) \(3, .unknown)",
+			156: "slide out image over \(1, .frames), unknowns: \(0, .unknown) \(2, .unknown)",
 			157: "fade in image \(0, .image) over \(2, .frames), unknowns: \(1, .fixedPoint) \(3, .unknown)",
 			159: "fade in image \(0, .image) over \(1, .frames) on top screen, unknown: \(2, .unknown)", // TODO: is this actually bottom?
 			// 160: (#, #)
+			// 161: (#, character??, frames??, smoothing??)
+			// 162: (#, #, #)
 			// 178: () suppresses "Fighter Area" corner tag?
 			//     used in e0302 before a fossil battle
+			// 179: (#)
+			180: "disable sonar over \(0, .frames)",
+//			181: "enable sonar over \(0, .frames)", // TODO: the argument is optional
 			191: "show revival screen for \(0, .vivosaur)",
 			194: "unknown 194: \(0, .character)",
 			// 195: (#, #)
 			200: "start turning \(0, .character) to follow \(1, .character)",
 			201: "stop turning \(0, .character)",
+			202: "show G banner",
+			203: "hide G banner",
 			206: "set \(0, .vivosaur) battle points to \(1, .integer)"
 			
-			// all the unknown commands as of rn 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 46 47 48 52 53 55 62 63 75 76 77 81 83 84 85 87 88 89 91 92 93 95 96 98 99 100 102 103 104 105 106 110 111 113 116 118 120 121 126 127 128 134 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205
+			// all the unknown commands as of rn 3 8 11 12 16 17 18 19 24 25 26 27 40 41 42 46 47 48 52 53 55 62 63 76 77 81 83 84 85 87 88 89 91 92 93 95 96 98 99 100 105 110 111 113 116 118 120 121 126 127 128 134 137 141 145 147 148 149 152 156 158 160 161 162 165 166 171 178 179 180 181 182 183 184 185 186 187 188 190 192 193 195 196 197 199 202 203 204 205
 		]
 		
 		// any time these are updated, also update fftechwiki
@@ -420,14 +456,22 @@ extension DEX.Unpacked.CommandDefinition: ExpressibleByStringInterpolation {
 
 extension DEX.Unpacked.Command {
 	init(_ binaryCommand: DEX.Packed.Block.Command, configuration: CarbonizerConfiguration) {
-		self = if let definition = DEX.Unpacked.knownCommands(for: configuration)[binaryCommand.type] {
-			.known(
+		if let definition = DEX.Unpacked.knownCommands(for: configuration)[binaryCommand.type] {
+			// TODO: special case for 181?
+			
+			guard definition.argumentTypes.count == binaryCommand.arguments.count else {
+				print("wrong number of arguments in binary for command", binaryCommand.type)
+				print("got \(.red)\(binaryCommand.arguments.count)\(.normal), expected \(.green)\(definition.argumentTypes.count)\(.normal)")
+				fatalError()
+			}
+			
+			self = .known(
 				type: binaryCommand.type,
 				definition: definition,
 				arguments: binaryCommand.arguments
 			)
 		} else {
-			.unknown(
+			self = .unknown(
 				type: binaryCommand.type,
 				arguments: binaryCommand.arguments
 			)
