@@ -234,6 +234,15 @@ struct Carbonizer: AsyncParsableCommand {
 				)
 			}
 			
+			if configuration.experimental.hmlNameLabeller, action == .unpack {
+				let text = dtxRipper(processedFile)
+				processedFile = hmlNameLabeller(
+					processedFile,
+					text: text,
+					configuration: configuration
+				)
+			}
+			
 #if !IN_CI
 			print()
 			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)")

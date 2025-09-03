@@ -26,6 +26,7 @@ struct CarbonizerConfiguration {
 		var dexDialogueSaver: Bool
 		var dexBlockLabeller: Bool
 		var dbsNameLabeller: Bool
+		var hmlNameLabeller: Bool
 	}
 	
 	enum CompressionMode: String, EnumerableFlag, Decodable {
@@ -158,7 +159,12 @@ struct CarbonizerConfiguration {
 				// adds labels for the names of fighters in DBS files (battle folder)
 				//
 				// make sure to enable both the DBS and DTX file types or nothing will happen
-				"dbsNameLabeller": false
+				"dbsNameLabeller": false,
+				
+				// adds labels for the names of masks in `etc/headmask_defs`
+				//
+				// make sure to enable both the HML and DTX file types or nothing will happen
+				"hmlNameLabeller": false
 			}
 		}
 		"""
@@ -242,6 +248,8 @@ extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 			fallback.dexBlockLabeller
 		dbsNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
 			fallback.dbsNameLabeller
+		hmlNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
+			fallback.hmlNameLabeller
 	}
 }
 

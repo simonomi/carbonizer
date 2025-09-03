@@ -40,6 +40,9 @@ enum HML {
 			var name: UInt16
 			var japaneseDebugName: UInt16
 			
+			var _name: String?
+			var _japaneseDebugName: String?
+			
 			var price: Int32
 			var walkingSoundEffect: Int32
 			var runningSoundEffect: Int32
