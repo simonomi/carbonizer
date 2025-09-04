@@ -28,9 +28,11 @@ func makeFileData(
 		"MMS": MMS.Unpacked.self,
 		"MPM": MPM.Unpacked.self,
 		"RLS": RLS.Unpacked.self,
-		"SHP": SHP.Unpacked.self
+		"SDAT": SDAT.Unpacked.self,
+		"SHP": SHP.Unpacked.self,
 	]
 	
+	// TODO: doing this for every file is slow!
 	let fileTypes: [any ProprietaryFileData.Type] = allFileTypes
 		.filter { (fileTypeName, _) in
 			configuration.fileTypes.contains(fileTypeName)
@@ -43,11 +45,14 @@ func makeFileData(
 		return try fileType.init(data, configuration: configuration) as any ProprietaryFileData
 	}
 	
-	let marker = data.placeMarker()
-	let magicBytes = try? data.read(String.self, exactLength: 3) // in ffc, donate_mask_defs has DMSK
-	data.jump(to: marker)
-	
-	if let fileType = fileTypes.first(where: { $0.magicBytes == magicBytes }) {
+	let dataCopy = Datastream(data) // copy to not modify
+	// most ff file types have 3-byte magic bytes with a null terminator, but
+	// some (SDAT, ffc DMSK) have 4-bytes with no terminator. this won't match
+	// a file if it's exactly 3 bytes long, but that should be ok... right?
+	if let magicBytes = try? dataCopy.read(String.self, length: 4),
+		magicBytes.isNotEmpty,
+		let fileType = fileTypes.first(where: { $0.magicBytes == magicBytes })
+	{
 		return try fileType.init(data, configuration: configuration) as any ProprietaryFileData
 	}
 	

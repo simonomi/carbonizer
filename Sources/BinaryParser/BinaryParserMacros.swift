@@ -37,6 +37,9 @@ public macro Offsets<S, T: BinaryInteger>(givenBy offsets: KeyPath<S, [T]>) = #e
 public macro Offsets<S, T, U: BinaryInteger>(givenBy offsets: KeyPath<S, [T]>, at subPath: KeyPath<T, U>) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
 
 @attached(peer)
+public macro Offsets<S, T, U: BinaryInteger>(givenBy offsets: KeyPath<S, [T]>, at subPath: KeyPath<T, [U]>) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
+
+@attached(peer)
 public macro Offsets<S, T, U: BinaryInteger>(givenBy offsets: KeyPath<S, [T]>, from startPath: KeyPath<T, U>, to endPath: KeyPath<T, U>) = #externalMacro(module: "BinaryParserMacros", type: "EmptyMacro")
 
 @attached(peer)

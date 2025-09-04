@@ -107,11 +107,21 @@ extension Datawriter {
 	public func write(
 		_ data: [String], offsets: [some BinaryInteger], relativeTo baseOffset: Offset
 	) {
-		let offsets = offsets.map { Int($0) + baseOffset.offest }
-		
 		for (offset, item) in zip(offsets, data) {
-			jump(to: Offset(offset))
+			jump(to: baseOffset + offset)
 			write(item)
+		}
+	}
+	
+	@inlinable
+	public func write(
+		_ data: [[String]], offsets: [[some BinaryInteger]], relativeTo baseOffset: Offset
+	) {
+		for (offsetRow, dataRow) in zip(offsets, data) {
+			for (offset, item) in zip(offsetRow, dataRow) {
+				jump(to: baseOffset + offset)
+				write(item)
+			}
 		}
 	}
 	

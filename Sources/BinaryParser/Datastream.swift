@@ -222,14 +222,29 @@ extension Datastream {
 	public func read(
 		_ type: [String].Type, offsets: [some BinaryInteger], relativeTo baseOffset: Offset
 	) throws -> [String] {
-		let offsets = offsets.map { Int($0) + baseOffset.offset }
 		do {
 			return try offsets.map {
-				offset = $0
+				jump(to: baseOffset + $0)
 				return try read(String.self)
 			}
 		} catch {
 			throw BinaryParserError.whileReading([String].self, error)
+		}
+	}
+	
+	@inlinable
+	public func read(
+		_ type: [[String]].Type, offsets: [[some BinaryInteger]], relativeTo baseOffset: Offset
+	) throws -> [[String]] {
+		do {
+			return try offsets.map {
+				try $0.map {
+					jump(to: baseOffset + $0)
+					return try read(String.self)
+				}
+			}
+		} catch {
+			throw BinaryParserError.whileReading([[String]].self, error)
 		}
 	}
 	

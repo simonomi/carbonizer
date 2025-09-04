@@ -223,7 +223,9 @@ enum DEX {
 			159: "fade in image \(0, .image) over \(1, .frames) on top screen, unknown: \(2, .unknown)", // TODO: is this actually bottom?
 			// 160: (#, #)
 			// 161: (#, entity??, frames??, smoothing??)
+			// - makes an image appear on the top screen
 			// 162: (#, #, #)
+			// - slides the top screen image down and away
 			// 178: () suppresses "Fighter Area" corner tag?
 			//     used in e0302 before a fossil battle
 			// 179: (#)
