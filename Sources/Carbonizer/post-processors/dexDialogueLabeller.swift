@@ -42,6 +42,7 @@ func dexDialogueLabeller(
 		case let folder as Folder:
 			Folder(
 				name: folder.name,
+				metadata: folder.metadata,
 				contents: folder.contents.map {
 					dexDialogueLabeller($0, dialogue: dialogue, configuration: configuration)
 				}

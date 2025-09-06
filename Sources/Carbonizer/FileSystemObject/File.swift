@@ -4,11 +4,12 @@ import BinaryParser
 func createFile(
 	contentsOf path: URL,
 	configuration: CarbonizerConfiguration
-) throws -> any FileSystemObject {
+) throws -> (any FileSystemObject)? {
+	let metadata = try Metadata(forItemAt: path)
+	if metadata?.skipFile == true { return nil }
+	
 	let name = path.lastPathComponent
 	let data = Datastream(try Data(contentsOf: path))
-	
-	let metadata = try Metadata(forFileAt: path)
 	
 	let file = try createFile(
 		name: name,

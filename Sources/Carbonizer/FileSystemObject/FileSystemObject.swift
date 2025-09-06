@@ -27,7 +27,7 @@ protocol FileSystemObject {
 func fileSystemObject(
 	contentsOf path: URL,
 	configuration: CarbonizerConfiguration
-) throws -> any FileSystemObject {
+) throws -> (any FileSystemObject)? {
 	do {
 		return switch try path.type() {
 			case .folder:

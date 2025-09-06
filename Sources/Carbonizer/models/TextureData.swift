@@ -117,6 +117,7 @@ extension TextureData {
 	func folder(named name: String) throws -> Folder {
 		Folder(
 			name: name,
+			metadata: .skipFile,
 			contents: try zip(imageHeaders, bitmaps, palettes).map(file)
 		)
 	}

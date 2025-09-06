@@ -21,7 +21,7 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		
 		let colorPaletteArchive = parent.contents.first { $0.name == mpm.palette.tableName } as! MAR.Unpacked
 		let colorPalette = colorPaletteArchive.files[Int(mpm.palette.index)]
-		let colorPaletteData = colorPalette.content as! Datastream
+		let colorPaletteData = Datastream(colorPalette.content as! Datastream) // copy so as not to modify the original
 		colorPaletteData.offset = 0 // multiple files use the same palette
 		let palette = try Palette(colorPaletteData)
 		
@@ -35,7 +35,7 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		
 		let bitmapArchive = parent.contents.first { $0.name == mpm.bitmap.tableName } as! MAR.Unpacked
 		let bitmap = bitmapArchive.files[Int(mpm.bitmap.index)]
-		let bitmapData = bitmap.content as! Datastream
+		let bitmapData = Datastream(bitmap.content as! Datastream) // copy so as not to modify the original
 		
 		let bitmapFile = Bitmap(
 			width: Int32(mpm.width),
@@ -58,11 +58,11 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //		if let entry3 = mpm.entry3 {
 //			let bgMapArchive = parent.contents.first { $0.name == entry3.tableName } as! MAR.Unpacked
 //			let bgMap = bgMapArchive.files[Int(entry3.index)]
-//			let bgMapData = bgMap.content as! Datastream
+//			let bgMapData = Datastream(bgMap.content as! Datastream) // copy so as not to modify the original
 			
 			// TODO: images with bg maps
 		} else {
-			images.append(ProprietaryFile(name: file.name, data: bitmapFile))
+			images.append(ProprietaryFile(name: file.name, metadata: .skipFile, data: bitmapFile))
 		}
 	}
 	

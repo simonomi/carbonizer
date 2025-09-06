@@ -47,6 +47,7 @@ func dexDialogueSaver(
 		case let folder as Folder:
 			Folder(
 				name: folder.name,
+				metadata: folder.metadata,
 				contents: folder.contents.map {
 					dexDialogueSaver($0, updatedDialogue: updatedDialogue, configuration: configuration)
 				}

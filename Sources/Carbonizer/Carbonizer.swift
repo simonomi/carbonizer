@@ -97,7 +97,10 @@ struct Carbonizer: AsyncParsableCommand {
 			let readStart = Date.now
 #endif
 			
-			var file = try fileSystemObject(contentsOf: filePath, configuration: configuration)
+			guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
+				print("Skipping file...")
+				continue
+			}
 			
 #if !IN_CI
 			print()
@@ -163,84 +166,88 @@ struct Carbonizer: AsyncParsableCommand {
 					continue
 			}
 			
-			logProgress(
-				"Running post-processors",
-				configuration: configuration
-			)
-//			let postProcessors: [String: PostProcessor] = [
-//				"3clFinder": tclFinder,
-//				"mm3Finder": mm3Finder,
-//				"mmsFinder": mmsFinder,
-//				"mpmFinder": mpmFinder
-//			]
-			
-			for postProcessorName in configuration.experimental.postProcessors {
+			if action == .unpack {
+				logProgress(
+					"Running post-processors",
+					configuration: configuration
+				)
+				
+				// TODO: make a new post-processing api that allows passing arguments? for things like dialogue labelling
+				let postProcessors: [String: PostProcessor] = [
+					"3clFinder": tclFinder,
+					"mm3Finder": mm3Finder,
+					"mmsFinder": mmsFinder,
+					"mpmFinder": mpmFinder
+				]
+				
+				for postProcessorName in configuration.experimental.postProcessors {
 //#if os(Windows)
-				switch postProcessorName {
-					case "3clFinder":
-						processedFile = try processedFile.postProcessed(with: tclFinder)
-					case "mm3Finder":
-						processedFile = try processedFile.postProcessed(with: mm3Finder)
-					case "mmsFinder":
-						processedFile = try processedFile.postProcessed(with: mmsFinder)
-					case "mpmFinder":
-						processedFile = try processedFile.postProcessed(with: mpmFinder)
-					default:
+//					switch postProcessorName {
+//						case "3clFinder":
+//							processedFile = try processedFile.postProcessed(with: tclFinder)
+//						case "mm3Finder":
+//							processedFile = try processedFile.postProcessed(with: mm3Finder)
+//						case "mmsFinder":
+//							processedFile = try processedFile.postProcessed(with: mmsFinder)
+//						case "mpmFinder":
+//							processedFile = try processedFile.postProcessed(with: mpmFinder)
+//						default:
+//							print("Could not find a post-processor named '\(postProcessorName)', skipping...")
+//							continue
+//					}
+//#else
+					guard let postProcessor = postProcessors[postProcessorName] else {
 						print("Could not find a post-processor named '\(postProcessorName)', skipping...")
 						continue
-				}
-//#else
-//				guard let postProcessor = postProcessors[postProcessorName] else {
-//					print("Could not find a post-processor named '\(postProcessorName)', skipping...")
-//					continue
-//				}
-//				
-//				processedFile = try processedFile.postProcessed(with: postProcessor)
+					}
+					
+					processedFile = try processedFile.postProcessed(with: postProcessor)
 //#endif
-			}
-			
-			if configuration.experimental.dexDialogueLabeller, action == .unpack {
-				let dialogue = dmgRipper(processedFile)
+				}
 				
-//				struct Line: Codable {
-//					var index: UInt32
-//					var string: String
-//				}
-//				
-//				try JSONEncoder(.prettyPrinted)
-//					.encode(dialogue.map(Line.init))
-//					.write(to: URL(filePath: "/tmp/output.json")!)
+				if configuration.experimental.dexDialogueLabeller {
+					let dialogue = dmgRipper(processedFile)
+					
+//					struct Line: Codable {
+//						var index: UInt32
+//						var string: String
+//					}
+//
+//					try JSONEncoder(.prettyPrinted)
+//						.encode(dialogue.map(Line.init))
+//						.write(to: URL(filePath: "/tmp/output.json")!)
+					
+					processedFile = dexDialogueLabeller(
+						processedFile,
+						dialogue: dialogue,
+						configuration: configuration
+					)
+				}
 				
-				processedFile = dexDialogueLabeller(
-					processedFile,
-					dialogue: dialogue,
-					configuration: configuration
-				)
-			}
-			
-			if configuration.experimental.dexBlockLabeller, action == .unpack {
-				processedFile = dexBlockLabeller(
-					processedFile,
-					configuration: configuration
-				)
-			}
-			
-			if configuration.experimental.dbsNameLabeller, action == .unpack {
-				let text = dtxRipper(processedFile)
-				processedFile = dbsNameLabeller(
-					processedFile,
-					text: text,
-					configuration: configuration
-				)
-			}
-			
-			if configuration.experimental.hmlNameLabeller, action == .unpack {
-				let text = dtxRipper(processedFile)
-				processedFile = hmlNameLabeller(
-					processedFile,
-					text: text,
-					configuration: configuration
-				)
+				if configuration.experimental.dexBlockLabeller {
+					processedFile = dexBlockLabeller(
+						processedFile,
+						configuration: configuration
+					)
+				}
+				
+				if configuration.experimental.dbsNameLabeller {
+					let text = dtxRipper(processedFile)
+					processedFile = dbsNameLabeller(
+						processedFile,
+						text: text,
+						configuration: configuration
+					)
+				}
+				
+				if configuration.experimental.hmlNameLabeller {
+					let text = dtxRipper(processedFile)
+					processedFile = hmlNameLabeller(
+						processedFile,
+						text: text,
+						configuration: configuration
+					)
+				}
 			}
 			
 #if !IN_CI
@@ -277,6 +284,7 @@ struct Carbonizer: AsyncParsableCommand {
 			let writeStart = Date.now
 #endif
 			
+			// TODO: remove overwriting argument, it already has the configuration
 			try processedFile.write(
 				into: outputFolder,
 				overwriting: configuration.overwriteOutput,

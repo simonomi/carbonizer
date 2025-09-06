@@ -9,7 +9,13 @@ extension Carbonizer {
 		
 		let inputPath = filePaths.first!
 		
-		var fileData = try fileSystemObject(contentsOf: inputPath, configuration: configuration)
+		guard var fileData = try fileSystemObject(contentsOf: inputPath, configuration: configuration) else {
+			print("\(.red, .bold)Error:\(.normal) \(.bold)could not make FileSystemObject from '\(inputPath.path(percentEncoded: false))'\(.normal)")
+			if configuration.keepWindowOpen.isTrueOnError {
+				waitForInput()
+			}
+			return
+		}
 		
 		let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? inputPath.deletingLastPathComponent()
 		
@@ -20,7 +26,7 @@ extension Carbonizer {
 				.pathComponents
 				.dropFirst(6)
 			
-			let newFile = try createFile(contentsOf: $0, configuration: configuration)
+			guard let newFile = try createFile(contentsOf: $0, configuration: configuration) else { return }
 			
 			fileData.setFile(at: components, to: newFile)
 			
@@ -38,7 +44,9 @@ extension Carbonizer {
 #else
 		var standardError = FileHandle.standardError
 		print("\(.red, .bold)Error:\(.normal) \(.bold)Hot reloading is only available on macOS\(.normal)", terminator: "\n\n", to: &standardError)
-		waitForInput()
+		if configuration.keepWindowOpen.isTrueOnError {
+			waitForInput()
+		}
 		return
 #endif
 	}

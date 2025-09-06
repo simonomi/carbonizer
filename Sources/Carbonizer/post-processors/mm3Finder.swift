@@ -58,10 +58,8 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			)
 		}
 		
-		let modelData = arc.files[Int(mm3.model.index)].content as! Datastream
-		let modelStart = modelData.placeMarker()
+		let modelData = Datastream(arc.files[Int(mm3.model.index)].content as! Datastream) // copy to not modify the original
 		let vertexData = try modelData.read(VertexData.self)
-		modelData.jump(to: modelStart)
 		
 		guard arc.files.indices.contains(Int(mm3.texture.index)) else {
 			throw BinaryParserError.indexOutOfBounds(
@@ -71,10 +69,8 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			)
 		}
 		
-		let textureData = arc.files[Int(mm3.texture.index)].content as! Datastream
-		let textureStart = textureData.placeMarker()
+		let textureData = Datastream(arc.files[Int(mm3.texture.index)].content as! Datastream) // copy to not modify the original
 		let texture = try textureData.read(TextureData.self)
-		textureData.jump(to: textureStart)
 		
 		guard arc.files.indices.contains(Int(mm3.animation.index)) else {
 			throw BinaryParserError.indexOutOfBounds(
@@ -84,10 +80,8 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			)
 		}
 		
-		let animationData = arc.files[Int(mm3.animation.index)].content as! Datastream
-		let animationStart = animationData.placeMarker()
+		let animationData = Datastream(arc.files[Int(mm3.animation.index)].content as! Datastream) // copy to not modify the original
 		let animation = try animationData.read(AnimationData.self)
-		animationData.jump(to: animationStart)
 		
 		
 		let textureFolder = try texture.folder(named: file.name)
@@ -114,6 +108,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		
 		let colladaFile = BinaryFile(
 			name: file.name + ".dae",
+			metadata: .skipFile,
 			data: Datastream(collada.asString().data(using: .utf8)!)
 		)
 		

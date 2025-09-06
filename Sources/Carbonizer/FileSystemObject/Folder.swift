@@ -1,20 +1,25 @@
 import Foundation
+import BinaryParser
 
 struct Folder {
 	var name: String
+	var metadata: Metadata?
 	var contents: [any FileSystemObject]
 }
 
 func createFolder(
 	contentsOf path: URL,
 	configuration: CarbonizerConfiguration
-) throws -> any FileSystemObject {
+) throws -> (any FileSystemObject)? {
+	let metadata = try Metadata(forItemAt: path)
+	if metadata?.skipFile == true { return nil }
+	
 	let contentPaths = try path.contents()
 	
 	let contents = try contentPaths
 		.filter { !$0.lastPathComponent.starts(with: ".") }
 		.filter { $0.pathExtension != "metadata" }
-		.map { try fileSystemObject(contentsOf: $0, configuration: configuration) }
+		.compactMap { try fileSystemObject(contentsOf: $0, configuration: configuration) }
 		.sorted(by: \.name)
 	
 	if configuration.fileTypes.contains(MAR.Packed.Binary.magicBytes),
@@ -66,6 +71,25 @@ extension Folder: FileSystemObject {
 	) throws {
 		let path = savePath(in: folder, overwriting: overwriting)
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
+		
+		if let metadata {
+			do {
+				if configuration.externalMetadata {
+					let metadataPath = path
+						.deletingPathExtension()
+						.appendingPathExtension("metadata")
+					
+					try JSONEncoder(.prettyPrinted, .sortedKeys)
+						.encode(metadata)
+						.write(to: metadataPath)
+				} else {
+					try path.setCreationDate(to: metadata.asDate)
+				}
+			} catch {
+				throw BinaryParserError.whileWriting(Metadata.self, error)
+			}
+		}
+		
 		try contents.forEach { try $0.write(into: path, overwriting: overwriting, with: configuration) }
 	}
 	
@@ -78,6 +102,7 @@ extension Folder: FileSystemObject {
 	func packed(configuration: CarbonizerConfiguration) -> Self {
 		Folder(
 			name: name,
+			metadata: metadata,
 			contents: contents.map { $0.packed(configuration: configuration) }
 		)
 	}
@@ -85,6 +110,7 @@ extension Folder: FileSystemObject {
 	func unpacked(path: [String], configuration: CarbonizerConfiguration) throws -> Self {
 		Folder(
 			name: name,
+			metadata: metadata,
 			contents: try contents.map {
 				if configuration.shouldUnpack(path + [name, $0.name]) {
 					try $0.unpacked(

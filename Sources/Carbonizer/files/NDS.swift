@@ -231,7 +231,9 @@ extension NDS.Packed.Binary {
 			return writer.intoDatastream()
 		}
 		
-		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while unpacked")
+//		print(zip(allFiles, files).map { ($0.name, $1.bytes.count) })
+		
+		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while packing")
 		
 		let offsetIncrement: UInt32 = 256
 		let iconBannerSize: UInt32 = 0x840
@@ -374,6 +376,16 @@ extension [any FileSystemObject] {
 extension NDS.Unpacked {
 	enum UnpackingError: Error {
 		case invalidFolderStructure([String])
+		case filesAdded(expectedCount: UInt32, actualCount: Int)
+		
+		var description: String {
+			switch self {
+				case .invalidFolderStructure(let contentNames):
+					"invalid folder structure: \(contentNames)"
+				case .filesAdded(expectedCount: let expectedCount, actualCount: let actualCount):
+					"file(s) added while unpacked (expected \(.green)\(expectedCount)\(.normal), got \(.red)\(actualCount)\(.normal)"
+			}
+		}
 	}
 	
 	init(
@@ -424,5 +436,12 @@ extension NDS.Unpacked {
 		iconBanner = iconBannerFile.data
 		
 		self.contents = dataFolder.contents
+		
+		let expectedFileCount = header.fileAllocationTableSize / 8
+		let actualFileCount = arm9Overlays.count + arm7Overlays.count + self.contents.getAllFiles().count
+		
+		guard actualFileCount == expectedFileCount else {
+			throw UnpackingError.filesAdded(expectedCount: expectedFileCount, actualCount: actualFileCount)
+		}
 	}
 }

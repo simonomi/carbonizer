@@ -157,6 +157,7 @@ extension ProprietaryFile {
 	init(index: Int, mcm: MCM.Unpacked) {
 		name = String(index).padded(toLength: 4, with: "0")
 		metadata = Metadata(
+			skipFile: false,
 			standalone: false,
 			compression: mcm.compression,
 			maxChunkSize: mcm.maxChunkSize,
@@ -169,6 +170,7 @@ extension ProprietaryFile {
 	init(name: String, standaloneMCM mcm: MCM.Unpacked) {
 		self.name = name
 		metadata = Metadata(
+			skipFile: false,
 			standalone: true,
 			compression: mcm.compression,
 			maxChunkSize: mcm.maxChunkSize,

@@ -57,13 +57,17 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		
 		precondition(mms.animation.indices.first == 0)
 		
-		var folder = Folder(name: file.name + " sprite", contents: [])
+		var folder = Folder(
+			name: file.name + " sprite",
+			metadata: .skipFile,
+			contents: []
+		)
 		
 		// TODO: temp skip 0
 		for animationIndex in mms.animation.indices.map(Int.init).dropFirst() {
 			if parent.name == "ui_shop", file.name == "hold_cursor.bin", animationIndex == 1 { continue } // 1st palette is malformed
 			
-			print("\(parent.name)/\(file.name)")
+//			print("\(parent.name)/\(file.name)")
 			
 			let colorPaletteArchive = parent.contents.first { $0.name == mms.colorPalette.tableName } as! MAR.Unpacked
 			
