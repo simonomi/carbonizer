@@ -521,13 +521,13 @@ extension Set {
 }
 
 extension Double {
-	init(fixedPoint: some BinaryInteger) {
-		self = Self(fixedPoint) / 4096
+	init(fixedPoint: some BinaryInteger, fractionBits: Int = 12) {
+		self = Self(fixedPoint) / Self(1 << fractionBits)
 	}
 }
 
 extension BinaryInteger {
-	init(fixedPoint: Double) {
-		self = Self(fixedPoint * 4096)
+	init(fixedPoint: Double, fractionBits: Int = 12) {
+		self = Self(fixedPoint * Double(1 << fractionBits))
 	}
 }

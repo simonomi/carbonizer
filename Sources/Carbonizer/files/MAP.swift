@@ -9,40 +9,41 @@ enum MAP {
 		var mapNameOffset: UInt32 = 0x6C
 		var collisionMapNameOffset: UInt32
 		
-		var unknown1: Int32
+		var unknown01: Int32
 		
 		// 0x10
-		var unknown2: Int32
-		var unknown3: Int32
+		var unknown02: Int32
+		var unknown03: Int32
 		
 		var thingACount: UInt32
 		var thingAOffset: UInt32
 		
 		// 0x20
-		var unknown6: Int32
-		var unknown7: Int32
-		var unknown8: Int32
-		var unknown9: Int32 // fixed-point?
-		// 0x30
-		var unknown10: Int32 // fixed-point?
-		var name: UInt32 // banner text id
+		var unknown06: Int32
+		var unknown07: Int32
+		var unknown08: Int32
+		var unknown09: Int32 // fixed-point
 		
-		var thingBCount: UInt32
-		var thingBOffset: UInt32
+		// 0x30
+		var unknown10: Int32 // fixed-point
+		var bannerTextID: UInt32
+		
+		var loadingZoneCount: UInt32
+		var loadingZonesOffset: UInt32
 		
 		// 0x40
-		var thingCCount: UInt32
-		var thingCOffset: UInt32
+		var cameraPositionCount: UInt32
+		var cameraPositionsOffset: UInt32
 		
 		var thingDCount: UInt32
 		var thingDOffsetsOffset: UInt32
 		
 		// 0x50
-		var thingECount: UInt32
-		var thingEOffsetsOffset: UInt32
+		var fossilSpawnCount: UInt32
+		var fossilSpawnOffsetsOffset: UInt32
 		
-		var thingFCount: UInt32
-		var thingFOffsetsOffset: UInt32
+		var breakableRockCount: UInt32
+		var breakableRockOffsetsOffset: UInt32
 		
 		// 0x60
 		var backgroundGradientTopOffset: UInt32
@@ -60,13 +61,13 @@ enum MAP {
 		@Offset(givenBy: \Self.thingAOffset)
 		var thingA: [ThingA]
 		
-		@Count(givenBy: \Self.thingBCount)
-		@Offset(givenBy: \Self.thingBOffset)
-		var thingB: [ThingB] // smthn with characters?
+		@Count(givenBy: \Self.loadingZoneCount)
+		@Offset(givenBy: \Self.loadingZonesOffset)
+		var loadingZones: [LoadingZone] // smthn with characters?
 		
-		@Count(givenBy: \Self.thingCCount)
-		@Offset(givenBy: \Self.thingCOffset)
-		var thingC: [ThingC]
+		@Count(givenBy: \Self.cameraPositionCount)
+		@Offset(givenBy: \Self.cameraPositionsOffset)
+		var cameraPositions: [CameraPosition]
 		
 		@Count(givenBy: \Self.thingDCount)
 		@Offset(givenBy: \Self.thingDOffsetsOffset)
@@ -76,19 +77,19 @@ enum MAP {
 		@Offsets(givenBy: \Self.thingDOffsets)
 		var thingD: [ThingD]
 		
-		@Count(givenBy: \Self.thingECount)
-		@Offset(givenBy: \Self.thingEOffsetsOffset)
-		var thingEOffsets: [UInt32]
+		@Count(givenBy: \Self.fossilSpawnCount)
+		@Offset(givenBy: \Self.fossilSpawnOffsetsOffset)
+		var fossilSpawnOffsets: [UInt32]
 		
-		@Offsets(givenBy: \Self.thingEOffsets)
-		var thingE: [ThingE]
+		@Offsets(givenBy: \Self.fossilSpawnOffsets)
+		var fossilSpawns: [FossilSpawn]
 		
-		@Count(givenBy: \Self.thingFCount)
-		@Offset(givenBy: \Self.thingFOffsetsOffset)
-		var thingFOffsets: [UInt32]
+		@Count(givenBy: \Self.breakableRockCount)
+		@Offset(givenBy: \Self.breakableRockOffsetsOffset)
+		var breakableRockOffsets: [UInt32]
 		
-		@Offsets(givenBy: \Self.thingFOffsets)
-		var thingF: [ThingF]
+		@Offsets(givenBy: \Self.breakableRockOffsets)
+		var breakableRocks: [BreakableRock]
 		
 		@Count(3)
 		@Offset(givenBy: \Self.backgroundGradientTopOffset)
@@ -103,63 +104,64 @@ enum MAP {
 		
 		@BinaryConvertible
 		struct ThingA {
-			var topScreenImage: Int32 // changing this affects the top image (1-fighter, 2-park, 3-guild)
-			var unknown2: Int32 // setting 1 breaks
+			var topScreenImage: Int32 // 1-fighter, 2-park, 3-guild
+			var unknown2: Int32 // setting to 1 crashes
 		}
 		
 		@BinaryConvertible
-		struct ThingB { // map/r (collisions)
-			var id: Int32 // id
-			var x: Int32
-			var y: Int32
+		struct LoadingZone { // map/r
+			var id: Int32
+			
 			// what do x and y do??? what abt the grd file?
 			// they seem to match up with their location, but changing them does... nothing???
-			var rotation: Int32 // fixed-point
+			var x: Int32
+			var y: Int32
+			
+			var rotation: Int32 // fixed-point 16.16
 			// angle but not degrees again
 			// - rotating a door makes the player walk out sideways
+			
 			var unknown5: Int32 = 0
 		}
 		
 		@BinaryConvertible
-		struct ThingC { // first one effects the camera when walking around, no clue abt the rest (not sub areas, not map/c)
-			var fov: Int16 // 4.12 fixed-point?
-			// camera fov?
-			var verticalAngle: Int16 // 4.12 fixed-point?
-			// camera vertical angle
+		struct CameraPosition: Equatable {
+			// first one effects the camera when walking around, no clue abt the rest (not sub areas, not map/c)
+			var fov: Int16 // fixed-point 12.4
+			var verticalAngle: Int16 // fixed-point 8.8
 			var horizontalAngle: Int32 // fixed-point
-			// camera horizontal angle
 			var distance: Int32 // fixed point
-			// camera distance
+			
+			init(fov: Int16, verticalAngle: Int16, horizontalAngle: Int32, distance: Int32) {
+				self.fov = fov
+				self.verticalAngle = verticalAngle
+				self.horizontalAngle = horizontalAngle
+				self.distance = distance
+			}
 		}
 		
 		@BinaryConvertible
 		struct ThingD { // camera (map/c)
-			var unknown1: Int32 // offset to stuff?
-			var x: Int32 // x? (but different from thingB's)
-			var y: Int32 // y? (but different from thingB's)
+			var cameraPositionOffset: Int32
+			
+			// different units from LoadingZone's
+			var x: Int32
+			var y: Int32
+			
 			var unknown4: Int32
 			var unknown5: Int32
 			
-			@If(\Self.unknown1, is: .notEqualTo(0))
-			var fov: Int16? // fov? (fp)
-			
-			@If(\Self.unknown1, is: .notEqualTo(0))
-			var verticalAngle: Int16? // vertical angle? (fp)
-			
-			@If(\Self.unknown1, is: .notEqualTo(0))
-			var horizontalAngle: Int32? // horizontal angle (fp)
-			
-			@If(\Self.unknown1, is: .notEqualTo(0))
-			var distance: Int32? // fixed-point
-			// camera distance
+			@If(\Self.cameraPositionOffset, is: .notEqualTo(0))
+			@Offset(givenBy: \Self.cameraPositionOffset)
+			var cameraPosition: MAP.Packed.CameraPosition?
 		}
 		
 		@BinaryConvertible
-		struct ThingE { // fossils
+		struct FossilSpawn { // map/e
 			var unknown1: Int32
-			var zone: Int32 // ?
-			var sonarUpgrades: Int32 // ?
-			var maxSpawns: Int32 // ?
+			var zone: Int32
+			var sonarUpgrades: Int32 // idk the type for this
+			var maxSpawns: Int32
 			
 			var unknown2: Int32
 			var unknown3: Int32
@@ -188,15 +190,15 @@ enum MAP {
 			
 			@BinaryConvertible
 			struct ThingB {
-				var unknown1: Int32
-				var unknown2: Int32
-				var unknown3: Int32
-				var unknown4: Int32
-				var unknown5: Int32 // these are (at least sometimes) incrementing
-				var unknown6: Int32 // these are (at least sometimes) incrementing
-				var unknown7: Int32 // these are (at least sometimes) incrementing
-				var unknown8: Int32 // these are (at least sometimes) incrementing
-				var unknown9: Int32 // these are (at least sometimes) incrementing
+				var unknown01: Int32
+				var unknown02: Int32
+				var unknown03: Int32
+				var unknown04: Int32
+				var unknown05: Int32 // these are (at least sometimes) incrementing
+				var unknown06: Int32 // these are (at least sometimes) incrementing
+				var unknown07: Int32 // these are (at least sometimes) incrementing
+				var unknown08: Int32 // these are (at least sometimes) incrementing
+				var unknown09: Int32 // these are (at least sometimes) incrementing
 				var unknown10: Int32 // these are (at least sometimes) incrementing
 				var unknown11: Int32 // these are (at least sometimes) incrementing
 				var unknown12: Int32 // these are (at least sometimes) incrementing
@@ -204,28 +206,31 @@ enum MAP {
 			
 			@BinaryConvertible
 			struct ThingC {
-				var vivosaurID: Int32 // vivosaur number
+				var vivosaurID: Int32
+				
 				var unknown2: Int32
 				var unknown3: Int32
 				var unknown4: Int32
-				var fossil1Chance: Int32 // chances of X fossil (/100)
-				var fossil2Chance: Int32 // chances of X fossil (/100)
-				var fossil3Chance: Int32 // chances of X fossil (/100)
-				var fossil4Chance: Int32 // chances of X fossil (/100)
+				
+				// head/body/arms/legs, but differ by file?
+				var fossil1Chance: Int32 // out of 100
+				var fossil2Chance: Int32 // out of 100
+				var fossil3Chance: Int32 // out of 100
+				var fossil4Chance: Int32 // out of 100
 			}
 		}
 		
 		@BinaryConvertible
-		struct ThingF { // breakable rocks?
+		struct BreakableRock { // map/g
 			var unknown1: Int32
-			var spawnCount: Int32 // how many spawn
-			var characterID: Int32 // character id
-			var rotation: Int32 // fixed-point
-			// facing angle, but not degrees
+			var spawnCount: Int32
+			var characterID: Int32
+			var rotation: Int32 // fixed-point 16.16
+			// not degrees
 			// 0 is right
-			// 4 is down
-			// 8 is left
-			// - could be 16.16 fixed-point?
+			// 0.25 is down
+			// 0.5 is left
+			// 0.75 is up
 			
 			var count: UInt32
 			var offset: UInt32 = 0x18
@@ -243,20 +248,20 @@ enum MAP {
 	}
 	
 	struct Unpacked: Codable {
-		var unknown1: Int32
+		var unknown01: Int32
 		
-		var unknown2: Int32
-		var unknown3: Int32
+		var unknown02: Int32
+		var unknown03: Int32
 		
-		var unknown6: Int32
-		var unknown7: Int32
-		var unknown8: Int32
-		var unknown9: Double
+		var unknown06: Int32
+		var unknown07: Int32
+		var unknown08: Int32
 		
+		var unknown09: Double
 		var unknown10: Double
-		var name: UInt32 // name in text/japanese
 		
-		var _name: String? // TODO: make a processor that fills this in
+		var bannerTextID: UInt32
+		var _name: String?
 		
 		var unknown24: UInt32 // unknown
 		
@@ -266,15 +271,15 @@ enum MAP {
 		
 		var thingA: [ThingA]
 		
-		var thingB: [ThingB] // smthn with characters?
+		var loadingZones: [LoadingZone]
 		
-		var thingC: [ThingC]
+		var cameraPositions: [CameraPosition]
 		
 		var thingD: [ThingD]
 		
-		var thingE: [ThingE]
+		var fossilSpawns: [FossilSpawn]
 		
-		var thingF: [ThingF]
+		var breakableRocks: [BreakableRock]
 		
 		var backgroundGradientTop: Color
 		
@@ -285,14 +290,14 @@ enum MAP {
 			var unknown2: Int32
 		}
 		
-		struct ThingB: Codable {
+		struct LoadingZone: Codable {
 			var id: Int32
 			var x: Int32
 			var y: Int32
 			var rotation: Double
 		}
 		
-		struct ThingC: Codable {
+		struct CameraPosition: Codable {
 			var fov: Double
 			var verticalAngle: Double
 			var horizontalAngle: Double
@@ -300,23 +305,19 @@ enum MAP {
 		}
 		
 		struct ThingD: Codable {
-			var unknown1: Int32
 			var unknown2: Int32
 			var unknown3: Int32
 			var unknown4: Int32
 			var unknown5: Int32
 			
-			var fov: Double?
-			var verticalAngle: Double?
-			var horizontalAngle: Double?
-			var distance: Double?
+			var cameraPositon: MAP.Unpacked.CameraPosition?
 		}
 		
-		struct ThingE: Codable { // fossils
+		struct FossilSpawn: Codable {
 			var unknown1: Int32
-			var zone: Int32 // ?
-			var sonarUpgrades: Int32 // ?
-			var maxSpawns: Int32 // ?
+			var zone: Int32
+			var sonarUpgrades: Int32
+			var maxSpawns: Int32
 			
 			var unknown2: Int32
 			var unknown3: Int32
@@ -328,15 +329,15 @@ enum MAP {
 			var thingCs: [ThingC]
 			
 			struct ThingB: Codable {
-				var unknown1: Int32
-				var unknown2: Int32
-				var unknown3: Int32
-				var unknown4: Int32
-				var unknown5: Int32
-				var unknown6: Int32
-				var unknown7: Int32
-				var unknown8: Int32
-				var unknown9: Int32
+				var unknown01: Int32
+				var unknown02: Int32
+				var unknown03: Int32
+				var unknown04: Int32
+				var unknown05: Int32
+				var unknown06: Int32
+				var unknown07: Int32
+				var unknown08: Int32
+				var unknown09: Int32
 				var unknown10: Int32
 				var unknown11: Int32
 				var unknown12: Int32
@@ -345,9 +346,11 @@ enum MAP {
 			struct ThingC: Codable {
 				var vivosaurID: Int32
 				var _vivosaur: String?
+				
 				var unknown2: Int32
 				var unknown3: Int32
 				var unknown4: Int32
+				
 				var fossil1Chance: Int32
 				var fossil2Chance: Int32
 				var fossil3Chance: Int32
@@ -355,7 +358,7 @@ enum MAP {
 			}
 		}
 		
-		struct ThingF: Codable {
+		struct BreakableRock: Codable {
 			var unknown1: Int32
 			var spawnCount: Int32
 			
@@ -388,29 +391,29 @@ extension MAP.Packed: ProprietaryFileData {
 	fileprivate init(_ unpacked: MAP.Unpacked, configuration: CarbonizerConfiguration) {
 		collisionMapNameOffset = mapNameOffset + UInt32(unpacked.mapName.utf8CString.count.roundedUpToTheNearest(4))
 		
-		unknown1 = unpacked.unknown1
+		unknown01 = unpacked.unknown01
 		
-		unknown2 = unpacked.unknown2
-		unknown3 = unpacked.unknown3
+		unknown02 = unpacked.unknown02
+		unknown03 = unpacked.unknown03
 		
 		thingACount = UInt32(unpacked.thingA.count)
 		thingAOffset = collisionMapNameOffset + UInt32(unpacked.collisionMapName.utf8CString.count.roundedUpToTheNearest(4))
 		
-		unknown6 = unpacked.unknown6
-		unknown7 = unpacked.unknown7
-		unknown8 = unpacked.unknown8
-		unknown9 = Int32(fixedPoint: unpacked.unknown9)
+		unknown06 = unpacked.unknown06
+		unknown07 = unpacked.unknown07
+		unknown08 = unpacked.unknown08
+		unknown09 = Int32(fixedPoint: unpacked.unknown09)
 		unknown10 = Int32(fixedPoint: unpacked.unknown10)
-		name = unpacked.name
+		bannerTextID = unpacked.bannerTextID
 		
-		thingBCount = UInt32(unpacked.thingB.count)
-		thingBOffset = thingAOffset + thingACount * 8
+		loadingZoneCount = UInt32(unpacked.loadingZones.count)
+		loadingZonesOffset = thingAOffset + thingACount * 8
 		
-		thingCCount = UInt32(unpacked.thingC.count)
-		thingCOffset = thingBOffset + thingBCount * 0x14
+		cameraPositionCount = UInt32(unpacked.cameraPositions.count)
+		cameraPositionsOffset = loadingZonesOffset + loadingZoneCount * 0x14
 		
 		thingDCount = UInt32(unpacked.thingD.count)
-		thingDOffsetsOffset = thingCOffset + thingCCount * 0xC
+		thingDOffsetsOffset = cameraPositionsOffset + cameraPositionCount * 0xC
 		
 		thingD = unpacked.thingD.map(ThingD.init)
 		
@@ -419,27 +422,27 @@ extension MAP.Packed: ProprietaryFileData {
 			sizes: thingD.map { $0.size() }
 		)
 		
-		thingECount = UInt32(unpacked.thingE.count)
-		thingEOffsetsOffset = thingDOffsetsOffset + thingDCount * 4 + thingD.map { $0.size() }.sum()
+		fossilSpawnCount = UInt32(unpacked.fossilSpawns.count)
+		fossilSpawnOffsetsOffset = thingDOffsetsOffset + thingDCount * 4 + thingD.map { $0.size() }.sum()
 		
-		thingE = unpacked.thingE.map(ThingE.init)
+		fossilSpawns = unpacked.fossilSpawns.map(FossilSpawn.init)
 		
-		thingEOffsets = makeOffsets(
-			start: thingEOffsetsOffset + thingECount * 4,
-			sizes: thingE.map { $0.size() }
+		fossilSpawnOffsets = makeOffsets(
+			start: fossilSpawnOffsetsOffset + fossilSpawnCount * 4,
+			sizes: fossilSpawns.map { $0.size() }
 		)
 		
-		thingFCount = UInt32(unpacked.thingF.count)
-		thingFOffsetsOffset = thingEOffsetsOffset + thingECount * 4 + thingE.map { $0.size() }.sum()
+		breakableRockCount = UInt32(unpacked.breakableRocks.count)
+		breakableRockOffsetsOffset = fossilSpawnOffsetsOffset + fossilSpawnCount * 4 + fossilSpawns.map { $0.size() }.sum()
 		
-		thingF = unpacked.thingF.map(ThingF.init)
+		breakableRocks = unpacked.breakableRocks.map(BreakableRock.init)
 		
-		thingFOffsets = makeOffsets(
-			start: thingFOffsetsOffset + thingFCount * 4,
-			sizes: thingF.map { $0.size() }
+		breakableRockOffsets = makeOffsets(
+			start: breakableRockOffsetsOffset + breakableRockCount * 4,
+			sizes: breakableRocks.map { $0.size() }
 		)
 		
-		backgroundGradientTopOffset = thingFOffsetsOffset + thingFCount * 4 + thingF.map { $0.size() }.sum()
+		backgroundGradientTopOffset = breakableRockOffsetsOffset + breakableRockCount * 4 + breakableRocks.map { $0.size() }.sum()
 		backgroundGradientBottomOffset = backgroundGradientTopOffset + 4
 		
 		unknown24 = unpacked.unknown24
@@ -450,9 +453,9 @@ extension MAP.Packed: ProprietaryFileData {
 		
 		thingA = unpacked.thingA.map(ThingA.init)
 		
-		thingB = unpacked.thingB.map(ThingB.init)
+		loadingZones = unpacked.loadingZones.map(LoadingZone.init)
 		
-		thingC = unpacked.thingC.map(ThingC.init)
+		cameraPositions = unpacked.cameraPositions.map(CameraPosition.init)
 		
 		backgroundGradientTop = unpacked.backgroundGradientTop.bytes
 		
@@ -467,19 +470,21 @@ extension MAP.Packed.ThingA {
 	}
 }
 
-extension MAP.Packed.ThingB {
-	init(_ unpacked: MAP.Unpacked.ThingB) {
+extension MAP.Packed.LoadingZone {
+	init(_ unpacked: MAP.Unpacked.LoadingZone) {
 		id = unpacked.id
 		x = unpacked.x
 		y = unpacked.y
-		rotation = Int32(fixedPoint: unpacked.rotation)
+		rotation = Int32(fixedPoint: unpacked.rotation, fractionBits: 16)
 	}
 }
 
-extension MAP.Packed.ThingC {
-	init(_ unpacked: MAP.Unpacked.ThingC) {
-		fov = Int16(fixedPoint: unpacked.fov)
-		verticalAngle = Int16(fixedPoint: unpacked.verticalAngle)
+extension MAP.Packed.CameraPosition {
+	static let null = Self(fov: 0, verticalAngle: 0, horizontalAngle: 0, distance: 0)
+	
+	init(_ unpacked: MAP.Unpacked.CameraPosition) {
+		fov = Int16(fixedPoint: unpacked.fov, fractionBits: 4)
+		verticalAngle = Int16(fixedPoint: unpacked.verticalAngle, fractionBits: 8)
 		horizontalAngle = Int32(fixedPoint: unpacked.horizontalAngle)
 		distance = Int32(fixedPoint: unpacked.distance)
 	}
@@ -487,29 +492,23 @@ extension MAP.Packed.ThingC {
 
 extension MAP.Packed.ThingD {
 	init(_ unpacked: MAP.Unpacked.ThingD) {
-		unknown1 = unpacked.unknown1
+		cameraPositionOffset = unpacked.cameraPositon == nil ? 0 : 0x14
+		
 		x = unpacked.unknown2
 		y = unpacked.unknown3
 		unknown4 = unpacked.unknown4
 		unknown5 = unpacked.unknown5
 		
-		fov = unpacked.fov.map { Int16(fixedPoint: $0) }
-		verticalAngle = unpacked.verticalAngle.map { Int16(fixedPoint: $0) }
-		horizontalAngle = unpacked.horizontalAngle.map { Int32(fixedPoint: $0) }
-		distance = unpacked.distance.map { Int32(fixedPoint: $0) }
+		cameraPosition = unpacked.cameraPositon.map(MAP.Packed.CameraPosition.init) ?? .null
 	}
 	
 	func size() -> UInt32 {
-		if unknown1 == 0 {
-			0x14
-		} else {
-			0x20
-		}
+		0x14 + (cameraPositionOffset == 0 ? 0 : 0xC)
 	}
 }
 
-extension MAP.Packed.ThingE {
-	init(_ unpacked: MAP.Unpacked.ThingE) {
+extension MAP.Packed.FossilSpawn {
+	init(_ unpacked: MAP.Unpacked.FossilSpawn) {
 		unknown1 = unpacked.unknown1
 		zone = unpacked.zone
 		sonarUpgrades = unpacked.sonarUpgrades
@@ -548,25 +547,25 @@ extension MAP.Packed.ThingE {
 	}
 }
 
-extension MAP.Packed.ThingE.ThingB {
-	init(_ unpacked: MAP.Unpacked.ThingE.ThingB) {
-		unknown1 = unpacked.unknown1
-		unknown2 = unpacked.unknown2
-		unknown3 = unpacked.unknown3
-		unknown4 = unpacked.unknown4
-		unknown5 = unpacked.unknown5
-		unknown6 = unpacked.unknown6
-		unknown7 = unpacked.unknown7
-		unknown8 = unpacked.unknown8
-		unknown9 = unpacked.unknown9
+extension MAP.Packed.FossilSpawn.ThingB {
+	init(_ unpacked: MAP.Unpacked.FossilSpawn.ThingB) {
+		unknown01 = unpacked.unknown01
+		unknown02 = unpacked.unknown02
+		unknown03 = unpacked.unknown03
+		unknown04 = unpacked.unknown04
+		unknown05 = unpacked.unknown05
+		unknown06 = unpacked.unknown06
+		unknown07 = unpacked.unknown07
+		unknown08 = unpacked.unknown08
+		unknown09 = unpacked.unknown09
 		unknown10 = unpacked.unknown10
 		unknown11 = unpacked.unknown11
 		unknown12 = unpacked.unknown12
 	}
 }
 
-extension MAP.Packed.ThingE.ThingC {
-	init(_ unpacked: MAP.Unpacked.ThingE.ThingC) {
+extension MAP.Packed.FossilSpawn.ThingC {
+	init(_ unpacked: MAP.Unpacked.FossilSpawn.ThingC) {
 		vivosaurID = unpacked.vivosaurID
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
@@ -578,12 +577,12 @@ extension MAP.Packed.ThingE.ThingC {
 	}
 }
 
-extension MAP.Packed.ThingF {
-	init(_ unpacked: MAP.Unpacked.ThingF) {
+extension MAP.Packed.BreakableRock {
+	init(_ unpacked: MAP.Unpacked.BreakableRock) {
 		unknown1 = unpacked.unknown1
 		spawnCount = unpacked.spawnCount
 		characterID = unpacked.characterID
-		rotation = Int32(fixedPoint: unpacked.rotation)
+		rotation = Int32(fixedPoint: unpacked.rotation, fractionBits: 16)
 		
 		count = UInt32(unpacked.things.count)
 		
@@ -595,8 +594,8 @@ extension MAP.Packed.ThingF {
 	}
 }
 
-extension MAP.Packed.ThingF.Thing {
-	init(_ unpacked: MAP.Unpacked.ThingF.Thing) {
+extension MAP.Packed.BreakableRock.Thing {
+	init(_ unpacked: MAP.Unpacked.BreakableRock.Thing) {
 		unknown1 = unpacked.unknown1
 		unknown2 = unpacked.unknown2
 	}
@@ -615,18 +614,18 @@ extension MAP.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
 	
 	fileprivate init(_ packed: MAP.Packed, configuration: CarbonizerConfiguration) {
-		unknown1 = packed.unknown1
+		unknown01 = packed.unknown01
 		
-		unknown2 = packed.unknown2
-		unknown3 = packed.unknown3
+		unknown02 = packed.unknown02
+		unknown03 = packed.unknown03
 		
-		unknown6 = packed.unknown6
-		unknown7 = packed.unknown7
-		unknown8 = packed.unknown8
-		unknown9 = Double(fixedPoint: packed.unknown9)
+		unknown06 = packed.unknown06
+		unknown07 = packed.unknown07
+		unknown08 = packed.unknown08
+		unknown09 = Double(fixedPoint: packed.unknown09)
 		
 		unknown10 = Double(fixedPoint: packed.unknown10)
-		name = packed.name
+		bannerTextID = packed.bannerTextID
 		
 		unknown24 = packed.unknown24
 		
@@ -636,15 +635,15 @@ extension MAP.Unpacked: ProprietaryFileData {
 		
 		thingA = packed.thingA.map(ThingA.init)
 		
-		thingB = packed.thingB.map(ThingB.init)
+		loadingZones = packed.loadingZones.map(LoadingZone.init)
 		
-		thingC = packed.thingC.map(ThingC.init)
+		cameraPositions = packed.cameraPositions.map(CameraPosition.init)
 		
 		thingD = packed.thingD.map(ThingD.init)
 		
-		thingE = packed.thingE.map(ThingE.init)
+		fossilSpawns = packed.fossilSpawns.map(FossilSpawn.init)
 		
-		thingF = packed.thingF.map(ThingF.init)
+		breakableRocks = packed.breakableRocks.map(BreakableRock.init)
 		
 		backgroundGradientTop = Color(packed.backgroundGradientTop)
 		
@@ -659,19 +658,19 @@ extension MAP.Unpacked.ThingA {
 	}
 }
 
-extension MAP.Unpacked.ThingB {
-	init(_ packed: MAP.Packed.ThingB) {
+extension MAP.Unpacked.LoadingZone {
+	init(_ packed: MAP.Packed.LoadingZone) {
 		id = packed.id
 		x = packed.x
 		y = packed.y
-		rotation = Double(fixedPoint: packed.rotation)
+		rotation = Double(fixedPoint: packed.rotation, fractionBits: 16)
 	}
 }
 
-extension MAP.Unpacked.ThingC {
-	init(_ packed: MAP.Packed.ThingC) {
-		fov = Double(fixedPoint: packed.fov)
-		verticalAngle = Double(fixedPoint: packed.verticalAngle)
+extension MAP.Unpacked.CameraPosition {
+	init(_ packed: MAP.Packed.CameraPosition) {
+		fov = Double(fixedPoint: packed.fov, fractionBits: 4)
+		verticalAngle = Double(fixedPoint: packed.verticalAngle, fractionBits: 8)
 		horizontalAngle = Double(fixedPoint: packed.horizontalAngle)
 		distance = Double(fixedPoint: packed.distance)
 	}
@@ -679,21 +678,17 @@ extension MAP.Unpacked.ThingC {
 
 extension MAP.Unpacked.ThingD {
 	init(_ packed: MAP.Packed.ThingD) {
-		unknown1 = packed.unknown1
 		unknown2 = packed.x
 		unknown3 = packed.y
 		unknown4 = packed.unknown4
 		unknown5 = packed.unknown5
 		
-		fov = packed.fov.map { Double(fixedPoint: $0) }
-		verticalAngle = packed.verticalAngle.map { Double(fixedPoint: $0) }
-		horizontalAngle = packed.horizontalAngle.map { Double(fixedPoint: $0) }
-		distance = packed.distance.map { Double(fixedPoint: $0) }
+		cameraPositon = packed.cameraPosition.map(MAP.Unpacked.CameraPosition.init)
 	}
 }
 
-extension MAP.Unpacked.ThingE {
-	init(_ packed: MAP.Packed.ThingE) {
+extension MAP.Unpacked.FossilSpawn {
+	init(_ packed: MAP.Packed.FossilSpawn) {
 		unknown1 = packed.unknown1
 		zone = packed.zone
 		sonarUpgrades = packed.sonarUpgrades
@@ -710,25 +705,25 @@ extension MAP.Unpacked.ThingE {
 	}
 }
 
-extension MAP.Unpacked.ThingE.ThingB {
-	init(_ packed: MAP.Packed.ThingE.ThingB) {
-		unknown1 = packed.unknown1
-		unknown2 = packed.unknown2
-		unknown3 = packed.unknown3
-		unknown4 = packed.unknown4
-		unknown5 = packed.unknown5
-		unknown6 = packed.unknown6
-		unknown7 = packed.unknown7
-		unknown8 = packed.unknown8
-		unknown9 = packed.unknown9
+extension MAP.Unpacked.FossilSpawn.ThingB {
+	init(_ packed: MAP.Packed.FossilSpawn.ThingB) {
+		unknown01 = packed.unknown01
+		unknown02 = packed.unknown02
+		unknown03 = packed.unknown03
+		unknown04 = packed.unknown04
+		unknown05 = packed.unknown05
+		unknown06 = packed.unknown06
+		unknown07 = packed.unknown07
+		unknown08 = packed.unknown08
+		unknown09 = packed.unknown09
 		unknown10 = packed.unknown10
 		unknown11 = packed.unknown11
 		unknown12 = packed.unknown12
 	}
 }
 
-extension MAP.Unpacked.ThingE.ThingC {
-	init(_ packed: MAP.Packed.ThingE.ThingC) {
+extension MAP.Unpacked.FossilSpawn.ThingC {
+	init(_ packed: MAP.Packed.FossilSpawn.ThingC) {
 		vivosaurID = packed.vivosaurID
 		_vivosaur = vivosaurNames[vivosaurID]
 		
@@ -742,22 +737,22 @@ extension MAP.Unpacked.ThingE.ThingC {
 	}
 }
 
-extension MAP.Unpacked.ThingF {
-	init(_ packed: MAP.Packed.ThingF) {
+extension MAP.Unpacked.BreakableRock {
+	init(_ packed: MAP.Packed.BreakableRock) {
 		unknown1 = packed.unknown1
 		spawnCount = packed.spawnCount
 		
 		characterID = packed.characterID
 		_character = characterNames[characterID]
 		
-		rotation = Double(fixedPoint: packed.rotation)
+		rotation = Double(fixedPoint: packed.rotation, fractionBits: 16)
 		
 		things = packed.things.map(Thing.init)
 	}
 }
 
-extension MAP.Unpacked.ThingF.Thing {
-	init(_ packed: MAP.Packed.ThingF.Thing) {
+extension MAP.Unpacked.BreakableRock.Thing {
+	init(_ packed: MAP.Packed.BreakableRock.Thing) {
 		unknown1 = packed.unknown1
 		unknown2 = packed.unknown2
 	}

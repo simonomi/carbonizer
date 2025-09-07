@@ -10,18 +10,12 @@ func mapLabeller(
 	let mFolderIndex = mapFolder.contents.firstIndex { $0.name == "m" }!
 	var mFolder = mapFolder.contents[mFolderIndex] as! Folder
 	
-	print("running")
-	
 	mFolder.contents = mFolder.contents
 		.map {
 			var mar = $0 as! MAR.Unpacked
 			var map = mar.files.first!.content as! MAP.Unpacked
 			
-			map._name = text[safely: Int(map.name)]
-			
-			if let name = map._name {
-				print("set", name)
-			}
+			map._name = text[safely: Int(map.bannerTextID)]
 			
 			mar.files[0].content = map
 			

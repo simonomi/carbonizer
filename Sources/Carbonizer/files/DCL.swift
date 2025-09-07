@@ -70,7 +70,7 @@ enum DCL {
 			var allySupportEffectsOffset: UInt32
 			var enemySupportEffectsOffset: UInt32
 			
-			var unknown9: UInt8 // always 1
+			var requiredFossilsForTeamSkill: UInt8 // always 1
 			var unknown10: UInt8 // always 1
 			var unknown11: UInt8 // always 100
 			var unknown12: UInt8 // always 100
@@ -246,7 +246,7 @@ enum DCL {
 				var evasion: Int8
 			}
 			
-			init(id: Int32, unknown1: UInt32, unknown2: UInt32, length: UInt8, element: Element? = nil, rank12HealthDividedBy2: UInt16, attack: Stat, defense: Stat, accuracy: Stat, evasion: Stat, crit: UInt8, critAgain: UInt8, linkChance: UInt8, unknown3: UInt8, teams: Teams, moveCount: UInt32, skillIdsOffset: UInt32, teamSkill: UInt32, linkSkill: UInt32, long1234Count: UInt32, long1234Offset: UInt32, unknown4: UInt32, unknown5: UInt32, unknown6: UInt32, unknown7: UInt32, unknown8: UInt32, allySupportEffectsOffset: UInt32, enemySupportEffectsOffset: UInt32, unknown9: UInt8, unknown10: UInt8, unknown11: UInt8, unknown12: UInt8, unknown13: UInt8, passiveAbility: PassiveAbility, statusChancesCount: UInt32, statusChancesOffset: UInt32, szDamageMultiplier: UInt32, unknown16: UInt32, moveCountAgainAgain: UInt32, moveListOrderOffset: UInt32, rankCount: UInt32, healthAtEachRankOffset: UInt32, displayNumber: UInt32, alphabeticalOrder: UInt32, skillIds: [UInt32], long1234: [UInt32], allySupportEffects: SupportEffects, enemySupportEffects: SupportEffects, statusChances: [UInt8], moveListOrder: [UInt8], padding: UInt8? = nil, healthAtEachRank: [UInt16]) {
+			init(id: Int32, unknown1: UInt32, unknown2: UInt32, length: UInt8, element: Element? = nil, rank12HealthDividedBy2: UInt16, attack: Stat, defense: Stat, accuracy: Stat, evasion: Stat, crit: UInt8, critAgain: UInt8, linkChance: UInt8, unknown3: UInt8, teams: Teams, moveCount: UInt32, skillIdsOffset: UInt32, teamSkill: UInt32, linkSkill: UInt32, long1234Count: UInt32, long1234Offset: UInt32, unknown4: UInt32, unknown5: UInt32, unknown6: UInt32, unknown7: UInt32, unknown8: UInt32, allySupportEffectsOffset: UInt32, enemySupportEffectsOffset: UInt32, requiredFossilsForTeamSkill: UInt8, unknown10: UInt8, unknown11: UInt8, unknown12: UInt8, unknown13: UInt8, passiveAbility: PassiveAbility, statusChancesCount: UInt32, statusChancesOffset: UInt32, szDamageMultiplier: UInt32, unknown16: UInt32, moveCountAgainAgain: UInt32, moveListOrderOffset: UInt32, rankCount: UInt32, healthAtEachRankOffset: UInt32, displayNumber: UInt32, alphabeticalOrder: UInt32, skillIds: [UInt32], long1234: [UInt32], allySupportEffects: SupportEffects, enemySupportEffects: SupportEffects, statusChances: [UInt8], moveListOrder: [UInt8], padding: UInt8? = nil, healthAtEachRank: [UInt16]) {
 				self.id = id
 				self.unknown1 = unknown1
 				self.unknown2 = unknown2
@@ -275,7 +275,7 @@ enum DCL {
 				self.unknown8 = unknown8
 				self.allySupportEffectsOffset = allySupportEffectsOffset
 				self.enemySupportEffectsOffset = enemySupportEffectsOffset
-				self.unknown9 = unknown9
+				self.requiredFossilsForTeamSkill = requiredFossilsForTeamSkill
 				self.unknown10 = unknown10
 				self.unknown11 = unknown11
 				self.unknown12 = unknown12
@@ -342,7 +342,7 @@ enum DCL {
 			
 			var unknown4: UInt32
 			
-			var unknown9: UInt8
+			var requiredFossilsForTeamSkill: UInt8
 			var unknown10: UInt8
 			var unknown11: UInt8
 			var unknown12: UInt8
@@ -473,7 +473,7 @@ extension DCL.Packed: ProprietaryFileData {
 }
 
 extension DCL.Packed.Vivosaur {
-	static let null = Self(id: 0, unknown1: 0, unknown2: 0, length: 0, rank12HealthDividedBy2: 0, attack: .null, defense: .null, accuracy: .null, evasion: .null, crit: 0, critAgain: 0, linkChance: 0, unknown3: 0, teams: Teams(rawValue: 0), moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown4: 0, unknown5: 0, unknown6: 0, unknown7: 0, unknown8: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, unknown9: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
+	static let null = Self(id: 0, unknown1: 0, unknown2: 0, length: 0, rank12HealthDividedBy2: 0, attack: .null, defense: .null, accuracy: .null, evasion: .null, crit: 0, critAgain: 0, linkChance: 0, unknown3: 0, teams: Teams(rawValue: 0), moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown4: 0, unknown5: 0, unknown6: 0, unknown7: 0, unknown8: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, requiredFossilsForTeamSkill: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
 	
 	fileprivate init(_ unpacked: DCL.Unpacked.Vivosaur) {
 		id = unpacked.id
@@ -511,7 +511,7 @@ extension DCL.Packed.Vivosaur {
 		allySupportEffectsOffset = long1234Offset + long1234Count * 4
 		enemySupportEffectsOffset = allySupportEffectsOffset + 4
 		
-		unknown9 = unpacked.unknown9
+		requiredFossilsForTeamSkill = unpacked.requiredFossilsForTeamSkill
 		unknown10 = unpacked.unknown10
 		unknown11 = unpacked.unknown11
 		unknown12 = unpacked.unknown12
@@ -690,7 +690,7 @@ extension DCL.Unpacked.Vivosaur {
 		
 		unknown4 = packed.unknown4
 		
-		unknown9 = packed.unknown9
+		requiredFossilsForTeamSkill = packed.requiredFossilsForTeamSkill
 		unknown10 = packed.unknown10
 		unknown11 = packed.unknown11
 		unknown12 = packed.unknown12
