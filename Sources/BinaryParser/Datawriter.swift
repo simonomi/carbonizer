@@ -72,8 +72,8 @@ extension Datawriter {
 		let byteWidth = T.bitWidth / 8
 		
 		let newBytes = (0..<byteWidth)
-			.map { (data >> ($0 * 8)) & 0xFF }
-			.map { Byte($0) }
+			.map { data >> ($0 * 8) }
+			.map { Byte(truncatingIfNeeded: $0) }
 		
 		if offset == bytes.endIndex {
 			bytes.insert(contentsOf: newBytes, at: offset)

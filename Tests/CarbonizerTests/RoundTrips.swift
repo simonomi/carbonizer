@@ -38,7 +38,7 @@ struct RoundTrips {
 			("battle 0587", .packed),
 			("battle 0605", .packed),
 			("creature_offset_defs", .packed),
-//			("creature_defs", .packed),
+			("creature_defs", .packed),
 			("kaseki_defs", .packed),
 		] as [(String, PackedStatus)]
 	)
@@ -46,9 +46,8 @@ struct RoundTrips {
 		let inputFilePath = filePath(for: fileName)
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
-		configurationWithFileTypes.fileTypes.append("DCL")
 		
-		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)
+		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		
 		let repackedFile: any FileSystemObject = switch packedStatus {
 			case .packed:
@@ -79,23 +78,23 @@ struct RoundTrips {
 	func roundTripROM() throws {
 		guard let wholeROMPath = URL.wholeROMPath else { return }
 		
-		let wholeROM = try fileSystemObject(contentsOf: wholeROMPath, configuration: .defaultConfiguration)
+		let wholeROM = try fileSystemObject(contentsOf: wholeROMPath, configuration: .defaultConfiguration)!
 		
 		let unpackedROM = try wholeROM.unpacked(path: [], configuration: .defaultConfiguration)
 		let unpackedSavePath = unpackedROM.savePath(in: .temporaryDirectory, overwriting: false)
 		try unpackedROM.write(into: .temporaryDirectory, overwriting: false, with: .defaultConfiguration)
 		
-		let repackedROM = try fileSystemObject(contentsOf: unpackedSavePath, configuration: .defaultConfiguration)
+		let repackedROM = try fileSystemObject(contentsOf: unpackedSavePath, configuration: .defaultConfiguration)!
 			.packed(configuration: .defaultConfiguration)
 		let repackedSavePath = repackedROM.savePath(in: .temporaryDirectory, overwriting: false)
 		try repackedROM.write(into: .temporaryDirectory, overwriting: false, with: .defaultConfiguration)
 		
-		let reunpackedROM = try fileSystemObject(contentsOf: repackedSavePath, configuration: .defaultConfiguration)
+		let reunpackedROM = try fileSystemObject(contentsOf: repackedSavePath, configuration: .defaultConfiguration)!
 			.unpacked(path: [], configuration: .defaultConfiguration)
 		let reunpackedSavePath = reunpackedROM.savePath(in: .temporaryDirectory, overwriting: false)
 		try reunpackedROM.write(into: .temporaryDirectory, overwriting: false, with: .defaultConfiguration)
 		
-		let rerepackedROM = try fileSystemObject(contentsOf: reunpackedSavePath, configuration: .defaultConfiguration)
+		let rerepackedROM = try fileSystemObject(contentsOf: reunpackedSavePath, configuration: .defaultConfiguration)!
 			.packed(configuration: .defaultConfiguration)
 		let rerepackedSavePath = rerepackedROM.savePath(in: .temporaryDirectory, overwriting: false)
 		try rerepackedROM.write(into: .temporaryDirectory, overwriting: false, with: .defaultConfiguration)
