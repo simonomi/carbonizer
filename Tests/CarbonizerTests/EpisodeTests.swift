@@ -28,7 +28,7 @@ func checkKnownRequirements() throws {
 }
 
 @Test(
-	.disabled("only enable when needed")
+//	.disabled("only enable when needed")
 )
 func exportDEXCommands() throws {
 	struct Command: Encodable {
@@ -40,7 +40,7 @@ func exportDEXCommands() throws {
 		.sorted(by: \.key)
 		.map { Command(id: $0, command: $1.formatted()) }
 	
-	let outputPath = URL(filePath: "/tmp/commands.json")!
+	let outputPath = URL(filePath: "/tmp/commands.json")
 	try JSONEncoder().encode(result).write(to: outputPath)
 	
 	print("\(.cyan)DEX commands written to \(outputPath.path(percentEncoded: false))\(.normal)")

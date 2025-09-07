@@ -172,37 +172,21 @@ struct Carbonizer: AsyncParsableCommand {
 					configuration: configuration
 				)
 				
-				// TODO: make a new post-processing api that allows passing arguments? for things like dialogue labelling
-				let postProcessors: [String: PostProcessor] = [
-					"3clFinder": tclFinder,
-					"mm3Finder": mm3Finder,
-					"mmsFinder": mmsFinder,
-					"mpmFinder": mpmFinder
-				]
-				
+				// TODO: make a new post-processing api that allows passing arguments? for things like dialogue labelling (and caching ripper results)
 				for postProcessorName in configuration.experimental.postProcessors {
-//#if os(Windows)
-//					switch postProcessorName {
-//						case "3clFinder":
-//							processedFile = try processedFile.postProcessed(with: tclFinder)
-//						case "mm3Finder":
-//							processedFile = try processedFile.postProcessed(with: mm3Finder)
-//						case "mmsFinder":
-//							processedFile = try processedFile.postProcessed(with: mmsFinder)
-//						case "mpmFinder":
-//							processedFile = try processedFile.postProcessed(with: mpmFinder)
-//						default:
-//							print("Could not find a post-processor named '\(postProcessorName)', skipping...")
-//							continue
-//					}
-//#else
-					guard let postProcessor = postProcessors[postProcessorName] else {
-						print("Could not find a post-processor named '\(postProcessorName)', skipping...")
-						continue
+					switch postProcessorName {
+						case "3clFinder":
+							processedFile = try processedFile.postProcessed(with: tclFinder)
+						case "mm3Finder":
+							processedFile = try processedFile.postProcessed(with: mm3Finder)
+						case "mmsFinder":
+							processedFile = try processedFile.postProcessed(with: mmsFinder)
+						case "mpmFinder":
+							processedFile = try processedFile.postProcessed(with: mpmFinder)
+						default:
+							print("Could not find a post-processor named '\(postProcessorName)', skipping...")
+							continue
 					}
-					
-					processedFile = try processedFile.postProcessed(with: postProcessor)
-//#endif
 				}
 				
 				if configuration.experimental.dexDialogueLabeller {
