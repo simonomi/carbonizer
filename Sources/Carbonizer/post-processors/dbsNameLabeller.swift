@@ -7,7 +7,7 @@ func dbsNameLabeller(
 	let battleFolderIndex = nds.contents.firstIndex { $0.name == "battle" }!
 	var battleFolder = nds.contents[battleFolderIndex] as! Folder
 	
-	let episodeFiles = battleFolder.contents
+	battleFolder.contents = battleFolder.contents
 		.map {
 			var mar = $0 as! MAR.Unpacked
 			var content = mar.files.first!.content as! DBS.Unpacked
@@ -24,7 +24,6 @@ func dbsNameLabeller(
 			return mar
 		}
 	
-	battleFolder.contents = episodeFiles
 	nds.contents[battleFolderIndex] = battleFolder
 	return nds
 }

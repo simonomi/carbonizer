@@ -248,6 +248,15 @@ struct Carbonizer: AsyncParsableCommand {
 						configuration: configuration
 					)
 				}
+				
+				if configuration.experimental.mapLabeller {
+					let text = dtxRipper(processedFile)
+					processedFile = mapLabeller(
+						processedFile,
+						text: text,
+						configuration: configuration
+					)
+				}
 			}
 			
 #if !IN_CI

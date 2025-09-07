@@ -27,6 +27,7 @@ struct CarbonizerConfiguration {
 		var dexBlockLabeller: Bool
 		var dbsNameLabeller: Bool
 		var hmlNameLabeller: Bool
+		var mapLabeller: Bool
 	}
 	
 	enum CompressionMode: String, EnumerableFlag, Decodable {
@@ -164,7 +165,12 @@ struct CarbonizerConfiguration {
 				// adds labels for the names of masks in `etc/headmask_defs`
 				//
 				// make sure to enable both the HML and DTX file types or nothing will happen
-				"hmlNameLabeller": false
+				"hmlNameLabeller": false,
+				
+				// adds labels for the names of maps in MAP files (`map/m/` folder)
+				//
+				// make sure to enable both the MAP and DTX file types or nothing will happen
+				"mapLabeller": false
 			}
 		}
 		"""
@@ -227,7 +233,7 @@ extension CarbonizerConfiguration: Decodable {
 
 extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 	enum CodingKeys: CodingKey {
-		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller
+		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, hmlNameLabeller, mapLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -242,14 +248,16 @@ extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 			fallback.postProcessors
 		dexDialogueLabeller = try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueLabeller) ??
 			fallback.dexDialogueLabeller
-		dexDialogueSaver = try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueSaver) ??
+		dexDialogueSaver =    try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueSaver) ??
 			fallback.dexDialogueSaver
 		dexBlockLabeller =    try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
 			fallback.dexBlockLabeller
 		dbsNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
 			fallback.dbsNameLabeller
-		hmlNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
+		hmlNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .hmlNameLabeller) ??
 			fallback.hmlNameLabeller
+		mapLabeller =         try container.decodeIfPresent(Bool.self,     forKey: .mapLabeller) ??
+			fallback.mapLabeller
 	}
 }
 
