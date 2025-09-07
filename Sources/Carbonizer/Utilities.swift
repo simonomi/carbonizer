@@ -519,3 +519,15 @@ extension Set {
 		return self
 	}
 }
+
+extension Double {
+	init(fixedPoint: some BinaryInteger) {
+		self = Self(fixedPoint) / 4096
+	}
+}
+
+extension BinaryInteger {
+	init(fixedPoint: Double) {
+		self = Self(fixedPoint * 4096)
+	}
+}

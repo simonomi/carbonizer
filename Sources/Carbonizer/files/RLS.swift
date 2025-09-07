@@ -156,8 +156,8 @@ extension RLS.Packed.Kaseki {
 		fossilImage = kaseki.fossilImage
 		rockImage = kaseki.rockImage
 		
-		fossilHardness = UInt32(kaseki.fossilHardness * 4096)
-		rockHardness = UInt32(kaseki.rockHardness * 4096)
+		fossilHardness = UInt32(fixedPoint: kaseki.fossilHardness)
+		rockHardness = UInt32(fixedPoint: kaseki.rockHardness)
 		
 		buyPrice = kaseki.buyPrice
 		sellPrice = kaseki.sellPrice
@@ -170,7 +170,7 @@ extension RLS.Packed.Kaseki {
 		passingScore = kaseki.passingScore
 		
 		unknownsCount = UInt32(kaseki.shockwaveResistances.count)
-		shockwaveResistances = kaseki.shockwaveResistances.map { UInt32($0 * 4096) }
+		shockwaveResistances = kaseki.shockwaveResistances.map { UInt32(fixedPoint: $0) }
 	}
 }
 
@@ -238,8 +238,8 @@ extension RLS.Unpacked.Kaseki {
 		fossilImage = kaseki.fossilImage
 		rockImage = kaseki.rockImage
 		
-		fossilHardness = Double(kaseki.fossilHardness) / 4096
-		rockHardness = Double(kaseki.rockHardness) / 4096
+		fossilHardness = Double(fixedPoint: kaseki.fossilHardness)
+		rockHardness = Double(fixedPoint: kaseki.rockHardness)
 		
 		buyPrice = kaseki.buyPrice
 		sellPrice = kaseki.sellPrice
@@ -253,7 +253,7 @@ extension RLS.Unpacked.Kaseki {
 		
 		completionBackground = try CompletionBones(kaseki.completionBackground)
 		
-		shockwaveResistances = kaseki.shockwaveResistances.map { Double($0) / 4096 }
+		shockwaveResistances = kaseki.shockwaveResistances.map { Double(fixedPoint: $0) }
 	}
 }
 

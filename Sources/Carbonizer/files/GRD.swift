@@ -1,7 +1,9 @@
 import BinaryParser
 
-// map c zooms the camera ? and maybe more?
+// map c zooms the camera ? and maybe more? sub areas??
+// map e is fossil rock areas
 // map g may have something to do with the rocks that spawn in digsites
+// map r collision boxes?
 
 enum GRD {
 	@BinaryConvertible

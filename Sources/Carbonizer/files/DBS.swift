@@ -257,7 +257,7 @@ extension DBS.Packed.Fighter {
 		
 		interLevelBattlePointsPerVivosaur = unpacked.vivosaurs
 			.map(\.interLevelBattlePoints)
-			.map { UInt32($0 * 4096) }
+			.map { UInt32(fixedPoint: $0) }
 		vivosaurCount3 = UInt32(interLevelBattlePointsPerVivosaur.count)
 		interLevelBattlePointsPerVivosaurOffset = aiSetsOffset + vivosaurCount2 * 4
 		
@@ -383,7 +383,7 @@ extension DBS.Unpacked.Fighter.Vivosaur {
 		hideStats = packed.hideStats & 0b10 > 0
 		
 		self.aiSet = aiSet
-		self.interLevelBattlePoints = Double(interLevelBattlePoints) / 4096
+		self.interLevelBattlePoints = Double(fixedPoint: interLevelBattlePoints)
 		self.movesUnlocked = movesUnlocked
 	}
 }

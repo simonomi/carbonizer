@@ -429,12 +429,6 @@ enum ECS {
 				var color1: Color
 				var color2: Color
 				var dialogueSound: Int32
-				
-				struct Color {
-					var red: UInt8
-					var green: UInt8
-					var blue: UInt8
-				}
 			}
 		}
 		
@@ -473,10 +467,10 @@ extension ECS.Packed: ProprietaryFileData {
 	fileprivate init(_ unpacked: ECS.Unpacked, configuration: CarbonizerConfiguration) {
 		thingACount = UInt32(unpacked.thingAs.count)
 		
-		unknown1 = Int32(unpacked.unknown1 * 4096)
-		unknown2 = Int32(unpacked.unknown2 * 4096)
-		unknown3 = Int32(unpacked.unknown3 * 4096)
-		unknown4 = Int32(unpacked.unknown4 * 4096)
+		unknown1 = Int32(fixedPoint: unpacked.unknown1)
+		unknown2 = Int32(fixedPoint: unpacked.unknown2)
+		unknown3 = Int32(fixedPoint: unpacked.unknown3)
+		unknown4 = Int32(fixedPoint: unpacked.unknown4)
 		unknown5 = unpacked.unknown5
 		unknown6 = unpacked.unknown6
 		unknown7 = unpacked.unknown7
@@ -496,8 +490,8 @@ extension ECS.Packed: ProprietaryFileData {
 		thingJCount = UInt32(unpacked.thingJs.count)
 		thingOCount = UInt32(unpacked.thingOs.count)
 		
-		unknown10 = Int32(unpacked.unknown10 * 4096)
-		unknown11 = Int32(unpacked.unknown11 * 4096)
+		unknown10 = Int32(fixedPoint: unpacked.unknown10)
+		unknown11 = Int32(fixedPoint: unpacked.unknown11)
 		unknown12 = unpacked.unknown12
 		unknown13 = unpacked.unknown13
 		unknown14 = unpacked.unknown14
@@ -590,17 +584,17 @@ extension ECS.Packed.KL33NLevel {
 		requiredFossilsCleaned = unpacked.requiredFossilsCleaned
 		nextLevelAt = unpacked.nextLevelAt
 		
-		cleaningScoreLowerBound = Int32(unpacked.cleaningScoreLowerBound * 4096)
-		cleaningScoreUpperBound = Int32(unpacked.cleaningScoreUpperBound * 4096)
+		cleaningScoreLowerBound = Int32(fixedPoint: unpacked.cleaningScoreLowerBound)
+		cleaningScoreUpperBound = Int32(fixedPoint: unpacked.cleaningScoreUpperBound)
 		
-		higherScoreProbability = Int32(unpacked.higherScoreProbability * 4096)
+		higherScoreProbability = Int32(fixedPoint: unpacked.higherScoreProbability)
 		
-		higherScoreLowerBound = Int32(unpacked.higherScoreLowerBound * 4096)
-		higherScoreUpperBound = Int32(unpacked.higherScoreUpperBound * 4096)
+		higherScoreLowerBound = Int32(fixedPoint: unpacked.higherScoreLowerBound)
+		higherScoreUpperBound = Int32(fixedPoint: unpacked.higherScoreUpperBound)
 		
-		otherScoreProbability = Int32(unpacked.otherScoreProbability * 4096)
-		otherScoreLowerBound = Int32(unpacked.otherScoreLowerBound * 4096)
-		otherScoreUpperBound = Int32(unpacked.otherScoreUpperBound * 4096)
+		otherScoreProbability = Int32(fixedPoint: unpacked.otherScoreProbability)
+		otherScoreLowerBound = Int32(fixedPoint: unpacked.otherScoreLowerBound)
+		otherScoreUpperBound = Int32(fixedPoint: unpacked.otherScoreUpperBound)
 	}
 }
 
@@ -619,9 +613,9 @@ extension ECS.Packed.ThingK {
 
 extension ECS.Packed.Characters {
 	init(_ unpacked: ECS.Unpacked.Characters) {
-		unknown1 = Int32(unpacked.unknown1 * 4096)
-		unknown2 = Int32(unpacked.unknown2 * 4096)
-		unknown3 = Int32(unpacked.unknown3 * 4096)
+		unknown1 = Int32(fixedPoint: unpacked.unknown1)
+		unknown2 = Int32(fixedPoint: unpacked.unknown2)
+		unknown3 = Int32(fixedPoint: unpacked.unknown3)
 		unknown4 = unpacked.unknown4
 		unknown5 = unpacked.unknown5
 		
@@ -631,7 +625,7 @@ extension ECS.Packed.Characters {
 		characters = unpacked.characters.map(Character.init)
 		
 		thingACount = UInt32(unpacked.thingAs.count)
-		thingAs = unpacked.thingAs.map { Int32($0 * 4096) }
+		thingAs = unpacked.thingAs.map { Int32(fixedPoint: $0) }
 	}
 }
 
@@ -644,12 +638,6 @@ extension ECS.Packed.Characters.Character {
 		
 		color1Offset = nameOffset + UInt32(name.utf8CString.count.roundedUpToTheNearest(4))
 		color2Offset = color1Offset + 4
-	}
-}
-
-extension ECS.Unpacked.Characters.Character.Color {
-	var bytes: [UInt8] {
-		[red, green, blue]
 	}
 }
 
@@ -693,10 +681,10 @@ extension ECS.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
 	
 	fileprivate init(_ packed: ECS.Packed, configuration: CarbonizerConfiguration) {
-		unknown1 = Double(packed.unknown1) / 4096
-		unknown2 = Double(packed.unknown2) / 4096
-		unknown3 = Double(packed.unknown3) / 4096
-		unknown4 = Double(packed.unknown4) / 4096
+		unknown1 = Double(fixedPoint: packed.unknown1)
+		unknown2 = Double(fixedPoint: packed.unknown2)
+		unknown3 = Double(fixedPoint: packed.unknown3)
+		unknown4 = Double(fixedPoint: packed.unknown4)
 		unknown5 = packed.unknown5
 		unknown6 = packed.unknown6
 		unknown7 = packed.unknown7
@@ -704,8 +692,8 @@ extension ECS.Unpacked: ProprietaryFileData {
 		
 		unknown9 = packed.unknown9
 		
-		unknown10 = Double(packed.unknown10) / 4096
-		unknown11 = Double(packed.unknown11) / 4096
+		unknown10 = Double(fixedPoint: packed.unknown10)
+		unknown11 = Double(fixedPoint: packed.unknown11)
 		unknown12 = packed.unknown12
 		unknown13 = packed.unknown13
 		unknown14 = packed.unknown14
@@ -811,16 +799,16 @@ extension ECS.Unpacked.KL33NLevel {
 		requiredFossilsCleaned = packed.requiredFossilsCleaned
 		nextLevelAt = packed.nextLevelAt
 		
-		cleaningScoreLowerBound = Double(packed.cleaningScoreLowerBound) / 4096
-		cleaningScoreUpperBound = Double(packed.cleaningScoreUpperBound) / 4096
+		cleaningScoreLowerBound = Double(fixedPoint: packed.cleaningScoreLowerBound)
+		cleaningScoreUpperBound = Double(fixedPoint: packed.cleaningScoreUpperBound)
 		
-		higherScoreProbability = Double(packed.higherScoreProbability) / 4096
-		higherScoreLowerBound = Double(packed.higherScoreLowerBound) / 4096
-		higherScoreUpperBound = Double(packed.higherScoreUpperBound) / 4096
+		higherScoreProbability = Double(fixedPoint: packed.higherScoreProbability)
+		higherScoreLowerBound = Double(fixedPoint: packed.higherScoreLowerBound)
+		higherScoreUpperBound = Double(fixedPoint: packed.higherScoreUpperBound)
 		
-		otherScoreProbability = Double(packed.otherScoreProbability) / 4096
-		otherScoreLowerBound = Double(packed.otherScoreLowerBound) / 4096
-		otherScoreUpperBound = Double(packed.otherScoreUpperBound) / 4096
+		otherScoreProbability = Double(fixedPoint: packed.otherScoreProbability)
+		otherScoreLowerBound = Double(fixedPoint: packed.otherScoreLowerBound)
+		otherScoreUpperBound = Double(fixedPoint: packed.otherScoreUpperBound)
 	}
 }
 
@@ -839,9 +827,9 @@ extension ECS.Unpacked.ThingK {
 
 extension ECS.Unpacked.Characters {
 	init(_ packed: ECS.Packed.Characters) {
-		unknown1 = Double(packed.unknown1) / 4096
-		unknown2 = Double(packed.unknown2) / 4096
-		unknown3 = Double(packed.unknown3) / 4096
+		unknown1 = Double(fixedPoint: packed.unknown1)
+		unknown2 = Double(fixedPoint: packed.unknown2)
+		unknown3 = Double(fixedPoint: packed.unknown3)
 		unknown4 = packed.unknown4
 		unknown5 = packed.unknown5
 		
@@ -849,7 +837,7 @@ extension ECS.Unpacked.Characters {
 		
 		characters = packed.characters.map(Character.init)
 		
-		thingAs = packed.thingAs.map { Double($0) / 4096 }
+		thingAs = packed.thingAs.map { Double(fixedPoint: $0) }
 	}
 }
 
@@ -859,50 +847,6 @@ extension ECS.Unpacked.Characters.Character {
 		color1 = Color(packed.color1)
 		color2 = Color(packed.color2)
 		dialogueSound = packed.dialogueSound
-	}
-}
-
-extension ECS.Unpacked.Characters.Character.Color: Codable {
-	init(_ bytes: [UInt8]) {
-		guard bytes.count == 3 else {
-			todo("throw error")
-		}
-		
-		red = bytes[0]
-		green = bytes[1]
-		blue = bytes[2]
-	}
-	
-	init(_ string: String) {
-		guard string.count == 7, string.hasPrefix("#") else {
-			todo("throw error")
-		}
-		
-		guard let red = UInt8(string.dropFirst().prefix(2), radix: 16),
-			  let green = UInt8(string.dropFirst(3).prefix(2), radix: 16),
-			  let blue = UInt8(string.dropFirst(5).prefix(2), radix: 16)
-		else {
-			todo("throw error")
-		}
-		
-		self.red = red
-		self.green = green
-		self.blue = blue
-	}
-	
-	var hexCode: String {
-		"#" +
-		String(red, radix: 16).padded(toLength: 2, with: "0", from: .leading) +
-		String(green, radix: 16).padded(toLength: 2, with: "0", from: .leading) +
-		String(blue, radix: 16).padded(toLength: 2, with: "0", from: .leading)
-	}
-	
-	init(from decoder: any Decoder) throws {
-		self = Self(try String(from: decoder))
-	}
-	
-	func encode(to encoder: any Encoder) throws {
-		try hexCode.encode(to: encoder)
 	}
 }
 

@@ -70,7 +70,7 @@ extension CHR.Packed: ProprietaryFileData {
 			unpacked.bodyNames.map { $0.utf8CString.count }.sum().roundedUpToTheNearest(4)
 		)
 		
-		unknowns = unpacked.unknowns.map { Int32($0 * 4096) }
+		unknowns = unpacked.unknowns.map { Int32(fixedPoint: $0) }
 		
 		someBodyCount = UInt32(unpacked.someBodies.count)
 		someBodiesOffset = headNamesOffsetsOffset + (headNamesCount * 4) + UInt32(
@@ -111,7 +111,7 @@ extension CHR.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
 	
 	fileprivate init(_ packed: CHR.Packed, configuration: CarbonizerConfiguration) {
-		unknowns = packed.unknowns.map { Double($0) / 4096 }
+		unknowns = packed.unknowns.map { Double(fixedPoint: $0) }
 		
 		bodyNames = packed.bodyNames
 		headNames = packed.headNames
