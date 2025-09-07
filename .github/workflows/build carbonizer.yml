@@ -41,7 +41,7 @@ jobs:
     - name: Set up Swift
       uses: compnerd/gha-setup-swift@main
       with:
-        swift-branch: swift-6.1.2-release
+        swift-version: swift-6.1.2-release
         swift-build: 6.1.2-RELEASE
     - name: print path
       run: dir "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\$(swift --version | Select-String -Pattern '\d+\.\d+(\.\d+)?' | ForEach-Object { $_.Matches[0].Value })\\usr\\bin"
