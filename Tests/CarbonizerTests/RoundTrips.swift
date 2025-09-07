@@ -40,12 +40,15 @@ struct RoundTrips {
 			("creature_offset_defs", .packed),
 			("creature_defs", .packed),
 			("kaseki_defs", .packed),
+			("map e 0033", .packed),
+			("map e 0067", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 		let inputFilePath = filePath(for: fileName)
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
+		configurationWithFileTypes.fileTypes.append("GRD")
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		
