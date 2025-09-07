@@ -86,7 +86,6 @@ jobs:
       run: >
         swift build -c release
         --static-swift-stdlib
-        -Xswiftc -static-executable
         -Xswiftc -DIN_CI
     - name: Package
       run: tar -azcf carbonizer-linux-x86.zip -C "$(swift build -c release --show-bin-path)" carbonizer
@@ -113,7 +112,6 @@ jobs:
       run: >
         swift build -c release
         --static-swift-stdlib
-        -Xswiftc -static-executable
         -Xswiftc -DIN_CI
     - name: Package
       run: tar -azcf carbonizer-linux-arm.zip -C "$(swift build -c release --show-bin-path)" carbonizer
