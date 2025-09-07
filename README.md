@@ -9,7 +9,7 @@ It determines whether to pack or unpack based on the file extensions and binary 
 - `.nds` - Nintendo DS ROM files
 - `3CL`/`.3cl.json` - vivosaur 3D models
 - `BBG`/`.bbg.json` - [kasekiums](https://github.com/simonomi/ff1-binary-formats/wiki/BBG)
-- `CHR`/`.chr.json` - characters
+- `CHR`/`.chr.json` - entities
 - `DBS`/`.dbs.json` - [battles](https://github.com/simonomi/ff1-binary-formats/wiki/DBS)
 - `DEP`/`.dep.txt` - [cutscene coordination](https://github.com/simonomi/ff1-binary-formats/wiki/DEP)
 - `DEX`/`.dex.txt` - [cutscenes](https://github.com/simonomi/ff1-binary-formats/wiki/DEX)

@@ -67,7 +67,7 @@ extension DEX.Unpacked.ArgumentType {
 	var name: StaticString {
 		switch self {
 			case .boolean: "boolean"
-			case .character: "character"
+			case .entity: "entity"
 			case .degrees: "degrees"
 			case .dialogue: "dialogue"
 			case .effect: "effect"

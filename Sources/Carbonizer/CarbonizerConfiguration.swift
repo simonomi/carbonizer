@@ -111,9 +111,9 @@ struct CarbonizerConfiguration {
 			
 			// basically required for anything useful: NDS, MAR
 			//
-			// stable: 3CL, BBG, BCO, CHR, DBS, DCL, DEP, DEX, DMG, DMS, DTX, ECS, HML, MAR, MM3, MMS, MPM, NDS, RLS, SHP
-			// experimental: DML, GRD, MAP, MFS
-			"fileTypes": ["3CL", "BBG", "BCO", "CHR", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "HML", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			// stable: 3CL, BBG, BCO, CHR, DBS, DCL, DEP, DEX, DMG, DMS, DTX, ECS, GRD, HML, MAP, MAR, MM3, MMS, MPM, NDS, RLS, SHP
+			// experimental: DML, MFS
+			"fileTypes": ["3CL", "BBG", "BCO", "CHR", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "GRD", "HML", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
 			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
@@ -127,9 +127,6 @@ struct CarbonizerConfiguration {
 			"experimental": {
 				"hotReloading": false, // macOS only
 				
-				// enablying any post-processor will make the resulting unpacked folder fail to
-				// repack! 
-				//
 				// 3clFinder: extract vivosaur 3D model files
 				//            make sure to enable the 3CL file type or nothing will happen
 				// mm3Finder: extract non-vivosaur 3D model files

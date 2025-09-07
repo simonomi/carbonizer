@@ -63,7 +63,7 @@ enum MAP {
 		
 		@Count(givenBy: \Self.loadingZoneCount)
 		@Offset(givenBy: \Self.loadingZonesOffset)
-		var loadingZones: [LoadingZone] // smthn with characters?
+		var loadingZones: [LoadingZone]
 		
 		@Count(givenBy: \Self.cameraPositionCount)
 		@Offset(givenBy: \Self.cameraPositionsOffset)
@@ -224,7 +224,7 @@ enum MAP {
 		struct BreakableRock { // map/g
 			var unknown1: Int32
 			var spawnCount: Int32
-			var characterID: Int32
+			var entityID: Int32
 			var rotation: Int32 // fixed-point 16.16
 			// not degrees
 			// 0 is right
@@ -362,8 +362,8 @@ enum MAP {
 			var unknown1: Int32
 			var spawnCount: Int32
 			
-			var characterID: Int32
-			var _character: String?
+			var entityID: Int32
+			var _entity: String?
 			
 			var rotation: Double
 			
@@ -581,7 +581,7 @@ extension MAP.Packed.BreakableRock {
 	init(_ unpacked: MAP.Unpacked.BreakableRock) {
 		unknown1 = unpacked.unknown1
 		spawnCount = unpacked.spawnCount
-		characterID = unpacked.characterID
+		entityID = unpacked.entityID
 		rotation = Int32(fixedPoint: unpacked.rotation, fractionBits: 16)
 		
 		count = UInt32(unpacked.things.count)
@@ -742,8 +742,8 @@ extension MAP.Unpacked.BreakableRock {
 		unknown1 = packed.unknown1
 		spawnCount = packed.spawnCount
 		
-		characterID = packed.characterID
-		_character = characterNames[characterID]
+		entityID = packed.entityID
+		_entity = entityNames[entityID]
 		
 		rotation = Double(fixedPoint: packed.rotation, fractionBits: 16)
 		

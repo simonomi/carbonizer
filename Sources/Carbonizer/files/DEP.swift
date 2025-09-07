@@ -54,7 +54,7 @@ enum DEP {
 		var blocks: [Block]
 		
 		enum ArgumentType {
-			case block, character, flag, door, firstNumberOnly, unknown, vivosaur
+			case block, entity, flag, door, firstNumberOnly, unknown, vivosaur
 		}
 		
 		struct RequirementDefinition {
@@ -68,10 +68,10 @@ enum DEP {
 		// this is because of some kinda hacky code in DEP.Block.Requirement.init(_: Substring)
 		static let knownRequirements: [UInt32: RequirementDefinition] = [
 			1:  "unconditional/always",
-			2:  "talked to \(0, .character)",
+			2:  "talked to \(0, .entity)",
 			3:  "went through \(0, .door)",
 			//  actually collided with??
-			5:  "caught by \(0, .character)",
+			5:  "caught by \(0, .entity)",
 			6:  "unknown 6 \(0, .vivosaur)",
 			// in unused code to give the chickens
 			7:  "flag \(0, .flag) equals \(1, .flag)",
@@ -113,7 +113,7 @@ enum DEP {
 			// memory types 5, 6, 7, and 10
 			22: "any flag false \(0..., .flag)",
 			// 22: requires NOT an unknown5, but ||
-			23: "\(0, .character) is spawned in",
+			23: "\(0, .entity) is spawned in",
 			// used to trigger rex and snivels when you get close enough to them (chapter 4)
 			36: "\(0, .block) has played", // op 2 is always 2 or 3
 			37: "at least one of \(0..., .block) has played",
@@ -574,7 +574,7 @@ extension DEP.Unpacked.ArgumentType {
 	func parse(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
 		switch self {
 			case .block:           parseBlock(text)
-			case .character:       parseLookupTable(characterNames, text: text) ?? parsePrefix(text)
+			case .entity:          parseLookupTable(entityNames, text: text) ?? parsePrefix(text)
 			case .flag:            parseUnknown(text)
 			case .door:            parseLookupTable(doorNames, text: text) ?? parsePrefix(text)
 			case .firstNumberOnly: parseFirstNumberOnly(text)
@@ -635,7 +635,7 @@ extension DEP.Unpacked.ArgumentType {
 		validate(argument)
 		return switch self {
 			case .block:           "block \(argument.unknown1) \(argument.unknown2)"
-			case .character:       "\(characterNames[Int32(argument.unknown1)] ?? "character \(argument.unknown1)")"
+			case .entity:          "\(entityNames[Int32(argument.unknown1)] ?? "entity \(argument.unknown1)")"
 			case .flag:            "\(argument.unknown1) \(argument.unknown2)"
 			case .door:            "\(doorNames[Int32(argument.unknown1)] ?? "door \(argument.unknown1)")"
 			case .firstNumberOnly: "\(argument.unknown1)"
@@ -646,7 +646,7 @@ extension DEP.Unpacked.ArgumentType {
 	
 	func validate(_ argument: DEP.Unpacked.Block.Requirement.Argument) {
 		switch self {
-			case .character, .door, .firstNumberOnly, .vivosaur:
+			case .entity, .door, .firstNumberOnly, .vivosaur:
 				// TODO: this should fail better
 				precondition(argument.unknown2 == 0)
 			default: ()
