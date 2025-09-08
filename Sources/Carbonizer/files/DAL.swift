@@ -24,9 +24,8 @@ enum DAL {
 			var totalDamageOffset: UInt32
 			var primaryStatusDataOffset: UInt32
 			var secondaryStatusDataOffset: UInt32
-			var counterProof: UInt32 // 0 for counter-proof, 3 for not
-			var unknown: UInt32 // always 0 or 3
-								// AOE?
+			var unknown: UInt32 // always 0 or 1?
+			var counterable: UInt32 // 0 for false, 3 for true
 			
 			@Count(givenBy: \Self.hitCount)
 			@Offset(givenBy: \Self.hitDamagesOffset)
@@ -85,14 +84,14 @@ enum DAL {
 				}
 			}
 			
-			init(id: UInt32, hitCount: UInt32, totalDamageOffset: UInt32, primaryStatusDataOffset: UInt32, secondaryStatusDataOffset: UInt32, counterProof: UInt32, unknown: UInt32, hitDamages: [Damage], totalDamage: Damage?, primaryEffect: PrimaryEffect?, secondaryEffect: SecondaryEffect?) {
+			init(id: UInt32, hitCount: UInt32, totalDamageOffset: UInt32, primaryStatusDataOffset: UInt32, secondaryStatusDataOffset: UInt32, unknown: UInt32, counterable: UInt32, hitDamages: [Damage], totalDamage: Damage?, primaryEffect: PrimaryEffect?, secondaryEffect: SecondaryEffect?) {
 				self.id = id
 				self.hitCount = hitCount
 				self.totalDamageOffset = totalDamageOffset
 				self.primaryStatusDataOffset = primaryStatusDataOffset
 				self.secondaryStatusDataOffset = secondaryStatusDataOffset
-				self.counterProof = counterProof
 				self.unknown = unknown
+				self.counterable = counterable
 				self.hitDamages = hitDamages
 				self.totalDamage = totalDamage
 				self.primaryEffect = primaryEffect
@@ -106,8 +105,8 @@ enum DAL {
 		
 		struct Attack: Codable {
 			var id: UInt32
-			var counterProof: UInt32
 			var unknown: UInt32
+			var counterable: UInt32
 			
 			var hitDamages: [Damage]
 			var totalDamage: Damage?
@@ -125,7 +124,7 @@ enum DAL {
 				var turnCount: UInt8
 				var icon: UInt8 // normal poison 02, gold 03, sleep 04, gold 05...
 				
-				enum Effect: Codable {
+				enum Effect {
 					case nothing(unknown: UInt8) // argument is always 1
 					case poison(damagePercent: UInt8)
 					case sleep
@@ -144,7 +143,7 @@ enum DAL {
 				var effect: Effect
 				var chanceToHit: UInt8
 				
-				enum Effect: Codable {
+				enum Effect {
 					case nothing
 					case transformation(unknown: UInt16, vivosaurs: [Vivosaur]) // argument is always 1
 					case allZoneAttack
@@ -198,7 +197,7 @@ extension DAL.Packed: ProprietaryFileData {
 }
 
 extension DAL.Packed.Attack {
-	static let null = DAL.Packed.Attack(id: 0, hitCount: 0, totalDamageOffset: 0, primaryStatusDataOffset: 0, secondaryStatusDataOffset: 0, counterProof: 0, unknown: 0, hitDamages: [], totalDamage: nil, primaryEffect: nil, secondaryEffect: nil)
+	static let null = DAL.Packed.Attack(id: 0, hitCount: 0, totalDamageOffset: 0, primaryStatusDataOffset: 0, secondaryStatusDataOffset: 0, unknown: 0, counterable: 0, hitDamages: [], totalDamage: nil, primaryEffect: nil, secondaryEffect: nil)
 	
 	fileprivate init(_ unpacked: DAL.Unpacked.Attack?) {
 		guard let unpacked else {
@@ -207,24 +206,29 @@ extension DAL.Packed.Attack {
 		}
 		
 		id = unpacked.id
-		counterProof = unpacked.counterProof
 		unknown = unpacked.unknown
+		counterable = unpacked.counterable
 		
 		hitCount = UInt32(unpacked.hitDamages.count)
 		hitDamages = unpacked.hitDamages.map(Damage.init)
 		
-		totalDamage = unpacked.totalDamage.map(Damage.init)
-		primaryEffect = unpacked.primaryEffect.map(PrimaryEffect.init)
-		secondaryEffect = unpacked.secondaryEffect.map(SecondaryEffect.init)
 		
 		if id == 0 {
 			totalDamageOffset = 0
 			primaryStatusDataOffset = 0
 			secondaryStatusDataOffset = 0
+			
+			totalDamage = nil
+			primaryEffect = nil
+			secondaryEffect = nil
 		} else {
 			totalDamageOffset = hitDamagesOffset + hitCount * 4
 			primaryStatusDataOffset = totalDamageOffset + 4
 			secondaryStatusDataOffset = primaryStatusDataOffset + 8
+			
+			totalDamage = Damage(unpacked.totalDamage!)
+			primaryEffect = PrimaryEffect(unpacked.primaryEffect!)
+			secondaryEffect = SecondaryEffect(unpacked.secondaryEffect)
 		}
 	}
 	
@@ -322,7 +326,16 @@ extension DAL.Packed.Attack.PrimaryEffect.Effect: BinaryConvertible {
 }
 
 extension DAL.Packed.Attack.SecondaryEffect {
-	fileprivate init(_ unpacked: DAL.Unpacked.Attack.SecondaryEffect) {
+	fileprivate init(_ unpacked: DAL.Unpacked.Attack.SecondaryEffect?) {
+		guard let unpacked else {
+			effect = .nothing
+			chanceToHit = 0
+			effectArgument = 0
+			transformVivosaurIDs = []
+			transformVivosaurCount = 0
+			return
+		}
+		
 		effect = Effect(unpacked.effect)
 		chanceToHit = unpacked.chanceToHit
 		effectArgument = unpacked.effect.argument
@@ -429,13 +442,13 @@ extension DAL.Unpacked.Attack {
 		if packed.id == 0 { return nil }
 		
 		id = packed.id
-		counterProof = packed.counterProof
 		unknown = packed.unknown
+		counterable = packed.counterable
 		
 		hitDamages = packed.hitDamages.map(Damage.init)
 		totalDamage = packed.totalDamage.map(Damage.init)
 		primaryEffect = packed.primaryEffect.map(PrimaryEffect.init)
-		secondaryEffect = packed.secondaryEffect.map(SecondaryEffect.init)
+		secondaryEffect = packed.secondaryEffect.flatMap(SecondaryEffect.init)
 	}
 }
 
@@ -477,8 +490,116 @@ extension DAL.Unpacked.Attack.PrimaryEffect.Effect {
 	}
 }
 
+extension DAL.Unpacked.Attack.PrimaryEffect.Effect: Codable {
+	enum CodingKeys: CodingKey {
+		case type, unknown, damagePercent, movesAffected, attackRaised, accuracyLowered, chance, defenseLowered, defenseRaised, evasionRaised
+	}
+	
+	init(from decoder: any Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		if let string = try? container.decode(String.self) {
+			self = switch string {
+				case "sleep": .sleep
+				case "excite": .excite
+				case "confusion": .confusion
+				default: throw DecodingError.dataCorrupted(
+					DecodingError.Context(
+						codingPath: [],
+						debugDescription: "invalid no-argument primary attack type"
+					)
+				)
+			}
+		} else {
+			let container = try decoder.container(keyedBy: CodingKeys.self)
+			let type = try container.decode(String.self, forKey: .type)
+			self = switch type {
+				case "nothing":
+					.nothing(unknown: try container.decode(UInt8.self, forKey: .unknown))
+				case "poison":
+					.poison(damagePercent: try container.decode(UInt8.self, forKey: .damagePercent))
+				case "scare":
+					.scare(movesAffected: try container.decode(UInt8.self, forKey: .movesAffected))
+				case "enrage":
+					.enrage(
+						attackRaised: try container.decode(UInt8.self, forKey: .attackRaised),
+						accuracyLowered: try container.decode(UInt8.self, forKey: .accuracyLowered)
+					)
+				case "counter":
+					.counter(chance: try container.decode(UInt8.self, forKey: .chance))
+				case "enflame":
+					.enflame(
+						attackRaised: try container.decode(UInt8.self, forKey: .attackRaised),
+						defenseLowered: try container.decode(UInt8.self, forKey: .defenseLowered)
+					)
+				case "harden":
+					.harden(defenseRaised: try container.decode(UInt8.self, forKey: .defenseRaised))
+				case "quicken":
+					.quicken(evasionRaised: try container.decode(UInt8.self, forKey: .evasionRaised))
+				default: throw DecodingError.dataCorrupted(
+					DecodingError.Context(
+						codingPath: [],
+						debugDescription: "invalid multi-argument primary attack type"
+					)
+				)
+			}
+		}
+	}
+	
+	func encode(to encoder: any Encoder) throws {
+		switch self {
+			case .nothing(let unknown):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("nothing", forKey: .type)
+				try container.encode(unknown, forKey: .unknown)
+			case .poison(let damagePercent):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("poison", forKey: .type)
+				try container.encode(damagePercent, forKey: .damagePercent)
+			case .sleep:
+				var container = encoder.singleValueContainer()
+				try container.encode("sleep")
+			case .scare(let movesAffected):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("scare", forKey: .type)
+				try container.encode(movesAffected, forKey: .movesAffected)
+			case .excite:
+				var container = encoder.singleValueContainer()
+				try container.encode("excite")
+			case .confusion:
+				var container = encoder.singleValueContainer()
+				try container.encode("confusion")
+			case .enrage(let attackRaised, let accuracyLowered):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("enrage", forKey: .type)
+				try container.encode(attackRaised, forKey: .attackRaised)
+				try container.encode(accuracyLowered, forKey: .accuracyLowered)
+			case .counter(let chance):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("counter", forKey: .type)
+				try container.encode(chance, forKey: .chance)
+			case .enflame(let attackRaised, let defenseLowered):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("enflame", forKey: .type)
+				try container.encode(attackRaised, forKey: .attackRaised)
+				try container.encode(defenseLowered, forKey: .defenseLowered)
+			case .harden(let defenseRaised):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("harden", forKey: .type)
+				try container.encode(defenseRaised, forKey: .defenseRaised)
+			case .quicken(let evasionRaised):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("quicken", forKey: .type)
+				try container.encode(evasionRaised, forKey: .evasionRaised)
+		}
+	}
+}
+
 extension DAL.Unpacked.Attack.SecondaryEffect {
-	fileprivate init(_ packed: DAL.Packed.Attack.SecondaryEffect) {
+	fileprivate init?(_ packed: DAL.Packed.Attack.SecondaryEffect) {
+		if packed.effect == .nothing, packed.chanceToHit == 0 {
+			return nil
+		}
+		
 		effect = Effect(packed.effect, arguments: packed.effectArgument, packed.transformVivosaurIDs)
 		chanceToHit = packed.chanceToHit
 	}
@@ -511,6 +632,124 @@ extension DAL.Unpacked.Attack.SecondaryEffect.Effect {
 	}
 }
 
+extension DAL.Unpacked.Attack.SecondaryEffect.Effect: Codable {
+	enum CodingKeys: CodingKey {
+		case type, unknown, vivosaurs, amount, damage, healingAmount
+	}
+	
+	init(from decoder: any Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		if let string = try? container.decode(String.self) {
+			self = switch string {
+				case "nothing": .nothing
+				case "allZoneAttack": .allZoneAttack
+				case "stealLPEqualToDamage": .stealLPEqualToDamage
+				case "powerScale": .powerScale
+				case "knockToEZ": .knockToEZ
+				case "sacrifice": .sacrifice
+				case "lawOfTheJungle": .lawOfTheJungle
+				case "cureAllStatuses": .cureAllStatuses
+				case "swapZones": .swapZones
+				default: throw DecodingError.dataCorrupted(
+					DecodingError.Context(
+						codingPath: [],
+						debugDescription: "invalid no-argument secondary attack type"
+					)
+				)
+			}
+		} else {
+			let container = try decoder.container(keyedBy: CodingKeys.self)
+			let type = try container.decode(String.self, forKey: .type)
+			self = switch type {
+				case "transformation":
+					.transformation(
+						unknown: try container.decode(UInt16.self, forKey: .unknown),
+						vivosaurs: try container.decode([Vivosaur].self, forKey: .vivosaurs)
+					)
+				case "stealFP":
+					.stealFP(amount: try container.decode(UInt16.self, forKey: .amount))
+				case "spiteBlast":
+					.spiteBlast(damage: try container.decode(UInt16.self, forKey: .damage))
+				case "unused1":
+					.unused1(healingAmount: try container.decode(UInt16.self, forKey: .healingAmount))
+				case "healWholeTeam":
+					.healWholeTeam(healingAmount: try container.decode(UInt16.self, forKey: .healingAmount))
+				case "healOneAlly":
+					.healOneAlly(healingAmount: try container.decode(UInt16.self, forKey: .healingAmount))
+				case "unused2":
+					.unused2(healingAmount: try container.decode(UInt16.self, forKey: .healingAmount))
+				default: throw DecodingError.dataCorrupted(
+					DecodingError.Context(
+						codingPath: [],
+						debugDescription: "invalid multi-argument secondary attack type"
+					)
+				)
+			}
+		}
+	}
+	
+	func encode(to encoder: any Encoder) throws {
+		switch self {
+			case .nothing:
+				var container = encoder.singleValueContainer()
+				try container.encode("nothing")
+			case .transformation(let unknown, let vivosaurs):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("transformation", forKey: .type)
+				try container.encode(unknown, forKey: .unknown)
+				try container.encode(vivosaurs, forKey: .vivosaurs)
+			case .allZoneAttack:
+				var container = encoder.singleValueContainer()
+				try container.encode("allZoneAttack")
+			case .stealLPEqualToDamage:
+				var container = encoder.singleValueContainer()
+				try container.encode("stealLPEqualToDamage")
+			case .stealFP(let amount):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("stealFP", forKey: .type)
+				try container.encode(amount, forKey: .amount)
+			case .spiteBlast(let damage):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("spiteBlast", forKey: .type)
+				try container.encode(damage, forKey: .damage)
+			case .powerScale:
+				var container = encoder.singleValueContainer()
+				try container.encode("powerScale")
+			case .knockToEZ:
+				var container = encoder.singleValueContainer()
+				try container.encode("knockToEZ")
+			case .unused1(let healingAmount):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("unused1", forKey: .type)
+				try container.encode(healingAmount, forKey: .healingAmount)
+			case .healWholeTeam(let healingAmount):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("healWholeTeam", forKey: .type)
+				try container.encode(healingAmount, forKey: .healingAmount)
+			case .sacrifice:
+				var container = encoder.singleValueContainer()
+				try container.encode("sacrifice")
+			case .lawOfTheJungle:
+				var container = encoder.singleValueContainer()
+				try container.encode("lawOfTheJungle")
+			case .healOneAlly(let healingAmount):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("healOneAlly", forKey: .type)
+				try container.encode(healingAmount, forKey: .healingAmount)
+			case .unused2(let healingAmount):
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode("unused2", forKey: .type)
+				try container.encode(healingAmount, forKey: .healingAmount)
+			case .cureAllStatuses:
+				var container = encoder.singleValueContainer()
+				try container.encode("cureAllStatuses")
+			case .swapZones:
+				var container = encoder.singleValueContainer()
+				try container.encode("swapZones")
+		}
+	}
+}
+	
 extension DAL.Unpacked: Codable {
 	init(from decoder: any Decoder) throws {
 		attacks = try [Attack?](from: decoder)
