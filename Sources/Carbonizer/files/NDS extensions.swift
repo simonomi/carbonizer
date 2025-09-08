@@ -64,7 +64,7 @@ extension NDS.Packed.Binary.FileNameTable.SubEntry {
 	) throws -> any FileSystemObject {
 		switch type {
 			case .file:
-				try createFile(
+				try makeFile(
 					name: name,
 					metadata: nil,
 					data: files[Int(id!)],
@@ -162,7 +162,7 @@ extension NDS.Packed.Binary.FileNameTable {
 		var fileId = firstFileId
 		var subTableOffset = (folderIds.count + 1) * 8
 		
-		func createSubEntry(_ fileSystemObject: any FileSystemObject) -> SubEntry {
+		func makeSubEntry(_ fileSystemObject: any FileSystemObject) -> SubEntry {
 			switch fileSystemObject {
 				case is ProprietaryFile, is BinaryFile, is MAR.Unpacked, is MAR.Packed:
 					fileId += 1
@@ -181,7 +181,7 @@ extension NDS.Packed.Binary.FileNameTable {
 			firstChildId: fileId,
 			parentId: UInt16(allFolders.count + 1)
 		)
-		rootSubTable = files.map(createSubEntry) + [.end]
+		rootSubTable = files.map(makeSubEntry) + [.end]
 		subTableOffset += 1
 		
 		mainTable = []
@@ -201,7 +201,7 @@ extension NDS.Packed.Binary.FileNameTable {
 					parentId: parentId
 				)
 			)
-			subTables.append(folder.contents.map(createSubEntry) + [.end])
+			subTables.append(folder.contents.map(makeSubEntry) + [.end])
 			subTableOffset += 1
 		}
 	}

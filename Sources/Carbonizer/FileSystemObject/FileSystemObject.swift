@@ -31,9 +31,9 @@ func fileSystemObject(
 	do {
 		return switch try path.type() {
 			case .folder:
-				try createFolder(contentsOf: path, configuration: configuration)
+				try makeFolder(contentsOf: path, configuration: configuration)
 			case .file:
-				try createFile(contentsOf: path, configuration: configuration)
+				try makeFile(contentsOf: path, configuration: configuration)
 			case .other(let otherType):
 				throw FileReadError.invalidFileType(path, otherType)
 		}

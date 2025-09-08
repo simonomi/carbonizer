@@ -1,7 +1,7 @@
 import BinaryParser
 import Foundation
 
-protocol ProprietaryFileData {
+protocol ProprietaryFileData: SendableMetatype {
 	static var fileExtension: String { get }
 	static var magicBytes: String { get }
 	static var packedStatus: PackedStatus { get }

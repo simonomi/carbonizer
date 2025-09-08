@@ -1,7 +1,7 @@
 import Foundation
 import BinaryParser
 
-func createFile(
+func makeFile(
 	contentsOf path: URL,
 	configuration: CarbonizerConfiguration
 ) throws -> (any FileSystemObject)? {
@@ -11,7 +11,7 @@ func createFile(
 	let name = path.lastPathComponent
 	let data = Datastream(try Data(contentsOf: path))
 	
-	let file = try createFile(
+	let file = try makeFile(
 		name: name,
 		metadata: metadata,
 		data: data,
@@ -41,7 +41,7 @@ struct ExtraneousMetadataError: Error, CustomStringConvertible {
 	}
 }
 
-func createFile(
+func makeFile(
 	name: String,
 	metadata: Metadata?,
 	data: Datastream,

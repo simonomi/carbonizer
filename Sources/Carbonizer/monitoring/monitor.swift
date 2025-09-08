@@ -26,7 +26,7 @@ extension Carbonizer {
 				.pathComponents
 				.dropFirst(6)
 			
-			guard let newFile = try createFile(contentsOf: $0, configuration: configuration) else { return }
+			guard let newFile = try makeFile(contentsOf: $0, configuration: configuration) else { return }
 			
 			fileData.setFile(at: components, to: newFile)
 			

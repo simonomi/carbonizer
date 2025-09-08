@@ -12,12 +12,14 @@ struct CarbonizerConfiguration {
 	var dexCommandList: DEXCommandList
 	var externalMetadata: Bool
 	
-	var fileTypes: [String]
+	var fileTypes: Set<String>
 	
 	var onlyUnpack: [Glob]
 	var skipUnpacking: [Glob]
 	
 	var experimental: ExperimentalOptions
+	
+	var cache: Cache
 	
 	struct ExperimentalOptions {
 		var hotReloading: Bool
@@ -28,6 +30,41 @@ struct CarbonizerConfiguration {
 		var dbsNameLabeller: Bool
 		var hmlNameLabeller: Bool
 		var mapLabeller: Bool
+	}
+	
+	struct Cache {
+		var fileExtensions: [(extension: String, type: any ProprietaryFileData.Type)]
+		var magicBytes: [String: any ProprietaryFileData.Type]
+		
+		init(inputFileTypes: Set<String>) {
+			let fileTypes: [any ProprietaryFileData.Type] = CarbonizerConfiguration.allFileTypes
+				.filter { (fileTypeName, _) in
+					inputFileTypes.contains(fileTypeName)
+				}
+				.flatMap { (_, fileType) in
+					fileType.unpackedAndPacked()
+				}
+			
+			fileExtensions = fileTypes
+				.compactMap {
+					if $0.fileExtension.isEmpty {
+						nil
+					} else {
+						($0.fileExtension, $0)
+					}
+				}
+			
+			magicBytes = Dictionary(
+				uniqueKeysWithValues: fileTypes
+					.compactMap {
+						if $0.magicBytes.isEmpty {
+							nil
+						} else {
+							($0.magicBytes, $0)
+						}
+					}
+			)
+		}
 	}
 	
 	enum CompressionMode: String, EnumerableFlag, Decodable {
@@ -76,6 +113,33 @@ struct CarbonizerConfiguration {
 	enum DEXCommandList: String, Decodable {
 		case ff1, ffc, none
 	}
+	
+	fileprivate static var allFileTypes: [String: any ProprietaryFileData.Type] {[
+		"3CL": TCL.Unpacked.self,
+		"BBG": BBG.Unpacked.self,
+		"BCO": BCO.Unpacked.self,
+		"CHR": CHR.Unpacked.self,
+		"DBS": DBS.Unpacked.self,
+		"DCL": DCL.Unpacked.self,
+		"DEP": DEP.Unpacked.self,
+		"DEX": DEX.Unpacked.self,
+		"DMG": DMG.Unpacked.self,
+		"DML": DML.Unpacked.self,
+		"DMS": DMS.Unpacked.self,
+		"DTX": DTX.Unpacked.self,
+		"ECS": ECS.Unpacked.self,
+		"GRD": GRD.Unpacked.self,
+		"HML": HML.Unpacked.self,
+		"KIL": KIL.Unpacked.self,
+		"MAP": MAP.Unpacked.self,
+		"MFS": MFS.Unpacked.self,
+		"MM3": MM3.Unpacked.self,
+		"MMS": MMS.Unpacked.self,
+		"MPM": MPM.Unpacked.self,
+		"RLS": RLS.Unpacked.self,
+		"SDAT": SDAT.Unpacked.self,
+		"SHP": SHP.Unpacked.self,
+	]}
 	
 	// TODO: including the file types makes updating carbonizer not use new file types :/
 	static let defaultConfigurationString: String = """
@@ -217,7 +281,7 @@ extension CarbonizerConfiguration: Decodable {
 			fallback.dexCommandList
 		externalMetadata = try container.decodeIfPresent(Bool.self,                forKey: .externalMetadata) ??
 			fallback.externalMetadata
-		fileTypes =        try container.decodeIfPresent([String].self,            forKey: .fileTypes) ??
+		fileTypes =        try container.decodeIfPresent(Set<String>.self,         forKey: .fileTypes) ??
 			fallback.fileTypes
 		onlyUnpack =       try container.decodeIfPresent([Glob].self,              forKey: .onlyUnpack) ??
 			fallback.onlyUnpack
@@ -225,6 +289,10 @@ extension CarbonizerConfiguration: Decodable {
 			fallback.skipUnpacking
 		experimental =     try container.decodeIfPresent(ExperimentalOptions.self, forKey: .experimental) ??
 			fallback.experimental
+		
+		cache = Cache(inputFileTypes: fileTypes)
+		
+		// TODO: error on unknown file type
 	}
 }
 
@@ -278,5 +346,23 @@ extension CarbonizerConfiguration {
 		decoder.allowsJSON5 = true
 		
 		self = try decoder.decode(Self.self, from: data)
+	}
+}
+
+extension CarbonizerConfiguration {
+	func fileType(name: String) -> (any ProprietaryFileData.Type)? {
+		cache.fileExtensions
+			.first { name.hasSuffix($0.extension) }?
+			.type
+	}
+	
+	func fileType(magicBytes: String) -> (any ProprietaryFileData.Type)? {
+		cache.magicBytes[magicBytes]
+	}
+}
+
+fileprivate extension ProprietaryFileData {
+	static func unpackedAndPacked() -> [any ProprietaryFileData.Type] {
+		[Unpacked.self, Packed.self]
 	}
 }

@@ -7,7 +7,7 @@ struct Folder {
 	var contents: [any FileSystemObject]
 }
 
-func createFolder(
+func makeFolder(
 	contentsOf path: URL,
 	configuration: CarbonizerConfiguration
 ) throws -> (any FileSystemObject)? {

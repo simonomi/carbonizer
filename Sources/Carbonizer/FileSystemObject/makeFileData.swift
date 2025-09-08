@@ -5,33 +5,6 @@ func makeFileData(
 	data: Datastream,
 	configuration: CarbonizerConfiguration
 ) throws -> (any ProprietaryFileData)? {
-	let allFileTypes: [String: any ProprietaryFileData.Type] = [
-		"3CL": TCL.Unpacked.self,
-		"BBG": BBG.Unpacked.self,
-		"BCO": BCO.Unpacked.self,
-		"CHR": CHR.Unpacked.self,
-		"DBS": DBS.Unpacked.self,
-		"DCL": DCL.Unpacked.self,
-		"DEP": DEP.Unpacked.self,
-		"DEX": DEX.Unpacked.self,
-		"DMG": DMG.Unpacked.self,
-		"DML": DML.Unpacked.self,
-		"DMS": DMS.Unpacked.self,
-		"DTX": DTX.Unpacked.self,
-		"ECS": ECS.Unpacked.self,
-		"GRD": GRD.Unpacked.self,
-		"HML": HML.Unpacked.self,
-		"KIL": KIL.Unpacked.self,
-		"MAP": MAP.Unpacked.self,
-		"MFS": MFS.Unpacked.self,
-		"MM3": MM3.Unpacked.self,
-		"MMS": MMS.Unpacked.self,
-		"MPM": MPM.Unpacked.self,
-		"RLS": RLS.Unpacked.self,
-		"SDAT": SDAT.Unpacked.self,
-		"SHP": SHP.Unpacked.self,
-	]
-	
 	if configuration.fileTypes.contains("_match") {
 		if name == "region_center_match" {
 			return try Match<UInt32>.Packed.init(data, configuration: configuration)
@@ -44,16 +17,7 @@ func makeFileData(
 		}
 	}
 	
-	// TODO: doing this for every file is slow!
-	let fileTypes: [any ProprietaryFileData.Type] = allFileTypes
-		.filter { (fileTypeName, _) in
-			configuration.fileTypes.contains(fileTypeName)
-		}
-		.flatMap { (_, fileType) in
-			fileType.unpackedAndPacked()
-		}
-	
-	if let fileType = fileTypes.first(where: name.hasExtension) {
+	if let fileType = configuration.fileType(name: name) {
 		return try fileType.init(data, configuration: configuration)
 	}
 	
@@ -63,22 +27,10 @@ func makeFileData(
 	// a file if it's exactly 3 bytes long, but that should be ok... right?
 	if let magicBytes = try? dataCopy.read(String.self, length: 4),
 		magicBytes.isNotEmpty,
-		let fileType = fileTypes.first(where: { $0.magicBytes == magicBytes })
+		let fileType = configuration.fileType(magicBytes: magicBytes)
 	{
 		return try fileType.init(data, configuration: configuration)
 	}
 	
 	return nil
-}
-
-fileprivate extension ProprietaryFileData {
-	static func unpackedAndPacked() -> [any ProprietaryFileData.Type] {
-		[Unpacked.self, Packed.self]
-	}
-}
-
-fileprivate extension String {
-	func hasExtension(of fileType: any ProprietaryFileData.Type) -> Bool {
-		fileType.fileExtension.isNotEmpty && hasSuffix(fileType.fileExtension)
-	}
 }
