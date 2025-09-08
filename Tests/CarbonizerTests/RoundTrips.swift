@@ -49,13 +49,14 @@ struct RoundTrips {
 			("map_bgm_match", .packed),
 			("talk_msg_match", .packed),
 			("attack_defs", .packed),
+			("battle_attack_type", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 		let inputFilePath = filePath(for: fileName)
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
-		configurationWithFileTypes.fileTypes.insert("DAL")
+//		configurationWithFileTypes.fileTypes.insert("DAL")
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		

@@ -115,6 +115,7 @@ struct CarbonizerConfiguration {
 	}
 	
 	fileprivate static var allFileTypes: [String: any ProprietaryFileData.Type] {[
+		"3BA": TBA.Unpacked.self,
 		"3CL": TCL.Unpacked.self,
 		"BBG": BBG.Unpacked.self,
 		"BCO": BCO.Unpacked.self,
@@ -176,9 +177,9 @@ struct CarbonizerConfiguration {
 			
 			// basically required for anything useful: NDS, MAR
 			//
-			// stable: _match, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DEX, DMG, DMS, DTX, ECS, GRD, HML, MAP, MAR, MM3, MMS, MPM, NDS, RLS, SHP
+			// stable: _match, 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DEX, DMG, DMS, DTX, ECS, GRD, HML, MAP, MAR, MM3, MMS, MPM, NDS, RLS, SHP
 			// experimental: DML, MFS, SDAT
-			"fileTypes": ["_match", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "GRD", "HML", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "GRD", "HML", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
 			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
