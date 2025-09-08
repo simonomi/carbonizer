@@ -111,9 +111,9 @@ struct CarbonizerConfiguration {
 			
 			// basically required for anything useful: NDS, MAR
 			//
-			// stable: 3CL, BBG, BCO, CHR, DBS, DCL, DEP, DEX, DMG, DMS, DTX, ECS, GRD, HML, MAP, MAR, MM3, MMS, MPM, NDS, RLS, SHP
+			// stable: _match, 3CL, BBG, BCO, CHR, DBS, DCL, DEP, DEX, DMG, DMS, DTX, ECS, GRD, HML, MAP, MAR, MM3, MMS, MPM, NDS, RLS, SHP
 			// experimental: DML, MFS, SDAT
-			"fileTypes": ["3CL", "BBG", "BCO", "CHR", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "GRD", "HML", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			"fileTypes": ["_match", "3CL", "BBG", "BCO", "CHR", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "GRD", "HML", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
 			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
