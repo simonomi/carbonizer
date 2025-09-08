@@ -360,6 +360,8 @@ enum DCL {
 			
 			var skillIds: [UInt32]
 			
+			var skillNames: [String?]?
+			
 			// what fossil you learn the move at (123/1234 for normal, 1111 for chickens)
 			var long1234: [UInt32]
 			
@@ -707,6 +709,8 @@ extension DCL.Unpacked.Vivosaur {
 		alphabeticalOrder = packed.alphabeticalOrder
 		
 		skillIds = packed.skillIds
+		
+		skillNames = skillIds.map { attackNames[$0] }
 		
 		long1234 = packed.long1234
 		

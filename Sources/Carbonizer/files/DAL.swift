@@ -24,7 +24,7 @@ enum DAL {
 			var totalDamageOffset: UInt32
 			var primaryStatusDataOffset: UInt32
 			var secondaryStatusDataOffset: UInt32
-			var unknown: UInt32 // always 0 or 1?
+			var randomElement: UInt32 // always 1 (false) or 2 (true)
 			var counterable: UInt32 // 0 for false, 3 for true
 			
 			@Count(givenBy: \Self.hitCount)
@@ -84,13 +84,13 @@ enum DAL {
 				}
 			}
 			
-			init(id: UInt32, hitCount: UInt32, totalDamageOffset: UInt32, primaryStatusDataOffset: UInt32, secondaryStatusDataOffset: UInt32, unknown: UInt32, counterable: UInt32, hitDamages: [Damage], totalDamage: Damage?, primaryEffect: PrimaryEffect?, secondaryEffect: SecondaryEffect?) {
+			init(id: UInt32, hitCount: UInt32, totalDamageOffset: UInt32, primaryStatusDataOffset: UInt32, secondaryStatusDataOffset: UInt32, randomElement: UInt32, counterable: UInt32, hitDamages: [Damage], totalDamage: Damage?, primaryEffect: PrimaryEffect?, secondaryEffect: SecondaryEffect?) {
 				self.id = id
 				self.hitCount = hitCount
 				self.totalDamageOffset = totalDamageOffset
 				self.primaryStatusDataOffset = primaryStatusDataOffset
 				self.secondaryStatusDataOffset = secondaryStatusDataOffset
-				self.unknown = unknown
+				self.randomElement = randomElement
 				self.counterable = counterable
 				self.hitDamages = hitDamages
 				self.totalDamage = totalDamage
@@ -105,8 +105,10 @@ enum DAL {
 		
 		struct Attack: Codable {
 			var id: UInt32
-			var unknown: UInt32
+			var randomElement: UInt32
 			var counterable: UInt32
+			
+			var _name: String?
 			
 			var hitDamages: [Damage]
 			var totalDamage: Damage?
@@ -197,7 +199,7 @@ extension DAL.Packed: ProprietaryFileData {
 }
 
 extension DAL.Packed.Attack {
-	static let null = DAL.Packed.Attack(id: 0, hitCount: 0, totalDamageOffset: 0, primaryStatusDataOffset: 0, secondaryStatusDataOffset: 0, unknown: 0, counterable: 0, hitDamages: [], totalDamage: nil, primaryEffect: nil, secondaryEffect: nil)
+	static let null = DAL.Packed.Attack(id: 0, hitCount: 0, totalDamageOffset: 0, primaryStatusDataOffset: 0, secondaryStatusDataOffset: 0, randomElement: 0, counterable: 0, hitDamages: [], totalDamage: nil, primaryEffect: nil, secondaryEffect: nil)
 	
 	fileprivate init(_ unpacked: DAL.Unpacked.Attack?) {
 		guard let unpacked else {
@@ -206,7 +208,7 @@ extension DAL.Packed.Attack {
 		}
 		
 		id = unpacked.id
-		unknown = unpacked.unknown
+		randomElement = unpacked.randomElement
 		counterable = unpacked.counterable
 		
 		hitCount = UInt32(unpacked.hitDamages.count)
@@ -442,13 +444,15 @@ extension DAL.Unpacked.Attack {
 		if packed.id == 0 { return nil }
 		
 		id = packed.id
-		unknown = packed.unknown
+		randomElement = packed.randomElement
 		counterable = packed.counterable
+		
+		_name = attackNames[id]
 		
 		hitDamages = packed.hitDamages.map(Damage.init)
 		totalDamage = packed.totalDamage.map(Damage.init)
 		primaryEffect = packed.primaryEffect.map(PrimaryEffect.init)
-		secondaryEffect = packed.secondaryEffect.flatMap(SecondaryEffect.init)
+		secondaryEffect = packed.secondaryEffect.map(SecondaryEffect.init)
 	}
 }
 
@@ -595,11 +599,7 @@ extension DAL.Unpacked.Attack.PrimaryEffect.Effect: Codable {
 }
 
 extension DAL.Unpacked.Attack.SecondaryEffect {
-	fileprivate init?(_ packed: DAL.Packed.Attack.SecondaryEffect) {
-		if packed.effect == .nothing, packed.chanceToHit == 0 {
-			return nil
-		}
-		
+	fileprivate init(_ packed: DAL.Packed.Attack.SecondaryEffect) {
 		effect = Effect(packed.effect, arguments: packed.effectArgument, packed.transformVivosaurIDs)
 		chanceToHit = packed.chanceToHit
 	}
