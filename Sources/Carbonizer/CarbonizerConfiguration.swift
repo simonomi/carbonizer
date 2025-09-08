@@ -133,6 +133,7 @@ struct CarbonizerConfiguration {
 		"GRD": GRD.Unpacked.self,
 		"HML": HML.Unpacked.self,
 		"KIL": KIL.Unpacked.self,
+		"KPS": KPS.Unpacked.self,
 		"MAP": MAP.Unpacked.self,
 		"MFS": MFS.Unpacked.self,
 		"MM3": MM3.Unpacked.self,
@@ -177,9 +178,9 @@ struct CarbonizerConfiguration {
 			
 			// basically required for anything useful: NDS, MAR
 			//
-			// stable: _match, 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DEX, DMG, DMS, DTX, ECS, GRD, HML, MAP, MAR, MM3, MMS, MPM, NDS, RLS, SHP
+			// stable: _match, 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DEX, DMG, DMS, DTX, ECS, GRD, HML, KPS, MAP, MAR, MM3, MMS, MPM, NDS, RLS, SHP
 			// experimental: DML, MFS, SDAT
-			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "GRD", "HML", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DTX", "ECS", "GRD", "HML", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
 			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not

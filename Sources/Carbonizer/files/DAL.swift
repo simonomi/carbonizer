@@ -29,7 +29,9 @@ enum DAL {
 			// 2: random element
 			var element: UInt32
 			
-			var counterable: UInt32 // 0 for false, 3 for true
+			// bitmask, 0x1 is counter status, 0x2 is auto-counter
+			// TODO: make output reflect this
+			var counterable: UInt32
 			
 			@Count(givenBy: \Self.hitCount)
 			@Offset(givenBy: \Self.hitDamagesOffset)

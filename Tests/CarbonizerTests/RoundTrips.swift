@@ -50,6 +50,7 @@ struct RoundTrips {
 			("talk_msg_match", .packed),
 			("attack_defs", .packed),
 			("battle_attack_type", .packed),
+			("btl_kp_defs", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
@@ -60,6 +61,7 @@ struct RoundTrips {
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		
+		// TODO: write to disk to test unpacked's codable/custom
 		let repackedFile: any FileSystemObject = switch packedStatus {
 			case .packed:
 				try file
