@@ -140,8 +140,8 @@ func applyOperators(_ operatorArguments: Slice<LabeledExprListSyntax>, to valueO
 		
 		components.append(modifyingValue)
 	}
-		
-	return .property(components.joined(separator: " "))
+	
+	return .property("(\(components.joined(separator: " ")))")
 }
 
 func parseOffsets(_ arguments: LabeledExprListSyntax) throws -> Property.Size.Offsets {
