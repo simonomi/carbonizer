@@ -6,7 +6,6 @@ func makeFileData(
 	configuration: CarbonizerConfiguration
 ) throws -> (any ProprietaryFileData)? {
 	let allFileTypes: [String: any ProprietaryFileData.Type] = [
-		"_match": Match.Unpacked.self,
 		"3CL": TCL.Unpacked.self,
 		"BBG": BBG.Unpacked.self,
 		"BCO": BCO.Unpacked.self,
@@ -33,6 +32,18 @@ func makeFileData(
 		"SHP": SHP.Unpacked.self,
 	]
 	
+	if configuration.fileTypes.contains("_match") {
+		if name == "region_center_match" {
+			return try Match<UInt32>.Packed.init(data, configuration: configuration)
+		} else if name.hasSuffix("_match") {
+			return try Match<UInt16>.Packed.init(data, configuration: configuration)
+		} else if name == "region_center_match.json" {
+			return try Match<UInt32>.Unpacked.init(data, configuration: configuration)
+		} else if name.hasSuffix("_match.json") {
+			return try Match<UInt16>.Unpacked.init(data, configuration: configuration)
+		}
+	}
+	
 	// TODO: doing this for every file is slow!
 	let fileTypes: [any ProprietaryFileData.Type] = allFileTypes
 		.filter { (fileTypeName, _) in
@@ -43,7 +54,7 @@ func makeFileData(
 		}
 	
 	if let fileType = fileTypes.first(where: name.hasExtension) {
-		return try fileType.init(data, configuration: configuration) as any ProprietaryFileData
+		return try fileType.init(data, configuration: configuration)
 	}
 	
 	let dataCopy = Datastream(data) // copy to not modify
@@ -54,7 +65,7 @@ func makeFileData(
 		magicBytes.isNotEmpty,
 		let fileType = fileTypes.first(where: { $0.magicBytes == magicBytes })
 	{
-		return try fileType.init(data, configuration: configuration) as any ProprietaryFileData
+		return try fileType.init(data, configuration: configuration)
 	}
 	
 	return nil

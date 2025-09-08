@@ -1,22 +1,20 @@
 import BinaryParser
 
-// region_center_match is weird, it might be u32s (and what abt the header??)
-
-enum Match {
+enum Match<Element: FixedWidthInteger & Codable> {
 	struct Packed {
-		var data: [UInt16]
+		var data: [Element]
 	}
 	
 	struct Unpacked {
-		var data: [UInt16]
+		var data: [Element]
 	}
 }
 
 // MARK: packed
 extension Match.Packed: ProprietaryFileData {
-	static let fileExtension = "_match"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .packed
+	static var fileExtension: String { "" }
+	static var magicBytes: String { "" }
+	static var packedStatus: PackedStatus { .packed }
 	
 	func packed(configuration: CarbonizerConfiguration) -> Self { self }
 	
@@ -29,8 +27,12 @@ extension Match.Packed: ProprietaryFileData {
 	}
 	
 	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
-		let dataCount = data.bytes[data.offset...].count / 2
-		self.data = try data.read([UInt16].self, count: dataCount)
+		do {
+			let dataCount = data.bytes[data.offset...].count / (Element.bitWidth / 8)
+			self.data = try data.read([Element].self, count: dataCount)
+		} catch {
+			throw BinaryParserError.whileReading(Match.Packed.self, error)
+		}
 	}
 	
 	func write(to data: Datawriter) {
@@ -40,9 +42,9 @@ extension Match.Packed: ProprietaryFileData {
 
 // MARK: unpacked
 extension Match.Unpacked: ProprietaryFileData {
-	static let fileExtension = ".match.json"
-	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
+	static var fileExtension: String { ".json" }
+	static var magicBytes: String { "" }
+	static var packedStatus: PackedStatus { .unpacked }
 	
 	func packed(configuration: CarbonizerConfiguration) -> Match.Packed {
 		Match.Packed(self, configuration: configuration)
@@ -57,7 +59,7 @@ extension Match.Unpacked: ProprietaryFileData {
 
 extension Match.Unpacked: Codable {
 	init(from decoder: any Decoder) throws {
-		data = try [UInt16](from: decoder)
+		data = try [Element](from: decoder)
 	}
 	
 	func encode(to encoder: any Encoder) throws {
