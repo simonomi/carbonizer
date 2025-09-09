@@ -11,10 +11,10 @@ enum KPS {
 		
 		@Count(givenBy: \Self.count)
 		@Offset(givenBy: \Self.offset)
-		var things: [Thing]
+		var levels: [Level]
 		
 		@BinaryConvertible
-		struct Thing {
+		struct Level {
 			var level: UInt32
 			var startingFP: UInt32
 			var maxFP: UInt32
@@ -25,9 +25,9 @@ enum KPS {
 	}
 	
 	struct Unpacked {
-		var things: [Thing]
+		var levels: [Level]
 		
-		struct Thing: Codable {
+		struct Level: Codable {
 			var level: UInt32
 			var startingFP: UInt32
 			var maxFP: UInt32
@@ -50,13 +50,13 @@ extension KPS.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: KPS.Unpacked, configuration: CarbonizerConfiguration) {
-		count = UInt32(unpacked.things.count)
-		things = unpacked.things.map(Thing.init)
+		count = UInt32(unpacked.levels.count)
+		levels = unpacked.levels.map(Level.init)
 	}
 }
 
-extension KPS.Packed.Thing {
-	fileprivate init(_ unpacked: KPS.Unpacked.Thing) {
+extension KPS.Packed.Level {
+	fileprivate init(_ unpacked: KPS.Unpacked.Level) {
 		level = unpacked.level
 		startingFP = unpacked.startingFP
 		maxFP = unpacked.maxFP
@@ -79,12 +79,12 @@ extension KPS.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
 	
 	fileprivate init(_ packed: KPS.Packed, configuration: CarbonizerConfiguration) {
-		things = packed.things.map(Thing.init)
+		levels = packed.levels.map(Level.init)
 	}
 }
 
-extension KPS.Unpacked.Thing {
-	fileprivate init(_ packed: KPS.Packed.Thing) {
+extension KPS.Unpacked.Level {
+	fileprivate init(_ packed: KPS.Packed.Level) {
 		level = packed.level
 		startingFP = packed.startingFP
 		maxFP = packed.maxFP
@@ -96,10 +96,10 @@ extension KPS.Unpacked.Thing {
 
 extension KPS.Unpacked: Codable {
 	init(from decoder: any Decoder) throws {
-		things = try [Thing](from: decoder)
+		levels = try [Level](from: decoder)
 	}
 	
 	func encode(to encoder: any Encoder) throws {
-		try things.encode(to: encoder)
+		try levels.encode(to: encoder)
 	}
 }
