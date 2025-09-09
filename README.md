@@ -1,16 +1,16 @@
-## carbonizer
+# carbonizer
 an all-in-one Fossil Fighters ROM-hacking tool
 
-### download
+## download
 [click here to download the latest release of carbonizer](https://github.com/simonomi/carbonizer/releases)
 
-### how to use
-#### drag-and-drop (Windows only)
+## how to use
+### drag-and-drop (Windows only)
 drag the `.nds` ROM file onto `carbonizer.exe`. a terminal window should appear while carbonizer runs, then close once it finishes. a folder will be created next to the input file that contains the unpacked ROM files.
 
 carbonizer's output files can be edited using a regular text editor (I recommend [Notepad++](https://notepad-plus-plus.org)). To repack the edited files back into a `.nds` ROM, drag the folder onto carbonizer.
 
-#### command-line
+### command-line
 ```
 OVERVIEW: A Fossil Fighters ROM-hacking tool
 
@@ -33,8 +33,8 @@ example:
 carbonizer "Fossil Fighters.nds"
 ```
 
-### configuration
+## configuration
 when carbonizer is run for the first time, it'll create a `config.json` file that configures certain aspects of carbonizer's behavior. it has comments explaining each option, but if anything is still confusing, let me know!
 
-### technical details
+## technical details
 see [this wiki](https://github.com/simonomi/FF1_Binary_Formats/wiki) for technical information on Fossil Fighters' proprietary binary formats.
