@@ -1,6 +1,10 @@
 import BinaryParser
 import Foundation
 
+#if compiler(<6.2)
+protocol SendableMetatype {}
+#endif
+
 protocol ProprietaryFileData: SendableMetatype {
 	static var fileExtension: String { get }
 	static var magicBytes: String { get }
