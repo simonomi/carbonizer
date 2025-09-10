@@ -655,7 +655,7 @@ let entityNames: [Int32: String] = [
 //	686: "", // cha47c head47c
 //	687: "", // cha47b head45d
 //	688: "", // cha47c head45e
-//	689: "", // cha10a head10a
+	689: "Bea Ginner", // cha10a head10a
 //	690: "", // cha44d head44d
 //	691: "", // cha45e head45e
 //	692: "", // cha52a head48c

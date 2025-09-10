@@ -1,5 +1,6 @@
 import BinaryParser
 
+// ffc is completely different, needs new file type
 enum DCL {
 	@BinaryConvertible
 	struct Packed {
@@ -48,6 +49,7 @@ enum DCL {
 			
 			var linkChance: UInt8
 			
+			// chance for attacks to hit (separate from accuracy)
 			var unknown03: UInt8 // always 100
 			
 			var teams: Teams

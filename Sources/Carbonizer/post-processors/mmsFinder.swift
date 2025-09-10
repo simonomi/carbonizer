@@ -67,6 +67,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		for animationIndex in mms.animation.indices.map(Int.init).dropFirst() {
 			if parent.name == "ui_shop", file.name == "hold_cursor.bin", animationIndex == 1 { continue } // 1st palette is malformed
 			
+			// TODO: logprogress
 //			print("\(parent.name)/\(file.name)")
 			
 			let colorPaletteArchive = parent.contents.first { $0.name == mms.colorPalette.tableName } as! MAR.Unpacked

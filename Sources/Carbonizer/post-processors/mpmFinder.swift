@@ -16,6 +16,7 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 	
 	for mpm in file.files.compactMap({ $0.content as? MPM.Unpacked }) {
 //		guard mpm.entry3 == nil else { continue }
+// TODO: logprogress
 //		print(file.name)
 //		print(mpm.entry3 == nil)
 		

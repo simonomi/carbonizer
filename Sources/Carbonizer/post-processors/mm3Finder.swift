@@ -44,6 +44,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //	guard file.name == "cha01a_02" else { return [file] }
 //	guard file.name == "head01a" else { return [file] }
 	
+	// TODO: logprogress
 //	print()
 //	print(file.name)
 	

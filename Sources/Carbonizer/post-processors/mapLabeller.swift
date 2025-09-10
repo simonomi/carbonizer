@@ -15,7 +15,7 @@ func mapLabeller(
 			var mar = $0 as! MAR.Unpacked
 			var map = mar.files.first!.content as! MAP.Unpacked
 			
-			map._name = text[safely: Int(map.bannerTextID)]
+			map._bannerText = text[safely: Int(map.bannerTextID)]
 			
 			mar.files[0].content = map
 			

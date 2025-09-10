@@ -18,6 +18,7 @@ func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		var results: [any FileSystemObject] = [file]
 		
 		for (vivosaurId, vivosaur) in tcl.vivosaurs.enumerated() {
+			// TODO: logprogress
 			let animations = vivosaur?.animations ?? []
 			for (animationId, vivosaurAnimation) in animations.enumerated() {
 				guard let vivosaurAnimation else { continue }

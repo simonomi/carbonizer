@@ -9,25 +9,26 @@ enum MAP {
 		var mapNameOffset: UInt32 = 0x6C
 		var collisionMapNameOffset: UInt32
 		
-		var unknown01: Int32
+		var unknown01: Int32 // 0-18 (skipping a bunch)
 		
 		// 0x10
-		var unknown02: Int32
-		var unknown03: Int32
+		var unknown02: Int32 // 0-26 (skipping 1)
+		var unknown03: Int32 // 1-34 (skipping a bunch)
 		
-		var thingACount: UInt32
-		var thingAOffset: UInt32
+		var topScreenImageCount: UInt32
+		var topScreenImagesOffset: UInt32
 		
 		// 0x20
-		var unknown06: Int32
-		var unknown07: Int32
-		var unknown08: Int32
-		var unknown09: Int32 // fixed-point
+		var mapDotMoves: Int32
+		var mapDotX: Int32
+		var mapDotY: Int32
+		var mapDotScale: Int32 // fixed-point
 		
 		// 0x30
-		var unknown10: Int32 // fixed-point
+		var movementSpeed: Int32 // fixed-point
 		var bannerTextID: UInt32
 		
+		// TODO: rename to like 'collision zone' or smthn
 		var loadingZoneCount: UInt32
 		var loadingZonesOffset: UInt32
 		
@@ -57,9 +58,9 @@ enum MAP {
 		@Offset(givenBy: \Self.collisionMapNameOffset)
 		var collisionMapName: String
 		
-		@Count(givenBy: \Self.thingACount)
-		@Offset(givenBy: \Self.thingAOffset)
-		var thingA: [ThingA]
+		@Count(givenBy: \Self.topScreenImageCount)
+		@Offset(givenBy: \Self.topScreenImagesOffset)
+		var topScreenImages: [TopScreenImage]
 		
 		@Count(givenBy: \Self.loadingZoneCount)
 		@Offset(givenBy: \Self.loadingZonesOffset)
@@ -103,9 +104,11 @@ enum MAP {
 		var fourByteAlign: ()
 		
 		@BinaryConvertible
-		struct ThingA {
-			var topScreenImage: Int32 // 1-fighter, 2-park, 3-guild
-			var unknown2: Int32 // setting to 1 crashes
+		struct TopScreenImage {
+			// always 1–5, `images/town_map_*`
+			// 1-fighter, 2-park, 3-guild, 4—park with bea ginner, 5—park with fossil cannon
+			var townMapNumber: UInt32
+			var enabledFlag: UInt32
 		}
 		
 		@BinaryConvertible
@@ -253,15 +256,15 @@ enum MAP {
 		var unknown02: Int32
 		var unknown03: Int32
 		
-		var unknown06: Int32
-		var unknown07: Int32
-		var unknown08: Int32
+		var mapDotMoves: Bool
+		var mapDotX: Int32
+		var mapDotY: Int32
+		var mapDotScale: Double
 		
-		var unknown09: Double
-		var unknown10: Double
+		var movementSpeed: Double
 		
 		var bannerTextID: UInt32
-		var _name: String?
+		var _bannerText: String?
 		
 		var unknown24: UInt32 // unknown
 		
@@ -269,7 +272,7 @@ enum MAP {
 		
 		var collisionMapName: String
 		
-		var thingA: [ThingA]
+		var topScreenImages: [TopScreenImage]
 		
 		var loadingZones: [LoadingZone]
 		
@@ -285,9 +288,9 @@ enum MAP {
 		
 		var backgroundGradientBottom: Color
 		
-		struct ThingA: Codable {
-			var topScreenImage: Int32
-			var unknown2: Int32
+		struct TopScreenImage: Codable {
+			var townMapNumber: UInt32
+			var enabledFlag: UInt32
 		}
 		
 		struct LoadingZone: Codable {
@@ -396,18 +399,19 @@ extension MAP.Packed: ProprietaryFileData {
 		unknown02 = unpacked.unknown02
 		unknown03 = unpacked.unknown03
 		
-		thingACount = UInt32(unpacked.thingA.count)
-		thingAOffset = collisionMapNameOffset + UInt32(unpacked.collisionMapName.utf8CString.count.roundedUpToTheNearest(4))
+		topScreenImageCount = UInt32(unpacked.topScreenImages.count)
+		topScreenImagesOffset = collisionMapNameOffset + UInt32(unpacked.collisionMapName.utf8CString.count.roundedUpToTheNearest(4))
 		
-		unknown06 = unpacked.unknown06
-		unknown07 = unpacked.unknown07
-		unknown08 = unpacked.unknown08
-		unknown09 = Int32(fixedPoint: unpacked.unknown09)
-		unknown10 = Int32(fixedPoint: unpacked.unknown10)
+		mapDotMoves = unpacked.mapDotMoves ? 1 : 0
+		mapDotX = unpacked.mapDotX
+		mapDotY = unpacked.mapDotY
+		mapDotScale = Int32(fixedPoint: unpacked.mapDotScale)
+		
+		movementSpeed = Int32(fixedPoint: unpacked.movementSpeed)
 		bannerTextID = unpacked.bannerTextID
 		
 		loadingZoneCount = UInt32(unpacked.loadingZones.count)
-		loadingZonesOffset = thingAOffset + thingACount * 8
+		loadingZonesOffset = topScreenImagesOffset + topScreenImageCount * 8
 		
 		cameraPositionCount = UInt32(unpacked.cameraPositions.count)
 		cameraPositionsOffset = loadingZonesOffset + loadingZoneCount * 0x14
@@ -451,7 +455,7 @@ extension MAP.Packed: ProprietaryFileData {
 		
 		collisionMapName = unpacked.collisionMapName
 		
-		thingA = unpacked.thingA.map(ThingA.init)
+		topScreenImages = unpacked.topScreenImages.map(TopScreenImage.init)
 		
 		loadingZones = unpacked.loadingZones.map(LoadingZone.init)
 		
@@ -463,10 +467,10 @@ extension MAP.Packed: ProprietaryFileData {
 	}
 }
 
-extension MAP.Packed.ThingA {
-	init(_ unpacked: MAP.Unpacked.ThingA) {
-		topScreenImage = unpacked.topScreenImage
-		unknown2 = unpacked.unknown2
+extension MAP.Packed.TopScreenImage {
+	init(_ unpacked: MAP.Unpacked.TopScreenImage) {
+		townMapNumber = unpacked.townMapNumber
+		enabledFlag = unpacked.enabledFlag
 	}
 }
 
@@ -619,12 +623,12 @@ extension MAP.Unpacked: ProprietaryFileData {
 		unknown02 = packed.unknown02
 		unknown03 = packed.unknown03
 		
-		unknown06 = packed.unknown06
-		unknown07 = packed.unknown07
-		unknown08 = packed.unknown08
-		unknown09 = Double(fixedPoint: packed.unknown09)
+		mapDotMoves = packed.mapDotMoves > 0
+		mapDotX = packed.mapDotX
+		mapDotY = packed.mapDotY
+		mapDotScale = Double(fixedPoint: packed.mapDotScale)
 		
-		unknown10 = Double(fixedPoint: packed.unknown10)
+		movementSpeed = Double(fixedPoint: packed.movementSpeed)
 		bannerTextID = packed.bannerTextID
 		
 		unknown24 = packed.unknown24
@@ -633,7 +637,7 @@ extension MAP.Unpacked: ProprietaryFileData {
 		
 		collisionMapName = packed.collisionMapName
 		
-		thingA = packed.thingA.map(ThingA.init)
+		topScreenImages = packed.topScreenImages.map(TopScreenImage.init)
 		
 		loadingZones = packed.loadingZones.map(LoadingZone.init)
 		
@@ -651,10 +655,10 @@ extension MAP.Unpacked: ProprietaryFileData {
 	}
 }
 
-extension MAP.Unpacked.ThingA {
-	init(_ packed: MAP.Packed.ThingA) {
-		topScreenImage = packed.topScreenImage
-		unknown2 = packed.unknown2
+extension MAP.Unpacked.TopScreenImage {
+	init(_ packed: MAP.Packed.TopScreenImage) {
+		townMapNumber = packed.townMapNumber
+		enabledFlag = packed.enabledFlag
 	}
 }
 
