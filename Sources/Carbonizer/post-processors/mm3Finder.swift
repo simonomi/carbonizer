@@ -84,6 +84,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		let animation = try animationData.read(AnimationData.self)
 		
 		
+		// TODO: export textures inside the mar file to avoid duplication
 		let textureFolder = try texture.folder(named: file.name)
 		
 		// no two images in a texture should have the same offset.... right?
