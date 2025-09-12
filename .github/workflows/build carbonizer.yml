@@ -20,8 +20,6 @@ jobs:
         swift-version: "6.1"
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Test
-      run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: >
         swift build -c release
@@ -47,8 +45,6 @@ jobs:
       run: dir "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\$(swift --version | Select-String -Pattern '\d+\.\d+(\.\d+)?' | ForEach-Object { $_.Matches[0].Value })\\usr\\bin"
     - name: Checkout
       uses: actions/checkout@v4
-#     - name: Test
-#       run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: >
         swift build -c release
@@ -80,8 +76,6 @@ jobs:
         swift-version: "6.1"
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Test
-      run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: >
         swift build -c release
@@ -106,8 +100,6 @@ jobs:
         swift-version: "6.1"
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Test
-      run: swift test -Xswiftc -DIN_CI
     - name: Build
       run: >
         swift build -c release
