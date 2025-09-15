@@ -44,15 +44,4 @@ extension DefaultStringInterpolation {
 			.joined(separator: ";")
 		appendInterpolation("\u{001B}[\(effects)m")
 	}
-	
-	mutating func appendInterpolation(_ number: some BinaryInteger, digits: Int) {
-		precondition(number >= 0)
-		appendInterpolation(String(number).padded(toLength: digits, with: "0"))
-	}
-}
-
-extension String {
-	func removingANSIFontEffects() -> Self {
-		replacing(/\x{001B}\[[0-9;]+m/, with: "")
-	}
 }

@@ -72,7 +72,7 @@ struct Carbonizer: AsyncParsableCommand {
 			if configuration.useColor {
 				print("\(.red)error:\(.normal)", error)
 			} else {
-				print("error:", String(describing: error).removingANSIFontEffects())
+				print("error:", String(describing: error).removingANSICodes())
 			}
 			if configuration.keepWindowOpen.isTrueOnError {
 				waitForInput()
@@ -88,10 +88,7 @@ struct Carbonizer: AsyncParsableCommand {
 		let compressionMode = compressionMode ?? configuration.compressionMode
 		
 		for filePath in filePaths {
-			logProgress(
-				"Reading \(filePath.path(percentEncoded: false))",
-				configuration: configuration
-			)
+			print("Reading \(filePath.path(percentEncoded: false))...")
 			
 #if !IN_CI
 			let readStart = Date.now
@@ -107,8 +104,7 @@ struct Carbonizer: AsyncParsableCommand {
 			}
 			
 #if !IN_CI
-			print()
-			print("\(.red)read", -readStart.timeIntervalSinceNow, "\(.normal)")
+			print("\(.red)read", -readStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")
 			
 			let processStart = Date.now
 #endif
@@ -248,8 +244,7 @@ struct Carbonizer: AsyncParsableCommand {
 			}
 			
 #if !IN_CI
-			print()
-			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)")
+			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")
 #endif
 			
 			let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? filePath.deletingLastPathComponent()
@@ -266,14 +261,13 @@ struct Carbonizer: AsyncParsableCommand {
 			
 #if !IN_CI
 			let removeStart = Date.now
-			print()
 #endif
 			
 			if configuration.overwriteOutput && savePath.exists() {
 				try FileManager.default.removeItem(at: savePath)
 				
 #if !IN_CI
-				print("\(.red)remove", -removeStart.timeIntervalSinceNow, "\(.normal)")
+				print("\(.red)remove", -removeStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")
 #endif
 			}
 			
@@ -289,7 +283,7 @@ struct Carbonizer: AsyncParsableCommand {
 			)
 			
 #if !IN_CI
-			print("\(.cyan)write", -writeStart.timeIntervalSinceNow, "\(.normal)")
+			print("\(.cyan)write", -writeStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")
 #endif
 		}
 	}

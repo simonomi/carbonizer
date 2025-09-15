@@ -142,8 +142,7 @@ func logProgress(_ items: Any..., configuration: CarbonizerConfiguration) {
 		.map { String(describing: $0) }
 		.joined(separator: " ")
 	
-	print(String(repeating: " ", count: 100), terminator: "\r")
-	print(message + "...", terminator: "\r")
+	print(message + "...\(.clearToEndOfLine)", terminator: "\r")
 	
 	fflush(stdout)
 }
@@ -241,6 +240,11 @@ extension String {
 		} else {
 			self = String(number)
 		}
+	}
+	
+	func removingANSICodes() -> Self {
+		// this only removes color and clear-line codes, since those are the only ones carbonizer uses
+		replacing(/\x{001B}\[[0-9;]+[mK]/, with: "")
 	}
 }
 
@@ -529,5 +533,12 @@ extension Double {
 extension BinaryInteger {
 	init(fixedPoint: Double, fractionBits: Int = 12) {
 		self = Self(fixedPoint * Double(1 << fractionBits))
+	}
+}
+
+extension DefaultStringInterpolation {
+	mutating func appendInterpolation(_ number: some BinaryInteger, digits: Int) {
+		precondition(number >= 0)
+		appendInterpolation(String(number).padded(toLength: digits, with: "0"))
 	}
 }

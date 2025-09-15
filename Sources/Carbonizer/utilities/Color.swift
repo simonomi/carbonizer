@@ -1,3 +1,4 @@
+// TODO: make this BinaryConvertible so no conversion is necessary when packing/unpacking?
 struct Color: Codable {
 	var red: UInt8
 	var green: UInt8

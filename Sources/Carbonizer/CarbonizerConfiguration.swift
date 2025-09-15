@@ -1,13 +1,17 @@
 import ArgumentParser
 import Foundation
 
+// TODO: define all logging/output functions on configuration,
+// to be defined by the user of the library
+// use an asyncstream? 👀
+
 struct CarbonizerConfiguration {
 	var compressionMode: CompressionMode
 	var inputFiles: [String]
 	var outputFolder: String?
 	var overwriteOutput: Bool
 	var showProgress: Bool
-	var keepWindowOpen: KeepWindowOpen
+	var keepWindowOpen: KeepWindowOpen // TODO: detect whether running interactively?
 	var useColor: Bool
 	var dexCommandList: DEXCommandList
 	var externalMetadata: Bool
