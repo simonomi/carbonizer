@@ -101,34 +101,34 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			}
 		)
 		
-		let usd = try USD(
-			vertexData: vertexData,
-			animationData: animation,
-			modelName: file.name,
-			textureNames: textureNames
-		)
-		
-		let usdFile = BinaryFile(
-			name: file.name + ".usd",
-			metadata: .skipFile,
-			data: Datastream(usd.string().data(using: .utf8)!)
-		)
-		
-		return [file, usdFile, textureFolder]
-		
-//		let collada = try Collada(
+//		let usd = try USD(
 //			vertexData: vertexData,
 //			animationData: animation,
 //			modelName: file.name,
 //			textureNames: textureNames
 //		)
 //		
-//		let colladaFile = BinaryFile(
-//			name: file.name + ".dae",
-//			data: Datastream(collada.asString().data(using: .utf8)!)
+//		let usdFile = BinaryFile(
+//			name: file.name + ".usd",
+//			metadata: .skipFile,
+//			data: Datastream(usd.string().data(using: .utf8)!)
 //		)
 //		
-//		return [file, colladaFile, textureFolder]
+//		return [file, usdFile, textureFolder]
+		
+		let collada = try Collada(
+			vertexData: vertexData,
+			animationData: animation,
+			modelName: file.name,
+			textureNames: textureNames
+		)
+		
+		let colladaFile = BinaryFile(
+			name: file.name + ".dae",
+			data: Datastream(collada.asString().data(using: .utf8)!)
+		)
+		
+		return [file, colladaFile, textureFolder]
 	} catch {
 		// ignore for now
 		print(file.name, "failed", error)

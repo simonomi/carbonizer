@@ -15,7 +15,7 @@ let package = Package(
 		.package(url: "https://github.com/swiftlang/swift-syntax.git", from: "601.0.1"),
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
 //		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.0"),
-		.package(url: "https://github.com/apple/SwiftUsd", from: "5.0.2"),
+//		.package(url: "https://github.com/apple/SwiftUsd", from: "5.0.2"),
 	],
 	targets: [
 		.macro(
@@ -31,11 +31,11 @@ let package = Package(
 			dependencies: [
 				"BinaryParser",
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
-				.product(name: "OpenUSD", package: "SwiftUsd"),
+//				.product(name: "OpenUSD", package: "SwiftUsd"),
 			],
-			swiftSettings: [
-				.interoperabilityMode(.Cxx)
-			]
+//			swiftSettings: [
+//				.interoperabilityMode(.Cxx)
+//			]
 		),
 		// enabling this target somehow results in CarbonizerTests not being able to import Carbonizer
 //		.testTarget(
@@ -48,9 +48,9 @@ let package = Package(
 		.testTarget(
 			name: "CarbonizerTests",
 			dependencies: ["Carbonizer"],
-			swiftSettings: [
-				.interoperabilityMode(.Cxx)
-			]
+//			swiftSettings: [
+//				.interoperabilityMode(.Cxx)
+//			]
 		)
 	],
 	cxxLanguageStandard: .gnucxx17
