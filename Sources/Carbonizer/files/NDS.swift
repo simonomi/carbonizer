@@ -296,16 +296,15 @@ extension NDS.Unpacked: FileSystemObject {
 		let arm7OverlayTable = Datastream(try encoder.encode(arm7OverlayTable))
 		
 		let contents: [any FileSystemObject] = [
-			Folder(name: "arm9 overlays", contents: arm9Overlays),
-			Folder(name: "arm7 overlays", contents: arm7Overlays),
-			Folder(name: "data",          contents: contents),
+			Folder(name: "_arm9 overlays", contents: arm9Overlays),
+			Folder(name: "_arm7 overlays", contents: arm7Overlays),
 			BinaryFile(name: "arm9",                    data: arm9),
 			BinaryFile(name: "arm9 overlay table.json", data: arm9OverlayTable),
 			BinaryFile(name: "arm7",                    data: arm7),
 			BinaryFile(name: "arm7 overlay table.json", data: arm7OverlayTable),
 			BinaryFile(name: "header.json",             data: header),
 			BinaryFile(name: "icon banner",             data: iconBanner)
-		]
+		] + contents
 		
 		try Folder(name: name, contents: contents)
 			.write(into: path, overwriting: overwriting, with: configuration)
@@ -399,12 +398,11 @@ extension NDS.Unpacked {
 		guard let headerFile =           contents.getChild(named: "header.json") as? BinaryFile,
 			  let arm9File =             contents.getChild(named: "arm9") as? BinaryFile,
 			  let arm9OverlayTableFile = contents.getChild(named: "arm9 overlay table.json") as? BinaryFile,
-			  let arm9OverlaysFolder =   contents.getChild(named: "arm9 overlays") as? Folder,
+			  let arm9OverlaysFolder =   contents.getChild(named: "_arm9 overlays") as? Folder,
 			  let arm7File =             contents.getChild(named: "arm7") as? BinaryFile,
 			  let arm7OverlayTableFile = contents.getChild(named: "arm7 overlay table.json") as? BinaryFile,
-			  let arm7OverlaysFolder =   contents.getChild(named: "arm7 overlays") as? Folder,
-			  let iconBannerFile =       contents.getChild(named: "icon banner") as? BinaryFile,
-			  let dataFolder =           contents.getChild(named: "data") as? Folder
+			  let arm7OverlaysFolder =   contents.getChild(named: "_arm7 overlays") as? Folder,
+			  let iconBannerFile =       contents.getChild(named: "icon banner") as? BinaryFile
 		else {
 			throw UnpackingError.invalidFolderStructure(contents.map(\.name))
 		}
@@ -436,7 +434,9 @@ extension NDS.Unpacked {
 		
 		iconBanner = iconBannerFile.data
 		
-		self.contents = dataFolder.contents
+		self.contents = contents.filter {
+			!["header.json", "arm9", "arm9 overlay table.json", "_arm9 overlays", "arm7", "arm7 overlay table.json", "_arm7 overlays", "icon banner"].contains($0.name)
+		}
 		
 		let expectedFileCount = header.fileAllocationTableSize / 8
 		let actualFileCount = arm9Overlays.count + arm7Overlays.count + self.contents.getAllFiles().count

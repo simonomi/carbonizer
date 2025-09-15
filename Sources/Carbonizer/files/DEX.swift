@@ -77,8 +77,8 @@ enum DEX {
 			// <16 7> being set with flag5 gives chieftain mask
 			// <2 7> being set with flag5 gives hip-shaker mask
 			// - 7 is masks
-			// <59 8> might be mask shop result? or maybe previous mask?
 			// <56 8> is probably chapter number
+			// <59 8> might be mask shop result? or maybe previous mask?
 			// <62 8> number of sonar upgrades left
 			// <67 8> number of cleaning upgrades left
 			// <68 8> number of case upgrades (1:8, 2:16, 3:24, 4:32, 5:48)

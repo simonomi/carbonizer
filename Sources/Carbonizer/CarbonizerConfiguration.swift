@@ -149,12 +149,11 @@ struct CarbonizerConfiguration {
 	// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns
 	static let defaultConfigurationString: String = """
 		{
-			// auto 
 			"compressionMode": "auto", // pack, unpack, auto, ask
 			
 			"inputFiles": [],
 			
-			// where any output files will be placed 
+			// where any output files will be placed
 			"outputFolder": null,
 			
 			// whether to overwrite any already-existing output files
@@ -164,7 +163,7 @@ struct CarbonizerConfiguration {
 			
 			"keepWindowOpen": "onError", // always, never, onError
 			
-			// enables pretty colorful output! not all terminals support colors though :( 
+			// enables pretty colorful output! not all terminals support colors though :(
 			"useColor": true,
 			
 			// ff1 and ffc use different commands in their DEX files (episode folder), you should
@@ -206,9 +205,9 @@ struct CarbonizerConfiguration {
 				//            make sure to enablethe  MPM file type or nothing will happen
 				"postProcessors": [],
 				
-				// adds comments to DEX files that show the dialogue used in a given command 
-				// 
-				// make sure to enable the DEX and DMG file types or nothing will happen 
+				// adds comments to DEX files that show the dialogue used in a given command
+				//
+				// make sure to enable the DEX and DMG file types or nothing will happen
 				"dexDialogueLabeller": false,
 				
 				// allows editing the comments made by dexDialogueLabeller, which will be
@@ -218,9 +217,9 @@ struct CarbonizerConfiguration {
 				"dexDialogueSaver": false,
 				
 				// labels the blocks of commands in DEX files with their block number. this number
-				// is used by DEP files to control when a block triggers 
+				// is used by DEP files to control when a block triggers
 				//
-				// make sure to enable both the DEX and DEP file types or nothing will happen 
+				// make sure to enable both the DEX and DEP file types or nothing will happen
 				"dexBlockLabeller": false,
 				
 				// adds labels for the names of fighters in DBS files (battle folder)
