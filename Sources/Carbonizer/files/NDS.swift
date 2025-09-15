@@ -310,11 +310,7 @@ extension NDS.Unpacked: FileSystemObject {
 			.write(into: path, overwriting: overwriting, with: configuration)
 	}
 	
-	func packedStatus() -> PackedStatus {
-		contents
-			.map { $0.packedStatus() }
-			.reduce(.unpacked) { $0.combined(with: $1) }
-	}
+	func packedStatus() -> PackedStatus { .unpacked }
 	
 	func packed(configuration: CarbonizerConfiguration) -> NDS.Packed {
 		NDS.Packed(

@@ -102,6 +102,10 @@ struct Carbonizer: AsyncParsableCommand {
 				continue
 			}
 			
+			guard file is NDS.Packed || file is NDS.Unpacked else {
+				throw InvalidInput()
+			}
+			
 #if !IN_CI
 			print()
 			print("\(.red)read", -readStart.timeIntervalSinceNow, "\(.normal)")
