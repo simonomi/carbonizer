@@ -160,16 +160,15 @@ enum NDS {
 extension NDS.Packed: FileSystemObject {
 	static let fileExtension = ".nds"
 	
-	func savePath(in directory: URL, overwriting: Bool) -> URL {
+	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
 		BinaryFile(
 			name: name + Self.fileExtension,
 			data: Datastream()
-		).savePath(in: directory, overwriting: overwriting)
+		).savePath(in: directory, with: configuration)
 	}
 	
 	func write(
 		into path: URL,
-		overwriting: Bool,
 		with configuration: CarbonizerConfiguration
 	) throws {
 		let writer = Datawriter()
@@ -180,7 +179,7 @@ extension NDS.Packed: FileSystemObject {
 				name: name + Self.fileExtension,
 				data: writer.intoDatastream()
 			)
-			.write(into: path, overwriting: overwriting, with: configuration)
+			.write(into: path, with: configuration)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
@@ -279,14 +278,13 @@ extension NDS.Packed.Binary {
 
 // MARK: unpacked
 extension NDS.Unpacked: FileSystemObject {
-	func savePath(in directory: URL, overwriting: Bool) -> URL {
+	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
 		Folder(name: name, contents: [])
-			.savePath(in: directory, overwriting: overwriting)
+			.savePath(in: directory, with: configuration)
 	}
 	
 	func write(
 		into path: URL,
-		overwriting: Bool,
 		with configuration: CarbonizerConfiguration
 	) throws {
 		let encoder = JSONEncoder(.prettyPrinted, .sortedKeys)
@@ -307,7 +305,7 @@ extension NDS.Unpacked: FileSystemObject {
 		] + contents
 		
 		try Folder(name: name, contents: contents)
-			.write(into: path, overwriting: overwriting, with: configuration)
+			.write(into: path, with: configuration)
 	}
 	
 	func packedStatus() -> PackedStatus { .unpacked }

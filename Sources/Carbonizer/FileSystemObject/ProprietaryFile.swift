@@ -12,18 +12,17 @@ extension ProprietaryFile: FileSystemObject {
 		type(of: data).fileExtension
 	}
 	
-	func savePath(in directory: URL, overwriting: Bool) -> URL {
+	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
 		BinaryFile(
 			name: name + fileExtension,
 			metadata: metadata,
 			data: Datastream()
 		)
-		.savePath(in: directory, overwriting: overwriting)
+		.savePath(in: directory, with: configuration)
 	}
 	
 	func write(
 		into folder: URL,
-		overwriting: Bool,
 		with configuration: CarbonizerConfiguration
 	) throws {
 		let writer = Datawriter()
@@ -34,7 +33,7 @@ extension ProprietaryFile: FileSystemObject {
 			metadata: metadata,
 			data: writer.intoDatastream()
 		)
-		.write(into: folder, overwriting: overwriting, with: configuration)
+		.write(into: folder, with: configuration)
 	}
 	
 	func packedStatus() -> PackedStatus {

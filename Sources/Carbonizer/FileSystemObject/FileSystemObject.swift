@@ -4,12 +4,8 @@ import Foundation
 protocol FileSystemObject {
 	var name: String { get }
 	
-	func savePath(in folder: URL, overwriting: Bool) -> URL
-	func write(
-		into folder: URL,
-		overwriting: Bool,
-		with configuration: CarbonizerConfiguration
-	) throws
+	func savePath(in folder: URL, with configuration: CarbonizerConfiguration) -> URL
+	func write(into folder: URL, with configuration: CarbonizerConfiguration) throws
 	
 	func packedStatus() -> PackedStatus
 	

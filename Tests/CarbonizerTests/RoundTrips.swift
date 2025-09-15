@@ -58,6 +58,7 @@ struct RoundTrips {
 		let inputFilePath = filePath(for: fileName)
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
+		configurationWithFileTypes.overwriteOutput = true
 //		configurationWithFileTypes.fileTypes.insert("DAL")
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
@@ -76,8 +77,8 @@ struct RoundTrips {
 				try Issue.failure("packed status must be either packed or unpacked")
 		}
 		
-		let savePath = repackedFile.savePath(in: .temporaryDirectory, overwriting: true)
-		try repackedFile.write(into: .temporaryDirectory, overwriting: true, with: configurationWithFileTypes)
+		let savePath = repackedFile.savePath(in: .temporaryDirectory, with: configurationWithFileTypes)
+		try repackedFile.write(into: .temporaryDirectory, with: configurationWithFileTypes)
 		
 		let originalData = try Data(contentsOf: inputFilePath)
 		let savedData = try Data(contentsOf: savePath)
@@ -95,23 +96,23 @@ struct RoundTrips {
 		let wholeROM = try fileSystemObject(contentsOf: wholeROMPath, configuration: .defaultConfiguration)!
 		
 		let unpackedROM = try wholeROM.unpacked(path: [], configuration: .defaultConfiguration)
-		let unpackedSavePath = unpackedROM.savePath(in: .temporaryDirectory, overwriting: false)
-		try unpackedROM.write(into: .temporaryDirectory, overwriting: false, with: .defaultConfiguration)
+		let unpackedSavePath = unpackedROM.savePath(in: .temporaryDirectory, with: .defaultConfiguration)
+		try unpackedROM.write(into: .temporaryDirectory, with: .defaultConfiguration)
 		
 		let repackedROM = try fileSystemObject(contentsOf: unpackedSavePath, configuration: .defaultConfiguration)!
 			.packed(configuration: .defaultConfiguration)
-		let repackedSavePath = repackedROM.savePath(in: .temporaryDirectory, overwriting: false)
-		try repackedROM.write(into: .temporaryDirectory, overwriting: false, with: .defaultConfiguration)
+		let repackedSavePath = repackedROM.savePath(in: .temporaryDirectory, with: .defaultConfiguration)
+		try repackedROM.write(into: .temporaryDirectory, with: .defaultConfiguration)
 		
 		let reunpackedROM = try fileSystemObject(contentsOf: repackedSavePath, configuration: .defaultConfiguration)!
 			.unpacked(path: [], configuration: .defaultConfiguration)
-		let reunpackedSavePath = reunpackedROM.savePath(in: .temporaryDirectory, overwriting: false)
-		try reunpackedROM.write(into: .temporaryDirectory, overwriting: false, with: .defaultConfiguration)
+		let reunpackedSavePath = reunpackedROM.savePath(in: .temporaryDirectory, with: .defaultConfiguration)
+		try reunpackedROM.write(into: .temporaryDirectory, with: .defaultConfiguration)
 		
 		let rerepackedROM = try fileSystemObject(contentsOf: reunpackedSavePath, configuration: .defaultConfiguration)!
 			.packed(configuration: .defaultConfiguration)
-		let rerepackedSavePath = rerepackedROM.savePath(in: .temporaryDirectory, overwriting: false)
-		try rerepackedROM.write(into: .temporaryDirectory, overwriting: false, with: .defaultConfiguration)
+		let rerepackedSavePath = rerepackedROM.savePath(in: .temporaryDirectory, with: .defaultConfiguration)
+		try rerepackedROM.write(into: .temporaryDirectory, with: .defaultConfiguration)
 		
 		func expectContents(
 			of firstPath: URL,

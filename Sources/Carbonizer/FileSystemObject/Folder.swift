@@ -48,11 +48,11 @@ func makeFolder(
 extension Folder: FileSystemObject {
 	var fileExtension: String { "" }
 	
-	func savePath(in directory: URL, overwriting: Bool) -> URL {
+	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
 		let path = directory
 			.appending(component: name)
 		
-		if overwriting || !path.exists() { return path }
+		if configuration.overwriteOutput || !path.exists() { return path }
 		
 		for number in 1... {
 			let path = directory
@@ -66,10 +66,9 @@ extension Folder: FileSystemObject {
 	
 	func write(
 		into folder: URL,
-		overwriting: Bool,
 		with configuration: CarbonizerConfiguration
 	) throws {
-		let path = savePath(in: folder, overwriting: overwriting)
+		let path = savePath(in: folder, with: configuration)
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
 		
 		if let metadata {
@@ -90,7 +89,7 @@ extension Folder: FileSystemObject {
 			}
 		}
 		
-		try contents.forEach { try $0.write(into: path, overwriting: overwriting, with: configuration) }
+		try contents.forEach { try $0.write(into: path, with: configuration) }
 	}
 	
 	func packedStatus() -> PackedStatus {

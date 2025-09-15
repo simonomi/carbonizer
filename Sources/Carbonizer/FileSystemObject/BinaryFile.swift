@@ -8,10 +8,10 @@ struct BinaryFile {
 }
 
 extension BinaryFile: FileSystemObject {
-	func savePath(in directory: URL, overwriting: Bool) -> URL {
+	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
 		let path = directory.appending(component: name)
 		
-		if overwriting || !path.exists() { return path }
+		if configuration.overwriteOutput || !path.exists() { return path }
 		
 		let (baseName, fileExtensions) = splitFileName(name)
 		
@@ -28,10 +28,9 @@ extension BinaryFile: FileSystemObject {
 	
 	func write(
 		into folder: URL,
-		overwriting: Bool,
 		with configuration: CarbonizerConfiguration
 	) throws {
-		let path = savePath(in: folder, overwriting: overwriting)
+		let path = savePath(in: folder, with: configuration)
 		
 		do {
 			if !folder.exists() {

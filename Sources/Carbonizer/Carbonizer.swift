@@ -249,10 +249,7 @@ struct Carbonizer: AsyncParsableCommand {
 			
 			let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? filePath.deletingLastPathComponent()
 			
-			let savePath = processedFile.savePath(
-				in: outputFolder,
-				overwriting: configuration.overwriteOutput
-			)
+			let savePath = processedFile.savePath(in: outputFolder, with: configuration)
 			
 			logProgress(
 				"Writing to \(savePath.path(percentEncoded: false))",
@@ -275,12 +272,7 @@ struct Carbonizer: AsyncParsableCommand {
 			let writeStart = Date.now
 #endif
 			
-			// TODO: remove overwriting argument, it already has the configuration
-			try processedFile.write(
-				into: outputFolder,
-				overwriting: configuration.overwriteOutput,
-				with: configuration
-			)
+			try processedFile.write(into: outputFolder, with: configuration)
 			
 #if !IN_CI
 			print("\(.cyan)write", -writeStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")

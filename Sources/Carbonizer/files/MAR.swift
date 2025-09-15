@@ -32,17 +32,16 @@ enum MAR {
 
 // MARK: packed
 extension MAR.Packed: FileSystemObject {
-	func savePath(in directory: URL, overwriting: Bool) -> URL {
+	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
 		BinaryFile(
 			name: name,
 			data: Datastream()
 		)
-		.savePath(in: directory, overwriting: overwriting)
+		.savePath(in: directory, with: configuration)
 	}
 	
 	func write(
 		into path: URL,
-		overwriting: Bool,
 		with configuration: CarbonizerConfiguration
 	) throws {
 		let writer = Datawriter()
@@ -53,7 +52,7 @@ extension MAR.Packed: FileSystemObject {
 				name: name,
 				data: writer.intoDatastream()
 			)
-			.write(into: path, overwriting: overwriting, with: configuration)
+			.write(into: path, with: configuration)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
@@ -92,31 +91,30 @@ extension MAR.Packed.Binary {
 extension MAR.Unpacked: FileSystemObject {
 	static let fileExtension = ".mar"
 	
-	func savePath(in folder: URL, overwriting: Bool) -> URL {
+	func savePath(in folder: URL, with configuration: CarbonizerConfiguration) -> URL {
 		if files.count == 1 {
 			ProprietaryFile(name: name, data: Datastream())
-				.savePath(in: folder, overwriting: overwriting)
+				.savePath(in: folder, with: configuration)
 		} else {
 			Folder(
 				name: name + Self.fileExtension,
 				contents: []
-			).savePath(in: folder, overwriting: overwriting)
+			).savePath(in: folder, with: configuration)
 		}
 	}
 	
 	func write(
 		into folder: URL,
-		overwriting: Bool,
 		with configuration: CarbonizerConfiguration
 	) throws {
 		if files.count == 1, let file = files.first {
 			try ProprietaryFile(name: name, standaloneMCM: file)
-				.write(into: folder, overwriting: overwriting, with: configuration)
+				.write(into: folder, with: configuration)
 		} else {
 			try Folder(
 				name: name + Self.fileExtension,
 				contents: files.enumerated().map(ProprietaryFile.init)
-			).write(into: folder, overwriting: overwriting, with: configuration)
+			).write(into: folder, with: configuration)
 		}
 	}
 	

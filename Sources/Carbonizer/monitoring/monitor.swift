@@ -7,6 +7,11 @@ extension Carbonizer {
 			print("Note: more than one input file provided, only monitoring the first")
 		}
 		
+		guard configuration.overwriteOutput else {
+			print("\(.red)overwriteOutput should be on\(.normal)")
+			fatalError()
+		}
+		
 		let inputPath = filePaths.first!
 		
 		guard var fileData = try fileSystemObject(contentsOf: inputPath, configuration: configuration) else {
@@ -31,8 +36,8 @@ extension Carbonizer {
 			fileData.setFile(at: components, to: newFile)
 			
 			let packedData = fileData.packed(configuration: configuration)
-			let outputPath = packedData.savePath(in: outputFolder, overwriting: true)
-			try packedData.write(into: outputFolder, overwriting: true, with: configuration)
+			let outputPath = packedData.savePath(in: outputFolder, with: configuration)
+			try packedData.write(into: outputFolder, with: configuration)
 			
 			try shell("open \"\(outputPath.path(percentEncoded: false))\"")
 		}
