@@ -60,9 +60,10 @@ struct Carbonizer: AsyncParsableCommand {
 		}
 		
 		if configuration.showProgress {
+			let terminalWidth = terminalSize().width
 			configuration.logHandler = {
-				// TODO: do these ansi codes work on windows?
-				print($0 + "...\(.clearToEndOfLine)\(.moveToStartOfLine)", terminator: "")
+				// TODO: do these ansi codes work on windows cmd?
+				print($0.prefix(terminalWidth - 3) + "...\(.clearToEndOfLine)", terminator: "\r")
 				fflush(stdout)
 			}
 		}
