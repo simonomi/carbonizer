@@ -120,18 +120,7 @@ struct RoundTrips {
 			areEqualTo secondPath: URL,
 			sourceLocation: SourceLocation = #_sourceLocation
 		) throws {
-			if try firstPath.type() == .file {
-				let firstContents = try Data(contentsOf: firstPath)
-				let secondContents = try Data(contentsOf: secondPath)
-				
-				let areTheSame = firstContents == secondContents
-				
-				#expect(
-					areTheSame,
-					"files '\(firstPath.path(percentEncoded: false))' and '\(secondPath.path(percentEncoded: false))' differ",
-					sourceLocation: sourceLocation
-				)
-			} else {
+			if try firstPath.isDirectory() {
 				let firstContents = try firstPath.contents()
 				let secondContents = try secondPath.contents()
 				
@@ -144,6 +133,17 @@ struct RoundTrips {
 				for (firstPath, secondPath) in zip(firstContents, secondContents) {
 					try expectContents(of: firstPath, areEqualTo: secondPath, sourceLocation: sourceLocation)
 				}
+			} else {
+				let firstContents = try Data(contentsOf: firstPath)
+				let secondContents = try Data(contentsOf: secondPath)
+				
+				let areTheSame = firstContents == secondContents
+				
+				#expect(
+					areTheSame,
+					"files '\(firstPath.path(percentEncoded: false))' and '\(secondPath.path(percentEncoded: false))' differ",
+					sourceLocation: sourceLocation
+				)
 			}
 		}
 		

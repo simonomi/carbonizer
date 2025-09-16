@@ -2,12 +2,14 @@ import ArgumentParser
 import Foundation
 
 // TODO: list
-// - add a .carbonizer file or smthn to contain the version number
+// - add a `carbonizer version.json` file or smthn to contain the version number
 //   - if trying to pack from too old a version (semver or smthn), give an error
 //   - also the list of file types, so if some file types were extracted they need to be repacked
 // - split the configuration into two parts
 //   - the CLI configuration (logProgress, input/output paths, post-processors...)
 //   - the library configuration (file types, overwrite output, external metadata, filters...)
+// - make reading (and writing?) use way fewer filesystem calls
+//   - enumerator
 
 // how should the carbonizer library should work
 // - input file path, output folder, overwrite, ff1/ffc, external metadata, file types, filters, monitoring, post-processors (extensions...? new name)

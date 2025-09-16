@@ -25,19 +25,12 @@ func fileSystemObject(
 	configuration: CarbonizerConfiguration
 ) throws -> (any FileSystemObject)? {
 	do {
-		return switch try path.type() {
-			case .folder:
-				try makeFolder(contentsOf: path, configuration: configuration)
-			case .file:
-				try makeFile(contentsOf: path, configuration: configuration)
-			case .other(let otherType):
-				throw FileReadError.invalidFileType(path, otherType)
+		return if try path.isDirectory() {
+			try makeFolder(contentsOf: path, configuration: configuration)
+		} else {
+			try makeFile(contentsOf: path, configuration: configuration)
 		}
 	} catch {
 		throw BinaryParserError.whileReadingFile(path.lastPathComponent, error)
 	}
-}
-
-enum FileReadError: Error {
-	case invalidFileType(URL, FileAttributeType?)
 }

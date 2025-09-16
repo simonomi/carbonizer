@@ -287,11 +287,11 @@ extension URL {
 #endif
 	
 	func getModificationDate() throws -> Date? {
-		try FileManager.default.attributesOfItem(atPath: path(percentEncoded: false))[.modificationDate] as? Date
+		try resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
 	}
 	
 	func getCreationDate() throws -> Date? {
-		try FileManager.default.attributesOfItem(atPath: path(percentEncoded: false))[.creationDate] as? Date
+		try resourceValues(forKeys: [.creationDateKey]).creationDate
 	}
 	
 	func setCreationDate(to date: Date) throws {
@@ -328,17 +328,8 @@ extension URL {
 		try FileManager.default.contentsOfDirectory(at: self, includingPropertiesForKeys: nil)
 	}
 	
-	enum FileType: Equatable {
-		case file, folder, other(FileAttributeType?)
-	}
-	
-	func type() throws -> FileType {
-		let type = try FileManager.default.attributesOfItem(atPath: self.path(percentEncoded: false))[.type] as? FileAttributeType
-		return switch type {
-			case .some(.typeRegular): .file
-			case .some(.typeDirectory): .folder
-			default: .other(type)
-		}
+	func isDirectory() throws -> Bool {
+		try self.resourceValues(forKeys: [.isDirectoryKey]).isDirectory!
 	}
 	
 #if os(Windows)

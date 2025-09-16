@@ -17,7 +17,7 @@ func monitorFiles(
 	in path: URL,
 	with eventHandler: sending @escaping @isolated(any) EventHandler
 ) throws -> PathMonitor {
-	guard try path.type() == .folder else {
+	guard try path.isDirectory() else {
 		fatalError("cannot monitor file")
 	}
 	
@@ -57,7 +57,7 @@ func monitorFiles(
 	
 	let subSources = try path
 		.contents()
-		.filter({ try $0.type() == .folder })
+		.filter { try $0.isDirectory() }
 		.flatMap { try monitorFiles(in: $0, with: eventHandler).sources }
 	
 	return PathMonitor(sources: [source] + subSources)

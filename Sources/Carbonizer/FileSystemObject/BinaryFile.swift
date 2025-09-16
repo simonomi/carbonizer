@@ -34,6 +34,7 @@ extension BinaryFile: FileSystemObject {
 		configuration.log("Writing", path.path(percentEncoded: false))
 		
 		do {
+			// TODO: can this be removed?
 			if !folder.exists() {
 				try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
 			}
