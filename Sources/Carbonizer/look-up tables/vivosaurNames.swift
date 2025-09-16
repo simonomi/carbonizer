@@ -116,3 +116,9 @@ let vivosaurNames: [Int32: String] = [
 	115: "OP Frigi",
 	116: "OP Igno"
 ]
+
+let vivosaurIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: vivosaurNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

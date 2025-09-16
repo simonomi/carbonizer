@@ -574,12 +574,12 @@ extension DEP.Unpacked.ArgumentType {
 	func parse(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
 		switch self {
 			case .block:           parseBlock(text)
-			case .entity:          parseLookupTable(entityNames, text: text) ?? parsePrefix(text)
+			case .entity:          parseLookupTable(entityIDs, text: text) ?? parsePrefix(text)
 			case .flag:            parseUnknown(text)
-			case .door:            parseLookupTable(doorNames, text: text) ?? parsePrefix(text)
+			case .door:            parseLookupTable(doorIDs, text: text) ?? parsePrefix(text)
 			case .firstNumberOnly: parseFirstNumberOnly(text)
 			case .unknown:         parseUnknown(text)
-			case .vivosaur:        parseLookupTable(vivosaurNames, text: text) ?? parsePrefix(text)
+			case .vivosaur:        parseLookupTable(vivosaurIDs, text: text) ?? parsePrefix(text)
 		}
 	}
 	
@@ -591,18 +591,8 @@ extension DEP.Unpacked.ArgumentType {
 			.map { DEP.Unpacked.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}
 	
-//	private func parseSuffix(_ text: Substring) -> DEP.Block.Requirement.Argument? {
-//		text
-//			.split(whereSeparator: \.isWhitespace)
-//			.first
-//			.flatMap { UInt16($0) }
-//			.map { DEP.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
-//	}
-	
-	private func parseLookupTable(_ table: [Int32: String], text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
-		table
-			.first { $0.value.caseInsensitiveEquals(text) }
-			.map(\.key)
+	private func parseLookupTable(_ table: [String: Int32], text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
+		table[text.lowercased()]
 			.map(UInt16.init)
 			.map { DEP.Unpacked.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}

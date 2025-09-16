@@ -432,11 +432,11 @@ extension DBS.Unpacked.Arena: Codable {
 				throw DBS.Unpacked.KeyNotFoundError.mismatchedType(for: "arena")
 			}
 			
-			guard let foundEntry = kasekiumNames.first(where: { $0.value.caseInsensitiveEquals(arenaName) }) else {
+			guard let kasekiumID = kasekiumIDs[arenaName.lowercased()] else {
 				throw DBS.Unpacked.KeyNotFoundError.kasekiumNotFound(arenaName)
 			}
 			
-			id = foundEntry.key
+			id = kasekiumID
 		}
 	}
 	
@@ -465,11 +465,11 @@ extension DBS.Unpacked.Music: Codable {
 				throw DBS.Unpacked.KeyNotFoundError.mismatchedType(for: "music")
 			}
 			
-			guard let foundEntry = musicNames.first(where: { $0.value.caseInsensitiveEquals(musicName) }) else {
+			guard let musicID = musicIDs[musicName.lowercased()] else {
 				throw DBS.Unpacked.KeyNotFoundError.musicNotFound(musicName)
 			}
 			
-			id = foundEntry.key
+			id = musicID
 		}
 	}
 	
@@ -498,11 +498,11 @@ extension DBS.Unpacked.Fighter.Vivosaur.ID: Codable {
 				throw DBS.Unpacked.KeyNotFoundError.mismatchedType(for: "vivosaur")
 			}
 			
-			guard let foundEntry = vivosaurNames.first(where: { $0.value.caseInsensitiveEquals(vivosaurName) }) else {
+			guard let vivosaurID = vivosaurIDs[vivosaurName.lowercased()] else {
 				throw DBS.Unpacked.KeyNotFoundError.vivosaurNotFound(vivosaurName)
 			}
 			
-			id = foundEntry.key
+			id = vivosaurID
 		}
 	}
 	

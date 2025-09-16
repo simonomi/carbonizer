@@ -944,3 +944,9 @@ let entityNames: [Int32: String] = [
 	976: "Hornsby", // cha50d head47c
 	977: "Clara", // cha51a head47c
 ]
+
+let entityIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: entityNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

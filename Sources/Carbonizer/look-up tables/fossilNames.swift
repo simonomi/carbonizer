@@ -505,3 +505,9 @@ let fossilNames: [Int32: String] = [
 	728: "Cleaning Practice",
 	729: "Pre-Chapter Level-Up Battle"
 ]
+
+let fossilIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: fossilNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

@@ -620,22 +620,22 @@ extension DEX.Unpacked.ArgumentType {
 	func parse(_ text: Substring) -> Int32? {
 		switch self {
 			case .boolean:         parseBoolean(text)
-			case .entity:          parseLookupTable(entityNames, text: text) ?? parsePrefix(text)
+			case .entity:          entityIDs[text.lowercased()] ?? parsePrefix(text)
 			case .degrees:         parseSuffix(text)
 			case .flag:            parseFlag(text)
 			case .dialogue:        parsePrefix(text)
-			case .effect:          parseLookupTable(effectNames, text: text) ?? parsePrefix(text)
+			case .effect:          effectIDs[text.lowercased()] ?? parsePrefix(text)
 			case .fixedPoint:      parseFixedPoint(text)
-			case .fossil:          parseLookupTable(fossilNames, text: text) ?? parsePrefix(text)
+			case .fossil:          fossilIDs[text.lowercased()] ?? parsePrefix(text)
 			case .frames:          parseSuffix(text)
-			case .image:           parseLookupTable(imageNames, text: text) ?? parsePrefix(text)
+			case .image:           imageIDs[text.lowercased()] ?? parsePrefix(text)
 			case .integer:         Int32(text)
-			case .map:             parseLookupTable(mapNames, text: text) ?? parsePrefix(text)
-			case .movement:        parseLookupTable(movementNames, text: text) ?? parsePrefix(text)
+			case .map:             mapIDs[text.lowercased()] ?? parsePrefix(text)
+			case .movement:        movementIDs[text.lowercased()] ?? parsePrefix(text)
 			case .music:           parsePrefix(text)
-			case .soundEffect:     parsePrefix(text)
+			case .soundEffect:     soundEffectIDs[text.lowercased()] ?? parsePrefix(text)
 			case .unknown:         parseUnknown(text)
-			case .vivosaur:        parseLookupTable(vivosaurNames, text: text) ?? parsePrefix(text)
+			case .vivosaur:        vivosaurIDs[text.lowercased()] ?? parsePrefix(text)
 		}
 	}
 	
@@ -651,12 +651,6 @@ extension DEX.Unpacked.ArgumentType {
 			.split(whereSeparator: \.isWhitespace)
 			.first
 			.flatMap { Int32($0) }
-	}
-	
-	private func parseLookupTable(_ table: [Int32: String], text: Substring) -> Int32? {
-		table
-			.first { $0.value.caseInsensitiveEquals(text) }
-			.map(\.key)
 	}
 	
 	private func parseBoolean(_ text: Substring) -> Int32? {
@@ -694,22 +688,22 @@ extension DEX.Unpacked.ArgumentType {
 	func format(_ number: Int32) -> String {
 		switch self {
 			case .boolean:     formatBoolean(number)
-			case .entity:      "\(entityNames[number] ?? "entity \(number)")"
+			case .entity:      entityNames[number] ?? "entity \(number)"
 			case .degrees:     "\(number) degrees"
 			case .flag:        formatFlag(number)
 			case .dialogue:    "dialogue \(number)"
-			case .effect:      "\(effectNames[number] ?? "effect \(number)")"
+			case .effect:      effectNames[number] ?? "effect \(number)"
 			case .fixedPoint:  formatFixedPoint(number)
-			case .fossil:      "\(fossilNames[number] ?? "fossil \(number)")"
+			case .fossil:      fossilNames[number] ?? "fossil \(number)"
 			case .frames:      "\(number) frames"
-			case .image:       "\(imageNames[number] ?? "image \(number)")"
+			case .image:       imageNames[number] ?? "image \(number)"
 			case .integer:     "\(number)"
-			case .map:         "\(mapNames[number] ?? "map \(number)")"
-			case .movement:    "\(movementNames[number] ?? "movement \(number)")"
+			case .map:         mapNames[number] ?? "map \(number)"
+			case .movement:    movementNames[number] ?? "movement \(number)"
 			case .music:       "music \(number)"
-			case .soundEffect: "sound effect \(number)"
+			case .soundEffect: soundEffectNames[number] ?? "sound effect \(number)"
 			case .unknown:     formatUnknown(number)
-			case .vivosaur:    "\(vivosaurNames[number] ?? "vivosaur \(number)")"
+			case .vivosaur:    vivosaurNames[number] ?? "vivosaur \(number)"
 		}
 	}
 	

@@ -206,3 +206,9 @@ let imageNames: [Int32: String] = [
 	205: "r_comp",
 	206: "gyou_01"
 ]
+
+let imageIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: imageNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

@@ -23,3 +23,9 @@ let movementNames: [Int32: String] = [
 	22: "stand up from back",
 	23: "fall down sideways",
 ]
+
+let movementIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: movementNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

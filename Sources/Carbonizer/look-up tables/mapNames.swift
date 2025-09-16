@@ -120,3 +120,9 @@ let mapNames: [Int32: String] = [
 	122: "Fossil Center Warehouse (Time Machine)",
 	123: "Buggy Fossil Stadium 10"
 ]
+
+let mapIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: mapNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

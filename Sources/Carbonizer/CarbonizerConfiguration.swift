@@ -8,7 +8,7 @@ struct CarbonizerConfiguration {
 	var overwriteOutput: Bool
 	var showProgress: Bool
 	var keepWindowOpen: KeepWindowOpen
-	var useColor: Bool
+	var useColor: Bool // TODO: use environment variable (COLORTERM is nil on windows tho)
 	var dexCommandList: DEXCommandList
 	var externalMetadata: Bool
 	

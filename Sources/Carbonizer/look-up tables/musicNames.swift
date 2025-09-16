@@ -48,3 +48,9 @@ let musicNames: [Int32: String] = [
 	1303: "Bullwort Battle Theme",
 	1304: "Dynal Battle Theme",
 ]
+
+let musicIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: musicNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

@@ -7,3 +7,9 @@ let doorNames: [Int32: String] = [
 	421: "greenhorn plains above gate area",
 	796: "bottom right elevator in hotel",
 ]
+
+let doorIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: doorNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

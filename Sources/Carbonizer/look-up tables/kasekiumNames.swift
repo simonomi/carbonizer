@@ -15,3 +15,9 @@ let kasekiumNames: [Int32: String] = [
 	13: "Pirate Ship",
 	14: "Mine Tunnels"
 ]
+
+let kasekiumIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: kasekiumNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

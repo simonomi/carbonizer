@@ -45,3 +45,9 @@ let soundEffectNames: [Int32: String] = [
 	1294: "BB Girl Mask running",
 	1295: "Dinaurian Mask running",
 ]
+
+let soundEffectIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: soundEffectNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)

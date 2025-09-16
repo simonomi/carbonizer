@@ -9,6 +9,10 @@ import Foundation
 //   - the CLI configuration (logProgress, input/output paths, post-processors...)
 //   - the library configuration (file types, overwrite output, external metadata, filters...)
 
+// how should the carbonizer library should work
+// - input file path, output folder, overwrite, ff1/ffc, external metadata, file types, filters, monitoring, post-processors (extensions...? new name)
+// - log handler, errors (protocol)
+
 @main
 struct Carbonizer: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
@@ -181,6 +185,7 @@ struct Carbonizer: AsyncParsableCommand {
 				configuration.log("Running post-processors")
 				
 				// TODO: make a new post-processing api that allows passing arguments? for things like dialogue labelling (and caching ripper results)
+				// some kind of 'environment' that can be read/written to?
 				for postProcessorName in configuration.experimental.postProcessors {
 					switch postProcessorName {
 						case "3clFinder":

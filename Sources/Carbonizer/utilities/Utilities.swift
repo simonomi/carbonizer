@@ -236,12 +236,6 @@ extension String {
 	}
 }
 
-extension StringProtocol {
-	func caseInsensitiveEquals(_ other: some StringProtocol) -> Bool {
-		caseInsensitiveCompare(other) == .orderedSame
-	}
-}
-
 extension Array where Element: Comparable {
 	func isSorted() -> Bool {
 		// this might be super slow idk

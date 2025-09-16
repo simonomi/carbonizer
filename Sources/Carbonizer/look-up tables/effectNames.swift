@@ -23,3 +23,9 @@ let effectNames: [Int32: String] = [
 	22: "ellipses right",          // mugon2
 	23: "light bulb right"         // denkyuu2
 ]
+
+let effectIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: effectNames
+		.mapValues { $0.lowercased() }
+		.map { ($1, $0) }
+)
