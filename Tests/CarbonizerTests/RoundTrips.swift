@@ -52,6 +52,7 @@ struct RoundTrips {
 			("battle_attack_type", .packed),
 			("btl_kp_defs", .packed),
 			("senryu_defs", .packed),
+			("keyitem_defs", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
@@ -59,7 +60,7 @@ struct RoundTrips {
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
 		configurationWithFileTypes.overwriteOutput = true
-//		configurationWithFileTypes.fileTypes.insert("DAL")
+		configurationWithFileTypes.fileTypes.insert("KIL")
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		
