@@ -1,3 +1,4 @@
+// TODO: make overall ANSI enum and some kind of protocol to simplify these into one
 enum ANSIFontEffect: Int {
 	case normal = 0
 	case bold = 1

@@ -134,10 +134,7 @@ extension MAR.Unpacked: FileSystemObject {
 		binary: MAR.Packed.Binary,
 		configuration: CarbonizerConfiguration
 	) throws {
-		logProgress(
-			"Decompressing", name,
-			configuration: configuration
-		)
+		configuration.log("Decompressing", name)
 		self.name = name
 		
 		do {

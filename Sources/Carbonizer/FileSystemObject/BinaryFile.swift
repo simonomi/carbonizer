@@ -31,6 +31,7 @@ extension BinaryFile: FileSystemObject {
 		with configuration: CarbonizerConfiguration
 	) throws {
 		let path = savePath(in: folder, with: configuration)
+		configuration.log("Writing", path.path(percentEncoded: false))
 		
 		do {
 			if !folder.exists() {

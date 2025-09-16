@@ -1,17 +1,13 @@
 import ArgumentParser
 import Foundation
 
-// TODO: define all logging/output functions on configuration,
-// to be defined by the user of the library
-// use an asyncstream? 👀
-
 struct CarbonizerConfiguration {
 	var compressionMode: CompressionMode
 	var inputFiles: [String]
 	var outputFolder: String?
 	var overwriteOutput: Bool
 	var showProgress: Bool
-	var keepWindowOpen: KeepWindowOpen // TODO: detect whether running interactively?
+	var keepWindowOpen: KeepWindowOpen
 	var useColor: Bool
 	var dexCommandList: DEXCommandList
 	var externalMetadata: Bool
@@ -24,6 +20,8 @@ struct CarbonizerConfiguration {
 	var experimental: ExperimentalOptions
 	
 	var cache: Cache
+	
+	var logHandler: (@Sendable (String) -> Void)? = nil
 	
 	struct ExperimentalOptions {
 		var hotReloading: Bool
@@ -116,6 +114,16 @@ struct CarbonizerConfiguration {
 	
 	enum DEXCommandList: String, Decodable {
 		case ff1, ffc, none
+	}
+	
+	func log(_ items: Any...) {
+		guard let logHandler else { return }
+		
+		logHandler(
+			items
+				.map { String(describing: $0) }
+				.joined(separator: " ")
+		)
 	}
 	
 	fileprivate static var allFileTypes: [String: any ProprietaryFileData.Type] {[

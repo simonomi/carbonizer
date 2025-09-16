@@ -8,6 +8,8 @@ func makeFile(
 	let metadata = try Metadata(forItemAt: path)
 	if metadata?.skipFile == true { return nil }
 	
+	configuration.log("Reading", path.path(percentEncoded: false))
+	
 	let name = path.lastPathComponent
 	let data = Datastream(try Data(contentsOf: path))
 	

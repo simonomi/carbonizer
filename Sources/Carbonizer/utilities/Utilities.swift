@@ -135,18 +135,6 @@ func hex<T: BinaryInteger & SignedNumeric>(_ value: T) -> String {
 	}
 }
 
-func logProgress(_ items: Any..., configuration: CarbonizerConfiguration) {
-	guard configuration.showProgress else { return }
-	
-	let message = items
-		.map { String(describing: $0) }
-		.joined(separator: " ")
-	
-	print(message + "...\(.clearToEndOfLine)", terminator: "\r")
-	
-	fflush(stdout)
-}
-
 func splitFileName(_ name: String) -> (name: String, fileExtensions: String) {
 	let split = name.split(separator: ".", maxSplits: 1)
 	if split.count == 2 {
@@ -243,8 +231,8 @@ extension String {
 	}
 	
 	func removingANSICodes() -> Self {
-		// this only removes color and clear-line codes, since those are the only ones carbonizer uses
-		replacing(/\x{001B}\[[0-9;]+[mK]/, with: "")
+		// this only removes the codes carbonizer uses
+		replacing(/\x{001B}\[[0-9;]+[mKG]/, with: "")
 	}
 }
 

@@ -5,6 +5,9 @@ import Foundation
 // - add a .carbonizer file or smthn to contain the version number
 //   - if trying to pack from too old a version (semver or smthn), give an error
 //   - also the list of file types, so if some file types were extracted they need to be repacked
+// - split the configuration into two parts
+//   - the CLI configuration (logProgress, input/output paths, post-processors...)
+//   - the library configuration (file types, overwrite output, external metadata, filters...)
 
 @main
 struct Carbonizer: AsyncParsableCommand {
@@ -39,7 +42,7 @@ struct Carbonizer: AsyncParsableCommand {
 			.appending(component: "config.\(configurationFileExtension)") ?? URL(filePath: "config.\(configurationFileExtension)")
 #endif
 		
-		let configuration: CarbonizerConfiguration
+		var configuration: CarbonizerConfiguration
 		do {
 			configuration = try CarbonizerConfiguration(contentsOf: configurationPath)
 		} catch let error as DecodingError {
@@ -50,6 +53,14 @@ struct Carbonizer: AsyncParsableCommand {
 			print("\(.bold)\(configurationPath.path(percentEncoded: false))\(.normal): \(error)")
 			waitForInput()
 			return
+		}
+		
+		if configuration.showProgress {
+			configuration.logHandler = {
+				// TODO: do these ansi codes work on windows?
+				print($0 + "...\(.clearToEndOfLine)\(.moveToStartOfLine)", terminator: "")
+				fflush(stdout)
+			}
 		}
 		
 		do {
@@ -88,14 +99,14 @@ struct Carbonizer: AsyncParsableCommand {
 		let compressionMode = compressionMode ?? configuration.compressionMode
 		
 		for filePath in filePaths {
-			print("Reading \(filePath.path(percentEncoded: false))...")
+			print("Reading", filePath.path(percentEncoded: false))
 			
 #if !IN_CI
 			let readStart = Date.now
 #endif
 			
 			guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
-				print("Skipping file...")
+				print("Skipping", filePath.path(percentEncoded: false))
 				continue
 			}
 			
@@ -167,10 +178,7 @@ struct Carbonizer: AsyncParsableCommand {
 			}
 			
 			if action == .unpack {
-				logProgress(
-					"Running post-processors",
-					configuration: configuration
-				)
+				configuration.log("Running post-processors")
 				
 				// TODO: make a new post-processing api that allows passing arguments? for things like dialogue labelling (and caching ripper results)
 				for postProcessorName in configuration.experimental.postProcessors {
@@ -251,10 +259,7 @@ struct Carbonizer: AsyncParsableCommand {
 			
 			let savePath = processedFile.savePath(in: outputFolder, with: configuration)
 			
-			logProgress(
-				"Writing to \(savePath.path(percentEncoded: false))",
-				configuration: configuration
-			)
+			print("Writing to", savePath.path(percentEncoded: false))
 			
 #if !IN_CI
 			let removeStart = Date.now
