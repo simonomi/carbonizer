@@ -36,14 +36,23 @@ func exportDEXCommands() throws {
 		var command: String
 	}
 	
-	let result = DEX.Unpacked.ff1Commands
+	let ff1Result = DEX.Unpacked.ff1Commands
 		.sorted(by: \.key)
 		.map { Command(id: $0, command: $1.formatted()) }
 	
-	let outputPath = URL(filePath: "/tmp/commands.json")
-	try JSONEncoder().encode(result).write(to: outputPath)
+	let ff1OutputPath = URL(filePath: "/tmp/ff1Commands.json")
+	try JSONEncoder().encode(ff1Result).write(to: ff1OutputPath)
 	
-	print("\(.cyan)DEX commands written to \(outputPath.path(percentEncoded: false))\(.normal)")
+	print("\(.cyan)ff1 DEX commands written to \(ff1OutputPath.path(percentEncoded: false))\(.normal)")
+	
+	let ffcResult = DEX.Unpacked.ffcCommands
+		.sorted(by: \.key)
+		.map { Command(id: $0, command: $1.formatted()) }
+	
+	let ffcOutputPath = URL(filePath: "/tmp/ffcCommands.json")
+	try JSONEncoder().encode(ffcResult).write(to: ffcOutputPath)
+	
+	print("\(.cyan)ffc DEX commands written to \(ffcOutputPath.path(percentEncoded: false))\(.normal)")
 }
 
 extension DEX.Unpacked.CommandDefinition {
