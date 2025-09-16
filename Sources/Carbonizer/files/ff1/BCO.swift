@@ -1,5 +1,6 @@
 import BinaryParser
 
+// ff1-only
 enum BCO {
 	@BinaryConvertible
 	struct Packed {

@@ -1,5 +1,6 @@
 import BinaryParser
 
+// ff1-only
 // 3CL
 enum TCL {
 	@BinaryConvertible
