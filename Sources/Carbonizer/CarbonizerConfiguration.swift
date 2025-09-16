@@ -31,6 +31,7 @@ struct CarbonizerConfiguration {
 		var dexBlockLabeller: Bool
 		var dbsNameLabeller: Bool
 		var hmlNameLabeller: Bool
+		var keyItemLabeller: Bool
 		var mapLabeller: Bool
 	}
 	
@@ -192,8 +193,8 @@ struct CarbonizerConfiguration {
 			// basically required for anything useful: NDS, MAR
 			//
 			// both ff1/ffc: _match, DEX, DMS, GRD, MMS 
-			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DMG, DSL, DTX, ECS, HML, KPS, MAP, MM3, MPM, RLS, SHP
-			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DMG, DSL, DTX, ECS, HML, KIL, KPS, MAP, MM3, MPM, RLS, SHP
+			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
 			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
@@ -243,6 +244,11 @@ struct CarbonizerConfiguration {
 				//
 				// make sure to enable both the HML and DTX file types or nothing will happen
 				"hmlNameLabeller": false,
+				
+				// adds labels for the text in `etc/keyitem_defs`
+				//
+				// make sure to enable both the KIL and DTX file types or nothing will happen
+				"keyItemLabeller": false,
 				
 				// adds labels for the names of maps in MAP files (`map/m/` folder)
 				//
@@ -314,7 +320,7 @@ extension CarbonizerConfiguration: Decodable {
 
 extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 	enum CodingKeys: CodingKey {
-		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, hmlNameLabeller, mapLabeller
+		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -337,6 +343,8 @@ extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 			fallback.dbsNameLabeller
 		hmlNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .hmlNameLabeller) ??
 			fallback.hmlNameLabeller
+		keyItemLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .keyItemLabeller) ??
+			fallback.keyItemLabeller
 		mapLabeller =         try container.decodeIfPresent(Bool.self,     forKey: .mapLabeller) ??
 			fallback.mapLabeller
 	}

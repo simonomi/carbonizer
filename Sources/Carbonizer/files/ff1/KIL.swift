@@ -15,8 +15,8 @@ enum KIL {
 		
 		@BinaryConvertible
 		struct KeyItem {
-			var index1: UInt16
-			var index2: UInt16
+			var nameIndex: UInt16
+			var descriptionIndex: UInt16
 			var unknown: UInt32 = 0
 		}
 	}
@@ -25,12 +25,11 @@ enum KIL {
 		var keyItems: [KeyItem?]
 		
 		struct KeyItem: Codable {
-			var index1: UInt16
-			var index2: UInt16
+			var nameIndex: UInt16
+			var descriptionIndex: UInt16
 			
-			// TODO: kilLabeller
-			var _label1: String?
-			var _label2: String?
+			var _name: String?
+			var _description: String?
 		}
 	}
 }
@@ -54,8 +53,8 @@ extension KIL.Packed: ProprietaryFileData {
 
 extension KIL.Packed.KeyItem {
 	init(_ unpacked: KIL.Unpacked.KeyItem?) {
-		index1 = unpacked?.index1 ?? 0
-		index2 = unpacked?.index2 ?? 0
+		nameIndex = unpacked?.nameIndex ?? 0
+		descriptionIndex = unpacked?.descriptionIndex ?? 0
 	}
 }
 
@@ -78,10 +77,10 @@ extension KIL.Unpacked: ProprietaryFileData {
 
 extension KIL.Unpacked.KeyItem {
 	init?(_ packed: KIL.Packed.KeyItem) {
-		guard packed.index1 != 0, packed.index2 != 0 else { return nil }
+		guard packed.nameIndex != 0, packed.descriptionIndex != 0 else { return nil }
 		
-		index1 = packed.index1
-		index2 = packed.index2
+		nameIndex = packed.nameIndex
+		descriptionIndex = packed.descriptionIndex
 	}
 }
 

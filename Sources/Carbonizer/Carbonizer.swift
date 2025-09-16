@@ -230,7 +230,7 @@ struct Carbonizer: AsyncParsableCommand {
 				}
 				
 				if configuration.experimental.dbsNameLabeller {
-					let text = dtxRipper(processedFile)
+					let text = try dtxRipper(processedFile)
 					processedFile = dbsNameLabeller(
 						processedFile,
 						text: text,
@@ -239,7 +239,7 @@ struct Carbonizer: AsyncParsableCommand {
 				}
 				
 				if configuration.experimental.hmlNameLabeller {
-					let text = dtxRipper(processedFile)
+					let text = try dtxRipper(processedFile)
 					processedFile = hmlNameLabeller(
 						processedFile,
 						text: text,
@@ -247,8 +247,17 @@ struct Carbonizer: AsyncParsableCommand {
 					)
 				}
 				
+				if configuration.experimental.keyItemLabeller {
+					let text = try dtxRipper(processedFile)
+					processedFile = keyItemLabeller(
+						processedFile,
+						text: text,
+						configuration: configuration
+					)
+				}
+				
 				if configuration.experimental.mapLabeller {
-					let text = dtxRipper(processedFile)
+					let text = try dtxRipper(processedFile)
 					processedFile = mapLabeller(
 						processedFile,
 						text: text,
