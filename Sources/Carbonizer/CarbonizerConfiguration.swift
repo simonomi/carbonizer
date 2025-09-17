@@ -127,6 +127,12 @@ struct CarbonizerConfiguration {
 		)
 	}
 	
+	// when adding a new stable filetype:
+	// - add to this list
+	// - add to config (test both ff1/ffc)
+	// - add round trip tests
+	// - test entire rom ff1 round trip
+	// - test entire rom ffc round trip
 	fileprivate static var allFileTypes: [String: any ProprietaryFileData.Type] {[
 		"3BA": TBA.Unpacked.self,
 		"3CL": TCL.Unpacked.self,
@@ -192,8 +198,8 @@ struct CarbonizerConfiguration {
 			
 			// basically required for anything useful: NDS, MAR
 			//
-			// both ff1/ffc: _match, DEX, DMS, DTX, GRD, KIL, MMS 
-			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DMG, DSL, ECS, HML, KPS, MAP, MM3, MPM, RLS, SHP
+			// both ff1/ffc: _match, DEX, DMS, DTX, GRD, KIL, MMS, MPM 
+			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DMG, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
 			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,

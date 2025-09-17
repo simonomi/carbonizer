@@ -34,6 +34,9 @@ enum MPM {
 		@If(\Self.bgMapTableNameOffset, is: .notEqualTo(0))
 		@Offset(givenBy: \Self.bgMapTableNameOffset)
 		var bgMapTableName: String?
+		
+		@FourByteAlign
+		var fourByteAlign: ()
 	}
 	
 	struct Unpacked {
@@ -92,9 +95,9 @@ extension MPM.Packed: ProprietaryFileData {
 		bitmapTableName = unpacked.bitmap.tableName
 		bgMapTableName = unpacked.bgMap?.tableName
 		
-		bitmapTableNameOffset = paletteTableNameOffset + UInt32(bitmapTableName.utf8CString.count)
+		bitmapTableNameOffset = paletteTableNameOffset + UInt32(bitmapTableName.utf8CString.count.roundedUpToTheNearest(4))
 		bgMapTableNameOffset = bgMapTableName.map { [bitmapTableNameOffset] in
-			bitmapTableNameOffset + UInt32($0.utf8CString.count)
+			bitmapTableNameOffset + UInt32($0.utf8CString.count.roundedUpToTheNearest(4))
 		} ?? 0
 	}
 }
