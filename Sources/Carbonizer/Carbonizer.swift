@@ -20,7 +20,6 @@ import Foundation
 // - DEP
 // - DMG
 // - GRD
-// - HML
 
 @main
 struct Carbonizer: AsyncParsableCommand {

@@ -30,6 +30,9 @@ enum HML {
 			
 			@Offset(givenBy: \Self.modelNameOffset)
 			var modelName: String
+			
+			@FourByteAlign
+			var fourByteAlign: ()
 		}
 	}
 	
