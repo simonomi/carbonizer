@@ -56,6 +56,7 @@ struct RoundTrips {
 			("keyitem_defs", .packed),
 			("image all_map", .packed),
 			("headmask_defs", .packed),
+			("msg_1007", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {

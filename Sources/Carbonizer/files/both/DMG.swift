@@ -21,6 +21,9 @@ enum DMG {
 			var stringOffset: UInt32 = 0x8
 			@Offset(givenBy: \Self.stringOffset)
 			var string: String
+			
+			@FourByteAlign
+			var fourByteAlign: ()
 		}
 	}
 	

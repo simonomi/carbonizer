@@ -18,7 +18,6 @@ import Foundation
 // file types that aren't in-out binary perfect
 // - BBG
 // - DEP
-// - DMG
 // - GRD
 
 @main
