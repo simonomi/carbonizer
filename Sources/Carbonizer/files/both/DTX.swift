@@ -12,6 +12,9 @@ enum DTX {
 		var indices: [UInt32]
 		@Offsets(givenBy: \Self.indices)
 		var strings: [String]
+		
+		@FourByteAlign
+		var fourByteAlign: ()
 	}
 	
 	struct Unpacked {

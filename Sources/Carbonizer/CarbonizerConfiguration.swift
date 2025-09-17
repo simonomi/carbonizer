@@ -192,8 +192,8 @@ struct CarbonizerConfiguration {
 			
 			// basically required for anything useful: NDS, MAR
 			//
-			// both ff1/ffc: _match, DEX, DMS, GRD, MMS 
-			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DMG, DSL, DTX, ECS, HML, KIL, KPS, MAP, MM3, MPM, RLS, SHP
+			// both ff1/ffc: _match, DEX, DMS, DTX, GRD, KIL, MMS 
+			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DMG, DSL, ECS, HML, KPS, MAP, MM3, MPM, RLS, SHP
 			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,

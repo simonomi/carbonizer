@@ -15,14 +15,15 @@ struct RoundTrips {
 	@Test(
 		arguments: [
 			// without compression, these will always fail (they're MARs)
-//			("japanese", .packed),
-//			("map c 0004", .packed),
-//			("map e 0048", .packed),
-//			("map g 0047", .packed),
-//			("e0046", .packed),
-//			("episode 0002", .packed),
-//			("msg_0911", .packed),
-//			("msg_1007", .packed),
+//			("japanese mar", .packed),
+//			("map c 0004 mar", .packed),
+//			("map e 0048 mar", .packed),
+//			("map g 0047 mar", .packed),
+//			("e0046 mar", .packed),
+//			("episode 0002 mar", .packed),
+//			("msg_0911 mar", .packed),
+//			("msg_1007 mar", .packed),
+			("japanese", .packed),
 			("arcdin 3cl", .packed),
 			("excavate_defs", .packed),
 			("shop 0001", .packed),
