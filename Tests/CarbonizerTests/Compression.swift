@@ -17,7 +17,7 @@ struct Compression {
 			(.runLength, "map g 0047 - decompressed", "map g 0047 - run length"),
 			(.runLength, "lorem ipsum - decompressed", "lorem ipsum - run length"),
 			(.lzss, "lorem ipsum - decompressed", "lorem ipsum - lzss"),
-//			(.huffman, "lorem ipsum - decompressed", "lorem ipsum - huffman"),
+//			(.huffman, "lorem ipsum - decompressed", "lorem ipsum - huffman"), // doesnt exist yet
 //			(.huffman, "e0046 - lzss", "e0046 - huffman"), // 4-bit
 			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
 //			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"), // 8-bit
@@ -29,7 +29,7 @@ struct Compression {
 		
 //		let start = Date.now
 		
-		// lzss is *notably* slower, ~0.3–3s compared to ~0.001–0.01s
+		// lzss is *notably* slower, ~0.3–3s compared to ~0.001–0.01s (in debug mode)
 		// thats 300x!!
 		let compressedInput = type.compress(inputData, compressionInfo: nil)
 		
@@ -77,6 +77,7 @@ struct Compression {
 //		let start = Date.now
 		
 		let (decompressedInput, _) = try type.decompress(inputData)
+//		print(expectedFileName)
 		
 //		print("\(.yellow)decompress", type, start.timeElapsed, "\(.normal)")
 		
