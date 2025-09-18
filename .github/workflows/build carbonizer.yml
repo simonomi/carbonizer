@@ -17,7 +17,7 @@ jobs:
     - name: Set up Swift
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.1"
+        swift-version: "6.2"
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build
@@ -39,8 +39,8 @@ jobs:
     - name: Set up Swift
       uses: compnerd/gha-setup-swift@main
       with:
-        swift-version: swift-6.1.2-release
-        swift-build: 6.1.2-RELEASE
+        swift-version: swift-6.2-release
+        swift-build: 6.2-RELEASE
     - name: print path
       run: dir "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\$(swift --version | Select-String -Pattern '\d+\.\d+(\.\d+)?' | ForEach-Object { $_.Matches[0].Value })\\usr\\bin"
     - name: Checkout
@@ -73,7 +73,7 @@ jobs:
       id: swift-setup
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.1"
+        swift-version: "6.2"
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build
@@ -97,7 +97,7 @@ jobs:
       id: swift-setup
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.1"
+        swift-version: "6.2"
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build
