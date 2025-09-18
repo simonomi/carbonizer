@@ -60,13 +60,13 @@ extension HML.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> HML.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> HML.Unpacked {
 		HML.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: HML.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: HML.Unpacked, configuration: Carbonizer.Configuration) {
 		masks = unpacked.masks.map(Mask.init)
 		maskCount = UInt32(masks.count)
 		maskOffsets = makeOffsets(
@@ -100,13 +100,13 @@ extension HML.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> HML.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> HML.Packed {
 		HML.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: HML.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: HML.Packed, configuration: Carbonizer.Configuration) {
 		masks = packed.masks.map(Mask.init)
 	}
 }

@@ -1,4 +1,4 @@
-struct Glob: Decodable {
+public struct Glob: Decodable, Sendable {
 	var components: [Component]
 	
 	enum Component {
@@ -64,7 +64,7 @@ struct Glob: Decodable {
 		components = try raw.split(separator: "/").map(Component.init)
 	}
 	
-	init(from decoder: any Decoder) throws {
+	public init(from decoder: any Decoder) throws {
 		let container = try decoder.singleValueContainer()
 		let raw = try container.decode(String.self)
 		self = try Self(raw: raw)

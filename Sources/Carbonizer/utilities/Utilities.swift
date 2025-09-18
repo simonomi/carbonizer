@@ -229,11 +229,6 @@ extension String {
 			self = String(number)
 		}
 	}
-	
-	func removingANSICodes() -> Self {
-		// this only removes the codes carbonizer uses
-		replacing(/\x{001B}\[[0-9;]+[mKG]/, with: "")
-	}
 }
 
 extension Array where Element: Comparable {
@@ -320,7 +315,7 @@ extension URL {
 #endif
 	}
 	
-	func exists() -> Bool {
+	public func exists() -> Bool {
 		FileManager.default.fileExists(atPath: path(percentEncoded: false))
 	}
 	
@@ -366,41 +361,6 @@ extension FileHandle: @retroactive TextOutputStream {
 func waitForInput() {
 	print("Press Enter to continue...", terminator: "")
 	let _ = readLine()
-}
-
-extension [any CodingKey] {
-	func formatted() -> String {
-		reduce("") { partialResult, key in
-			if partialResult.isEmpty {
-				if let index = key.intValue {
-					"[\(index)]"
-				} else {
-					key.stringValue
-				}
-			} else if let index = key.intValue {
-				"\(partialResult)[\(index)]"
-			} else {
-				"\(partialResult).\(key.stringValue)"
-			}
-		}
-	}
-}
-
-extension DecodingError {
-	func configurationFormatting(path: URL) -> String {
-		switch self {
-			case .typeMismatch(let expectedType, let context):
-				let fullKeyPath = context.codingPath
-				
-				return "\(.bold)\(path.path(percentEncoded: false))\(.normal)>\(.bold)\(fullKeyPath.formatted())\(.normal): invalid type, expected \(.green)\(expectedType)\(.normal)"
-			case .keyNotFound(let key, let context):
-				let fullKeyPath = context.codingPath + [key]
-				
-				return "\(.bold)\(path.path(percentEncoded: false))\(.normal)>\(.bold)\(fullKeyPath.formatted())\(.normal): missing value for option"
-			default:
-				return "\(.bold)\(path.path(percentEncoded: false))\(.normal): \(self)"
-		}
-	}
 }
 
 func extractAngleBrackets(from text: Substring) -> ([Substring], [String])? {
@@ -514,17 +474,4 @@ extension DefaultStringInterpolation {
 		precondition(number >= 0)
 		appendInterpolation(String(number).padded(toLength: digits, with: "0"))
 	}
-}
-
-// from https://github.com/vapor/console-kit/blob/4.15.2/Sources/ConsoleKitTerminal/Terminal/Terminal.swift#L142
-func terminalSize() -> (width: Int, height: Int) {
-#if os(Windows)
-	var csbi = CONSOLE_SCREEN_BUFFER_INFO()
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)
-	return (Int(csbi.dwSize.X), Int(csbi.dwSize.Y))
-#else
-	var w = winsize()
-	_ = ioctl(STDOUT_FILENO, UInt(TIOCGWINSZ), &w);
-	return (Int(w.ws_col), Int(w.ws_row))
-#endif
 }

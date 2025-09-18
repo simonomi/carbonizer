@@ -1,30 +1,30 @@
 import Foundation
 
-extension Carbonizer {
-	func monitor(with configuration: CarbonizerConfiguration) async throws {
+public extension Carbonizer {
+	static func monitor(
+		_ filePath: URL,
+		into outputFolder: URL,
+		configuration: Configuration
+	) async throws {
 #if os(macOS)
-		if filePaths.count > 1 {
-			print("Note: more than one input file provided, only monitoring the first")
-		}
-		
 		guard configuration.overwriteOutput else {
 			print("\(.red)overwriteOutput should be on\(.normal)")
 			fatalError()
 		}
 		
-		let inputPath = filePaths.first!
-		
-		guard var fileData = try fileSystemObject(contentsOf: inputPath, configuration: configuration) else {
-			print("\(.red, .bold)Error:\(.normal) \(.bold)could not make FileSystemObject from '\(inputPath.path(percentEncoded: false))'\(.normal)")
-			if configuration.keepWindowOpen.isTrueOnError {
-				waitForInput()
-			}
-			return
+		guard var fileData = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
+			// TODO: throw
+			todo()
+//			print("\(.red, .bold)Error:\(.normal) \(.bold)could not make FileSystemObject from '\(filePath.path(percentEncoded: false))'\(.normal)")
+//			if configuration.keepWindowOpen.isTrueOnError {
+//				waitForInput()
+//			}
+//			return
 		}
 		
-		let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? inputPath.deletingLastPathComponent()
+		let outputFolder = outputFolder
 		
-		let monitor = try monitorFiles(in: inputPath) {
+		try monitorFiles(in: filePath) {
 			let components = $0
 				.deletingPathExtension()
 				.deletingPathExtension()
@@ -43,10 +43,8 @@ extension Carbonizer {
 		}
 		
 		print("ready!")
-		try await Task.sleep(for: .seconds(1_000_000))
-		
-		monitor.cancel()
 #else
+		// TODO: throw
 		var standardError = FileHandle.standardError
 		print("\(.red, .bold)Error:\(.normal) \(.bold)Hot reloading is only available on macOS\(.normal)", terminator: "\n\n", to: &standardError)
 		if configuration.keepWindowOpen.isTrueOnError {

@@ -192,13 +192,13 @@ extension DAL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> DAL.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> DAL.Unpacked {
 		DAL.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DAL.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: DAL.Unpacked, configuration: Carbonizer.Configuration) {
 		attacks = unpacked.attacks.map(Attack.init)
 		indicesCount = UInt32(attacks.count)
 		indices = makeOffsets(
@@ -447,13 +447,13 @@ extension DAL.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> DAL.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> DAL.Packed {
 		DAL.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DAL.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: DAL.Packed, configuration: Carbonizer.Configuration) {
 		attacks = packed.attacks.map(Attack.init)
 	}
 }

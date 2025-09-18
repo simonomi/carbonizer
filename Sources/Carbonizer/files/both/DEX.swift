@@ -250,7 +250,7 @@ enum DEX {
 			107: "unowned dialogue \(0, .dialogue)",
 		]
 		
-		static func knownCommands(for configuration: CarbonizerConfiguration) -> [UInt32: CommandDefinition] {
+		static func knownCommands(for configuration: Carbonizer.Configuration) -> [UInt32: CommandDefinition] {
 			switch configuration.dexCommandList {
 				case .ff1: ff1Commands
 				case .ffc: ffcCommands
@@ -278,13 +278,13 @@ extension DEX.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> DEX.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> DEX.Unpacked {
 		DEX.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DEX.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: DEX.Unpacked, configuration: Carbonizer.Configuration) {
 		numberOfBlocks = UInt32(unpacked.commands.count)
 		
 		blocks = unpacked.commands.map(Block.init)
@@ -341,19 +341,19 @@ extension DEX.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> DEX.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> DEX.Packed {
 		DEX.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DEX.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: DEX.Packed, configuration: Carbonizer.Configuration) {
 		commands = packed.blocks
 			.map(\.commands)
 			.recursiveMap { Command($0, configuration: configuration) }
 	}
 	
-	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
+	init(_ data: Datastream, configuration: Carbonizer.Configuration) throws {
 		let fileLength = data.bytes.endIndex - data.offset
 		let string = try data.read(String.self, exactLength: fileLength)
 		
@@ -462,7 +462,7 @@ extension DEX.Unpacked.CommandDefinition: ExpressibleByStringInterpolation {
 }
 
 extension DEX.Unpacked.Command {
-	init(_ binaryCommand: DEX.Packed.Block.Command, configuration: CarbonizerConfiguration) {
+	init(_ binaryCommand: DEX.Packed.Block.Command, configuration: Carbonizer.Configuration) {
 		if let definition = DEX.Unpacked.knownCommands(for: configuration)[binaryCommand.type] {
 			// TODO: special case for 181?
 			
@@ -485,7 +485,7 @@ extension DEX.Unpacked.Command {
 		}
 	}
 	
-	init(_ text: Substring, configuration: CarbonizerConfiguration) throws(DEX.Unpacked.Command.ParseError) {
+	init(_ text: Substring, configuration: Carbonizer.Configuration) throws(DEX.Unpacked.Command.ParseError) {
 		if text.hasPrefix("// ") {
 			self = .comment(String(text.dropFirst(3)))
 			return

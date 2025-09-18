@@ -1,4 +1,4 @@
-struct ANSIMoveToColumn {
+public struct ANSIMoveToColumn: Sendable {
 	var column: Int
 	
 	static let moveToStartOfLine = Self(column: 1)
@@ -8,7 +8,7 @@ struct ANSIMoveToColumn {
 	}
 }
 
-extension DefaultStringInterpolation {
+public extension DefaultStringInterpolation {
 	mutating func appendInterpolation(_ moveToColumn: ANSIMoveToColumn) {
 		appendInterpolation("\u{001B}[\(moveToColumn.column)G")
 	}

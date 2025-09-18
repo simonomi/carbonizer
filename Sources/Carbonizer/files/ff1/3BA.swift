@@ -24,13 +24,13 @@ extension TBA.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> TBA.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> TBA.Unpacked {
 		TBA.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: TBA.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: TBA.Unpacked, configuration: Carbonizer.Configuration) {
 		count = UInt32(unpacked.data.count)
 		words = unpacked.data
 	}
@@ -42,13 +42,13 @@ extension TBA.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> TBA.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> TBA.Packed {
 		TBA.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: TBA.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: TBA.Packed, configuration: Carbonizer.Configuration) {
 		data = packed.words
 	}
 }

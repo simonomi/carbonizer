@@ -5,8 +5,8 @@ import Foundation
 
 @Test
 func defaultConfigurationIsValid() throws {
-	_ = try CarbonizerConfiguration(
-		decoding: CarbonizerConfiguration.defaultConfigurationString
+	_ = try Carbonizer.Configuration(
+		decoding: Carbonizer.Configuration.defaultConfigurationString
 	)
 }
 
@@ -78,7 +78,7 @@ struct Globs {
 	@Test
 	func onlyUnpackConfiguration() throws {
 		let rawConfiguration = #"{ "onlyUnpack": ["model/fieldchar/**"] }"#.data(using: .utf8)!
-		let configuration = try JSONDecoder().decode(CarbonizerConfiguration.self, from: rawConfiguration)
+		let configuration = try JSONDecoder().decode(Carbonizer.Configuration.self, from: rawConfiguration)
 		
 		#expect(configuration.shouldUnpack(["model", "fieldchar", "cha01a_01"]))
 	}

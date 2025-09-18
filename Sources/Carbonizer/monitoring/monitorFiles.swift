@@ -5,14 +5,9 @@ typealias EventHandler = @MainActor (URL) async throws -> Void
 
 struct PathMonitor {
 	var sources: [any DispatchSourceFileSystemObject]
-	
-	func cancel() {
-		for source in sources {
-			source.cancel()
-		}
-	}
 }
 
+@discardableResult
 func monitorFiles(
 	in path: URL,
 	with eventHandler: sending @escaping @isolated(any) EventHandler

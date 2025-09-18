@@ -69,7 +69,7 @@ struct RoundTrips {
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 		let inputFilePath = filePath(for: fileName)
 		
-		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
+		var configurationWithFileTypes: Carbonizer.Configuration = .defaultConfiguration
 		configurationWithFileTypes.overwriteOutput = true
 		configurationWithFileTypes.fileTypes.insert("DML")
 		

@@ -36,7 +36,7 @@ enum MCM {
 
 // MARK: packed
 extension MCM.Packed {
-	init(_ unpacked: MCM.Unpacked, configuration: CarbonizerConfiguration) {
+	init(_ unpacked: MCM.Unpacked, configuration: Carbonizer.Configuration) {
 		maxChunkSize = unpacked.maxChunkSize
 		// TODO: turn back on once compression is implemented
 //		compressionType1 = unpacked.compression.0.rawValue
@@ -94,7 +94,7 @@ extension MCM.Unpacked {
 		}
 	}
 	
-	init(_ packed: MCM.Packed, configuration: CarbonizerConfiguration) throws {
+	init(_ packed: MCM.Packed, configuration: Carbonizer.Configuration) throws {
 		compression = (
 			CompressionType(rawValue: packed.compressionType1) ?? .none,
 			CompressionType(rawValue: packed.compressionType2) ?? .none

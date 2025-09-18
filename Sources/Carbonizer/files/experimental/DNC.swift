@@ -53,13 +53,13 @@ extension DNC.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> DNC.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> DNC.Unpacked {
 		DNC.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DNC.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: DNC.Unpacked, configuration: Carbonizer.Configuration) {
 		todo()
 	}
 }
@@ -70,13 +70,13 @@ extension DNC.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> DNC.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> DNC.Packed {
 		DNC.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DNC.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: DNC.Packed, configuration: Carbonizer.Configuration) {
 		todo()
 	}
 }

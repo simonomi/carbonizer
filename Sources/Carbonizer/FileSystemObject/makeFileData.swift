@@ -3,7 +3,7 @@ import BinaryParser
 func makeFileData(
 	name: String,
 	data: Datastream,
-	configuration: CarbonizerConfiguration
+	configuration: Carbonizer.Configuration
 ) throws -> (any ProprietaryFileData)? {
 	if configuration.fileTypes.contains("_match") {
 		if name == "region_center_match" {

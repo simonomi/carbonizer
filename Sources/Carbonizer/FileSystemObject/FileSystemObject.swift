@@ -4,16 +4,16 @@ import Foundation
 protocol FileSystemObject {
 	var name: String { get }
 	
-	func savePath(in folder: URL, with configuration: CarbonizerConfiguration) -> URL
-	func write(into folder: URL, with configuration: CarbonizerConfiguration) throws
+	func savePath(in folder: URL, with configuration: Carbonizer.Configuration) -> URL
+	func write(into folder: URL, with configuration: Carbonizer.Configuration) throws
 	
 	func packedStatus() -> PackedStatus
 	
 	associatedtype Packed: FileSystemObject
-	func packed(configuration: CarbonizerConfiguration) -> Packed
+	func packed(configuration: Carbonizer.Configuration) -> Packed
 	
 	associatedtype Unpacked: FileSystemObject
-	func unpacked(path: [String], configuration: CarbonizerConfiguration) throws -> Unpacked
+	func unpacked(path: [String], configuration: Carbonizer.Configuration) throws -> Unpacked
 	
 	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self
 	
@@ -22,7 +22,7 @@ protocol FileSystemObject {
 
 func fileSystemObject(
 	contentsOf path: URL,
-	configuration: CarbonizerConfiguration
+	configuration: Carbonizer.Configuration
 ) throws -> (any FileSystemObject)? {
 	do {
 		return if try path.isDirectory() {

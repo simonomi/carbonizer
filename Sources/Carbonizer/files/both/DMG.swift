@@ -42,13 +42,13 @@ extension DMG.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> DMG.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> DMG.Unpacked {
 		DMG.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DMG.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: DMG.Unpacked, configuration: Carbonizer.Configuration) {
 		stringCount = UInt32(unpacked.strings.count)
 		
 		indices = makeOffsets(
@@ -77,13 +77,13 @@ extension DMG.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> DMG.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> DMG.Packed {
 		DMG.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DMG.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: DMG.Packed, configuration: Carbonizer.Configuration) {
 		strings = packed.strings.map(DMGString.init)
 	}
 }

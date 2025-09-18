@@ -9,12 +9,12 @@ let package = Package(
 		.custom("Windows", versionString: "11")
  	],
 	products: [
-		.executable(name: "carbonizer", targets: ["Carbonizer"])
+		.executable(name: "carbonizer", targets: ["CarbonizerCLI"]),
+		.library(name: "Carbonizer", targets: ["Carbonizer"])
 	],
 	dependencies: [
 		.package(url: "https://github.com/swiftlang/swift-syntax.git", from: "601.0.1"),
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
-//		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.0"),
 //		.package(url: "https://github.com/apple/SwiftUsd", from: "5.0.2"),
 	],
 	targets: [
@@ -26,25 +26,26 @@ let package = Package(
 			]
 		),
 		.target(name: "BinaryParser", dependencies: ["BinaryParserMacros"]),
-		.executableTarget(
+		.target(
 			name: "Carbonizer",
 			dependencies: [
 				"BinaryParser",
-				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				"ANSICodes",
 //				.product(name: "OpenUSD", package: "SwiftUsd"),
 			],
 //			swiftSettings: [
 //				.interoperabilityMode(.Cxx)
 //			]
 		),
-		// enabling this target somehow results in CarbonizerTests not being able to import Carbonizer
-//		.testTarget(
-//			name: "BinaryParserTests",
-//			dependencies: [
-//				"BinaryParserMacros",
-//				.product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
-//			]
-//		),
+		.target(name: "ANSICodes"),
+		.executableTarget(
+			name: "CarbonizerCLI",
+			dependencies: [
+				"Carbonizer",
+				"ANSICodes",
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+			]
+		),
 		.testTarget(
 			name: "CarbonizerTests",
 			dependencies: ["Carbonizer"],

@@ -1,5 +1,5 @@
 // TODO: make overall ANSI enum and some kind of protocol to simplify these into one
-enum ANSIFontEffect: Int {
+public enum ANSIFontEffect: Int {
 	case normal = 0
 	case bold = 1
 	case underline = 4
@@ -37,7 +37,7 @@ enum ANSIFontEffect: Int {
 	case brightWhiteBackground = 107
 }
 
-extension DefaultStringInterpolation {
+public extension DefaultStringInterpolation {
 	mutating func appendInterpolation(_ fontEffects: ANSIFontEffect...) {
 		let effects = fontEffects
 			.map(\.rawValue)

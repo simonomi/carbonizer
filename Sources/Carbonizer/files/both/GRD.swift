@@ -35,13 +35,13 @@ extension GRD.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> GRD.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> GRD.Unpacked {
 		GRD.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: GRD.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: GRD.Unpacked, configuration: Carbonizer.Configuration) {
 		width = UInt32(unpacked.data[0].count)
 		height = UInt32(unpacked.data.count)
 		
@@ -57,13 +57,13 @@ extension GRD.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> GRD.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> GRD.Packed {
 		GRD.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: GRD.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: GRD.Packed, configuration: Carbonizer.Configuration) {
 		data = packed.gridData.bytes[packed.gridData.offset...]
 			.chunked(maxSize: Int(packed.width))
 			.map(Array.init)
@@ -94,7 +94,7 @@ extension GRD.Unpacked: ProprietaryFileData {
 		}
 	}
 	
-	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
+	init(_ data: Datastream, configuration: Carbonizer.Configuration) throws {
 		let dataCount = data.bytes[data.offset...].indices.count
 		let raw = try data.read(String.self, exactLength: dataCount)
 		

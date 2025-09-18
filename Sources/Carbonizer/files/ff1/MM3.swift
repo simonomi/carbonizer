@@ -42,13 +42,13 @@ extension MM3.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> MM3.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> MM3.Unpacked {
 		MM3.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: MM3.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: MM3.Unpacked, configuration: Carbonizer.Configuration) {
 		modelIndex = unpacked.model.index
 		animationIndex = unpacked.animation.index
 		textureIndex = unpacked.texture.index
@@ -69,13 +69,13 @@ extension MM3.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> MM3.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> MM3.Packed {
 		MM3.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: MM3.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: MM3.Packed, configuration: Carbonizer.Configuration) {
 		model = TableEntry(index: packed.modelIndex, tableName: packed.modelTableName)
 		animation = TableEntry(index: packed.animationIndex, tableName: packed.animationTableName)
 		texture = TableEntry(index: packed.textureIndex, tableName: packed.textureTableName)

@@ -1,6 +1,6 @@
 func dexBlockLabeller(
 	_ fileSystemObject: consuming any FileSystemObject,
-	configuration: CarbonizerConfiguration
+	configuration: Carbonizer.Configuration
 ) -> any FileSystemObject {
 	var nds = fileSystemObject as! NDS.Unpacked
 	let episodeFolderIndex = nds.contents.firstIndex { $0.name == "episode" }!

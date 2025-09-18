@@ -32,7 +32,7 @@ enum MAR {
 
 // MARK: packed
 extension MAR.Packed: FileSystemObject {
-	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
+	func savePath(in directory: URL, with configuration: Carbonizer.Configuration) -> URL {
 		BinaryFile(
 			name: name,
 			data: Datastream()
@@ -42,7 +42,7 @@ extension MAR.Packed: FileSystemObject {
 	
 	func write(
 		into path: URL,
-		with configuration: CarbonizerConfiguration
+		with configuration: Carbonizer.Configuration
 	) throws {
 		let writer = Datawriter()
 		writer.write(binary)
@@ -60,9 +60,9 @@ extension MAR.Packed: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .packed }
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> MAR.Unpacked {
+	func unpacked(path: [String] = [], configuration: Carbonizer.Configuration) throws -> MAR.Unpacked {
 		try MAR.Unpacked(
 			name: name,
 			binary: binary,
@@ -72,7 +72,7 @@ extension MAR.Packed: FileSystemObject {
 }
 
 extension MAR.Packed.Binary {
-	init(_ mar: MAR.Unpacked, configuration: CarbonizerConfiguration) {
+	init(_ mar: MAR.Unpacked, configuration: Carbonizer.Configuration) {
 		fileCount = UInt32(mar.files.count)
 		
 		files = mar.files.map { MCM.Packed($0, configuration: configuration) }
@@ -91,7 +91,7 @@ extension MAR.Packed.Binary {
 extension MAR.Unpacked: FileSystemObject {
 	static let fileExtension = ".mar"
 	
-	func savePath(in folder: URL, with configuration: CarbonizerConfiguration) -> URL {
+	func savePath(in folder: URL, with configuration: Carbonizer.Configuration) -> URL {
 		if files.count == 1 {
 			ProprietaryFile(name: name, data: Datastream())
 				.savePath(in: folder, with: configuration)
@@ -105,7 +105,7 @@ extension MAR.Unpacked: FileSystemObject {
 	
 	func write(
 		into folder: URL,
-		with configuration: CarbonizerConfiguration
+		with configuration: Carbonizer.Configuration
 	) throws {
 		if files.count == 1, let file = files.first {
 			try ProprietaryFile(name: name, standaloneMCM: file)
@@ -120,19 +120,19 @@ extension MAR.Unpacked: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .unpacked }
 	
-	func packed(configuration: CarbonizerConfiguration) -> MAR.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> MAR.Packed {
 		MAR.Packed(
 			name: name,
 			binary: MAR.Packed.Binary(self, configuration: configuration)
 		)
 	}
 	
-	func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> Self { self }
+	func unpacked(path: [String] = [], configuration: Carbonizer.Configuration) throws -> Self { self }
 	
 	init(
 		name: String,
 		binary: MAR.Packed.Binary,
-		configuration: CarbonizerConfiguration
+		configuration: Carbonizer.Configuration
 	) throws {
 		configuration.log("Decompressing", name)
 		self.name = name

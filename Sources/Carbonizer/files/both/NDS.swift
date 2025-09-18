@@ -163,7 +163,7 @@ enum NDS {
 extension NDS.Packed: FileSystemObject {
 	static let fileExtension = ".nds"
 	
-	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
+	func savePath(in directory: URL, with configuration: Carbonizer.Configuration) -> URL {
 		BinaryFile(
 			name: name + Self.fileExtension,
 			data: Datastream()
@@ -172,7 +172,7 @@ extension NDS.Packed: FileSystemObject {
 	
 	func write(
 		into path: URL,
-		with configuration: CarbonizerConfiguration
+		with configuration: Carbonizer.Configuration
 	) throws {
 		let writer = Datawriter()
 		writer.write(binary)
@@ -190,16 +190,16 @@ extension NDS.Packed: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .packed }
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> NDS.Unpacked {
+	func unpacked(path: [String] = [], configuration: Carbonizer.Configuration) throws -> NDS.Unpacked {
 		try NDS.Unpacked(name: name, binary: binary, configuration: configuration)
 			.unpacked(configuration: configuration)
 	}
 }
 
 extension NDS.Packed.Binary {
-	init(_ unpacked: NDS.Unpacked, configuration: CarbonizerConfiguration) {
+	init(_ unpacked: NDS.Unpacked, configuration: Carbonizer.Configuration) {
 		header = unpacked.header
 		
 		arm9 = unpacked.arm9
@@ -297,14 +297,14 @@ extension NDS.Packed.Binary {
 
 // MARK: unpacked
 extension NDS.Unpacked: FileSystemObject {
-	func savePath(in directory: URL, with configuration: CarbonizerConfiguration) -> URL {
+	func savePath(in directory: URL, with configuration: Carbonizer.Configuration) -> URL {
 		Folder(name: name, contents: [])
 			.savePath(in: directory, with: configuration)
 	}
 	
 	func write(
 		into path: URL,
-		with configuration: CarbonizerConfiguration
+		with configuration: Carbonizer.Configuration
 	) throws {
 		let encoder = JSONEncoder(.prettyPrinted, .sortedKeys)
 		
@@ -329,19 +329,19 @@ extension NDS.Unpacked: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .unpacked }
 	
-	func packed(configuration: CarbonizerConfiguration) -> NDS.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> NDS.Packed {
 		NDS.Packed(
 			name: name,
 			binary: NDS.Packed.Binary(self, configuration: configuration)
 		)
 	}
 	
-	consuming func unpacked(path: [String] = [], configuration: CarbonizerConfiguration) throws -> Self {
+	consuming func unpacked(path: [String] = [], configuration: Carbonizer.Configuration) throws -> Self {
 		contents = try contents.map { try $0.unpacked(path: [], configuration: configuration) }
 		return self
 	}
 	
-	init(name: String, binary: NDS.Packed.Binary, configuration: CarbonizerConfiguration) throws {
+	init(name: String, binary: NDS.Packed.Binary, configuration: Carbonizer.Configuration) throws {
 		self.name = name
 		header = binary.header
 		
@@ -404,7 +404,7 @@ extension NDS.Unpacked {
 	init(
 		name: String,
 		contents: [any FileSystemObject],
-		configuration: CarbonizerConfiguration
+		configuration: Carbonizer.Configuration
 	) throws {
 		self.name = name
 		

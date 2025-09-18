@@ -60,7 +60,7 @@ extension NDS.Packed.Binary.FileNameTable.SubEntry {
 	func fileSystemObject(
 		files: [Datastream],
 		fileNameTable: CompleteFNT,
-		configuration: CarbonizerConfiguration
+		configuration: Carbonizer.Configuration
 	) throws -> any FileSystemObject {
 		switch type {
 			case .file:

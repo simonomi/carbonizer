@@ -48,13 +48,13 @@ extension DSL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> DSL.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> DSL.Unpacked {
 		DSL.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DSL.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: DSL.Unpacked, configuration: Carbonizer.Configuration) {
 		haikuCount = UInt32(unpacked.haiku.count)
 		haiku = unpacked.haiku.map(Haiku.init)
 		haikuOffsets = makeOffsets(
@@ -81,13 +81,13 @@ extension DSL.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> DSL.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> DSL.Packed {
 		DSL.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DSL.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: DSL.Packed, configuration: Carbonizer.Configuration) {
 		haiku = packed.haiku.map(Haiku.init)
 	}
 }

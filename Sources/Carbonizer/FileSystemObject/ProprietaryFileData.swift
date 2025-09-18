@@ -11,23 +11,23 @@ protocol ProprietaryFileData: SendableMetatype {
 	static var packedStatus: PackedStatus { get }
 	
 	associatedtype Packed: ProprietaryFileData
-	func packed(configuration: CarbonizerConfiguration) -> Packed
+	func packed(configuration: Carbonizer.Configuration) -> Packed
 	
 	associatedtype Unpacked: ProprietaryFileData
-	func unpacked(configuration: CarbonizerConfiguration) throws -> Unpacked
+	func unpacked(configuration: Carbonizer.Configuration) throws -> Unpacked
 	
-	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws
+	init(_ data: Datastream, configuration: Carbonizer.Configuration) throws
 	func write(to data: Datawriter)
 }
 
 extension ProprietaryFileData where Self: BinaryConvertible {
-	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
+	init(_ data: Datastream, configuration: Carbonizer.Configuration) throws {
 		self = try data.read(Self.self)
 	}
 }
 
 extension ProprietaryFileData where Self: Codable {
-	init(_ data: Datastream, configuration: CarbonizerConfiguration) throws {
+	init(_ data: Datastream, configuration: Carbonizer.Configuration) throws {
 		assert(data.offset == 0) // should only read full files as json (?)
 		self = try JSONDecoder(allowsJSON5: true).decode(Self.self, from: Data(data.bytes))
 	}
@@ -45,10 +45,10 @@ extension Datastream: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unknown
 	
-	func packed(configuration: CarbonizerConfiguration) -> Datastream { self }
-	func unpacked(configuration: CarbonizerConfiguration) -> Datastream { self }
+	func packed(configuration: Carbonizer.Configuration) -> Datastream { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Datastream { self }
 	
-	convenience init(_ data: Datastream, configuration: CarbonizerConfiguration) {
+	convenience init(_ data: Datastream, configuration: Carbonizer.Configuration) {
 		self.init(data)
 	}
 }

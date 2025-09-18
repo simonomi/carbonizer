@@ -1,7 +1,7 @@
 func keyItemLabeller(
 	_ fileSystemObject: consuming any FileSystemObject,
 	text: [String],
-	configuration: CarbonizerConfiguration
+	configuration: Carbonizer.Configuration
 ) -> any FileSystemObject {
 	var nds = fileSystemObject as! NDS.Unpacked
 	let etcFolderIndex = nds.contents.firstIndex { $0.name == "etc" }!

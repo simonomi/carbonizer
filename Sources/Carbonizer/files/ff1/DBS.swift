@@ -196,13 +196,13 @@ extension DBS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> DBS.Unpacked {
-		DBS.Unpacked(self, configuration: configuration)
+	func unpacked(configuration: Carbonizer.Configuration) throws -> DBS.Unpacked {
+		try DBS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DBS.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: DBS.Unpacked, configuration: Carbonizer.Configuration) {
 		music = unpacked.music.id
 		
 		unknown3 = unpacked.unknown3
@@ -298,13 +298,13 @@ extension DBS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> DBS.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> DBS.Packed {
 		DBS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DBS.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: DBS.Packed, configuration: Carbonizer.Configuration) throws {
 		music = Music(id: packed.music)
 		
 		unknown3 = packed.unknown3
@@ -328,9 +328,9 @@ extension DBS.Unpacked: ProprietaryFileData {
 		unknown16 = packed.unknown16
 		
 		// nil for 0578
-		fighter1 = packed.fighter1.map { Fighter($0, configuration: configuration) }
+		fighter1 = try packed.fighter1.map { try Fighter($0, configuration: configuration) }
 		
-		fighter2 = Fighter(packed.fighter2, configuration: configuration)
+		fighter2 = try Fighter(packed.fighter2, configuration: configuration)
 		
 		unknowns17 = packed.unknowns17.map(Unknown.init)
 		
@@ -339,7 +339,17 @@ extension DBS.Unpacked: ProprietaryFileData {
 }
 
 extension DBS.Unpacked.Fighter {
-	init(_ packed: DBS.Packed.Fighter, configuration: CarbonizerConfiguration) {
+	struct MismatchedVivosaurCount: Error, CustomStringConvertible {
+		var vivosaurCount: Int
+		var interLevelBattlePointCount: Int
+		var movesUnlockedCount: Int
+		
+		var description: String {
+			"error in binary DBS file: mismatched numbers of vivosaurs, inter-level battle points, and moves unlocked: \(vivosaurCount), \(interLevelBattlePointCount), and \(movesUnlockedCount)"
+		}
+	}
+	
+	init(_ packed: DBS.Packed.Fighter, configuration: Carbonizer.Configuration) throws {
 		name = Name(id: packed.name)
 		rank = packed.rank
 		
@@ -349,12 +359,11 @@ extension DBS.Unpacked.Fighter {
 		guard packed.vivosaurs.count == packed.interLevelBattlePointsPerVivosaur.count,
 			  packed.vivosaurs.count == packed.movesUnlockedPerVivosaur.count
 		else {
-			print("error in binary DBS file: mismatched numbers of vivosaurs, inter-level battle points, and moves unlocked: \(packed.vivosaurs.count), \(packed.interLevelBattlePointsPerVivosaur.count), and \(packed.movesUnlockedPerVivosaur.count)")
-			
-			if configuration.keepWindowOpen.isTrueOnError {
-				waitForInput()
-			}
-			fatalError()
+			throw MismatchedVivosaurCount(
+				vivosaurCount: packed.vivosaurs.count,
+				interLevelBattlePointCount: packed.interLevelBattlePointsPerVivosaur.count,
+				movesUnlockedCount: packed.movesUnlockedPerVivosaur.count
+			)
 		}
 		
 		vivosaurs = packed.vivosaurs.indices.map { index in

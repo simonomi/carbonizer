@@ -69,13 +69,13 @@ extension MPM.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> MPM.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> MPM.Unpacked {
 		MPM.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: MPM.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: MPM.Unpacked, configuration: Carbonizer.Configuration) {
 		unknown1 = unpacked.unknown1
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
@@ -108,13 +108,13 @@ extension MPM.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> MPM.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> MPM.Packed {
 		MPM.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: MPM.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: MPM.Packed, configuration: Carbonizer.Configuration) {
 		unknown1 = packed.unknown1
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3

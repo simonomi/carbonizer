@@ -385,13 +385,13 @@ extension MAP.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> MAP.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> MAP.Unpacked {
 		MAP.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: MAP.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: MAP.Unpacked, configuration: Carbonizer.Configuration) {
 		collisionMapNameOffset = mapNameOffset + UInt32(unpacked.mapName.utf8CString.count.roundedUpToTheNearest(4))
 		
 		unknown01 = unpacked.unknown01
@@ -611,13 +611,13 @@ extension MAP.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> MAP.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> MAP.Packed {
 		MAP.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: MAP.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: MAP.Packed, configuration: Carbonizer.Configuration) {
 		unknown01 = packed.unknown01
 		
 		unknown02 = packed.unknown02
