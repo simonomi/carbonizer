@@ -63,6 +63,7 @@ struct RoundTrips {
 			("episode 0048", .packed),
 			("episode 0088", .packed),
 			("map r 0025", .packed),
+			("museum_defs", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
@@ -70,7 +71,7 @@ struct RoundTrips {
 		
 		var configurationWithFileTypes: CarbonizerConfiguration = .defaultConfiguration
 		configurationWithFileTypes.overwriteOutput = true
-		configurationWithFileTypes.fileTypes.insert("KIL")
+		configurationWithFileTypes.fileTypes.insert("DML")
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		

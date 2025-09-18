@@ -7,28 +7,55 @@ enum DML {
 		static let magicBytes = "DML"
 		
 		var vivosaurCount: UInt32
-		var vivosaurOffset: UInt32
+		var vivosaursOffset: UInt32 = 0xC
 		
 		@Count(givenBy: \Self.vivosaurCount)
-		@Offset(givenBy: \Self.vivosaurOffset)
+		@Offset(givenBy: \Self.vivosaursOffset)
 		var vivosaurs: [Vivosaur]
 		
 		@BinaryConvertible
 		struct Vivosaur {
+			var unknown: UInt32 = 0
+			
 			var description: Int32
 			
 			var unknown1: UInt8
-			var size: UInt8
-			var site: UInt8
-			var unknown4: UInt8
-			var unknown5: UInt8
+			
+			var sortSize: UInt8
+			var sortSite: UInt8
+			
+			var unknown4: UInt8 = 0
+			
+			// same for all legendaries
+			var unknown5: UInt8 // 0, 0x40, 0x80, 0xa0
 			var unknown6: UInt8
 			var unknown7: UInt8
-			var era: UInt8
+			
+			var eraSort: UInt8
 		}
 	}
 	
-	struct Unpacked: Codable {}
+	struct Unpacked {
+		var vivosaurs: [Vivosaur]
+		
+		struct Vivosaur: Codable {
+			var _name: String?
+			var _description: String?
+			
+			var description: Int32
+			
+			var unknown1: UInt8
+			
+			var sortSize: UInt8
+			var sortSite: UInt8
+			
+			var unknown5: UInt8
+			var unknown6: UInt8
+			var unknown7: UInt8
+			
+			var eraSort: UInt8
+		}
+	}
 }
 
 // MARK: packed
@@ -43,7 +70,25 @@ extension DML.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: DML.Unpacked, configuration: CarbonizerConfiguration) {
-		todo()
+		vivosaurs = unpacked.vivosaurs.map(Vivosaur.init)
+		vivosaurCount = UInt32(vivosaurs.count)
+	}
+}
+
+extension DML.Packed.Vivosaur {
+	fileprivate init(_ unpacked: DML.Unpacked.Vivosaur) {
+		description = unpacked.description
+		
+		unknown1 = unpacked.unknown1
+		
+		sortSize = unpacked.sortSize
+		sortSite = unpacked.sortSite
+		
+		unknown5 = unpacked.unknown5
+		unknown6 = unpacked.unknown6
+		unknown7 = unpacked.unknown7
+		
+		eraSort = unpacked.eraSort
 	}
 }
 
@@ -60,6 +105,36 @@ extension DML.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
 	
 	fileprivate init(_ packed: DML.Packed, configuration: CarbonizerConfiguration) {
-		todo()
+		vivosaurs = packed.vivosaurs.enumerated().map(Vivosaur.init)
+	}
+}
+
+extension DML.Unpacked.Vivosaur {
+	fileprivate init(_ index: Int, _ unpacked: DML.Packed.Vivosaur) {
+		_name = vivosaurNames[Int32(index)]
+		
+		description = unpacked.description
+		
+		unknown1 = unpacked.unknown1
+		
+		sortSize = unpacked.sortSize
+		sortSite = unpacked.sortSite
+		
+		unknown5 = unpacked.unknown5
+		unknown6 = unpacked.unknown6
+		unknown7 = unpacked.unknown7
+		
+		eraSort = unpacked.eraSort
+	}
+}
+
+// MARK: unpacked codable
+extension DML.Unpacked: Codable {
+	init(from decoder: any Decoder) throws {
+		vivosaurs = try [Vivosaur](from: decoder)
+	}
+	
+	func encode(to encoder: any Encoder) throws {
+		try vivosaurs.encode(to: encoder)
 	}
 }

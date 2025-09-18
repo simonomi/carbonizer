@@ -29,7 +29,7 @@ extension Carbonizer {
 				.deletingPathExtension()
 				.deletingPathExtension()
 				.pathComponents
-				.dropFirst(6)
+				.dropFirst(5)
 			
 			guard let newFile = try makeFile(contentsOf: $0, configuration: configuration) else { return }
 			
