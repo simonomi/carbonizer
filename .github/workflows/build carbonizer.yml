@@ -41,8 +41,6 @@ jobs:
       with:
         swift-version: swift-6.2-release
         swift-build: 6.2-RELEASE
-    - name: print path
-      run: dir "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\6.2.0\\usr\\bin"
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build
@@ -57,7 +55,7 @@ jobs:
         LICENSE.txt
         -C "$(swift build -c release --show-bin-path)"
         carbonizer.exe
-        -C "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\$(swift --version | Select-String -Pattern '\d+\.\d+(\.\d+)?' | ForEach-Object { $_.Matches[0].Value })\\usr\\bin"
+        -C "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\6.2.0\\usr\\bin"
         swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll swiftCRT.dll Foundation.dll swift_RegexParser.dll dispatch.dll BlocksRuntime.dll swiftDispatch.dll FoundationEssentials.dll FoundationInternationalization.dll _FoundationICU.dll swiftSynchronization.dll
     - name: Release
       uses: softprops/action-gh-release@v2
