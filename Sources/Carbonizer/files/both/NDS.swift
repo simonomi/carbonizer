@@ -152,6 +152,9 @@ enum NDS {
 		
 		var iconBanner: Datastream
 		
+		// file name table somehow...
+//		var fileAllocationTable: [NDS.Packed.Binary.FileAllocationTableEntry]
+		
 		var contents: [any FileSystemObject]
 	}
 }
@@ -235,7 +238,7 @@ extension NDS.Packed.Binary {
 		
 		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while packing")
 		
-		let offsetIncrement: UInt32 = 256
+		let offsetIncrement: UInt32 = 0x200
 		let iconBannerSize: UInt32 = 0x840
 		
 		// ok, the original ff1 rom has the following:
@@ -244,6 +247,7 @@ extension NDS.Packed.Binary {
 		// 0x0793D0 arm9 size
 		// 0x07D400 arm9 overlay offset
 		// 0x000100 arm9 overlay size
+		// overlays
 		// 0x119600 arm7 offset
 		// 0x02434C arm7 size
 		// 0x000000 arm7 overlay offset
@@ -254,14 +258,29 @@ extension NDS.Packed.Binary {
 		// 0x0102B8 fat size
 		// 0x164C00 icon banner offset
 		
-		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(offsetIncrement)
-		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(offsetIncrement)
-		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)        .roundedUpToTheNearest(offsetIncrement)
-		header.arm7OverlayOffset =         (header.arm7Offset                + header.arm7Size)               .roundedUpToTheNearest(offsetIncrement)
-		header.fileNameTableOffset =       (header.arm7OverlayOffset         + header.arm7OverlaySize)        .roundedUpToTheNearest(offsetIncrement)
-		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)      .roundedUpToTheNearest(offsetIncrement)
-		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize).roundedUpToTheNearest(offsetIncrement)
-		let filesOffset =                  (header.iconBannerOffset          + iconBannerSize)                         .roundedUpToTheNearest(offsetIncrement)
+		// TODO: file order is actually NOT just alphabetical
+		// - the original ROM sorts in a different way than swift (_ < A)
+		
+		// ok plan:
+		// - add setting for filling with 0xFF
+		// - enable compression
+		// - store fnt and fat
+		// - if all sizes are <= original, fit everything into the same places
+		// - otherwise, move file(s) to the first available location (probably the end), based on which ends up with least displacement
+		
+		
+		// keep these from the original rom
+		// TODO: make sure no sizes have changed
+//		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(offsetIncrement)
+//		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(offsetIncrement)
+//		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)        .roundedUpToTheNearest(offsetIncrement)
+//		header.arm7OverlayOffset =         (header.arm7Offset                + header.arm7Size)               .roundedUpToTheNearest(offsetIncrement)
+//		header.fileNameTableOffset =       (header.arm7OverlayOffset         + header.arm7OverlaySize)        .roundedUpToTheNearest(offsetIncrement)
+//		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)      .roundedUpToTheNearest(offsetIncrement)
+//		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize).roundedUpToTheNearest(offsetIncrement)
+		
+		let filesOffset = (header.iconBannerOffset + iconBannerSize)
+			.roundedUpToTheNearest(offsetIncrement)
 		
 		let fileSizes = files.map(\.bytes.count).map(UInt32.init)
 		fileAllocationTable = fileSizes.reduce(into: []) { fat, size in
