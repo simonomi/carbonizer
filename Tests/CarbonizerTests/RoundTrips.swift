@@ -62,6 +62,7 @@ struct RoundTrips {
 			("episode 0002", .packed),
 			("episode 0048", .packed),
 			("episode 0088", .packed),
+			("map r 0025", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {

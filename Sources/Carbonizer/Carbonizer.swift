@@ -15,9 +15,6 @@ import Foundation
 // - input file path, output folder, overwrite, ff1/ffc, external metadata, file types, filters, monitoring, post-processors (extensions...? new name)
 // - log handler, errors (protocol)
 
-// file types that aren't in-out binary perfect
-// - GRD
-
 @main
 struct Carbonizer: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(

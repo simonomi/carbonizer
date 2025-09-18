@@ -231,7 +231,7 @@ extension NDS.Packed.Binary {
 			return writer.intoDatastream()
 		}
 		
-		print(zip(allFiles, files).map { ($0.name, $1.bytes.count) })
+//		print(zip(allFiles, files).map { ($0.name, $1.bytes.count) })
 		
 		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while packing")
 		

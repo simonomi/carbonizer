@@ -20,6 +20,9 @@ enum GRD {
 		@Offset(givenBy: \Self.offset)
 		@Length(givenBy: \Self.byteCount)
 		var gridData: Datastream
+		
+		@FourByteAlign
+		var fourByteAlign: ()
 	}
 	
 	struct Unpacked {
