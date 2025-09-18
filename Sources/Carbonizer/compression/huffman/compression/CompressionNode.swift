@@ -1,3 +1,5 @@
+import BinaryParser
+
 extension Huffman {
 	struct CompressionNode: Comparable, CustomDebugStringConvertible {
 		var kind: Kind
@@ -130,6 +132,43 @@ extension Huffman {
 						right: Self(right)
 					)
 			}
+		}
+		
+		func write(to output: Datawriter) {
+			// rounded up to align to the nearest word
+			let nodeCount = (self.nodeCount() + 1).roundedUpToTheNearest(4) - 1
+			let branchNodeCount = (nodeCount - 1) / 2
+			precondition(branchNodeCount <= Byte.max)
+			output.write(Byte(branchNodeCount))
+			
+			var nodeWritingQueue: ArraySlice = [self]
+			
+			while let node = nodeWritingQueue.popFirst() {
+				switch node.kind {
+					case .symbol(let symbol):
+						output.write(symbol)
+					case .branch(left: let left, right: let right):
+						var nodeData = Byte(nodeWritingQueue.count / 2)
+						
+						// children offset should fit in lower 5 bits
+						precondition(nodeData & 0b11111 == nodeData, "more nodes than should be possible")
+						
+						if left.isData {
+							nodeData |= 1 << 7
+						}
+						
+						if right.isData {
+							nodeData |= 1 << 6
+						}
+						
+						output.write(nodeData)
+						
+						nodeWritingQueue.append(left)
+						nodeWritingQueue.append(right)
+				}
+			}
+			
+			output.fourByteAlign()
 		}
 	}
 }
