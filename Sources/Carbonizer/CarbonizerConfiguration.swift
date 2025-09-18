@@ -33,6 +33,7 @@ struct CarbonizerConfiguration {
 		var hmlNameLabeller: Bool
 		var keyItemLabeller: Bool
 		var mapLabeller: Bool
+		var museumLabeller: Bool
 	}
 	
 	struct Cache {
@@ -260,7 +261,12 @@ struct CarbonizerConfiguration {
 				// adds labels for the names of maps in MAP files (`map/m/` folder)
 				//
 				// make sure to enable both the MAP and DTX file types or nothing will happen
-				"mapLabeller": false
+				"mapLabeller": false,
+				
+				// adds labels for the descriptions in `etc/museum_defs`
+				//
+				// make sure to enable both the DML and DTX file types or nothing will happen
+				"museumLabeller": false
 			}
 		}
 		"""
@@ -327,7 +333,7 @@ extension CarbonizerConfiguration: Decodable {
 
 extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 	enum CodingKeys: CodingKey {
-		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller
+		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -354,6 +360,8 @@ extension CarbonizerConfiguration.ExperimentalOptions: Decodable {
 			fallback.keyItemLabeller
 		mapLabeller =         try container.decodeIfPresent(Bool.self,     forKey: .mapLabeller) ??
 			fallback.mapLabeller
+		museumLabeller =      try container.decodeIfPresent(Bool.self,     forKey: .museumLabeller) ??
+			fallback.museumLabeller
 	}
 }
 

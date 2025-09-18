@@ -17,7 +17,7 @@ enum DML {
 		struct Vivosaur {
 			var unknown: UInt32 = 0
 			
-			var description: Int32
+			var descriptionIndex: Int32
 			
 			var unknown1: UInt8
 			
@@ -31,7 +31,7 @@ enum DML {
 			var unknown6: UInt8
 			var unknown7: UInt8
 			
-			var eraSort: UInt8
+			var sortEra: UInt8
 		}
 	}
 	
@@ -42,7 +42,7 @@ enum DML {
 			var _name: String?
 			var _description: String?
 			
-			var description: Int32
+			var descriptionIndex: Int32
 			
 			var unknown1: UInt8
 			
@@ -53,7 +53,7 @@ enum DML {
 			var unknown6: UInt8
 			var unknown7: UInt8
 			
-			var eraSort: UInt8
+			var sortEra: UInt8
 		}
 	}
 }
@@ -77,7 +77,7 @@ extension DML.Packed: ProprietaryFileData {
 
 extension DML.Packed.Vivosaur {
 	fileprivate init(_ unpacked: DML.Unpacked.Vivosaur) {
-		description = unpacked.description
+		descriptionIndex = unpacked.descriptionIndex
 		
 		unknown1 = unpacked.unknown1
 		
@@ -88,7 +88,7 @@ extension DML.Packed.Vivosaur {
 		unknown6 = unpacked.unknown6
 		unknown7 = unpacked.unknown7
 		
-		eraSort = unpacked.eraSort
+		sortEra = unpacked.sortEra
 	}
 }
 
@@ -113,7 +113,7 @@ extension DML.Unpacked.Vivosaur {
 	fileprivate init(_ index: Int, _ unpacked: DML.Packed.Vivosaur) {
 		_name = vivosaurNames[Int32(index)]
 		
-		description = unpacked.description
+		descriptionIndex = unpacked.descriptionIndex
 		
 		unknown1 = unpacked.unknown1
 		
@@ -124,7 +124,7 @@ extension DML.Unpacked.Vivosaur {
 		unknown6 = unpacked.unknown6
 		unknown7 = unpacked.unknown7
 		
-		eraSort = unpacked.eraSort
+		sortEra = unpacked.sortEra
 	}
 }
 
