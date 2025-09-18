@@ -20,6 +20,7 @@ enum BBG {
 		struct Kasekium {
 			var index: Int32
 			
+			// for ffc this is 0x10, is there simply another offset ?
 			var imageFileOffset: UInt32 = 0xC
 			var modelFileOffset: UInt32
 			
@@ -28,6 +29,9 @@ enum BBG {
 			
 			@Offset(givenBy: \Self.modelFileOffset)
 			var modelFile: String
+			
+			@FourByteAlign
+			var fourByteAlign: ()
 		}
 	}
 	
