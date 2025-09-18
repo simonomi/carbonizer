@@ -22,16 +22,24 @@ struct Compression {
 			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
 //			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"), // 8-bit
 //			(.huffman, "msg_1007 - decompressed", "msg_1007 - huffman"), // 8-bit
+			(.huffman, "kaseki_defs - lzss", "kaseki_defs - huffman"), // ?-bit
+			(.lzss, "kaseki_defs - decompressed", "kaseki_defs - lzss"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
 	func compress(_ type: MCM.Unpacked.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {
 		let inputData = try data(for: decompressedFileName)
 		
-//		let start = Date.now
+		let inputFilePath: URL = .compressionDirectory
+			.appending(component: decompressedFileName)
+			.appendingPathExtension("bin")
 		
+		let compressionInfo = try Metadata(forItemAt: inputFilePath)?.huffmanCompressionInfo.first
+		
+//		let start = Date.now
+
 		// lzss is *notably* slower, ~0.3–3s compared to ~0.001–0.01s (in debug mode)
 		// thats 300x!!
-		let compressedInput = type.compress(inputData, compressionInfo: nil)
+		let compressedInput = type.compress(inputData, compressionInfo: compressionInfo)
 		
 //		print("\(.yellow)compress", type, start.timeElapsed, "\(.normal)")
 		
@@ -45,12 +53,18 @@ struct Compression {
 		
 		let expectedOutput = try data(for: expectedFileName)
 		
+		let expectedFilePath: URL = .compressionDirectory
+			.appending(component: expectedFileName)
+			.appendingPathExtension("bin")
+		
+		let incorrectFilePath: URL = .compressionDirectory
+			.appending(component: "incorrect \(expectedFileName).bin")
+		
 		let areTheSame = compressedInput.bytes == expectedOutput.bytes
-		#expect(areTheSame)
+		#expect(areTheSame, "nvim -d \"\(expectedFilePath.path(percentEncoded: false))\" \"\(incorrectFilePath.path(percentEncoded: false))\"")
 		
 		if !areTheSame {
-			let url: URL = .compressionDirectory.appending(component: "incorrect \(expectedFileName).bin")
-			try Data(compressedInput.bytes).write(to: url)
+			try Data(compressedInput.bytes).write(to: incorrectFilePath)
 		}
 	}
 	
@@ -69,6 +83,8 @@ struct Compression {
 			(.lzss, "e0046 - lzss", "e0046 - decompressed"),
 			(.huffman, "msg_0911 - huffman", "msg_0911 - decompressed"),
 			(.huffman, "msg_1007 - huffman", "msg_1007 - decompressed"),
+			(.huffman, "kaseki_defs - huffman", "kaseki_defs - lzss"),
+			(.lzss, "kaseki_defs - lzss", "kaseki_defs - decompressed"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
 	func decompress(_ type: MCM.Unpacked.CompressionType, _ compressedFileName: String, _ expectedFileName: String) throws {
@@ -87,6 +103,15 @@ struct Compression {
 		if !expectedURL.exists() {
 			print("\(.green)saving decompression to '\(.cyan)\(expectedFileName).bin\(.green)'\(.normal)")
 			try Data(decompressedInput.bytes).write(to: expectedURL)
+			
+//			let metadata = compressionInfo.map {
+//				Metadata(skipFile: false, standalone: false, compression: (.huffman, .lzss), maxChunkSize: 4000, index: 0, huffmanCompressionInfo: [$0])
+//			}
+//			
+//			if let metadata {
+//				try JSONEncoder().encode(metadata).write(to: .temporaryDirectory.appending(component: expectedFileName + ".metadata"))
+//				print(URL.temporaryDirectory.appending(component: expectedFileName + ".metadata").path(percentEncoded: false))
+//			}
 		}
 		
 		let expectedOutput = try data(for: expectedFileName)

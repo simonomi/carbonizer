@@ -19,9 +19,9 @@ extension Huffman {
 		var rightIsData: Bool {
 			nodeData >> 6 & 1 != 0
 		}
-		
-		fileprivate func dropLowestBit<T: FixedWidthInteger>(of number: T) -> T {
-			number & ~1
-		}
 	}
+}
+
+fileprivate func dropLowestBit<T: FixedWidthInteger>(of number: T) -> T {
+	number & ~1
 }

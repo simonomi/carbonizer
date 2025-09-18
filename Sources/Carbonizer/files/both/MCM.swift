@@ -39,8 +39,8 @@ extension MCM.Packed {
 	init(_ unpacked: MCM.Unpacked, configuration: CarbonizerConfiguration) {
 		maxChunkSize = unpacked.maxChunkSize
 		// TODO: turn back on once compression is implemented
-//		compressionType1 = mcm.compression.0.rawValue
-//		compressionType2 = mcm.compression.1.rawValue
+//		compressionType1 = unpacked.compression.0.rawValue
+//		compressionType2 = unpacked.compression.1.rawValue
 		compressionType1 = 0
 		compressionType2 = 0
 		
@@ -54,11 +54,11 @@ extension MCM.Packed {
 			.chunked(maxSize: Int(maxChunkSize))
 		
 		chunks = chunkedData
-//		let firstCompressionLayer = zip(chunkedData, mcm.huffmanCompressionInfo)
-//			.map(mcm.compression.1.compress)
-//
-//		chunks = zip(firstCompressionLayer, mcm.huffmanCompressionInfo)
-//			.map(mcm.compression.0.compress)
+//		let firstCompressionLayer = zip(chunkedData, unpacked.huffmanCompressionInfo)
+//			.map(unpacked.compression.1.compress)
+//		
+//		chunks = zip(firstCompressionLayer, unpacked.huffmanCompressionInfo)
+//			.map(unpacked.compression.0.compress)
 		
 		chunkCount = UInt32(chunks.count)
 		

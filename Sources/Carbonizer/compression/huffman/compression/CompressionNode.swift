@@ -84,7 +84,7 @@ extension Huffman {
 		private func mermaidConnections(_ index: inout Int) -> (name: String, connections: [String]) {
 			switch kind {
 				case .symbol(let byte):
-					let myName = "\(frequency)x" + String(byte, radix: 16, uppercase: true)
+					let myName = "\(frequency)x0x" + String(byte, radix: 16, uppercase: true)
 					return (
 						myName,
 						["style \(myName) fill:#00c7de"]
@@ -141,6 +141,7 @@ extension Huffman {
 			precondition(branchNodeCount <= Byte.max)
 			output.write(Byte(branchNodeCount))
 			
+			// TODO: this algorithm is wrong, it fails for kaseki_defs
 			var nodeWritingQueue: ArraySlice = [self]
 			
 			while let node = nodeWritingQueue.popFirst() {
@@ -167,6 +168,35 @@ extension Huffman {
 						nodeWritingQueue.append(right)
 				}
 			}
+			
+			output.fourByteAlign()
+		}
+		
+		func write(_ inputData: ArraySlice<UInt8>, to output: Datawriter) {
+			let dictionary = dictionary()
+//			print(dictionary)
+			
+			var currentWord: BitArray? = nil
+			
+			for byte in inputData { // e0046 stops too soon...?
+				if currentWord == nil {
+					currentWord = BitArray()
+				}
+				
+				guard let newBits = dictionary[byte] else {
+					fatalError("this should never happen... right?")
+				}
+				
+//				print(String(byte, radix: 16, uppercase: true), newBits)
+				
+				if let overflow = currentWord!.append(contentsOf: newBits) {
+//					print(currentWord!)
+					currentWord!.write(to: output)
+					currentWord = overflow
+				}
+			}
+			
+			currentWord?.write(to: output)
 			
 			output.fourByteAlign()
 		}

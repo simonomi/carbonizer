@@ -67,7 +67,13 @@ struct Carbonizer: AsyncParsableCommand {
 		}
 		
 		if configuration.showProgress {
-			let terminalWidth = terminalSize().width
+			let inputTerminalWidth = terminalSize().width
+			let terminalWidth = if inputTerminalWidth == 0 {
+				9999
+			} else {
+				inputTerminalWidth
+			}
+			
 			configuration.logHandler = {
 				// TODO: do these ansi codes work on windows cmd?
 				print($0.prefix(max(0, terminalWidth - 3)) + "...\(.clearToEndOfLine)", terminator: "\r")
