@@ -42,7 +42,7 @@ jobs:
         swift-version: swift-6.2-release
         swift-build: 6.2-RELEASE
     - name: print path
-      run: dir "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\$(swift --version | Select-String -Pattern '\d+\.\d+(\.\d+)?' | ForEach-Object { $_.Matches[0].Value })\\usr\\bin"
+      run: dir "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\6.2.0\\usr\\bin"
     - name: Checkout
       uses: actions/checkout@v4
     - name: Build

@@ -1,6 +1,11 @@
 import ArgumentParser
 import Foundation
 
+// hopefully this should fix using `stdout`?
+#if os(Linux)
+@preconcurrency import Glibc
+#endif
+
 // TODO: list
 // - add a `carbonizer version.json` file or smthn to contain the version number
 //   - if trying to pack from too old a version (semver or smthn), give an error
