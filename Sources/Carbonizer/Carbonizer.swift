@@ -1,10 +1,10 @@
-import ArgumentParser
-import Foundation
-
 // hopefully this should fix using `stdout`?
 #if os(Linux)
 @preconcurrency import Glibc
 #endif
+
+import ArgumentParser
+import Foundation
 
 // TODO: list
 // - add a `carbonizer version.json` file or smthn to contain the version number
