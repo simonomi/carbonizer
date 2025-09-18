@@ -16,7 +16,6 @@ import Foundation
 // - log handler, errors (protocol)
 
 // file types that aren't in-out binary perfect
-// - DEP
 // - GRD
 
 @main

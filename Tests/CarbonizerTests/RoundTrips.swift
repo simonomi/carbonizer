@@ -58,6 +58,10 @@ struct RoundTrips {
 			("headmask_defs", .packed),
 			("msg_1007", .packed),
 			("btl_bg_defs", .packed),
+			("episode 0046", .packed),
+			("episode 0002", .packed),
+			("episode 0048", .packed),
+			("episode 0088", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
@@ -69,22 +73,31 @@ struct RoundTrips {
 		
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		
-		// TODO: write to disk to test unpacked's codable/custom
-		let repackedFile: any FileSystemObject = switch packedStatus {
+		let toggledFile: any FileSystemObject = switch packedStatus {
 			case .packed:
-				try file
-					.unpacked(path: [], configuration: configurationWithFileTypes)
-					.packed(configuration: configurationWithFileTypes)
+				try file.unpacked(path: [], configuration: configurationWithFileTypes)
 			case .unpacked:
-				try file
-					.packed(configuration: configurationWithFileTypes)
-					.unpacked(path: [], configuration: configurationWithFileTypes)
+				file.packed(configuration: configurationWithFileTypes)
 			case .unknown, .contradictory:
 				try Issue.failure("packed status must be either packed or unpacked")
 		}
 		
-		let savePath = repackedFile.savePath(in: .temporaryDirectory, with: configurationWithFileTypes)
-		try repackedFile.write(into: .temporaryDirectory, with: configurationWithFileTypes)
+		let toggledSavePath = toggledFile.savePath(in: .temporaryDirectory, with: configurationWithFileTypes)
+		try toggledFile.write(into: .temporaryDirectory, with: configurationWithFileTypes)
+		
+		let rereadFile = try fileSystemObject(contentsOf: toggledSavePath, configuration: configurationWithFileTypes)!
+		
+		let retoggledFile: any FileSystemObject = switch packedStatus {
+			case .packed:
+				rereadFile.packed(configuration: configurationWithFileTypes)
+			case .unpacked:
+				try rereadFile.unpacked(path: [], configuration: configurationWithFileTypes)
+			case .unknown, .contradictory:
+				try Issue.failure("packed status must be either packed or unpacked")
+		}
+		
+		let savePath = retoggledFile.savePath(in: .temporaryDirectory, with: configurationWithFileTypes)
+		try retoggledFile.write(into: .temporaryDirectory, with: configurationWithFileTypes)
 		
 		let originalData = try Data(contentsOf: inputFilePath)
 		let savedData = try Data(contentsOf: savePath)

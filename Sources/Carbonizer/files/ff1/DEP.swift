@@ -115,9 +115,9 @@ enum DEP {
 			// 22: requires NOT an unknown5, but ||
 			23: "\(0, .entity) is spawned in",
 			// used to trigger rex and snivels when you get close enough to them (chapter 4)
-			36: "\(0, .block) has played", // op 2 is always 2 or 3
+			36: "\(0..., .block) has played", // wait, if this is variadic, how is it different from the others?
 			37: "at least one of \(0..., .block) has played",
-			38: "\(0, .block) has not played", // op 2 is always 2 or 3
+			38: "\(0..., .block) has not played", // wait, if this is variadic, how is it different from the others?
 			39: "none of \(0..., .block) have played",
 			41: "has \(0, .vivosaur)",
 		]
@@ -421,6 +421,12 @@ extension String {
 			let comment: DEP.Unpacked.Block.Requirement = .comment(originalText)
 			self = String(comment, isInComment: false)
 			return
+		}
+		
+		if case .known(let type, let definition, let arguments) = requirement,
+		   !definition.outputStringThingy.contains(where: { $0.isVariadic })
+		{
+			assert(definition.argumentTypes.count == arguments.count, "argument count for command \(type) doesnt match that in binary: definition \(definition.argumentTypes.count), binary \(arguments.count)")
 		}
 		
 		self = switch requirement {
