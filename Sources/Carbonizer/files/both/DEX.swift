@@ -4,6 +4,8 @@ import Foundation
 // TODO: parsing ffc with ff1's commands crashes instead of giving an error message
 // WHILE WRITING??
 
+// TODO: the game files call 'blocks' 'events'
+
 enum DEX {
 	@BinaryConvertible
 	struct Packed {

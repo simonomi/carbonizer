@@ -1,5 +1,6 @@
 import BinaryParser
 
+// etc/creature_defs
 // ffc is completely different, needs new file type
 enum DCL {
 	@BinaryConvertible

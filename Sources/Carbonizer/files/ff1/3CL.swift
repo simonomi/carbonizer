@@ -1,8 +1,6 @@
 import BinaryParser
 
-// ff1-only
-// 3CL
-enum TCL {
+enum TCL { // 3CL
 	@BinaryConvertible
 	struct Packed {
 		@Include

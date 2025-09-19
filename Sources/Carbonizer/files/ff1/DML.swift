@@ -1,5 +1,6 @@
 import BinaryParser
 
+// etc/museum_defs
 enum DML {
 	@BinaryConvertible
 	struct Packed {
@@ -63,13 +64,13 @@ extension DML.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: CarbonizerConfiguration) -> Self { self }
+	func packed(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> DML.Unpacked {
+	func unpacked(configuration: Carbonizer.Configuration) -> DML.Unpacked {
 		DML.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DML.Unpacked, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ unpacked: DML.Unpacked, configuration: Carbonizer.Configuration) {
 		vivosaurs = unpacked.vivosaurs.map(Vivosaur.init)
 		vivosaurCount = UInt32(vivosaurs.count)
 	}
@@ -98,13 +99,13 @@ extension DML.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: CarbonizerConfiguration) -> DML.Packed {
+	func packed(configuration: Carbonizer.Configuration) -> DML.Packed {
 		DML.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: CarbonizerConfiguration) -> Self { self }
+	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DML.Packed, configuration: CarbonizerConfiguration) {
+	fileprivate init(_ packed: DML.Packed, configuration: Carbonizer.Configuration) {
 		vivosaurs = packed.vivosaurs.enumerated().map(Vivosaur.init)
 	}
 }

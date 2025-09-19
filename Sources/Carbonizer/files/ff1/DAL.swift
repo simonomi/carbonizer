@@ -1,5 +1,6 @@
 import BinaryParser
 
+// etc/attack_defs
 enum DAL {
 	@BinaryConvertible
 	struct Packed {

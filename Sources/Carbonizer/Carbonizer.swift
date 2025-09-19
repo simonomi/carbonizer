@@ -21,33 +21,30 @@ import Foundation
 // - log handler, errors (protocol)
 
 public enum Carbonizer {
-//	func main(with configuration: Carbonizer.Configuration) throws {
-//		let compressionMode = compressionMode ?? configuration.compressionMode
-//		
-//		for filePath in filePaths {
-//			print("Reading", filePath.path(percentEncoded: false))
-//			
-//#if !IN_CI
-//			let readStart = Date.now
-//#endif
-//			
-//			guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
-//				print("Skipping", filePath.path(percentEncoded: false))
-//				continue
-//			}
-//			
-//			guard file is NDS.Packed || file is NDS.Unpacked else {
-//				throw InvalidInput()
-//			}
-//			
-//#if !IN_CI
-//			print("\(.red)read", -readStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")
-//			
-//			let processStart = Date.now
-//#endif
-//			
-//			let action = compressionMode.action(packedStatus: file.packedStatus())
-//			
+	public static func auto(
+		_ filePath: URL,
+		into outputFolder: URL,
+		configuration: Configuration
+	) throws {
+		try process(.auto, path: filePath, into: outputFolder, configuration: configuration)
+	}
+	
+	public static func pack(
+		_ filePath: URL,
+		into outputFolder: URL,
+		configuration: Configuration
+	) throws {
+		try process(.pack, path: filePath, into: outputFolder, configuration: configuration)
+	}
+	
+	public static func unpack(
+		_ filePath: URL,
+		into outputFolder: URL,
+		configuration: Configuration
+	) throws {
+		try process(.unpack, path: filePath, into: outputFolder, configuration: configuration)
+	}
+	
 //			if configuration.experimental.dexDialogueSaver, action == .pack {
 //				let updatedDialogueWithConflicts = try dexDialogueRipper(file)
 //				
@@ -195,38 +192,4 @@ public enum Carbonizer {
 //					)
 //				}
 //			}
-//			
-//#if !IN_CI
-//			print("\(.yellow)process", -processStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")
-//#endif
-//			
-//			let outputFolder = configuration.outputFolder.map { URL(filePath: $0) } ?? filePath.deletingLastPathComponent()
-//			
-//			let savePath = processedFile.savePath(in: outputFolder, with: configuration)
-//			
-//			print("Writing to", savePath.path(percentEncoded: false))
-//			
-//#if !IN_CI
-//			let removeStart = Date.now
-//#endif
-//			
-//			if configuration.overwriteOutput && savePath.exists() {
-//				try FileManager.default.removeItem(at: savePath)
-//				
-//#if !IN_CI
-//				print("\(.red)remove", -removeStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")
-//#endif
-//			}
-//			
-//#if !IN_CI
-//			let writeStart = Date.now
-//#endif
-//			
-//			try processedFile.write(into: outputFolder, with: configuration)
-//			
-//#if !IN_CI
-//			print("\(.cyan)write", -writeStart.timeIntervalSinceNow, "\(.normal)\(.clearToEndOfLine)")
-//#endif
-//		}
-//	}
 }
