@@ -108,13 +108,13 @@ extension RLS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) throws -> RLS.Unpacked {
+	func unpacked(configuration: Configuration) throws -> RLS.Unpacked {
 		try RLS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: RLS.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: RLS.Unpacked, configuration: Configuration) {
 		kasekiCount = UInt32(unpacked.kasekis.count)
 		
 		offsets = makeOffsets(
@@ -201,13 +201,13 @@ extension RLS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> RLS.Packed {
+	func packed(configuration: Configuration) -> RLS.Packed {
 		RLS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: RLS.Packed, configuration: Carbonizer.Configuration) throws {
+	fileprivate init(_ packed: RLS.Packed, configuration: Configuration) throws {
 		kasekis = try packed.kasekis.enumerated().map(Kaseki.init)
 	}
 }

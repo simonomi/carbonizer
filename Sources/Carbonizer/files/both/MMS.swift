@@ -74,13 +74,13 @@ extension MMS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> MMS.Unpacked {
+	func unpacked(configuration: Configuration) -> MMS.Unpacked {
 		MMS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: MMS.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: MMS.Unpacked, configuration: Configuration) {
 		unknown1 = unpacked.unknown1
 		
 		colorPaletteType = unpacked.colorPaletteType
@@ -117,13 +117,13 @@ extension MMS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> MMS.Packed {
+	func packed(configuration: Configuration) -> MMS.Packed {
 		MMS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: MMS.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: MMS.Packed, configuration: Configuration) {
 		unknown1 = packed.unknown1
 		
 		colorPaletteType = packed.colorPaletteType

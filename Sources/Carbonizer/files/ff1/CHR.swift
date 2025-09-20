@@ -56,13 +56,13 @@ extension CHR.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> CHR.Unpacked {
+	func unpacked(configuration: Configuration) -> CHR.Unpacked {
 		CHR.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: CHR.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: CHR.Unpacked, configuration: Configuration) {
 		bodyNamesCount = UInt32(unpacked.bodyNames.count)
 		
 		headNamesCount = UInt32(unpacked.headNames.count)
@@ -104,13 +104,13 @@ extension CHR.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> CHR.Packed {
+	func packed(configuration: Configuration) -> CHR.Packed {
 		CHR.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: CHR.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: CHR.Packed, configuration: Configuration) {
 		unknowns = packed.unknowns.map { Double(fixedPoint: $0) }
 		
 		bodyNames = packed.bodyNames

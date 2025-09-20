@@ -1,7 +1,7 @@
 func mapLabeller(
 	_ fileSystemObject: consuming any FileSystemObject,
 	text: [String],
-	configuration: Carbonizer.Configuration
+	configuration: Configuration
 ) -> any FileSystemObject {
 	var nds = fileSystemObject as! NDS.Unpacked
 	let mapFolderIndex = nds.contents.firstIndex { $0.name == "map" }!

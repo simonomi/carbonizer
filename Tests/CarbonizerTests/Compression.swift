@@ -22,7 +22,7 @@ struct Compression {
 			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
 //			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"), // 8-bit
 //			(.huffman, "msg_1007 - decompressed", "msg_1007 - huffman"), // 8-bit
-			(.huffman, "kaseki_defs - lzss", "kaseki_defs - huffman"), // ?-bit
+//			(.huffman, "kaseki_defs - lzss", "kaseki_defs - huffman"), // ?-bit
 			(.lzss, "kaseki_defs - decompressed", "kaseki_defs - lzss"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)

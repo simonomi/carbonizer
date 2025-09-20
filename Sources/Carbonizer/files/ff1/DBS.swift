@@ -196,13 +196,13 @@ extension DBS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) throws -> DBS.Unpacked {
+	func unpacked(configuration: Configuration) throws -> DBS.Unpacked {
 		try DBS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DBS.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: DBS.Unpacked, configuration: Configuration) {
 		music = unpacked.music.id
 		
 		unknown3 = unpacked.unknown3
@@ -298,13 +298,13 @@ extension DBS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> DBS.Packed {
+	func packed(configuration: Configuration) -> DBS.Packed {
 		DBS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DBS.Packed, configuration: Carbonizer.Configuration) throws {
+	fileprivate init(_ packed: DBS.Packed, configuration: Configuration) throws {
 		music = Music(id: packed.music)
 		
 		unknown3 = packed.unknown3
@@ -349,7 +349,7 @@ extension DBS.Unpacked.Fighter {
 		}
 	}
 	
-	init(_ packed: DBS.Packed.Fighter, configuration: Carbonizer.Configuration) throws {
+	init(_ packed: DBS.Packed.Fighter, configuration: Configuration) throws {
 		name = Name(id: packed.name)
 		rank = packed.rank
 		

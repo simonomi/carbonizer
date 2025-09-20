@@ -458,13 +458,13 @@ extension ECS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> ECS.Unpacked {
+	func unpacked(configuration: Configuration) -> ECS.Unpacked {
 		ECS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: ECS.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: ECS.Unpacked, configuration: Configuration) {
 		thingACount = UInt32(unpacked.thingAs.count)
 		
 		unknown1 = Int32(fixedPoint: unpacked.unknown1)
@@ -674,13 +674,13 @@ extension ECS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> ECS.Packed {
+	func packed(configuration: Configuration) -> ECS.Packed {
 		ECS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: ECS.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: ECS.Packed, configuration: Configuration) {
 		unknown1 = Double(fixedPoint: packed.unknown1)
 		unknown2 = Double(fixedPoint: packed.unknown2)
 		unknown3 = Double(fixedPoint: packed.unknown3)

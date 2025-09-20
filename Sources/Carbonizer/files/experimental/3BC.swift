@@ -28,13 +28,13 @@ extension TBC.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> TBC.Unpacked {
+	func unpacked(configuration: Configuration) -> TBC.Unpacked {
 		TBC.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: TBC.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: TBC.Unpacked, configuration: Configuration) {
 		todo()
 	}
 }
@@ -45,13 +45,13 @@ extension TBC.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> TBC.Packed {
+	func packed(configuration: Configuration) -> TBC.Packed {
 		TBC.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: TBC.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: TBC.Packed, configuration: Configuration) {
 		todo()
 	}
 }

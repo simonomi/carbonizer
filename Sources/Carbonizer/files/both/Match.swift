@@ -16,17 +16,17 @@ extension Match.Packed: ProprietaryFileData {
 	static var magicBytes: String { "" }
 	static var packedStatus: PackedStatus { .packed }
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Match.Unpacked {
+	func unpacked(configuration: Configuration) -> Match.Unpacked {
 		Match.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: Match.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: Match.Unpacked, configuration: Configuration) {
 		data = unpacked.data
 	}
 	
-	init(_ data: Datastream, configuration: Carbonizer.Configuration) throws {
+	init(_ data: Datastream, configuration: Configuration) throws {
 		do {
 			let dataCount = data.bytes[data.offset...].count / (Element.bitWidth / 8)
 			self.data = try data.read([Element].self, count: dataCount)
@@ -46,13 +46,13 @@ extension Match.Unpacked: ProprietaryFileData {
 	static var magicBytes: String { "" }
 	static var packedStatus: PackedStatus { .unpacked }
 	
-	func packed(configuration: Carbonizer.Configuration) -> Match.Packed {
+	func packed(configuration: Configuration) -> Match.Packed {
 		Match.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: Match.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: Match.Packed, configuration: Configuration) {
 		data = packed.data
 	}
 }

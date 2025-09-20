@@ -3,7 +3,7 @@ import BinaryParser
 
 func makeFile(
 	contentsOf path: URL,
-	configuration: Carbonizer.Configuration
+	configuration: Configuration
 ) throws -> (any FileSystemObject)? {
 	let metadata = try Metadata(forItemAt: path)
 	if metadata?.skipFile == true { return nil }
@@ -47,7 +47,7 @@ func makeFile(
 	name: String,
 	metadata: Metadata?,
 	data: Datastream,
-	configuration: Carbonizer.Configuration
+	configuration: Configuration
 ) throws -> any FileSystemObject {
 	if configuration.fileTypes.contains("NDS"), name.hasSuffix(NDS.Packed.fileExtension) {
 		return NDS.Packed(

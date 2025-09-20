@@ -1,7 +1,7 @@
 func dexDialogueSaver(
 	_ fileSystemObject: consuming any FileSystemObject,
 	updatedDialogue: [UInt32: String],
-	configuration: Carbonizer.Configuration
+	configuration: Configuration
 ) -> any FileSystemObject {
 	switch fileSystemObject {
 		case let binaryFile as BinaryFile: binaryFile

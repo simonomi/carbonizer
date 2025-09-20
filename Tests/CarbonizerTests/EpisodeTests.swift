@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 
+import ANSICodes
 @testable import Carbonizer
 
 @Test(arguments: [DEX.Unpacked.ff1Commands, DEX.Unpacked.ffcCommands])

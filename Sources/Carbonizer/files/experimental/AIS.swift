@@ -33,13 +33,13 @@ extension AIS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> AIS.Unpacked {
+	func unpacked(configuration: Configuration) -> AIS.Unpacked {
 		AIS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: AIS.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: AIS.Unpacked, configuration: Configuration) {
 		todo()
 	}
 }
@@ -50,13 +50,13 @@ extension AIS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> AIS.Packed {
+	func packed(configuration: Configuration) -> AIS.Packed {
 		AIS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: AIS.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: AIS.Packed, configuration: Configuration) {
 		todo()
 	}
 }

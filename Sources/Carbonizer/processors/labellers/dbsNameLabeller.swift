@@ -1,7 +1,7 @@
 func dbsNameLabeller(
 	_ fileSystemObject: consuming any FileSystemObject,
 	text: [String],
-	configuration: Carbonizer.Configuration
+	configuration: Configuration
 ) -> any FileSystemObject {
 	var nds = fileSystemObject as! NDS.Unpacked
 	let battleFolderIndex = nds.contents.firstIndex { $0.name == "battle" }!

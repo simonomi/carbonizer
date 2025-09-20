@@ -27,13 +27,13 @@ extension DTX.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> DTX.Unpacked {
+	func unpacked(configuration: Configuration) -> DTX.Unpacked {
 		DTX.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DTX.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: DTX.Unpacked, configuration: Configuration) {
 		stringCount = UInt32(unpacked.strings.count)
 
 		indices = makeOffsets(
@@ -53,13 +53,13 @@ extension DTX.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> DTX.Packed {
+	func packed(configuration: Configuration) -> DTX.Packed {
 		DTX.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DTX.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: DTX.Packed, configuration: Configuration) {
 		strings = packed.strings
 	}
 }

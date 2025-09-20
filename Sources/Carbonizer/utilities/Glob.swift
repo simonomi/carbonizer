@@ -108,6 +108,32 @@ extension Glob {
 			}
 		}
 	}
+	
+	// this version works for folders, to allow short-circuiting
+	consuming func couldFindMatch(in path: consuming [String]) -> Bool {
+		while true {
+			switch (components.first, path.first) {
+				case (nil, nil), (_?, nil), (.recursiveWildcard, _):
+					return true
+				case (nil, _?):
+					return false
+				case (.exactly(let expectedPathComponent), let pathComponent?):
+					if pathComponent == expectedPathComponent {
+						components.removeFirst()
+						path.removeFirst()
+					} else {
+						return false
+					}
+				case (.wildcard(let pattern), let pathComponent?):
+					if pattern.matches(pathComponent) {
+						components.removeFirst()
+						path.removeFirst()
+					} else {
+						return false
+					}
+			}
+		}
+	}
 }
 
 extension Glob.Component.WildcardPattern {
@@ -126,3 +152,8 @@ extension Glob.Component.WildcardPattern {
 	}
 }
 
+extension Glob: ExpressibleByStringLiteral {
+	public init(stringLiteral: String) {
+		try! self.init(raw: stringLiteral)
+	}
+}

@@ -112,13 +112,13 @@ extension SDAT.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> SDAT.Unpacked {
+	func unpacked(configuration: Configuration) -> SDAT.Unpacked {
 		SDAT.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: SDAT.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: SDAT.Unpacked, configuration: Configuration) {
 		todo()
 	}
 }
@@ -129,13 +129,13 @@ extension SDAT.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> SDAT.Packed {
+	func packed(configuration: Configuration) -> SDAT.Packed {
 		SDAT.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: SDAT.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: SDAT.Packed, configuration: Configuration) {
 		print(packed.symbolBlock.sequenceNames)
 		print(packed.symbolBlock.sequenceArchiveCategoryNames)
 		print(packed.symbolBlock.sequenceArchiveNames)

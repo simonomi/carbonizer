@@ -448,13 +448,13 @@ extension DCL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> DCL.Unpacked {
+	func unpacked(configuration: Configuration) -> DCL.Unpacked {
 		DCL.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DCL.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: DCL.Unpacked, configuration: Configuration) {
 		unknown1 = unpacked.unknown1
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
@@ -644,13 +644,13 @@ extension DCL.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> DCL.Packed {
+	func packed(configuration: Configuration) -> DCL.Packed {
 		DCL.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DCL.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: DCL.Packed, configuration: Configuration) {
 		unknown1 = packed.unknown1
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3

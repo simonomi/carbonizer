@@ -36,13 +36,13 @@ extension SHP.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> SHP.Unpacked {
+	func unpacked(configuration: Configuration) -> SHP.Unpacked {
 		SHP.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: SHP.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: SHP.Unpacked, configuration: Configuration) {
 		firstCount = UInt32(unpacked.firsts.count)
 		secondCount = UInt32(unpacked.seconds.count)
 		secondOffset = firstOffset + 8 * firstCount
@@ -59,13 +59,13 @@ extension SHP.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> SHP.Packed {
+	func packed(configuration: Configuration) -> SHP.Packed {
 		SHP.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: SHP.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: SHP.Packed, configuration: Configuration) {
 		firsts = packed.firsts.map(\.unknown2)
 		seconds = packed.seconds.map(\.unknown2)
 	}

@@ -3,7 +3,7 @@ import Foundation
 public enum Action {
 	case auto, pack, unpack
 	
-	fileprivate func resolved(for path: URL) throws -> PackOrUnpack {
+	func resolved(for path: URL) throws -> PackOrUnpack {
 		switch self {
 			case .auto:
 				if try path.isDirectory() {
@@ -17,23 +17,20 @@ public enum Action {
 	}
 }
 
-fileprivate enum PackOrUnpack {
-	case pack, unpack
-}
-
 extension Carbonizer {
-	static func process(
+	static func run(
 		_ action: Action,
 		path filePath: URL,
 		into outputFolder: URL,
 		configuration: Configuration
 	) throws {
+		let action = try action.resolved(for: filePath)
 #if !IN_CI
 		let readStart = Date.now
 #endif
 		
 		// TODO: add priority to logs for things like this
-		guard let file = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
+		guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
 			configuration.log("skipping", filePath.path(percentEncoded: false))
 			return
 		}
@@ -42,29 +39,37 @@ extension Carbonizer {
 			throw InvalidInput()
 		}
 		
-		// TODO: processors
-		
 #if !IN_CI
 		print("\(.red)read", readStart.timeElapsed, "\(.normal)\(.clearToEndOfLine)")
+		let firstProcessorsStart = Date.now
+#endif
 		
+		try runProcessors(on: &file, when: action, configuration: configuration)
+		
+#if !IN_CI
+		print("\(.yellow)process", firstProcessorsStart.timeElapsed, "\(.normal)\(.clearToEndOfLine)")
 		let packUnpackStart = Date.now
 #endif
 		
-		let processedFile: any FileSystemObject
-		switch try action.resolved(for: filePath) {
+		switch action {
 			case .pack:
-				processedFile = file.packed(configuration: configuration)
+				file = file.packed(configuration: configuration)
 			case .unpack:
-				processedFile = try file.unpacked(path: [], configuration: configuration)
+				file = try file.unpacked(path: [], configuration: configuration)
 		}
 		
 #if !IN_CI
 		print("\(.yellow)pack/unpack", packUnpackStart.timeElapsed, "\(.normal)\(.clearToEndOfLine)")
+		let secondProcessorsStart = Date.now
 #endif
 		
-		// TODO: processors
+		try runProcessors(on: &file, when: action, configuration: configuration)
 		
-		let savePath = processedFile.savePath(in: outputFolder, with: configuration)
+#if !IN_CI
+		print("\(.yellow)process", secondProcessorsStart.timeElapsed, "\(.normal)\(.clearToEndOfLine)")
+#endif
+		
+		let savePath = file.savePath(in: outputFolder, with: configuration)
 		
 		configuration.log("writing to", savePath.path(percentEncoded: false))
 		
@@ -88,7 +93,7 @@ extension Carbonizer {
 		let writeStart = Date.now
 #endif
 		
-		try processedFile.write(into: outputFolder, with: configuration)
+		try file.write(into: outputFolder, with: configuration)
 		
 #if !IN_CI
 		print("\(.cyan)write", writeStart.timeElapsed, "\(.normal)\(.clearToEndOfLine)")

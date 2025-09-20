@@ -8,7 +8,7 @@ struct BinaryFile {
 }
 
 extension BinaryFile: FileSystemObject {
-	func savePath(in directory: URL, with configuration: Carbonizer.Configuration) -> URL {
+	func savePath(in directory: URL, with configuration: Configuration) -> URL {
 		let path = directory.appending(component: name)
 		
 		if configuration.overwriteOutput || !path.exists() { return path }
@@ -28,7 +28,7 @@ extension BinaryFile: FileSystemObject {
 	
 	func write(
 		into folder: URL,
-		with configuration: Carbonizer.Configuration
+		with configuration: Configuration
 	) throws {
 		let path = savePath(in: folder, with: configuration)
 		configuration.log("Writing", path.path(percentEncoded: false))
@@ -65,6 +65,6 @@ extension BinaryFile: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .unknown }
 	
-	func packed(configuration: Carbonizer.Configuration) -> BinaryFile { self }
-	func unpacked(path: [String] = [], configuration: Carbonizer.Configuration) throws -> BinaryFile { self }
+	func packed(configuration: Configuration) -> BinaryFile { self }
+	func unpacked(path: [String] = [], configuration: Configuration) throws -> BinaryFile { self }
 }

@@ -64,13 +64,13 @@ extension DML.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> DML.Unpacked {
+	func unpacked(configuration: Configuration) -> DML.Unpacked {
 		DML.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DML.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: DML.Unpacked, configuration: Configuration) {
 		vivosaurs = unpacked.vivosaurs.map(Vivosaur.init)
 		vivosaurCount = UInt32(vivosaurs.count)
 	}
@@ -99,13 +99,13 @@ extension DML.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> DML.Packed {
+	func packed(configuration: Configuration) -> DML.Packed {
 		DML.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DML.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: DML.Packed, configuration: Configuration) {
 		vivosaurs = packed.vivosaurs.enumerated().map(Vivosaur.init)
 	}
 }

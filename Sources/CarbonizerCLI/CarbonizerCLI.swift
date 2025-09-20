@@ -1,3 +1,8 @@
+// this fixes using `stdout` on linux
+#if os(Linux)
+@preconcurrency import Glibc
+#endif
+
 import Carbonizer
 import ANSICodes
 import ArgumentParser
@@ -12,7 +17,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 	)
 	
 	@Flag(help: "Manually specify compression mode (default: --auto)")
-	var compressionMode: Configuration.CompressionMode?
+	var compressionMode: CLIConfiguration.CompressionMode?
 	
 	@Argument(
 		help: "The files to pack/unpack",
@@ -34,9 +39,9 @@ struct CarbonizerCLI: AsyncParsableCommand {
 			.appending(component: "config.json5") ?? URL(filePath: "config.json5")
 #endif
 		
-		let cliConfiguration: Configuration
+		let cliConfiguration: CLIConfiguration
 		do {
-			cliConfiguration = try Configuration(contentsOf: configurationPath)
+			cliConfiguration = try CLIConfiguration(contentsOf: configurationPath)
 		} catch let error as DecodingError {
 			print(error.configurationFormatting(path: configurationPath))
 			waitForInput()
@@ -65,7 +70,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 			logHandler = nil
 		}
 		
-		let configuration = Carbonizer.Configuration(
+		let configuration = Configuration(
 			cliConfiguration,
 			logHandler: logHandler
 		)

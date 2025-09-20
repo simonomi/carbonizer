@@ -39,13 +39,13 @@ extension KIL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> KIL.Unpacked {
+	func unpacked(configuration: Configuration) -> KIL.Unpacked {
 		KIL.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: KIL.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: KIL.Unpacked, configuration: Configuration) {
 		keyItems = unpacked.keyItems.map(KeyItem.init)
 		keyItemCount = UInt32(keyItems.count)
 	}
@@ -64,13 +64,13 @@ extension KIL.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> KIL.Packed {
+	func packed(configuration: Configuration) -> KIL.Packed {
 		KIL.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: KIL.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: KIL.Packed, configuration: Configuration) {
 		keyItems = packed.keyItems.map(KeyItem.init)
 	}
 }

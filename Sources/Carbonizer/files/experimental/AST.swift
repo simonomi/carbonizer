@@ -46,13 +46,13 @@ extension AST.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> AST.Unpacked {
+	func unpacked(configuration: Configuration) -> AST.Unpacked {
 		AST.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: AST.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: AST.Unpacked, configuration: Configuration) {
 		todo()
 	}
 }
@@ -63,13 +63,13 @@ extension AST.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> AST.Packed {
+	func packed(configuration: Configuration) -> AST.Packed {
 		AST.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: AST.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: AST.Packed, configuration: Configuration) {
 		todo()
 	}
 }

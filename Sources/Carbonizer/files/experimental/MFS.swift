@@ -63,13 +63,13 @@ extension MFS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> MFS.Unpacked {
+	func unpacked(configuration: Configuration) -> MFS.Unpacked {
 		MFS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: MFS.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: MFS.Unpacked, configuration: Configuration) {
 		todo()
 	}
 }
@@ -80,13 +80,13 @@ extension MFS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> MFS.Packed {
+	func packed(configuration: Configuration) -> MFS.Packed {
 		MFS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: MFS.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: MFS.Packed, configuration: Configuration) {
 		guard packed.someCount == 3 else { return }
 		
 		let something = packed.noClue.first!

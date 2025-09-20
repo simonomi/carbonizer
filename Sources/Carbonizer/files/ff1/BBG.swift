@@ -53,13 +53,13 @@ extension BBG.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> BBG.Unpacked {
+	func unpacked(configuration: Configuration) -> BBG.Unpacked {
 		BBG.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: BBG.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: BBG.Unpacked, configuration: Configuration) {
 		kasekiums = unpacked.kasekiums.map(Kasekium.init)
 		kasekiumCount = UInt32(kasekiums.count)
 		kasekiumOffsets = makeOffsets(
@@ -89,13 +89,13 @@ extension BBG.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> BBG.Packed {
+	func packed(configuration: Configuration) -> BBG.Packed {
 		BBG.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: BBG.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: BBG.Packed, configuration: Configuration) {
 		kasekiums = packed.kasekiums.map(Kasekium.init)
 	}
 }

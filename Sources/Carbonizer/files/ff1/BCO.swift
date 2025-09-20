@@ -36,13 +36,13 @@ extension BCO.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> BCO.Unpacked {
+	func unpacked(configuration: Configuration) -> BCO.Unpacked {
 		BCO.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: BCO.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: BCO.Unpacked, configuration: Configuration) {
 		count = UInt32(unpacked.elements.count)
 		
 		elements = unpacked.elements.map(Element.init)
@@ -67,13 +67,13 @@ extension BCO.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> BCO.Packed {
+	func packed(configuration: Configuration) -> BCO.Packed {
 		BCO.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: BCO.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: BCO.Packed, configuration: Configuration) {
 		elements = packed.elements.map(Element?.init)
 	}
 }

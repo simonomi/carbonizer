@@ -9,7 +9,7 @@ struct Folder {
 
 func makeFolder(
 	contentsOf path: URL,
-	configuration: Carbonizer.Configuration
+	configuration: Configuration
 ) throws -> (any FileSystemObject)? {
 	let metadata = try Metadata(forItemAt: path)
 	if metadata?.skipFile == true { return nil }
@@ -50,7 +50,7 @@ func makeFolder(
 extension Folder: FileSystemObject {
 	var fileExtension: String { "" }
 	
-	func savePath(in directory: URL, with configuration: Carbonizer.Configuration) -> URL {
+	func savePath(in directory: URL, with configuration: Configuration) -> URL {
 		let path = directory
 			.appending(component: name)
 		
@@ -68,7 +68,7 @@ extension Folder: FileSystemObject {
 	
 	func write(
 		into folder: URL,
-		with configuration: Carbonizer.Configuration
+		with configuration: Configuration
 	) throws {
 		let path = savePath(in: folder, with: configuration)
 		configuration.log("Writing", path.path(percentEncoded: false))
@@ -101,7 +101,7 @@ extension Folder: FileSystemObject {
 			.reduce(.unknown) { $0.combined(with: $1) }
 	}
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self {
+	func packed(configuration: Configuration) -> Self {
 		Folder(
 			name: name,
 			metadata: metadata,
@@ -109,7 +109,7 @@ extension Folder: FileSystemObject {
 		)
 	}
 	
-	func unpacked(path: [String], configuration: Carbonizer.Configuration) throws -> Self {
+	func unpacked(path: [String], configuration: Configuration) throws -> Self {
 		Folder(
 			name: name,
 			metadata: metadata,

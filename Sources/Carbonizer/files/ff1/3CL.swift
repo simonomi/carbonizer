@@ -87,13 +87,13 @@ extension TCL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> TCL.Unpacked {
+	func unpacked(configuration: Configuration) -> TCL.Unpacked {
 		TCL.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: TCL.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: TCL.Unpacked, configuration: Configuration) {
 		vivosaurCount = UInt32(unpacked.vivosaurs.count)
 		
 		vivosaurs = unpacked.vivosaurs.map { Vivosaur($0) }
@@ -177,13 +177,13 @@ extension TCL.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> TCL.Packed {
+	func packed(configuration: Configuration) -> TCL.Packed {
 		TCL.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: TCL.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: TCL.Packed, configuration: Configuration) {
 		vivosaurs = packed.vivosaurs.map {
 			Vivosaur(
 				animations: $0.animations.map {

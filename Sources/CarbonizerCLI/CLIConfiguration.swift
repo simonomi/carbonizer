@@ -2,175 +2,173 @@ import Carbonizer
 import Foundation
 import ArgumentParser
 
-extension CarbonizerCLI {
-	struct Configuration : Sendable {
-		var compressionMode: CompressionMode
-		var inputFiles: [String]
-		var outputFolder: String?
-		var overwriteOutput: Bool
-		var showProgress: Bool
-		var keepWindowOpen: KeepWindowOpen
-		var useColor: Bool // TODO: use environment variable (COLORTERM is nil on windows tho)
-		var dexCommandList: DEXCommandList
-		var externalMetadata: Bool
-		
-		var fileTypes: Set<String>
-		
-		var onlyUnpack: [Glob]
-		var skipUnpacking: [Glob]
-		
-		var experimental: ExperimentalOptions
-		
-		struct ExperimentalOptions {
-			var hotReloading: Bool
-			var postProcessors: [String]
-			var dexDialogueLabeller: Bool
-			var dexDialogueSaver: Bool
-			var dexBlockLabeller: Bool
-			var dbsNameLabeller: Bool
-			var hmlNameLabeller: Bool
-			var keyItemLabeller: Bool
-			var mapLabeller: Bool
-			var museumLabeller: Bool
-		}
-		
-		enum CompressionMode: String, EnumerableFlag, Decodable {
-			case pack, unpack, auto
-			
-			static func name(for value: Self) -> NameSpecification {
-				switch value {
-					case .pack: .shortAndLong
-					case .unpack: .shortAndLong
-					case .auto: .long
-				}
-			}
-		}
-		
-		enum KeepWindowOpen: String, Decodable {
-			case always, never, onError
-			
-			var isTrueOnError: Bool {
-				self == .always || self == .onError
-			}
-		}
-		
-		enum DEXCommandList: String, Decodable {
-			case ff1, ffc, none
-		}
-		
-		// TODO: including the file types makes updating carbonizer not use new file types :/
-		// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns
-		static let defaultConfigurationString: String = """
-			{
-				"compressionMode": "auto", // auto, pack, unpack
-				
-				"inputFiles": [],
-				
-				// where any output files will be placed
-				"outputFolder": null,
-				
-				// whether to overwrite any already-existing output files
-				"overwriteOutput": false,
-				
-				"showProgress": true,
-				
-				"keepWindowOpen": "onError", // always, never, onError
-				
-				// enables pretty colorful output! not all terminals support colors though :(
-				"useColor": true,
-				
-				// ff1 and ffc use different commands in their DEX files (episode folder), you should
-				// pick the one that matches the game you're unpacking. setting this to none may
-				// fix some weird bugs if something unexpected occurs (but it'll make episode files
-				// less readable)
-				"dexCommandList": "ff1", // ff1, ffc, none
-				
-				// stores metadata for MAR files in a separate file, rather than the creation
-				// date. this can avoid some problems, but creates a bunch of annoying extra files.
-				// required to make MAR packing work on linux
-				"externalMetadata": false,
-				
-				// basically required for anything useful: NDS, MAR
-				//
-				// both ff1/ffc: _match, DEX, DMG, DMS, DTX, GRD, KIL, MPM, MMS, MPM 
-				// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
-				"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
-				
-				// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
-				// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
-				// to accidentally skip a file you want to edit!
-				//
-				// these options accept globs within an nds' contents ("text/japanese", "episode/*", "model/**", "**/arc*")
-				// file names in globs may contain one wildcard "arc*", but not two "*arc*"
-				"onlyUnpack": [],
-				"skipUnpacking": [],
-				
-				"experimental": {
-					"hotReloading": false, // macOS only
-					
-					// 3clFinder: extract vivosaur 3D model files
-					//            make sure to enable the 3CL file type or nothing will happen
-					// mm3Finder: extract non-vivosaur 3D model files
-					//            make sure to enable the MM3 file type or nothing will happen
-					// mmsFinder: extract sprites (motion folder)
-					//            make sure to enable the MMS file type or nothing will happen
-					// mpmFinder: extract images (image folder)
-					//            make sure to enablethe  MPM file type or nothing will happen
-					"postProcessors": [],
-					
-					// adds comments to DEX files that show the dialogue used in a given command
-					//
-					// make sure to enable the DEX and DMG file types or nothing will happen
-					"dexDialogueLabeller": false,
-					
-					// allows editing the comments made by dexDialogueLabeller, which will be
-					// saved to the correct MSG file. new lines of dialogue cannot be added
-					//
-					// make sure to enable the DEX and DMG file types or nothing will happen 
-					"dexDialogueSaver": false,
-					
-					// labels the blocks of commands in DEX files with their block number. this number
-					// is used by DEP files to control when a block triggers
-					//
-					// make sure to enable both the DEX and DEP file types or nothing will happen
-					"dexBlockLabeller": false,
-					
-					// adds labels for the names of fighters in DBS files (battle folder)
-					//
-					// make sure to enable both the DBS and DTX file types or nothing will happen
-					"dbsNameLabeller": false,
-					
-					// adds labels for the names of masks in `etc/headmask_defs`
-					//
-					// make sure to enable both the HML and DTX file types or nothing will happen
-					"hmlNameLabeller": false,
-					
-					// adds labels for the text in `etc/keyitem_defs`
-					//
-					// make sure to enable both the KIL and DTX file types or nothing will happen
-					"keyItemLabeller": false,
-					
-					// adds labels for the names of maps in MAP files (`map/m/` folder)
-					//
-					// make sure to enable both the MAP and DTX file types or nothing will happen
-					"mapLabeller": false,
-					
-					// adds labels for the descriptions in `etc/museum_defs`
-					//
-					// make sure to enable both the DML and DTX file types or nothing will happen
-					"museumLabeller": false
-				}
-			}
-			"""
-#if os(Windows)
-			.replacing("useColor\": true", with: "useColor\": false")
-#endif
-		
-		static let defaultConfiguration = try! Self(decoding: defaultConfigurationString)
+struct CLIConfiguration : Sendable {
+	var compressionMode: CompressionMode
+	var inputFiles: [String]
+	var outputFolder: String?
+	var overwriteOutput: Bool
+	var showProgress: Bool
+	var keepWindowOpen: KeepWindowOpen
+	var useColor: Bool // TODO: use environment variable (COLORTERM is nil on windows tho)
+	var dexCommandList: DEXCommandList
+	var externalMetadata: Bool
+	
+	var fileTypes: Set<String>
+	
+	var onlyUnpack: [Glob]
+	var skipUnpacking: [Glob]
+	
+	var experimental: ExperimentalOptions
+	
+	struct ExperimentalOptions {
+		var hotReloading: Bool
+		var postProcessors: [String]
+		var dexDialogueLabeller: Bool
+		var dexDialogueSaver: Bool
+		var dexBlockLabeller: Bool
+		var dbsNameLabeller: Bool
+		var hmlNameLabeller: Bool
+		var keyItemLabeller: Bool
+		var mapLabeller: Bool
+		var museumLabeller: Bool
 	}
+	
+	enum CompressionMode: String, EnumerableFlag, Decodable {
+		case pack, unpack, auto
+		
+		static func name(for value: Self) -> NameSpecification {
+			switch value {
+				case .pack: .shortAndLong
+				case .unpack: .shortAndLong
+				case .auto: .long
+			}
+		}
+	}
+	
+	enum KeepWindowOpen: String, Decodable {
+		case always, never, onError
+		
+		var isTrueOnError: Bool {
+			self == .always || self == .onError
+		}
+	}
+	
+	enum DEXCommandList: String, Decodable {
+		case ff1, ffc, none
+	}
+	
+	// TODO: including the file types makes updating carbonizer not use new file types :/
+	// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns
+	static let defaultConfigurationString: String = """
+		{
+			"compressionMode": "auto", // auto, pack, unpack
+			
+			"inputFiles": [],
+			
+			// where any output files will be placed
+			"outputFolder": null,
+			
+			// whether to overwrite any already-existing output files
+			"overwriteOutput": false,
+			
+			"showProgress": true,
+			
+			"keepWindowOpen": "onError", // always, never, onError
+			
+			// enables pretty colorful output! not all terminals support colors though :(
+			"useColor": true,
+			
+			// ff1 and ffc use different commands in their DEX files (episode folder), you should
+			// pick the one that matches the game you're unpacking. setting this to none may
+			// fix some weird bugs if something unexpected occurs (but it'll make episode files
+			// less readable)
+			"dexCommandList": "ff1", // ff1, ffc, none
+			
+			// stores metadata for MAR files in a separate file, rather than the creation
+			// date. this can avoid some problems, but creates a bunch of annoying extra files.
+			// required to make MAR packing work on linux
+			"externalMetadata": false,
+			
+			// basically required for anything useful: NDS, MAR
+			//
+			// both ff1/ffc: _match, DEX, DMG, DMS, DTX, GRD, KIL, MPM, MMS, MPM 
+			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
+			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			
+			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
+			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
+			// to accidentally skip a file you want to edit!
+			//
+			// these options accept globs within an nds' contents ("text/japanese", "episode/*", "model/**", "**/arc*")
+			// file names in globs may contain one wildcard "arc*", but not two "*arc*"
+			"onlyUnpack": [],
+			"skipUnpacking": [],
+			
+			"experimental": {
+				"hotReloading": false, // macOS only
+				
+				// 3clFinder: extract vivosaur 3D model files
+				//            make sure to enable the 3CL file type or nothing will happen
+				// mm3Finder: extract non-vivosaur 3D model files
+				//            make sure to enable the MM3 file type or nothing will happen
+				// mmsFinder: extract sprites (motion folder)
+				//            make sure to enable the MMS file type or nothing will happen
+				// mpmFinder: extract images (image folder)
+				//            make sure to enablethe  MPM file type or nothing will happen
+				"postProcessors": [],
+				
+				// adds comments to DEX files that show the dialogue used in a given command
+				//
+				// make sure to enable the DEX and DMG file types or nothing will happen
+				"dexDialogueLabeller": false,
+				
+				// allows editing the comments made by dexDialogueLabeller, which will be
+				// saved to the correct MSG file. new lines of dialogue cannot be added
+				//
+				// make sure to enable the DEX and DMG file types or nothing will happen 
+				"dexDialogueSaver": false,
+				
+				// labels the blocks of commands in DEX files with their block number. this number
+				// is used by DEP files to control when a block triggers
+				//
+				// make sure to enable both the DEX and DEP file types or nothing will happen
+				"dexBlockLabeller": false,
+				
+				// adds labels for the names of fighters in DBS files (battle folder)
+				//
+				// make sure to enable both the DBS and DTX file types or nothing will happen
+				"dbsNameLabeller": false,
+				
+				// adds labels for the names of masks in `etc/headmask_defs`
+				//
+				// make sure to enable both the HML and DTX file types or nothing will happen
+				"hmlNameLabeller": false,
+				
+				// adds labels for the text in `etc/keyitem_defs`
+				//
+				// make sure to enable both the KIL and DTX file types or nothing will happen
+				"keyItemLabeller": false,
+				
+				// adds labels for the names of maps in MAP files (`map/m/` folder)
+				//
+				// make sure to enable both the MAP and DTX file types or nothing will happen
+				"mapLabeller": false,
+				
+				// adds labels for the descriptions in `etc/museum_defs`
+				//
+				// make sure to enable both the DML and DTX file types or nothing will happen
+				"museumLabeller": false
+			}
+		}
+		"""
+#if os(Windows)
+		.replacing("useColor\": true", with: "useColor\": false")
+#endif
+	
+	static let defaultConfiguration = try! Self(decoding: defaultConfigurationString)
 }
 	
-extension CarbonizerCLI.Configuration: Decodable {
+extension CLIConfiguration: Decodable {
 	enum CodingKeys: CodingKey {
 		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, dexCommandList, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, experimental
 	}
@@ -212,7 +210,7 @@ extension CarbonizerCLI.Configuration: Decodable {
 	}
 }
 
-extension CarbonizerCLI.Configuration.ExperimentalOptions: Decodable {
+extension CLIConfiguration.ExperimentalOptions: Decodable {
 	enum CodingKeys: CodingKey {
 		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
@@ -221,7 +219,7 @@ extension CarbonizerCLI.Configuration.ExperimentalOptions: Decodable {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 		
 		// this is lazy to prevent infinite recursion
-		lazy var fallback = CarbonizerCLI.Configuration.defaultConfiguration.experimental
+		lazy var fallback = CLIConfiguration.defaultConfiguration.experimental
 		
 		hotReloading =        try container.decodeIfPresent(Bool.self,     forKey: .hotReloading) ??
 		fallback.hotReloading
@@ -246,7 +244,7 @@ extension CarbonizerCLI.Configuration.ExperimentalOptions: Decodable {
 	}
 }
 
-extension CarbonizerCLI.Configuration {
+extension CLIConfiguration {
 	init(contentsOf path: URL) throws {
 		let text: String
 		if path.exists() {

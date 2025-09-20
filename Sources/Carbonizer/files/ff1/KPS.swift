@@ -43,13 +43,13 @@ extension KPS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> KPS.Unpacked {
+	func unpacked(configuration: Configuration) -> KPS.Unpacked {
 		KPS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: KPS.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: KPS.Unpacked, configuration: Configuration) {
 		count = UInt32(unpacked.levels.count)
 		levels = unpacked.levels.map(Level.init)
 	}
@@ -72,13 +72,13 @@ extension KPS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> KPS.Packed {
+	func packed(configuration: Configuration) -> KPS.Packed {
 		KPS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: KPS.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: KPS.Packed, configuration: Configuration) {
 		levels = packed.levels.map(Level.init)
 	}
 }

@@ -22,14 +22,12 @@ public extension Carbonizer {
 //			return
 		}
 		
-		let outputFolder = outputFolder
-		
 		try monitorFiles(in: filePath) {
 			let components = $0
 				.deletingPathExtension()
 				.deletingPathExtension()
 				.pathComponents
-				.dropFirst(5)
+				.dropFirst(5) // TODO: is this hardcoding `/Users/simonomi/ff1/output/Fossil Fighters`???
 			
 			guard let newFile = try makeFile(contentsOf: $0, configuration: configuration) else { return }
 			

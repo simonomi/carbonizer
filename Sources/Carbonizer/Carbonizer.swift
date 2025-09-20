@@ -1,8 +1,3 @@
-// hopefully this should fix using `stdout`?
-#if os(Linux)
-@preconcurrency import Glibc
-#endif
-
 import ANSICodes
 import Foundation
 
@@ -10,15 +5,8 @@ import Foundation
 // - add a `carbonizer version.json` file or smthn to contain the version number
 //   - if trying to pack from too old a version (semver or smthn), give an error
 //   - also the list of file types, so if some file types were extracted they need to be repacked
-// - split the configuration into two parts - ongoing
-//   - the CLI configuration (logProgress, input/output paths, post-processors...)
-//   - the library configuration (file types, overwrite output, external metadata, filters...)
 // - make reading (and writing?) use way fewer filesystem calls
 //   - enumerator
-
-// how should the carbonizer library should work
-// - input file path, output folder, overwrite, ff1/ffc, external metadata, file types, filters, monitoring, post-processors (extensions...? new name)
-// - log handler, errors (protocol)
 
 public enum Carbonizer {
 	public static func auto(
@@ -26,7 +14,7 @@ public enum Carbonizer {
 		into outputFolder: URL,
 		configuration: Configuration
 	) throws {
-		try process(.auto, path: filePath, into: outputFolder, configuration: configuration)
+		try run(.auto, path: filePath, into: outputFolder, configuration: configuration)
 	}
 	
 	public static func pack(
@@ -34,7 +22,7 @@ public enum Carbonizer {
 		into outputFolder: URL,
 		configuration: Configuration
 	) throws {
-		try process(.pack, path: filePath, into: outputFolder, configuration: configuration)
+		try run(.pack, path: filePath, into: outputFolder, configuration: configuration)
 	}
 	
 	public static func unpack(
@@ -42,7 +30,7 @@ public enum Carbonizer {
 		into outputFolder: URL,
 		configuration: Configuration
 	) throws {
-		try process(.unpack, path: filePath, into: outputFolder, configuration: configuration)
+		try run(.unpack, path: filePath, into: outputFolder, configuration: configuration)
 	}
 	
 //			if configuration.experimental.dexDialogueSaver, action == .pack {

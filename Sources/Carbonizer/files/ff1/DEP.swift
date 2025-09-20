@@ -156,13 +156,13 @@ extension DEP.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> DEP.Unpacked {
+	func unpacked(configuration: Configuration) -> DEP.Unpacked {
 		DEP.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DEP.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: DEP.Unpacked, configuration: Configuration) {
 		blocks = unpacked.blocks.compactMap(Block.init)
 		blockCount = UInt32(blocks.count)
 		blockOffsets = makeOffsets(
@@ -223,17 +223,17 @@ extension DEP.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> DEP.Packed {
+	func packed(configuration: Configuration) -> DEP.Packed {
 		DEP.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DEP.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: DEP.Packed, configuration: Configuration) {
 		blocks = packed.blocks.map(Block.init)
 	}
 	
-	init(_ data: Datastream, configuration: Carbonizer.Configuration) throws {
+	init(_ data: Datastream, configuration: Configuration) throws {
 		let fileLength = data.bytes.endIndex - data.offset
 		let string = try data.read(String.self, exactLength: fileLength)
 		

@@ -4,25 +4,30 @@ import Foundation
 protocol FileSystemObject {
 	var name: String { get }
 	
-	func savePath(in folder: URL, with configuration: Carbonizer.Configuration) -> URL
-	func write(into folder: URL, with configuration: Carbonizer.Configuration) throws
+	func savePath(in folder: URL, with configuration: Configuration) -> URL
+	func write(into folder: URL, with configuration: Configuration) throws
 	
 	func packedStatus() -> PackedStatus
 	
 	associatedtype Packed: FileSystemObject
-	func packed(configuration: Carbonizer.Configuration) -> Packed
+	func packed(configuration: Configuration) -> Packed
 	
 	associatedtype Unpacked: FileSystemObject
-	func unpacked(path: [String], configuration: Carbonizer.Configuration) throws -> Unpacked
+	func unpacked(path: [String], configuration: Configuration) throws -> Unpacked
 	
-	consuming func postProcessed(with postProcessor: PostProcessor) rethrows -> Self
+	mutating func runProcessor<T>(
+		_ processor: ProcessorFunction<T>,
+		on glob: Glob,
+		in environment: inout Processor.Environment,
+		at path: [String]
+	) throws
 	
 	mutating func setFile(at path: ArraySlice<String>, to content: any FileSystemObject)
 }
 
 func fileSystemObject(
 	contentsOf path: URL,
-	configuration: Carbonizer.Configuration
+	configuration: Configuration
 ) throws -> (any FileSystemObject)? {
 	do {
 		return if try path.isDirectory() {

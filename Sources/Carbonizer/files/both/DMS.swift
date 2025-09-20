@@ -18,13 +18,13 @@ extension DMS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
-	func packed(configuration: Carbonizer.Configuration) -> Self { self }
+	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> DMS.Unpacked {
+	func unpacked(configuration: Configuration) -> DMS.Unpacked {
 		DMS.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DMS.Unpacked, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ unpacked: DMS.Unpacked, configuration: Configuration) {
 		value = unpacked.value
 	}
 }
@@ -35,13 +35,13 @@ extension DMS.Unpacked: ProprietaryFileData {
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Carbonizer.Configuration) -> DMS.Packed {
+	func packed(configuration: Configuration) -> DMS.Packed {
 		DMS.Packed(self, configuration: configuration)
 	}
 	
-	func unpacked(configuration: Carbonizer.Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DMS.Packed, configuration: Carbonizer.Configuration) {
+	fileprivate init(_ packed: DMS.Packed, configuration: Configuration) {
 		value = packed.value
 	}
 }
