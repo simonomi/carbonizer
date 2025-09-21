@@ -19,7 +19,8 @@ protocol FileSystemObject {
 		_ processor: ProcessorFunction<T>,
 		on glob: Glob,
 		in environment: inout Processor.Environment,
-		at path: [String]
+		at path: [String],
+		configuration: Configuration
 	) throws
 	
 	mutating func setFile(at path: ArraySlice<String>, to content: any FileSystemObject)

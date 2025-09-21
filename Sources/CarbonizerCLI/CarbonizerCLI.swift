@@ -70,14 +70,14 @@ struct CarbonizerCLI: AsyncParsableCommand {
 			logHandler = nil
 		}
 		
-		let configuration = Configuration(
-			cliConfiguration,
-			logHandler: logHandler
-		)
-		
-		let filePaths = inputFilePaths + cliConfiguration.inputFiles.map(URL.fromFilePath)
-		
 		do {
+			let configuration = try Configuration(
+				cliConfiguration,
+				logHandler: logHandler
+			)
+			
+			let filePaths = inputFilePaths + cliConfiguration.inputFiles.map(URL.fromFilePath)
+			
 			guard filePaths.isNotEmpty else {
 				throw NoInputFiles()
 			}

@@ -4,9 +4,9 @@ extension Configuration {
 	init(
 		_ cliConfiguration: CLIConfiguration,
 		logHandler: (@Sendable (String) -> Void)?
-	) {
+	) throws {
 		
-		self.init(
+		try self.init(
 			overwriteOutput: cliConfiguration.overwriteOutput,
 			dexCommandList: .init(cliConfiguration.dexCommandList),
 			externalMetadata: cliConfiguration.externalMetadata,

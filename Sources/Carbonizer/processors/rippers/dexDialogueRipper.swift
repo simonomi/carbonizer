@@ -1,38 +1,16 @@
-func dexDialogueRipper(_ fileSystemObject: any FileSystemObject) throws -> [UInt32: WithPossibleMergeConflict<String>] {
-	switch fileSystemObject {
-		case is BinaryFile, is MAR.Packed, is NDS.Packed:
-			[:]
-		case let file as ProprietaryFile:
-			try ripDEXDialogue(file.data)
-		case let mar as MAR.Unpacked:
-			try mar.files.map(\.content).map(ripDEXDialogue).gentlyMerged()
-		case let nds as NDS.Unpacked:
-			try nds.contents.map(dexDialogueRipper).gentlyMerged()
-		case let folder as Folder:
-			try folder.contents.map(dexDialogueRipper).gentlyMerged()
-		default:
-			fatalError("unexpected fileSystemObject type: \(type(of: fileSystemObject))")
+func dexDialogueRipperF(
+	_ dex: inout DEX.Unpacked,
+	in environment: inout Processor.Environment,
+	configuration: Configuration
+) throws {
+	if environment.conflictedDexDialogue == nil {
+		environment.conflictedDexDialogue = [:]
 	}
-}
-
-struct MismatchedDialogueCounts: Error, CustomStringConvertible {
-	var newLines: [String]
-	var dialogueNumbers: [UInt32]
-	
-	var description: String {
-		"The number of lines of dialogue (\(newLines.count)) does not match the number of dialogues used in the command (\(dialogueNumbers.count)). Lines of dialogue: \(newLines), dialogues used: \(dialogueNumbers)"
-	}
-}
-
-fileprivate func ripDEXDialogue(_ data: any ProprietaryFileData) throws -> [UInt32: WithPossibleMergeConflict<String>] {
-	guard let dex = data as? DEX.Unpacked else { return [:] }
-	
-	var updatedDialogue: [UInt32: WithPossibleMergeConflict<String>] = [:]
 	
 	var currentComments: [String] = []
 	
-	for block in dex.commands {
-		for command in block {
+	for event in dex.commands {
+		for command in event {
 			if case .comment(let string) = command {
 				guard string.wholeMatch(of: /block \d+/) == nil else { continue }
 				
@@ -56,10 +34,10 @@ fileprivate func ripDEXDialogue(_ data: any ProprietaryFileData) throws -> [UInt
 				}
 				
 				for (dialogueNumber, newLine) in zip(dialogueNumbers, newLines) {
-					if let existingLine = updatedDialogue[dialogueNumber] {
-						updatedDialogue[dialogueNumber] = WithPossibleMergeConflict(existingLine, .one(newLine))
+					if let existingLine = environment.conflictedDexDialogue![dialogueNumber] {
+						environment.conflictedDexDialogue![dialogueNumber] = WithPossibleMergeConflict(existingLine, .one(newLine))
 					} else {
-						updatedDialogue[dialogueNumber] = .one(newLine)
+						environment.conflictedDexDialogue![dialogueNumber] = .one(newLine)
 					}
 				}
 				currentComments.removeAll(keepingCapacity: true)
@@ -68,17 +46,14 @@ fileprivate func ripDEXDialogue(_ data: any ProprietaryFileData) throws -> [UInt
 			}
 		}
 	}
-	
-	return updatedDialogue
 }
 
-fileprivate extension [[UInt32: WithPossibleMergeConflict<String>]] {
-	func gentlyMerged() -> [UInt32: WithPossibleMergeConflict<String>] {
-		reduce([:]) { partialResult, dialogue in
-			partialResult.merging(dialogue) {
-				WithPossibleMergeConflict($0, $1)
-			}
-		}
+struct MismatchedDialogueCounts: Error, CustomStringConvertible {
+	var newLines: [String]
+	var dialogueNumbers: [UInt32]
+	
+	var description: String {
+		"The number of lines of dialogue (\(newLines.count)) does not match the number of dialogues used in the command (\(dialogueNumbers.count)). Lines of dialogue: \(newLines), dialogues used: \(dialogueNumbers)"
 	}
 }
 

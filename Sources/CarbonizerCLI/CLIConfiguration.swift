@@ -20,6 +20,7 @@ struct CLIConfiguration : Sendable {
 	
 	var experimental: ExperimentalOptions
 	
+	// TODO: rename processors, split into 'processors' section, make hotreloading stable
 	struct ExperimentalOptions {
 		var hotReloading: Bool
 		var postProcessors: [String]
@@ -57,8 +58,7 @@ struct CLIConfiguration : Sendable {
 		case ff1, ffc, none
 	}
 	
-	// TODO: including the file types makes updating carbonizer not use new file types :/
-	// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns
+	// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns?
 	static let defaultConfigurationString: String = """
 		{
 			"compressionMode": "auto", // auto, pack, unpack
@@ -205,8 +205,6 @@ extension CLIConfiguration: Decodable {
 		fallback.skipUnpacking
 		experimental =     try container.decodeIfPresent(ExperimentalOptions.self, forKey: .experimental) ??
 		fallback.experimental
-		
-		// TODO: error on unknown file type
 	}
 }
 

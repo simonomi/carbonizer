@@ -8,18 +8,18 @@ enum DCL {
 		@Include
 		static let magicBytes = "DCL"
 		
-		var unknown1: UInt32
-		var unknown2: UInt32
-		var unknown3: UInt32
-		var unknown4: UInt32
+		var unknown1: UInt32 // start of dinosaur names in text
+		var unknown2: UInt32 // start of vivosaur names in text
+		var unknown3: UInt32 // attack descriptions (but +3??)
+		var unknown4: UInt32 // enemy names
 		
 		var vivosaurCount: UInt32
 		var indicesOffset: UInt32 = 0x2C
 		
-		var unknown5: UInt32
-		var unknown6: UInt32
-		var unknown7: UInt32
-		var unknown8: UInt32
+		var unknown5: UInt32 // like.. attack descriptions in text
+		var unknown6: UInt32 // vmm descriptions
+		var unknown7: UInt32 // size/category or whatever
+		var unknown8: UInt32 // uhh room names???
 		
 		@Count(givenBy: \Self.vivosaurCount)
 		@Offset(givenBy: \Self.indicesOffset)

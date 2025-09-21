@@ -12,7 +12,7 @@ func runProcessors(
 	
 	for step in pipeline {
 		for stage in step {
-			try stage.run(on: &file, in: &environment)
+			try stage.run(on: &file, in: &environment, configuration: configuration)
 		}
 	}
 }

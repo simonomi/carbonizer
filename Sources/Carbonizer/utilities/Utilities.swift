@@ -255,6 +255,7 @@ extension Optional {
 	}
 }
 
+// TODO: use subprocess package
 @discardableResult
 func shell(_ command: String) throws -> String {
 	let task = Process()

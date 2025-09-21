@@ -25,17 +25,17 @@ extension Carbonizer {
 		configuration: Configuration
 	) throws {
 		let action = try action.resolved(for: filePath)
+		
 #if !IN_CI
 		let readStart = Date.now
 #endif
 		
 		// TODO: add priority to logs for things like this
-		guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
-			configuration.log("skipping", filePath.path(percentEncoded: false))
-			return
-		}
+		configuration.log("reading", filePath.path(percentEncoded: false))
 		
-		guard file is NDS.Unpacked || file is NDS.Packed else {
+		guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration),
+		      (file is NDS.Unpacked || file is NDS.Packed)
+		else {
 			throw InvalidInput()
 		}
 		

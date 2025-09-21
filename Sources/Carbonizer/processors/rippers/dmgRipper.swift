@@ -1,6 +1,7 @@
 func dmgRipperF(
 	_ dmg: inout DMG.Unpacked,
-	in environment: inout Processor.Environment
+	in environment: inout Processor.Environment,
+	configuration: Configuration
 ) throws {
 	func uniqueKeys(_ firstLine: String, _ secondLine: String) throws -> String {
 		if firstLine == secondLine {

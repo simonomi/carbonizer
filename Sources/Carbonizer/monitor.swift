@@ -13,13 +13,7 @@ public extension Carbonizer {
 		}
 		
 		guard var fileData = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
-			// TODO: throw
-			todo()
-//			print("\(.red, .bold)Error:\(.normal) \(.bold)could not make FileSystemObject from '\(filePath.path(percentEncoded: false))'\(.normal)")
-//			if configuration.keepWindowOpen.isTrueOnError {
-//				waitForInput()
-//			}
-//			return
+			throw InvalidInput()
 		}
 		
 		try monitorFiles(in: filePath) {
@@ -42,13 +36,13 @@ public extension Carbonizer {
 		
 		print("ready!")
 #else
-		// TODO: throw
-		var standardError = FileHandle.standardError
-		print("\(.red, .bold)Error:\(.normal) \(.bold)Hot reloading is only available on macOS\(.normal)", terminator: "\n\n", to: &standardError)
-		if configuration.keepWindowOpen.isTrueOnError {
-			waitForInput()
-		}
-		return
+		throw OSNotSupported()
 #endif
+	}
+}
+
+struct OSNotSupported: Error, CustomStringConvertible {
+	var description: String {
+		"\(.bold)Hot reloading is only available on macOS\(.normal)"
 	}
 }

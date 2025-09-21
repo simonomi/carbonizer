@@ -79,7 +79,7 @@ public struct Configuration: Sendable {
 		}
 	}
 	
-	public init(overwriteOutput: Bool, dexCommandList: DEXCommandList, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], processors: Set<Processor>, logHandler: (@Sendable (String) -> Void)?) {
+	public init(overwriteOutput: Bool, dexCommandList: DEXCommandList, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], processors: Set<Processor>, logHandler: (@Sendable (String) -> Void)?) throws {
 		self.overwriteOutput = overwriteOutput
 		self.dexCommandList = dexCommandList
 		self.externalMetadata = externalMetadata
@@ -88,6 +88,16 @@ public struct Configuration: Sendable {
 		self.skipUnpacking = skipUnpacking
 		self.processors = processors
 		self.logHandler = logHandler
+		
+		let allowedInputFileTypes = Self.allFileTypes.keys + ["MAR", "NDS", "_match"]
+		
+		guard fileTypes.allSatisfy(allowedInputFileTypes.contains) else {
+			throw UnsupportedFileTypes(
+				fileTypes: fileTypes
+					.filter { !allowedInputFileTypes.contains($0) }
+					.sorted()
+			)
+		}
 		
 		cache = Cache(inputFileTypes: fileTypes)
 	}
