@@ -134,11 +134,22 @@ extension MAR.Unpacked: FileSystemObject {
 		binary: MAR.Packed.Binary,
 		configuration: Configuration
 	) throws {
-		configuration.log("Decompressing", name)
 		self.name = name
 		
+		if binary.files.count == 1 {
+			configuration.log("Decompressing", name)
+		}
+		
 		do {
-			files = try binary.files.map { try MCM.Unpacked($0, configuration: configuration) }
+			files = try binary.files
+				.enumerated()
+				.map {
+					if binary.files.count > 1 {
+						configuration.log("Decompressing", name, $0)
+					}
+					
+					return try MCM.Unpacked($1, configuration: configuration)
+				}
 		} catch {
 			throw BinaryParserError.whileReadingFile(name, error)
 		}

@@ -350,8 +350,12 @@ extension Datastream {
 		
 		let ranges = zip(offsets, offsets.dropFirst() + [endOffset])
 		defer { offset = endOffset }
-		return ranges.map { start, end in
-			Datastream(bytes[start..<end])
+		return try ranges.map { start, end in
+			guard start <= end else {
+				throw BinaryParserError.indexOutOfBounds(index: end, expected: start..<endOffset)
+			}
+			
+			return Datastream(bytes[start..<end])
 		}
 	}
 	

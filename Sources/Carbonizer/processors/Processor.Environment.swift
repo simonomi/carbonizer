@@ -8,7 +8,7 @@ extension Processor {
 		var conflictedDexDialogue: [UInt32: WithPossibleMergeConflict<String>]?
 		var dexDialogue: [UInt32: String]?
 		
-		var vertexFiles: [[String]: Set<Int>]?
+		var meshFiles: [[String]: Set<Int>]?
 		var textureFiles: [[String]: Set<Int>]?
 		var animationFiles: [[String]: Set<Int>]?
 		
@@ -17,7 +17,7 @@ extension Processor {
 			if let _modelTableNameCache {
 				return _modelTableNameCache
 			} else {
-				_modelTableNameCache = Set(try get(\.vertexFiles).keys)
+				_modelTableNameCache = Set(try get(\.meshFiles).keys)
 					.union(try get(\.textureFiles).keys)
 					.union(try get(\.animationFiles).keys)
 				

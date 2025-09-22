@@ -49,13 +49,20 @@ public struct Configuration: Sendable {
 		var magicBytes: [String: any ProprietaryFileData.Type]
 		
 		init(inputFileTypes: Set<String>) {
-			let fileTypes: [any ProprietaryFileData.Type] = Configuration.allFileTypes
+			let enabledFileTypes: [any ProprietaryFileData.Type] = Configuration.allFileTypes
 				.filter { (fileTypeName, _) in
 					inputFileTypes.contains(fileTypeName)
 				}
 				.flatMap { (_, fileType) in
 					fileType.unpackedAndPacked()
 				}
+			
+			let alwaysEnabledFileTypes: [any ProprietaryFileData.Type] = [
+				Mesh.Unpacked.self,
+				Texture.Unpacked.self,
+			]
+			
+			let fileTypes = enabledFileTypes + alwaysEnabledFileTypes
 			
 			fileExtensions = fileTypes
 				.compactMap {

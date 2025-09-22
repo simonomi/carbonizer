@@ -8,9 +8,9 @@ func modelReparserF(
 ) throws {
 	guard try environment.modelTableNames().contains(path) else { return }
 	
-	let vertexFiles = try environment.get(\.vertexFiles)
-	if let vertexIndices = vertexFiles[path] {
-		for fileIndex in vertexIndices {
+	let meshFiles = try environment.get(\.meshFiles)
+	if let meshIndices = meshFiles[path] {
+		for fileIndex in meshIndices {
 			guard mar.files.indices.contains(fileIndex) else {
 				todo("invalid index")
 			}
@@ -30,7 +30,27 @@ func modelReparserF(
 		}
 	}
 	
-//	let textureFiles = try environment.get(\.textureFiles)
+	let textureFiles = try environment.get(\.textureFiles)
+	if let textureIndices = textureFiles[path] {
+		for fileIndex in textureIndices {
+			guard mar.files.indices.contains(fileIndex) else {
+				todo("invalid index")
+			}
+			
+			guard let data = mar.files[fileIndex].content as? Datastream else {
+				todo("invalid type")
+			}
+			
+			do {
+				let packed = try Datastream(data).read(Texture.Packed.self) // copy to not modify the original
+				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
+			} catch {
+				// TODO: log properly
+				print(path + [String(fileIndex)])
+				print(error)
+			}
+		}
+	}
 	
 	
 	

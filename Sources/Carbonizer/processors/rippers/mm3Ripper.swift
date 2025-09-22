@@ -4,12 +4,12 @@ func mm3RipperF(
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {
-	if environment.vertexFiles == nil {
-		environment.vertexFiles = [:]
+	if environment.meshFiles == nil {
+		environment.meshFiles = [:]
 	}
 	
-	let modelTablePath = Array(path.dropLast() + [mm3.mesh.tableName])
-	environment.vertexFiles![modelTablePath, default: []].insert(Int(mm3.mesh.index))
+	let meshTablePath = Array(path.dropLast() + [mm3.mesh.tableName])
+	environment.meshFiles![meshTablePath, default: []].insert(Int(mm3.mesh.index))
 	
 	if environment.textureFiles == nil {
 		environment.textureFiles = [:]

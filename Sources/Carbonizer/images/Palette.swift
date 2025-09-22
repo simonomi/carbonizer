@@ -17,6 +17,18 @@ struct RGB555Color {
 	}
 }
 
+extension RGB555Color {
+	init(_ color: Color) {
+		func fiveBit(_ color: UInt8) -> UInt16 {
+			UInt16(color / (255 / 31))
+		}
+		
+		raw = fiveBit(color.red) |
+			(fiveBit(color.green) << 5) |
+			(fiveBit(color.blue) << 10)
+	}
+}
+
 struct Palette: BinaryConvertible {
 	var colors: [RGB555Color]
 	
