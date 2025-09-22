@@ -1,6 +1,6 @@
 import BinaryParser
 
-func modelReparser(
+func modelReparserF(
 	_ mar: inout MAR.Unpacked,
 	at path: [String],
 	in environment: inout Processor.Environment,
@@ -19,8 +19,14 @@ func modelReparser(
 				todo("invalid type")
 			}
 			
-			let packed = try Datastream(data).read(VertexData.Packed.self) // copy to not modify the original
-			mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
+			do {
+				let packed = try Datastream(data).read(Mesh.Packed.self) // copy to not modify the original
+				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
+			} catch {
+				// TODO: log properly
+				print(path + [String(fileIndex)])
+				print(error)
+			}
 		}
 	}
 	

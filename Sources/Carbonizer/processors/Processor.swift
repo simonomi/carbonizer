@@ -22,7 +22,7 @@ public enum Processor: Hashable, Sendable {
 	var stages: [Stage] {
 		switch self {
 			case .tclFinder:           []
-			case .mm3Finder:           [.mm3Ripper]
+			case .mm3Finder:           [.mm3Ripper, .modelReparser]
 			case .mmsFinder:           []
 			case .mpmFinder:           []
 			case .dexDialogueLabeller: [.dmgRipper, .dexDialogueLabeller]
@@ -40,7 +40,7 @@ public enum Processor: Hashable, Sendable {
 	
 	enum Stage: Equatable {
 		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, mm3Ripper
-		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, hmlNameLabeller, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
 		
 		func run(
 			on file: inout any FileSystemObject,
@@ -144,6 +144,14 @@ public enum Processor: Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
+				case .modelReparser:
+					try file.runProcessor(
+						modelReparserF,
+						on: "model/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
 				case .museumLabeller:
 					try file.runProcessor(
 						museumLabellerF,
@@ -152,7 +160,6 @@ public enum Processor: Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
-				default: todo()
 			}
 		}
 	}

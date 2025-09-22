@@ -1,6 +1,6 @@
 import BinaryParser
 
-enum VertexData {
+enum Mesh {
 	@BinaryConvertible
 	struct Packed {
 		var unknown1: FixedPoint2012 = 32
@@ -62,12 +62,6 @@ enum VertexData {
 	}
 	
 	struct Unpacked: Codable {
-		var commandsLength: UInt32
-		
-		var boneTableLength: UInt32
-		
-		var modelNamesLength: UInt32
-		
 		var unknown2: UInt32
 		var unknown3: UInt32
 		var unknown4: UInt32
@@ -75,7 +69,7 @@ enum VertexData {
 		
 		var unknown6: UInt32
 		
-		var commands: [GPUCommand]
+		var commands: [GPUCommands.Command]
 		
 		var bones: [Bone]
 		
@@ -89,75 +83,82 @@ enum VertexData {
 }
 
 // MARK: packed
-extension VertexData.Packed: ProprietaryFileData {
+extension Mesh.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Configuration) throws -> VertexData.Unpacked {
-		try VertexData.Unpacked(self, configuration: configuration)
+	func unpacked(configuration: Configuration) throws -> Mesh.Unpacked {
+		try Mesh.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: VertexData.Unpacked, configuration: Configuration) {
-		commandsLength = unpacked.commandsLength
-		boneTableLength = unpacked.boneTableLength
-		modelNamesLength = unpacked.modelNamesLength
-		
+	fileprivate init(_ unpacked: Mesh.Unpacked, configuration: Configuration) {
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
 		unknown4 = unpacked.unknown4
 		unknown5 = unpacked.unknown5
 		unknown6 = unpacked.unknown6
 		
-//		commands = unpacked.commands
+		let writer = Datawriter()
+		writer.write(GPUCommands(commands: unpacked.commands))
+		commands = writer.intoDatastream()
+		commandsLength = UInt32(commands.bytes.count)
 		
 		boneTable = BoneTable(
 			boneCount: UInt32(unpacked.bones.count),
 			bones: unpacked.bones.map(BoneTable.Bone.init)
 		)
+		boneTableLength = boneTable.byteCount
 		
 		modelNames = ModelNames(
 			nameCount: UInt32(unpacked.modelNames.count),
 			names: unpacked.modelNames.map(ModelNames.FixedLengthString.init)
 		)
-		
-		todo()
+		modelNamesLength = modelNames.byteCount
 	}
 }
 
-extension VertexData.Packed.BoneTable.Bone {
-	fileprivate init(_ unpacked: VertexData.Unpacked.Bone) {
+extension Mesh.Packed.BoneTable {
+	var byteCount: UInt32 {
+		4 + boneCount * (16 + (3 * 4 * 4))
+	}
+}
+
+extension Mesh.Packed.BoneTable.Bone {
+	fileprivate init(_ unpacked: Mesh.Unpacked.Bone) {
 		name = unpacked.name
 		matrix = Matrix4x3_2012(unpacked.matrix)
 	}
 }
 
+extension Mesh.Packed.ModelNames {
+	var byteCount: UInt32 {
+		4 + nameCount * 16
+	}
+}
+
 // MARK: unpacked
-extension VertexData.Unpacked: ProprietaryFileData {
-	static let fileExtension = ".vertexData.json"
+extension Mesh.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".mesh.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Configuration) -> VertexData.Packed {
-		VertexData.Packed(self, configuration: configuration)
+	func packed(configuration: Configuration) -> Mesh.Packed {
+		Mesh.Packed(self, configuration: configuration)
 	}
 	
 	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: VertexData.Packed, configuration: Configuration) throws {
-		commandsLength = packed.commandsLength
-		boneTableLength = packed.boneTableLength
-		modelNamesLength = packed.modelNamesLength
-		
+	fileprivate init(_ packed: Mesh.Packed, configuration: Configuration) throws {
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3
 		unknown4 = packed.unknown4
 		unknown5 = packed.unknown5
 		unknown6 = packed.unknown6
 		
-		commands = try packed.commands.readCommands()
+		commands = try packed.commands.read(GPUCommands.self).commands
 		
 		bones = packed.boneTable.bones.map(Bone.init)
 		
@@ -165,8 +166,8 @@ extension VertexData.Unpacked: ProprietaryFileData {
 	}
 }
 
-extension VertexData.Unpacked.Bone {
-	fileprivate init(_ packed: VertexData.Packed.BoneTable.Bone) {
+extension Mesh.Unpacked.Bone {
+	fileprivate init(_ packed: Mesh.Packed.BoneTable.Bone) {
 		name = packed.name
 		matrix = Matrix4x3(packed.matrix)
 	}

@@ -50,18 +50,18 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //	print(file.name)
 	
 	do {
-		let arc = parent.contents.first { $0.name == mm3.model.tableName }! as! MAR.Unpacked
+		let arc = parent.contents.first { $0.name == mm3.mesh.tableName }! as! MAR.Unpacked
 		
-		guard arc.files.indices.contains(Int(mm3.model.index)) else {
+		guard arc.files.indices.contains(Int(mm3.mesh.index)) else {
 			throw BinaryParserError.indexOutOfBounds(
-				index: Int(mm3.model.index),
+				index: Int(mm3.mesh.index),
 				expected: arc.files.indices,
 				whileReading: MM3.self
 			)
 		}
 		
-		let modelData = Datastream(arc.files[Int(mm3.model.index)].content as! Datastream) // copy to not modify the original
-		let vertexData = try modelData.read(VertexData.Packed.self)
+		let meshData = Datastream(arc.files[Int(mm3.mesh.index)].content as! Datastream) // copy to not modify the original
+		let mesh = try meshData.read(Mesh.Packed.self)
 		
 		guard arc.files.indices.contains(Int(mm3.texture.index)) else {
 			throw BinaryParserError.indexOutOfBounds(
@@ -118,7 +118,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 //		return [file, usdFile, textureFolder]
 		
 		let collada = try Collada(
-			vertexData: vertexData,
+			mesh: mesh,
 			animationData: animation,
 			modelName: file.name,
 			textureNames: textureNames

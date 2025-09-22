@@ -8,9 +8,9 @@ extension Processor {
 		var conflictedDexDialogue: [UInt32: WithPossibleMergeConflict<String>]?
 		var dexDialogue: [UInt32: String]?
 		
-		var vertexFiles: [[String]: [Int]]?
-		var textureFiles: [[String]: [Int]]?
-		var animationFiles: [[String]: [Int]]?
+		var vertexFiles: [[String]: Set<Int>]?
+		var textureFiles: [[String]: Set<Int>]?
+		var animationFiles: [[String]: Set<Int>]?
 		
 		var _modelTableNameCache: Set<[String]>?
 		mutating func modelTableNames() throws -> Set<[String]> {

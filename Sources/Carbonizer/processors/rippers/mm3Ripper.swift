@@ -8,20 +8,20 @@ func mm3RipperF(
 		environment.vertexFiles = [:]
 	}
 	
-	let modelTablePath = Array(path.dropLast() + [mm3.model.tableName])
-	environment.vertexFiles![modelTablePath, default: []].append(Int(mm3.model.index))
+	let modelTablePath = Array(path.dropLast() + [mm3.mesh.tableName])
+	environment.vertexFiles![modelTablePath, default: []].insert(Int(mm3.mesh.index))
 	
 	if environment.textureFiles == nil {
 		environment.textureFiles = [:]
 	}
 	
 	let textureTablePath = Array(path.dropLast() + [mm3.texture.tableName])
-	environment.textureFiles![textureTablePath, default: []].append(Int(mm3.texture.index))
+	environment.textureFiles![textureTablePath, default: []].insert(Int(mm3.texture.index))
 	
 	if environment.animationFiles == nil {
 		environment.animationFiles = [:]
 	}
 	
 	let animationTablePath = Array(path.dropLast() + [mm3.animation.tableName])
-	environment.animationFiles![animationTablePath, default: []].append(Int(mm3.animation.index))
+	environment.animationFiles![animationTablePath, default: []].insert(Int(mm3.animation.index))
 }

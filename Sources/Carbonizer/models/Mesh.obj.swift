@@ -1,6 +1,6 @@
 import BinaryParser
 
-extension VertexData.Packed {
+extension Mesh.Packed {
 	/// creates an OBJ
 	/// - Parameters:
 	///   - matrices: the stack of matrices (usually offset by 5)
@@ -16,12 +16,12 @@ extension VertexData.Packed {
 		// copy so theres no side effects
 		let commandData = Datastream(self.commands)
 		
-		let commands = try commandData.readCommands()
+		let commands = try commandData.read(GPUCommands.self).commands
 		
 		var textureScale: SIMD2<Double> = SIMD2(1, 1)
 		
 		var currentMatrix: Matrix4x3<Double>?
-		var currentVertexMode: GPUCommand.VertexMode?
+		var currentVertexMode: GPUCommands.Command.VertexMode?
 		var currentVertex: SIMD3<Double> = .zero
 		var currentTextureVertex: SIMD2<Double> = .zero
 		var currentVertices: [(Int, texture: Int)] = []

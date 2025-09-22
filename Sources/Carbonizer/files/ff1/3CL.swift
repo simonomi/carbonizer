@@ -32,8 +32,8 @@ enum TCL { // 3CL
 			struct Animation {
 				var isValid: UInt32
 				
-				var modelIndex: UInt32
-				var modelTableNameOffset: UInt32
+				var meshIndex: UInt32
+				var meshTableNameOffset: UInt32
 				
 				var animationIndex: UInt32
 				var animationTableNameOffset: UInt32
@@ -41,8 +41,8 @@ enum TCL { // 3CL
 				var textureIndex: UInt32
 				var textureTableNameOffset: UInt32
 				
-				@Offset(givenBy: \Self.modelTableNameOffset)
-				var modelTableName: String
+				@Offset(givenBy: \Self.meshTableNameOffset)
+				var meshTableName: String
 				
 				@Offset(givenBy: \Self.animationTableNameOffset)
 				var animationTableName: String
@@ -69,7 +69,7 @@ enum TCL { // 3CL
 			}
 			
 			struct Animation: Codable {
-				var model: TableEntry
+				var mesh: TableEntry
 				var animation: TableEntry
 				var texture: TableEntry
 				
@@ -133,30 +133,30 @@ extension TCL.Packed.Vivosaur.Animation {
 	fileprivate init(_ unpacked: TCL.Unpacked.Vivosaur.Animation?) {
 		guard let unpacked else {
 			isValid = 0
-			modelIndex = 0
-			modelTableNameOffset = 0
+			meshIndex = 0
+			meshTableNameOffset = 0
 			animationIndex = 0
 			animationTableNameOffset = 0
 			textureIndex = 0
 			textureTableNameOffset = 0
 			
-			modelTableName = ""
+			meshTableName = ""
 			animationTableName = ""
 			textureTableName = ""
 			return
 		}
 		
-		modelTableName = unpacked.model.tableName
+		meshTableName = unpacked.mesh.tableName
 		animationTableName = unpacked.animation.tableName
 		textureTableName = unpacked.texture.tableName
 		
 		isValid = 1
 		
-		modelIndex = unpacked.model.index
-		modelTableNameOffset = 0x1C
+		meshIndex = unpacked.mesh.index
+		meshTableNameOffset = 0x1C
 		
 		animationIndex = unpacked.animation.index
-		animationTableNameOffset = modelTableNameOffset + UInt32(modelTableName.utf8CString.count.roundedUpToTheNearest(4))
+		animationTableNameOffset = meshTableNameOffset + UInt32(meshTableName.utf8CString.count.roundedUpToTheNearest(4))
 		
 		textureIndex = unpacked.texture.index
 		textureTableNameOffset = animationTableNameOffset + UInt32(animationTableName.utf8CString.count.roundedUpToTheNearest(4))
@@ -164,7 +164,7 @@ extension TCL.Packed.Vivosaur.Animation {
 	
 	var size: UInt32 {
 		if isValid > 0 {
-			UInt32(28 + modelTableName.utf8CString.count.roundedUpToTheNearest(4) + animationTableName.utf8CString.count.roundedUpToTheNearest(4) + textureTableName.utf8CString.count.roundedUpToTheNearest(4))
+			UInt32(28 + meshTableName.utf8CString.count.roundedUpToTheNearest(4) + animationTableName.utf8CString.count.roundedUpToTheNearest(4) + textureTableName.utf8CString.count.roundedUpToTheNearest(4))
 		} else {
 			28
 		}
@@ -189,9 +189,9 @@ extension TCL.Unpacked: ProprietaryFileData {
 				animations: $0.animations.map {
 					if $0.isValid > 0 {
 						Vivosaur.Animation(
-							model: Vivosaur.Animation.TableEntry(
-								index: $0.modelIndex,
-								tableName: $0.modelTableName
+							mesh: Vivosaur.Animation.TableEntry(
+								index: $0.meshIndex,
+								tableName: $0.meshTableName
 							),
 							animation: Vivosaur.Animation.TableEntry(
 								index: $0.animationIndex,

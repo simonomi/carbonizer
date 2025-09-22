@@ -6,8 +6,8 @@ enum MM3 {
 		@Include
 		static let magicBytes = "MM3"
 		
-		var modelIndex: UInt32
-		var modelTableNameOffset: UInt32
+		var meshIndex: UInt32
+		var meshTableNameOffset: UInt32
 		
 		var animationIndex: UInt32
 		var animationTableNameOffset: UInt32
@@ -15,8 +15,8 @@ enum MM3 {
 		var textureIndex: UInt32
 		var textureTableNameOffset: UInt32
 		
-		@Offset(givenBy: \Self.modelTableNameOffset)
-		var modelTableName: String
+		@Offset(givenBy: \Self.meshTableNameOffset)
+		var meshTableName: String
 		
 		@Offset(givenBy: \Self.animationTableNameOffset)
 		var animationTableName: String
@@ -25,12 +25,12 @@ enum MM3 {
 		var textureTableName: String
 	}
 	
-	struct Unpacked {
-		var model: TableEntry
+	struct Unpacked: Codable {
+		var mesh: TableEntry
 		var animation: TableEntry
 		var texture: TableEntry
 		
-		struct TableEntry {
+		struct TableEntry: Codable {
 			var index: UInt32
 			var tableName: String
 		}
@@ -49,16 +49,17 @@ extension MM3.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: MM3.Unpacked, configuration: Configuration) {
-		modelIndex = unpacked.model.index
+		meshIndex = unpacked.mesh.index
 		animationIndex = unpacked.animation.index
 		textureIndex = unpacked.texture.index
 		
-		modelTableName = unpacked.model.tableName
+		meshTableName = unpacked.mesh.tableName
 		animationTableName = unpacked.animation.tableName
 		textureTableName = unpacked.texture.tableName
 		
-		modelTableNameOffset = 0x1C
-		animationTableNameOffset = modelTableNameOffset + UInt32(animationTableName.utf8CString.count) // TODO: are these the right offsets??
+		meshTableNameOffset = 0x1C
+		// TODO: are these offsets only correct bc "arc\0" is 4 bytes? should be aligned right
+		animationTableNameOffset = meshTableNameOffset + UInt32(animationTableName.utf8CString.count)
 		textureTableNameOffset = animationTableNameOffset + UInt32(textureTableName.utf8CString.count)
 	}
 }
@@ -76,24 +77,8 @@ extension MM3.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: MM3.Packed, configuration: Configuration) {
-		model = TableEntry(index: packed.modelIndex, tableName: packed.modelTableName)
+		mesh = TableEntry(index: packed.meshIndex, tableName: packed.meshTableName)
 		animation = TableEntry(index: packed.animationIndex, tableName: packed.animationTableName)
 		texture = TableEntry(index: packed.textureIndex, tableName: packed.textureTableName)
-	}
-}
-
-// MARK: unpacked codable
-extension MM3.Unpacked: Codable {
-	enum CodingKeys: String, CodingKey {
-		case model = "model"
-		case animation = "animation"
-		case texture = "texture"
-	}
-}
-
-extension MM3.Unpacked.TableEntry: Codable {
-	enum CodingKeys: String, CodingKey {
-		case index =     "index"
-		case tableName = "table name"
 	}
 }

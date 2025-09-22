@@ -10,7 +10,7 @@ struct PolygonPoint {
 
 fileprivate struct CommandParsingState {
 	var vertex: SIMD3<Double> = .zero // ?
-	var vertexMode: GPUCommand.VertexMode?
+	var vertexMode: GPUCommands.Command.VertexMode?
 	var bone: Int = -1
 	
 	var worldRootBoneCount: Int = 0
@@ -121,7 +121,7 @@ struct CommandParsingResult {
 }
 
 func parseCommands(
-	_ commands: [GPUCommand],
+	_ commands: [GPUCommands.Command],
 	textureNames: [UInt32: String],
 	matrices: [Matrix4x3<Double>]
 ) -> CommandParsingResult {
@@ -141,7 +141,7 @@ func parseCommands(
 fileprivate func parseCommand(
 	state: inout CommandParsingState,
 	result: inout CommandParsingResult,
-	command: GPUCommand,
+	command: GPUCommands.Command,
 	textureNames: [UInt32: String],
 	matrices: [Matrix4x3<Double>]
 ) {

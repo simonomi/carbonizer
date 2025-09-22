@@ -20,19 +20,19 @@ fileprivate extension String {
 extension Collada {
 	// textureNames: a mapping from palette offset to texture file name. the offset should be normalized (bit shifted according to type)
 	init(
-		vertexData: VertexData.Packed,
+		mesh: Mesh.Packed,
 		animationData: AnimationData,
 		modelName: String,
 		textureNames: [UInt32: String]
 	) throws {
 		// copy so theres no side effects
-		let commandData = Datastream(vertexData.commands)
-		let commands = try commandData.readCommands()
+		let commandData = Datastream(mesh.commands)
+		let commands = try commandData.read(GPUCommands.self).commands
 		
 		let modelNameWithSpaces = modelName
 		let modelName = modelName.withoutSpaces()
 		
-		let matrices = vertexData.boneTable.bones
+		let matrices = mesh.boneTable.bones
 			.map(\.matrix)
 			.map(Matrix4x3.init)
 		
@@ -42,8 +42,8 @@ extension Collada {
 			matrices: matrices
 		)
 		
-		let boneCount = vertexData.boneTable.bones.count
-		let boneNames = vertexData.boneTable.bones.map(\.name)
+		let boneCount = mesh.boneTable.bones.count
+		let boneNames = mesh.boneTable.bones.map(\.name)
 		
 		precondition(boneCount > 0)
 		
@@ -351,7 +351,7 @@ extension Collada {
 						.node(
 							id: "\(modelName)-skeleton",
 							type: "JOINT",
-							vertexData.boneTable.bones
+							mesh.boneTable.bones
 								.map {
 									.node( // NOTE: if a bone name has a " in it, it'll break
 										sid: $0.name,
