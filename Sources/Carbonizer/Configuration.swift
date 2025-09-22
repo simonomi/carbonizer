@@ -134,6 +134,7 @@ public struct Configuration: Sendable {
 		"CHR": CHR.Unpacked.self,
 		"DAL": DAL.Unpacked.self,
 		"DBS": DBS.Unpacked.self,
+		"DBT": DBT.Unpacked.self,
 		"DCL": DCL.Unpacked.self,
 		"DEP": DEP.Unpacked.self,
 		"DEX": DEX.Unpacked.self,

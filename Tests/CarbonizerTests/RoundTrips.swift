@@ -65,16 +65,17 @@ struct RoundTrips {
 			("episode 0088", .packed),
 			("map r 0025", .packed),
 			("museum_defs", .packed),
+			("btl_tuto_001", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 		let inputFilePath = filePath(for: fileName)
 		
-		var configurationWithFileTypes = Configuration(
+		let configurationWithFileTypes = try Configuration(
 			overwriteOutput: true,
 			dexCommandList: .ff1,
 			externalMetadata: false,
-			fileTypes: ["DML"],
+			fileTypes: ["DBT"],
 			onlyUnpack: [],
 			skipUnpacking: [],
 			processors: [],
@@ -122,7 +123,7 @@ struct RoundTrips {
 	func roundTripROM() throws {
 		guard let wholeROMPath = URL.wholeROMPath else { return }
 		
-		var configuration = Configuration(
+		let configuration = try Configuration(
 			overwriteOutput: true,
 			dexCommandList: .ff1,
 			externalMetadata: false,

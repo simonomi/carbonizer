@@ -92,8 +92,9 @@ struct CLIConfiguration : Sendable {
 			// basically required for anything useful: NDS, MAR
 			//
 			// both ff1/ffc: _match, DEX, DMG, DMS, DTX, GRD, KIL, MPM, MMS, MPM 
-			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DCL, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
-			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBS, DBT, DCL, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
+			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBS", "DBT", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
+			// "fileTypes": ["_match", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MPM", "MMS", "MPM", "NDS"], // ffc-compatible
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
 			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
