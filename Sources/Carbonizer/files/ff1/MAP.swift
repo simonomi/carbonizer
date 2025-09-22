@@ -22,10 +22,10 @@ enum MAP {
 		var mapDotMoves: Int32
 		var mapDotX: Int32
 		var mapDotY: Int32
-		var mapDotScale: Int32 // fixed-point
+		var mapDotScale: FixedPoint2012
 		
 		// 0x30
-		var movementSpeed: Int32 // fixed-point
+		var movementSpeed: FixedPoint2012
 		var bannerTextID: UInt32
 		
 		// TODO: rename to like 'collision zone' or smthn
@@ -120,7 +120,7 @@ enum MAP {
 			var x: Int32
 			var y: Int32
 			
-			var rotation: Int32 // fixed-point 16.16
+			var rotation: FixedPoint1616
 			// angle but not degrees again
 			// - rotating a door makes the player walk out sideways
 			
@@ -130,12 +130,17 @@ enum MAP {
 		@BinaryConvertible
 		struct CameraPosition: Equatable {
 			// first one effects the camera when walking around, no clue abt the rest (not sub areas, not map/c)
-			var fov: Int16 // fixed-point 12.4
-			var verticalAngle: Int16 // fixed-point 8.8
-			var horizontalAngle: Int32 // fixed-point
-			var distance: Int32 // fixed point
+			var fov: FixedPoint124
+			var verticalAngle: FixedPoint88
+			var horizontalAngle: FixedPoint2012
+			var distance: FixedPoint2012
 			
-			init(fov: Int16, verticalAngle: Int16, horizontalAngle: Int32, distance: Int32) {
+			init(
+				fov: FixedPoint124,
+				verticalAngle: FixedPoint88,
+				horizontalAngle: FixedPoint2012,
+				distance: FixedPoint2012
+			) {
 				self.fov = fov
 				self.verticalAngle = verticalAngle
 				self.horizontalAngle = horizontalAngle
@@ -228,7 +233,7 @@ enum MAP {
 			var unknown1: Int32
 			var spawnCount: Int32
 			var entityID: Int32
-			var rotation: Int32 // fixed-point 16.16
+			var rotation: FixedPoint1616
 			// not degrees
 			// 0 is right
 			// 0.25 is down
@@ -405,9 +410,9 @@ extension MAP.Packed: ProprietaryFileData {
 		mapDotMoves = unpacked.mapDotMoves ? 1 : 0
 		mapDotX = unpacked.mapDotX
 		mapDotY = unpacked.mapDotY
-		mapDotScale = Int32(fixedPoint: unpacked.mapDotScale)
+		mapDotScale = FixedPoint2012(unpacked.mapDotScale)
 		
-		movementSpeed = Int32(fixedPoint: unpacked.movementSpeed)
+		movementSpeed = FixedPoint2012(unpacked.movementSpeed)
 		bannerTextID = unpacked.bannerTextID
 		
 		loadingZoneCount = UInt32(unpacked.loadingZones.count)
@@ -479,7 +484,7 @@ extension MAP.Packed.LoadingZone {
 		id = unpacked.id
 		x = unpacked.x
 		y = unpacked.y
-		rotation = Int32(fixedPoint: unpacked.rotation, fractionBits: 16)
+		rotation = FixedPoint1616(unpacked.rotation)
 	}
 }
 
@@ -487,10 +492,10 @@ extension MAP.Packed.CameraPosition {
 	static let null = Self(fov: 0, verticalAngle: 0, horizontalAngle: 0, distance: 0)
 	
 	init(_ unpacked: MAP.Unpacked.CameraPosition) {
-		fov = Int16(fixedPoint: unpacked.fov, fractionBits: 4)
-		verticalAngle = Int16(fixedPoint: unpacked.verticalAngle, fractionBits: 8)
-		horizontalAngle = Int32(fixedPoint: unpacked.horizontalAngle)
-		distance = Int32(fixedPoint: unpacked.distance)
+		fov = FixedPoint124(unpacked.fov)
+		verticalAngle = FixedPoint88(unpacked.verticalAngle)
+		horizontalAngle = FixedPoint2012(unpacked.horizontalAngle)
+		distance = FixedPoint2012(unpacked.distance)
 	}
 }
 
@@ -586,7 +591,8 @@ extension MAP.Packed.BreakableRock {
 		unknown1 = unpacked.unknown1
 		spawnCount = unpacked.spawnCount
 		entityID = unpacked.entityID
-		rotation = Int32(fixedPoint: unpacked.rotation, fractionBits: 16)
+		rotation = FixedPoint1616(unpacked.rotation
+		)
 		
 		count = UInt32(unpacked.things.count)
 		
@@ -626,9 +632,9 @@ extension MAP.Unpacked: ProprietaryFileData {
 		mapDotMoves = packed.mapDotMoves > 0
 		mapDotX = packed.mapDotX
 		mapDotY = packed.mapDotY
-		mapDotScale = Double(fixedPoint: packed.mapDotScale)
+		mapDotScale = Double(packed.mapDotScale)
 		
-		movementSpeed = Double(fixedPoint: packed.movementSpeed)
+		movementSpeed = Double(packed.movementSpeed)
 		bannerTextID = packed.bannerTextID
 		
 		unknown24 = packed.unknown24
@@ -667,16 +673,16 @@ extension MAP.Unpacked.LoadingZone {
 		id = packed.id
 		x = packed.x
 		y = packed.y
-		rotation = Double(fixedPoint: packed.rotation, fractionBits: 16)
+		rotation = Double(packed.rotation)
 	}
 }
 
 extension MAP.Unpacked.CameraPosition {
 	init(_ packed: MAP.Packed.CameraPosition) {
-		fov = Double(fixedPoint: packed.fov, fractionBits: 4)
-		verticalAngle = Double(fixedPoint: packed.verticalAngle, fractionBits: 8)
-		horizontalAngle = Double(fixedPoint: packed.horizontalAngle)
-		distance = Double(fixedPoint: packed.distance)
+		fov = Double(packed.fov)
+		verticalAngle = Double(packed.verticalAngle)
+		horizontalAngle = Double(packed.horizontalAngle)
+		distance = Double(packed.distance)
 	}
 }
 
@@ -749,7 +755,7 @@ extension MAP.Unpacked.BreakableRock {
 		entityID = packed.entityID
 		_entity = entityNames[entityID]
 		
-		rotation = Double(fixedPoint: packed.rotation, fractionBits: 16)
+		rotation = Double(packed.rotation)
 		
 		things = packed.things.map(Thing.init)
 	}

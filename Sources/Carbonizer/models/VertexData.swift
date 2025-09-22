@@ -10,14 +10,9 @@ struct Matrix4x3_2012 {
 
 @BinaryConvertible
 struct Vector3_2012 {
-	var x: Fixed2012
-	var y: Fixed2012
-	var z: Fixed2012
-}
-
-@BinaryConvertible
-struct Fixed2012 {
-	var raw: Int32
+	var x: FixedPoint2012
+	var y: FixedPoint2012
+	var z: FixedPoint2012
 }
 
 @BinaryConvertible
@@ -87,12 +82,6 @@ extension SIMD3<Double> {
 			Double(vector3_2012.y),
 			Double(vector3_2012.z)
 		)
-	}
-}
-
-extension Double {
-	init(_ fixed2012: Fixed2012) {
-		self = Double(fixed2012.raw) / Double(1 << 12)
 	}
 }
 

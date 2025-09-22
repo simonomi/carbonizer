@@ -88,7 +88,7 @@ struct DBS {
 			
 			@Count(givenBy: \Self.vivosaurCount3)
 			@Offset(givenBy: \Self.interLevelBattlePointsPerVivosaurOffset)
-			var interLevelBattlePointsPerVivosaur: [UInt32] // fixed-point, percentage between levels
+			var interLevelBattlePointsPerVivosaur: [FixedPoint2012] // percentage between levels
 			
 			@Count(givenBy: \Self.vivosaurCount4)
 			@Offset(givenBy: \Self.movesUnlockedPerVivosaurOffset)
@@ -258,7 +258,7 @@ extension DBS.Packed.Fighter {
 		
 		interLevelBattlePointsPerVivosaur = unpacked.vivosaurs
 			.map(\.interLevelBattlePoints)
-			.map { UInt32(fixedPoint: $0) }
+			.map { FixedPoint2012($0) }
 		vivosaurCount3 = UInt32(interLevelBattlePointsPerVivosaur.count)
 		interLevelBattlePointsPerVivosaurOffset = aiSetsOffset + vivosaurCount2 * 4
 		
@@ -383,7 +383,7 @@ extension DBS.Unpacked.Fighter.Vivosaur {
 	init(
 		_ packed: DBS.Packed.Fighter.Vivosaur,
 		aiSet: Int32?,
-		interLevelBattlePoints: UInt32,
+		interLevelBattlePoints: FixedPoint2012,
 		movesUnlocked: Int32
 	) {
 		id = ID(id: packed.id)
@@ -393,7 +393,7 @@ extension DBS.Unpacked.Fighter.Vivosaur {
 		hideStats = packed.hideStats & 0b10 > 0
 		
 		self.aiSet = aiSet
-		self.interLevelBattlePoints = Double(fixedPoint: interLevelBattlePoints)
+		self.interLevelBattlePoints = Double(interLevelBattlePoints)
 		self.movesUnlocked = movesUnlocked
 	}
 }

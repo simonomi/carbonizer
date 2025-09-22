@@ -9,11 +9,11 @@ enum ECS {
 		var thingACount: UInt32
 		var thingAOffsetsOffset: UInt32 = 0xC4
 		
-		var unknown1: Int32 // fixed-point
+		var unknown1: FixedPoint2012
 		// 0x10
-		var unknown2: Int32 // fixed-point
-		var unknown3: Int32 // fixed-point
-		var unknown4: Int32 // fixed-point
+		var unknown2: FixedPoint2012
+		var unknown3: FixedPoint2012
+		var unknown4: FixedPoint2012
 		var unknown5: Int32
 		// 0x20
 		var unknown6: Int32
@@ -54,8 +54,8 @@ enum ECS {
 		var thingOCount: UInt32
 		var thingOOffset: UInt32 = 0x384C
 		// 0x90
-		var unknown10: Int32
-		var unknown11: Int32
+		var unknown10: FixedPoint2012
+		var unknown11: FixedPoint2012
 		var unknown12: Int32
 		var unknown13: Int32
 		// 0xa0
@@ -194,17 +194,17 @@ enum ECS {
 			var requiredFossilsCleaned: Int32
 			var nextLevelAt: Int32
 			
-			var cleaningScoreLowerBound: Int32 // fixed point
-			var cleaningScoreUpperBound: Int32 // fixed point
+			var cleaningScoreLowerBound: FixedPoint2012
+			var cleaningScoreUpperBound: FixedPoint2012
 			
-			var higherScoreProbability: Int32 // fixed point
+			var higherScoreProbability: FixedPoint2012
 			
-			var higherScoreLowerBound: Int32 // fixed point
-			var higherScoreUpperBound: Int32 // fixed point
+			var higherScoreLowerBound: FixedPoint2012
+			var higherScoreUpperBound: FixedPoint2012
 			
-			var otherScoreProbability: Int32  // fixed point? always 0
-			var otherScoreLowerBound: Int32 // fixed point
-			var otherScoreUpperBound: Int32 // fixed point
+			var otherScoreProbability: FixedPoint2012 // always 0
+			var otherScoreLowerBound: FixedPoint2012
+			var otherScoreUpperBound: FixedPoint2012
 		}
 		
 		@BinaryConvertible
@@ -216,7 +216,7 @@ enum ECS {
 		@BinaryConvertible
 		struct ThingK {
 			@Count(16)
-			var unknowns: [UInt32] // fixed-point
+			var unknowns: [FixedPoint2012]
 		}
 		
 		@BinaryConvertible
@@ -227,9 +227,9 @@ enum ECS {
 			var thingACount: UInt32
 			var thingAOffset: UInt32 = 0x1378
 			
-			var unknown1: Int32 // fixed-point
-			var unknown2: Int32 // fixed-point
-			var unknown3: Int32 // fixed-point
+			var unknown1: FixedPoint2012
+			var unknown2: FixedPoint2012
+			var unknown3: FixedPoint2012
 			var unknown4: Int32
 			var unknown5: Int32
 			
@@ -242,7 +242,7 @@ enum ECS {
 			
 			@Count(givenBy: \Self.thingACount)
 			@Offset(givenBy: \Self.thingAOffset)
-			var thingAs: [Int32] // fixed-point
+			var thingAs: [FixedPoint2012]
 			
 			@BinaryConvertible
 			struct Character {
@@ -408,7 +408,7 @@ enum ECS {
 		}
 		
 		struct ThingK: Codable {
-			var unknowns: [UInt32]
+			var unknowns: [Double]
 		}
 		
 		struct Characters: Codable {
@@ -467,10 +467,10 @@ extension ECS.Packed: ProprietaryFileData {
 	fileprivate init(_ unpacked: ECS.Unpacked, configuration: Configuration) {
 		thingACount = UInt32(unpacked.thingAs.count)
 		
-		unknown1 = Int32(fixedPoint: unpacked.unknown1)
-		unknown2 = Int32(fixedPoint: unpacked.unknown2)
-		unknown3 = Int32(fixedPoint: unpacked.unknown3)
-		unknown4 = Int32(fixedPoint: unpacked.unknown4)
+		unknown1 = FixedPoint2012(unpacked.unknown1)
+		unknown2 = FixedPoint2012(unpacked.unknown2)
+		unknown3 = FixedPoint2012(unpacked.unknown3)
+		unknown4 = FixedPoint2012(unpacked.unknown4)
 		unknown5 = unpacked.unknown5
 		unknown6 = unpacked.unknown6
 		unknown7 = unpacked.unknown7
@@ -490,8 +490,8 @@ extension ECS.Packed: ProprietaryFileData {
 		thingJCount = UInt32(unpacked.thingJs.count)
 		thingOCount = UInt32(unpacked.thingOs.count)
 		
-		unknown10 = Int32(fixedPoint: unpacked.unknown10)
-		unknown11 = Int32(fixedPoint: unpacked.unknown11)
+		unknown10 = FixedPoint2012(unpacked.unknown10)
+		unknown11 = FixedPoint2012(unpacked.unknown11)
 		unknown12 = unpacked.unknown12
 		unknown13 = unpacked.unknown13
 		unknown14 = unpacked.unknown14
@@ -584,17 +584,17 @@ extension ECS.Packed.KL33NLevel {
 		requiredFossilsCleaned = unpacked.requiredFossilsCleaned
 		nextLevelAt = unpacked.nextLevelAt
 		
-		cleaningScoreLowerBound = Int32(fixedPoint: unpacked.cleaningScoreLowerBound)
-		cleaningScoreUpperBound = Int32(fixedPoint: unpacked.cleaningScoreUpperBound)
+		cleaningScoreLowerBound = FixedPoint2012(unpacked.cleaningScoreLowerBound)
+		cleaningScoreUpperBound = FixedPoint2012(unpacked.cleaningScoreUpperBound)
 		
-		higherScoreProbability = Int32(fixedPoint: unpacked.higherScoreProbability)
+		higherScoreProbability = FixedPoint2012(unpacked.higherScoreProbability)
 		
-		higherScoreLowerBound = Int32(fixedPoint: unpacked.higherScoreLowerBound)
-		higherScoreUpperBound = Int32(fixedPoint: unpacked.higherScoreUpperBound)
+		higherScoreLowerBound = FixedPoint2012(unpacked.higherScoreLowerBound)
+		higherScoreUpperBound = FixedPoint2012(unpacked.higherScoreUpperBound)
 		
-		otherScoreProbability = Int32(fixedPoint: unpacked.otherScoreProbability)
-		otherScoreLowerBound = Int32(fixedPoint: unpacked.otherScoreLowerBound)
-		otherScoreUpperBound = Int32(fixedPoint: unpacked.otherScoreUpperBound)
+		otherScoreProbability = FixedPoint2012(unpacked.otherScoreProbability)
+		otherScoreLowerBound = FixedPoint2012(unpacked.otherScoreLowerBound)
+		otherScoreUpperBound = FixedPoint2012(unpacked.otherScoreUpperBound)
 	}
 }
 
@@ -607,15 +607,15 @@ extension ECS.Packed.ThingJ {
 
 extension ECS.Packed.ThingK {
 	init(_ unpacked: ECS.Unpacked.ThingK) {
-		unknowns = unpacked.unknowns
+		unknowns = unpacked.unknowns.map { FixedPoint2012($0) }
 	}
 }
 
 extension ECS.Packed.Characters {
 	init(_ unpacked: ECS.Unpacked.Characters) {
-		unknown1 = Int32(fixedPoint: unpacked.unknown1)
-		unknown2 = Int32(fixedPoint: unpacked.unknown2)
-		unknown3 = Int32(fixedPoint: unpacked.unknown3)
+		unknown1 = FixedPoint2012(unpacked.unknown1)
+		unknown2 = FixedPoint2012(unpacked.unknown2)
+		unknown3 = FixedPoint2012(unpacked.unknown3)
 		unknown4 = unpacked.unknown4
 		unknown5 = unpacked.unknown5
 		
@@ -625,7 +625,7 @@ extension ECS.Packed.Characters {
 		characters = unpacked.characters.map(Character.init)
 		
 		thingACount = UInt32(unpacked.thingAs.count)
-		thingAs = unpacked.thingAs.map { Int32(fixedPoint: $0) }
+		thingAs = unpacked.thingAs.map { FixedPoint2012($0) }
 	}
 }
 
@@ -681,10 +681,10 @@ extension ECS.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: ECS.Packed, configuration: Configuration) {
-		unknown1 = Double(fixedPoint: packed.unknown1)
-		unknown2 = Double(fixedPoint: packed.unknown2)
-		unknown3 = Double(fixedPoint: packed.unknown3)
-		unknown4 = Double(fixedPoint: packed.unknown4)
+		unknown1 = Double(packed.unknown1)
+		unknown2 = Double(packed.unknown2)
+		unknown3 = Double(packed.unknown3)
+		unknown4 = Double(packed.unknown4)
 		unknown5 = packed.unknown5
 		unknown6 = packed.unknown6
 		unknown7 = packed.unknown7
@@ -692,8 +692,8 @@ extension ECS.Unpacked: ProprietaryFileData {
 		
 		unknown9 = packed.unknown9
 		
-		unknown10 = Double(fixedPoint: packed.unknown10)
-		unknown11 = Double(fixedPoint: packed.unknown11)
+		unknown10 = Double(packed.unknown10)
+		unknown11 = Double(packed.unknown11)
 		unknown12 = packed.unknown12
 		unknown13 = packed.unknown13
 		unknown14 = packed.unknown14
@@ -799,16 +799,16 @@ extension ECS.Unpacked.KL33NLevel {
 		requiredFossilsCleaned = packed.requiredFossilsCleaned
 		nextLevelAt = packed.nextLevelAt
 		
-		cleaningScoreLowerBound = Double(fixedPoint: packed.cleaningScoreLowerBound)
-		cleaningScoreUpperBound = Double(fixedPoint: packed.cleaningScoreUpperBound)
+		cleaningScoreLowerBound = Double(packed.cleaningScoreLowerBound)
+		cleaningScoreUpperBound = Double(packed.cleaningScoreUpperBound)
 		
-		higherScoreProbability = Double(fixedPoint: packed.higherScoreProbability)
-		higherScoreLowerBound = Double(fixedPoint: packed.higherScoreLowerBound)
-		higherScoreUpperBound = Double(fixedPoint: packed.higherScoreUpperBound)
+		higherScoreProbability = Double(packed.higherScoreProbability)
+		higherScoreLowerBound = Double(packed.higherScoreLowerBound)
+		higherScoreUpperBound = Double(packed.higherScoreUpperBound)
 		
-		otherScoreProbability = Double(fixedPoint: packed.otherScoreProbability)
-		otherScoreLowerBound = Double(fixedPoint: packed.otherScoreLowerBound)
-		otherScoreUpperBound = Double(fixedPoint: packed.otherScoreUpperBound)
+		otherScoreProbability = Double(packed.otherScoreProbability)
+		otherScoreLowerBound = Double(packed.otherScoreLowerBound)
+		otherScoreUpperBound = Double(packed.otherScoreUpperBound)
 	}
 }
 
@@ -821,15 +821,15 @@ extension ECS.Unpacked.ThingJ {
 
 extension ECS.Unpacked.ThingK {
 	init(_ packed: ECS.Packed.ThingK) {
-		unknowns = packed.unknowns
+		unknowns = packed.unknowns.map(Double.init)
 	}
 }
 
 extension ECS.Unpacked.Characters {
 	init(_ packed: ECS.Packed.Characters) {
-		unknown1 = Double(fixedPoint: packed.unknown1)
-		unknown2 = Double(fixedPoint: packed.unknown2)
-		unknown3 = Double(fixedPoint: packed.unknown3)
+		unknown1 = Double(packed.unknown1)
+		unknown2 = Double(packed.unknown2)
+		unknown3 = Double(packed.unknown3)
 		unknown4 = packed.unknown4
 		unknown5 = packed.unknown5
 		
@@ -837,7 +837,7 @@ extension ECS.Unpacked.Characters {
 		
 		characters = packed.characters.map(Character.init)
 		
-		thingAs = packed.thingAs.map { Double(fixedPoint: $0) }
+		thingAs = packed.thingAs.map { Double($0) }
 	}
 }
 

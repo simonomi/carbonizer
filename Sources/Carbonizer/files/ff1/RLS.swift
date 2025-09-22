@@ -29,8 +29,8 @@ enum RLS {
 			var fossilImage: UInt32
 			var rockImage: UInt32
 			
-			var fossilHardness: UInt32 // fixed-point
-			var rockHardness: UInt32 // fixed-point
+			var fossilHardness: FixedPoint2012
+			var rockHardness: FixedPoint2012
 			
 			var buyPrice: UInt32
 			var sellPrice: UInt32
@@ -49,7 +49,7 @@ enum RLS {
 			var unknownsOffset: UInt32 = 0x44
 			@Count(givenBy: \Self.unknownsCount)
 			@Offset(givenBy: \Self.unknownsOffset)
-			var shockwaveResistances: [UInt32] // hammer then drill
+			var shockwaveResistances: [FixedPoint2012] // hammer then drill
 			// hammer:
 			// - 0.4, 0.5, 0.6
 			// drill:
@@ -156,8 +156,8 @@ extension RLS.Packed.Kaseki {
 		fossilImage = kaseki.fossilImage
 		rockImage = kaseki.rockImage
 		
-		fossilHardness = UInt32(fixedPoint: kaseki.fossilHardness)
-		rockHardness = UInt32(fixedPoint: kaseki.rockHardness)
+		fossilHardness = FixedPoint2012(kaseki.fossilHardness)
+		rockHardness = FixedPoint2012(kaseki.rockHardness)
 		
 		buyPrice = kaseki.buyPrice
 		sellPrice = kaseki.sellPrice
@@ -170,7 +170,7 @@ extension RLS.Packed.Kaseki {
 		passingScore = kaseki.passingScore
 		
 		unknownsCount = UInt32(kaseki.shockwaveResistances.count)
-		shockwaveResistances = kaseki.shockwaveResistances.map { UInt32(fixedPoint: $0) }
+		shockwaveResistances = kaseki.shockwaveResistances.map { FixedPoint2012($0) }
 	}
 }
 
@@ -238,8 +238,8 @@ extension RLS.Unpacked.Kaseki {
 		fossilImage = kaseki.fossilImage
 		rockImage = kaseki.rockImage
 		
-		fossilHardness = Double(fixedPoint: kaseki.fossilHardness)
-		rockHardness = Double(fixedPoint: kaseki.rockHardness)
+		fossilHardness = Double(kaseki.fossilHardness)
+		rockHardness = Double(kaseki.rockHardness)
 		
 		buyPrice = kaseki.buyPrice
 		sellPrice = kaseki.sellPrice
@@ -253,7 +253,7 @@ extension RLS.Unpacked.Kaseki {
 		
 		completionBackground = try CompletionBones(kaseki.completionBackground)
 		
-		shockwaveResistances = kaseki.shockwaveResistances.map { Double(fixedPoint: $0) }
+		shockwaveResistances = kaseki.shockwaveResistances.map { Double($0) }
 	}
 }
 

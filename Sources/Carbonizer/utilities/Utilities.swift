@@ -450,18 +450,6 @@ extension Set {
 	}
 }
 
-extension Double {
-	init(fixedPoint: some BinaryInteger, fractionBits: Int = 12) {
-		self = Self(fixedPoint) / Self(1 << fractionBits)
-	}
-}
-
-extension BinaryInteger {
-	init(fixedPoint: Double, fractionBits: Int = 12) {
-		self = Self(fixedPoint * Double(1 << fractionBits))
-	}
-}
-
 extension DefaultStringInterpolation {
 	mutating func appendInterpolation(_ number: some BinaryInteger, digits: Int) {
 		precondition(number >= 0)

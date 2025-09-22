@@ -13,7 +13,7 @@ enum CHR {
 		var headNamesOffsetsOffset: UInt32
 		
 		@Count(16)
-		var unknowns: [Int32]
+		var unknowns: [FixedPoint2012]
 		
 		var someBodyCount: UInt32
 		var someBodiesOffset: UInt32
@@ -70,7 +70,7 @@ extension CHR.Packed: ProprietaryFileData {
 			unpacked.bodyNames.map { $0.utf8CString.count }.sum().roundedUpToTheNearest(4)
 		)
 		
-		unknowns = unpacked.unknowns.map { Int32(fixedPoint: $0) }
+		unknowns = unpacked.unknowns.map { FixedPoint2012($0) }
 		
 		someBodyCount = UInt32(unpacked.someBodies.count)
 		someBodiesOffset = headNamesOffsetsOffset + (headNamesCount * 4) + UInt32(
@@ -111,7 +111,7 @@ extension CHR.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: CHR.Packed, configuration: Configuration) {
-		unknowns = packed.unknowns.map { Double(fixedPoint: $0) }
+		unknowns = packed.unknowns.map { Double($0) }
 		
 		bodyNames = packed.bodyNames
 		headNames = packed.headNames
