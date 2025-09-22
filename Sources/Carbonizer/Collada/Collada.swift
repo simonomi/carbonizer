@@ -21,7 +21,7 @@ extension Collada {
 	// textureNames: a mapping from palette offset to texture file name. the offset should be normalized (bit shifted according to type)
 	init(
 		mesh: Mesh.Packed,
-		animationData: AnimationData,
+		animationData: Animation.Packed,
 		modelName: String,
 		textureNames: [UInt32: String]
 	) throws {

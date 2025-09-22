@@ -135,30 +135,30 @@ extension Texture.Packed: ProprietaryFileData {
 		
 		// this runs successfully, but doesnt output identical bytes
 		
-		imageCount = UInt32(unpacked.images.count)
-		
-		var bitmapOffset: UInt32 = 0
-		var paletteOffset: UInt32 = 0
-		
-		imageHeaders = unpacked.images.map {
-			ImageHeader($0, bitmapOffset: &bitmapOffset, paletteOffset: &paletteOffset)
-		}
-		
-		bitmaps = unpacked.images.map(\.bitmap)
-		
-		palettes = unpacked.images
-			.map {
-				let writer = Datawriter()
-				for color in $0.palette {
-					writer.write(RGB555Color(color))
-				}
-				return writer.intoDatastream()
-			}
-		
-		
-		bitmapsLength = UInt32(bitmaps.map(\.bytes.count).sum())
-		
-		palettesLength = UInt32(palettes.map(\.bytes.count).sum())
+//		imageCount = UInt32(unpacked.images.count)
+//		
+//		var bitmapOffset: UInt32 = 0
+//		var paletteOffset: UInt32 = 0
+//		
+//		imageHeaders = unpacked.images.map {
+//			ImageHeader($0, bitmapOffset: &bitmapOffset, paletteOffset: &paletteOffset)
+//		}
+//		
+//		bitmaps = unpacked.images.map(\.bitmap)
+//		
+//		palettes = unpacked.images
+//			.map {
+//				let writer = Datawriter()
+//				for color in $0.palette {
+//					writer.write(RGB555Color(color))
+//				}
+//				return writer.intoDatastream()
+//			}
+//		
+//		
+//		bitmapsLength = UInt32(bitmaps.map(\.bytes.count).sum())
+//		
+//		palettesLength = UInt32(palettes.map(\.bytes.count).sum())
 	}
 }
 
@@ -301,3 +301,95 @@ extension Texture.Unpacked.Image.Info.TextureFormat {
 		}
 	}
 }
+
+//extension TextureData {
+//	func folder(named name: String) throws -> Folder {
+//		Folder(
+//			name: name,
+//			metadata: .skipFile,
+//			contents: try zip(imageHeaders, bitmaps, palettes).map(file)
+//		)
+//	}
+//}
+
+//fileprivate func file(
+//	header: TextureData.ImageHeader,
+//	bitmap: Datastream,
+//	palette: [RGB555Color]
+//) throws -> ProprietaryFile {
+//	let headerInfo = try header.info()
+//
+//	var palette = palette.map { Bitmap.Color($0) }
+//
+//	if headerInfo.transparent {
+//		palette[0] = .transparent
+//	}
+//
+//	let pixelData = bitmap.bytes
+//	let pixels: [Bitmap.Color]
+//	switch headerInfo.type {
+//		case .a3i5:
+//			pixels = pixelData
+//				.map {(
+//					index: $0 & 0b11111,
+//					alpha: $0 >> 5
+//				)}
+//				.map {
+//					palette[Int($0.index)]
+//						.replacingAlpha(with: Double($0.alpha) / 7)
+//				}
+//		case .twoBits:
+//			pixels = pixelData
+//				.flatMap { (byte: UInt8) -> [UInt8] in [
+//					byte & 0b11,
+//					byte >> 2 & 0b11,
+//					byte >> 4 & 0b11,
+//					byte >> 6
+//				]}
+//				.map { palette[Int($0)] }
+//		case .fourBits:
+//			pixels = pixelData
+//				.flatMap {[
+//					$0 & 0b1111,
+//					$0 >> 4
+//				]}
+//				.map { palette[Int($0)] }
+//		case .eightBits:
+//			pixels = pixelData
+//				.map { palette[Int($0)] }
+//		case .compressed:
+//			fatalError("i dont wanna do 4x4 compressed texture format")
+//		case .a5i3:
+//			pixels = pixelData
+//				.map {(
+//					index: $0 & 0b111,
+//					alpha: $0 >> 3
+//				)}
+//				.map {
+//					palette[Int($0.index)]
+//						.replacingAlpha(with: Double($0.alpha) / 31)
+//				}
+//		case .direct:
+//			pixels = pixelData
+//				.chunked(exactSize: 2)
+//				.map {
+//					RGB555Color(
+//						raw: $0
+//							.enumerated()
+//							.map { (index, byte) in
+//								UInt16(byte) << (index * 8)
+//							}
+//							.reduce(0, |)
+//					)
+//				}
+//				.map { Bitmap.Color($0) }
+//	}
+//
+//	let bitmap = Bitmap(
+//		width: headerInfo.width,
+//		height: headerInfo.height,
+//		contents: pixels
+//	)
+//
+//	return ProprietaryFile(name: header.name, data: bitmap)
+//}

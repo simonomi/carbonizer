@@ -20,7 +20,8 @@ func modelReparserF(
 			}
 			
 			do {
-				let packed = try Datastream(data).read(Mesh.Packed.self) // copy to not modify the original
+				// copy to not modify the original
+				let packed = try Datastream(data).read(Mesh.Packed.self)
 				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
 			} catch {
 				// TODO: log properly
@@ -42,7 +43,8 @@ func modelReparserF(
 			}
 			
 			do {
-				let packed = try Datastream(data).read(Texture.Packed.self) // copy to not modify the original
+				// copy to not modify the original
+				let packed = try Datastream(data).read(Texture.Packed.self)
 				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
 			} catch {
 				// TODO: log properly
@@ -52,10 +54,28 @@ func modelReparserF(
 		}
 	}
 	
-	
-	
-//	let animationFiles = try environment.get(\.animationFiles)
-	
-	
-	
+	let animationFiles = try environment.get(\.animationFiles)
+	if let animationIndices = animationFiles[path] {
+		for fileIndex in animationIndices {
+			guard mar.files.indices.contains(fileIndex) else {
+				todo("invalid index")
+			}
+			
+			guard let data = mar.files[fileIndex].content as? Datastream else {
+				todo("invalid type")
+			}
+			
+			do {
+				// copy to not modify the original
+				let packed = try Datastream(data).read(Animation.Packed.self)
+				mar.files[fileIndex].content = packed
+				// TODO: enable once animation has an unpacked
+//					.unpacked(configuration: configuration)
+			} catch {
+				// TODO: log properly
+				print(path + [String(fileIndex)])
+				print(error)
+			}
+		}
+	}
 }

@@ -6,7 +6,7 @@
 //	
 //	init(
 //		vertexData: VertexData.Packed,
-//		animationData: AnimationData,
+//		animationData: Animation.Packed,
 //		modelName: String,
 //		textureNames: [UInt32: String]
 //	) throws {
