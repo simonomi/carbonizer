@@ -21,10 +21,10 @@ public enum Processor: Hashable, Sendable {
 	
 	var stages: [Stage] {
 		switch self {
-			case .tclFinder:           [.tclFinder] // TODO: split into multiple stages
-			case .mm3Finder:           [.mm3Finder] // TODO: split into multiple stages
-			case .mmsFinder:           [.mmsFinder] // TODO: split into multiple stages
-			case .mpmFinder:           [.mpmFinder] // TODO: split into multiple stages
+			case .tclFinder:           []
+			case .mm3Finder:           [.mm3Ripper]
+			case .mmsFinder:           []
+			case .mpmFinder:           []
 			case .dexDialogueLabeller: [.dmgRipper, .dexDialogueLabeller]
 			case .dexDialogueSaver:    [.dexDialogueRipper, .dexDialogueSaver]
 			case .dexBlockLabeller:    [.eventIDRipper, .dexBlockLabeller]
@@ -39,9 +39,8 @@ public enum Processor: Hashable, Sendable {
 	
 	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper
+		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, mm3Ripper
 		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
-		case tclFinder, mm3Finder, mmsFinder, mpmFinder
 		
 		func run(
 			on file: inout any FileSystemObject,
@@ -77,6 +76,14 @@ public enum Processor: Hashable, Sendable {
 					try file.runProcessor(
 						eventIDRipperF,
 						on: "episode/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .mm3Ripper:
+					try file.runProcessor(
+						mm3RipperF,
+						on: "model/**",
 						in: &environment,
 						at: [],
 						configuration: configuration
@@ -145,14 +152,6 @@ public enum Processor: Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
-//				case .tclFinder:
-//					<#code#>
-//				case .mm3Finder:
-//					<#code#>
-//				case .mmsFinder:
-//					<#code#>
-//				case .mpmFinder:
-//					<#code#>
 				default: todo()
 			}
 		}

@@ -1,5 +1,6 @@
 import BinaryParser
 
+// vertex, texture, animation
 func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
 	let file: MAR.Unpacked
 	switch inputFile {
@@ -60,7 +61,7 @@ func mm3Finder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		}
 		
 		let modelData = Datastream(arc.files[Int(mm3.model.index)].content as! Datastream) // copy to not modify the original
-		let vertexData = try modelData.read(VertexData.self)
+		let vertexData = try modelData.read(VertexData.Packed.self)
 		
 		guard arc.files.indices.contains(Int(mm3.texture.index)) else {
 			throw BinaryParserError.indexOutOfBounds(

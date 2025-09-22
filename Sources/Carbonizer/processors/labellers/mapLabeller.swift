@@ -1,5 +1,6 @@
 func mapLabellerF(
 	_ map: inout MAP.Unpacked,
+	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {

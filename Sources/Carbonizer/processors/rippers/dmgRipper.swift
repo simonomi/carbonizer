@@ -1,5 +1,6 @@
 func dmgRipperF(
 	_ dmg: inout DMG.Unpacked,
+	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {

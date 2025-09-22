@@ -1,5 +1,6 @@
 func dexDialogueLabellerF(
 	_ dex: inout DEX.Unpacked,
+	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {

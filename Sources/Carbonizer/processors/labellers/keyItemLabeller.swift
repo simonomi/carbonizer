@@ -1,5 +1,6 @@
 func keyItemLabellerF(
 	_ keyitemDefs: inout KIL.Unpacked,
+	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {

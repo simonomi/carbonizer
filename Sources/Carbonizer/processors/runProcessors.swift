@@ -11,6 +11,7 @@ func runProcessors(
 	var environment = Processor.Environment()
 	
 	for step in pipeline {
+		// TODO: flip this loop, so only one run call that takes a list of stages
 		for stage in step {
 			try stage.run(on: &file, in: &environment, configuration: configuration)
 		}

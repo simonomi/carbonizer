@@ -1,4 +1,4 @@
-struct Matrix4x3<Scalar: SIMDScalar> {
+struct Matrix4x3<Scalar: SIMDScalar>: Codable {
 	var x: SIMD3<Scalar>
 	var y: SIMD3<Scalar>
 	var z: SIMD3<Scalar>

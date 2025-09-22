@@ -14,6 +14,12 @@ struct Color: Codable {
 		blue = bytes[2]
 	}
 	
+	init(_ rgb555: RGB555Color) {
+		red = UInt8(rgb555.red * 255)
+		green = UInt8(rgb555.green * 255)
+		blue = UInt8(rgb555.blue * 255)
+	}
+	
 	init(_ string: String) {
 		guard string.count == 7, string.hasPrefix("#") else {
 			todo("throw error")

@@ -5,7 +5,7 @@
 //	let data: String
 //	
 //	init(
-//		vertexData: VertexData,
+//		vertexData: VertexData.Packed,
 //		animationData: AnimationData,
 //		modelName: String,
 //		textureNames: [UInt32: String]

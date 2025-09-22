@@ -20,7 +20,7 @@ fileprivate extension String {
 extension Collada {
 	// textureNames: a mapping from palette offset to texture file name. the offset should be normalized (bit shifted according to type)
 	init(
-		vertexData: VertexData,
+		vertexData: VertexData.Packed,
 		animationData: AnimationData,
 		modelName: String,
 		textureNames: [UInt32: String]

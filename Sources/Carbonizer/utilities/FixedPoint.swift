@@ -44,14 +44,22 @@ struct FixedPoint1616: FixedPoint {
 
 @BinaryConvertible
 struct FixedPoint124: FixedPoint {
-	var raw: Int32
+	var raw: Int16
 	
 	static let fractionBits = 4
 }
 
 @BinaryConvertible
 struct FixedPoint88: FixedPoint {
-	var raw: Int32
+	var raw: Int16
 	
 	static let fractionBits = 8
+}
+
+
+@BinaryConvertible
+struct FixedPoint412: FixedPoint {
+	var raw: Int16
+	
+	static let fractionBits = 12
 }

@@ -1,5 +1,8 @@
 import BinaryParser
 
+// TODO: clean this up SEVERLY
+// make a packed/unpacked representation
+
 enum InvalidGPUCommand: Error {
 	case invalidCommand(UInt8)
 	case invalidMatrixMode(UInt32)
@@ -76,15 +79,16 @@ extension GPUCommandType: BinaryConvertible {
 	}
 }
 
-enum GPUCommand {
+// TODO: check that all of these are accurate >.<
+enum GPUCommand: Codable {
 	case noop
 	case matrixMode(MatrixMode)
-	case matrixPop(UInt32) // 1w - i6
-	case matrixRestore(UInt32) // 1w - u5
+	case matrixPop(Int8) // 1w - sign bit + u5
+	case matrixRestore(UInt8) // 1w - u5
 	case matrixIdentity
-	case matrixLoad4x3([UInt32]) // 12w
-	case matrixScale(UInt32, UInt32, UInt32) // 3w - signed 20.12
-	case color(UInt32) // 1w - 555
+	case matrixLoad4x3([UInt32]) // 12w // Matrix4x3?
+	case matrixScale(Double, Double, Double) // 3w, 2012
+	case color(Color) // 1w - 555
 	case normal(UInt32) // 1w
 	case textureCoordinate(SIMD2<Double>) // 1w
 	case vertex16(SIMD3<Double>) // 2w
@@ -103,50 +107,117 @@ enum GPUCommand {
 	case unknown53(UInt32, UInt32, UInt32) // 3w
 	case commandsEnd // always followed by 0F 7F ?
 	
-	enum MatrixMode: UInt32 {
+	enum MatrixMode: Codable {
 		case projection, position, positionAndVector, texture
+		
+		init?(raw: UInt32) {
+			switch raw {
+				case 0: self = .projection
+				case 1: self = .position
+				case 2: self = .positionAndVector
+				case 3: self = .texture
+				default: return nil
+			}
+		}
+		
+		var raw: UInt32 {
+			switch self {
+				case .projection: 0
+				case .position: 1
+				case .positionAndVector: 2
+				case .texture: 3
+			}
+		}
 	}
 	
-	enum VertexMode: UInt32 {
+	enum VertexMode: Codable {
 		case triangle, quadrilateral, triangleStrip, quadrilateralStrip
+		
+		init?(raw: UInt32) {
+			switch raw {
+				case 0: self = .triangle
+				case 1: self = .quadrilateral
+				case 2: self = .triangleStrip
+				case 3: self = .quadrilateralStrip
+				default: return nil
+			}
+		}
+		
+		var raw: UInt32 {
+			switch self {
+				case .triangle: 0
+				case .quadrilateral: 1
+				case .triangleStrip: 2
+				case .quadrilateralStrip: 3
+			}
+		}
 	}
 }
 
 extension GPUCommand.MatrixMode: BinaryConvertible {
 	init(_ data: Datastream) throws {
 		let raw = try data.read(UInt32.self)
-		guard let possiblySelf = Self(rawValue: raw) else {
+		guard let possiblySelf = Self(raw: raw) else {
 			throw InvalidGPUCommand.invalidMatrixMode(raw)
 		}
 		self = possiblySelf
 	}
 	
 	func write(to data: Datawriter) {
-		data.write(rawValue)
+		data.write(raw)
 	}
 }
 
 extension GPUCommand.VertexMode: BinaryConvertible {
 	init(_ data: Datastream) throws {
 		let raw = try data.read(UInt32.self)
-		guard let possiblySelf = Self(rawValue: raw) else {
+		guard let possiblySelf = Self(raw: raw) else {
 			throw InvalidGPUCommand.invalidVertexMode(raw)
 		}
 		self = possiblySelf
 	}
 	
 	func write(to data: Datawriter) {
-		data.write(rawValue)
+		data.write(raw)
 	}
 }
 
 extension Datastream {
 	fileprivate func readFixed412() throws -> Double {
-		Double(try read(Int16.self)) / Double(1 << 12)
+		Double(try read(FixedPoint412.self))
 	}
 	
 	fileprivate func readFixed124() throws -> Double {
-		Double(try read(Int16.self)) / Double(1 << 4)
+		Double(try read(FixedPoint124.self))
+	}
+	
+	fileprivate func readFixed2012() throws -> Double {
+		Double(try read(FixedPoint2012.self))
+	}
+	
+	fileprivate func readSigned6() throws -> Int8 {
+		let raw = try read(UInt32.self)
+		guard raw < (1 << 7) else {
+			todo("throw")
+		}
+		
+		let sign = (raw >> 5) > 0
+		let integer = Int8(raw & 0b11111)
+		
+		return if sign {
+			-integer
+		} else {
+			integer
+		}
+	}
+	
+	fileprivate func readUnsigned5() throws -> UInt8 {
+		let raw = try read(UInt32.self)
+		guard raw < (1 << 6) else {
+			todo("throw")
+		}
+		
+		return UInt8(raw)
 	}
 	
 	func readCommands() throws -> [GPUCommand] {
@@ -164,18 +235,20 @@ extension Datastream {
 				let command: GPUCommand = switch commandType {
 					case .noop: .noop
 					case .matrixMode: .matrixMode(try read(GPUCommand.MatrixMode.self))
-					case .matrixPop: .matrixPop(try read(UInt32.self))
-					case .matrixRestore: .matrixRestore(try read(UInt32.self))
+					case .matrixPop: .matrixPop(try readSigned6())
+					case .matrixRestore: .matrixRestore(try readUnsigned5())
 					case .matrixIdentity: .matrixIdentity
 					case .matrixLoad4x3:
 						.matrixLoad4x3(try read([UInt32].self, count: 12))
 					case .matrixScale:
 							.matrixScale(
-								try read(UInt32.self),
-								try read(UInt32.self),
-								try read(UInt32.self)
+								try readFixed2012(),
+								try readFixed2012(),
+								try readFixed2012()
 							)
-					case .color: .color(try read(UInt32.self))
+					case .color: .color(
+						Color(try read(RGB555Color.self))
+					)
 					case .normal: .normal(try read(UInt32.self))
 					case .textureCoordinate: .textureCoordinate(
 						SIMD2(

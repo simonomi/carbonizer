@@ -1,5 +1,6 @@
 func maskNameLabellerF(
 	_ headmaskDefs: inout HML.Unpacked,
+	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {

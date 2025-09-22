@@ -1,5 +1,6 @@
 func museumLabellerF(
 	_ museumDefs: inout DML.Unpacked,
+	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {

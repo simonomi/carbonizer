@@ -1,87 +1,174 @@
 import BinaryParser
 
-@BinaryConvertible
-struct Matrix4x3_2012 {
-	var x: Vector3_2012
-	var y: Vector3_2012
-	var z: Vector3_2012
-	var transform: Vector3_2012
-}
-
-@BinaryConvertible
-struct Vector3_2012 {
-	var x: FixedPoint2012
-	var y: FixedPoint2012
-	var z: FixedPoint2012
-}
-
-@BinaryConvertible
-struct VertexData {
-	var unknown1: UInt32 = 0x20000
-	
-	var commandsOffset: UInt32 = 0x28
-	var commandsLength: UInt32
-	
-	var boneTableLength: UInt32
-	
-	var modelNamesLength: UInt32
-	
-	var unknown2: UInt32 // (1...27).filter(\.isOdd) except 21
-	var unknown3: UInt32 // no clue what this number means but when its 0 its all funky
-						 // 0, 0x100, 0x101, 0x102
-	var unknown4: UInt32 // 1, 2, 3, 4, 5, 6, 9
-	var unknown5: UInt32 // lots of values 1...300
-						 // number of keyframes?
-	
-	var unknown6: UInt32 // usually half of 0x8 (commandsLength)??
-	
-	@Offset(givenBy: \Self.commandsOffset)
-	@Length(givenBy: \Self.commandsLength)
-	var commands: Datastream
-	
-	@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength))
-	var boneTable: BoneTable
-	
-	@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength), .plus(\Self.boneTableLength))
-	var modelNames: ModelNames
-	
+enum VertexData {
 	@BinaryConvertible
-	struct BoneTable {
-		var boneCount: UInt32
+	struct Packed {
+		var unknown1: FixedPoint2012 = 32
 		
-		@Count(givenBy: \Self.boneCount)
+		var commandsOffset: UInt32 = 0x28
+		var commandsLength: UInt32
+		
+		var boneTableLength: UInt32
+		
+		var modelNamesLength: UInt32
+		
+		var unknown2: UInt32 // (1...27).filter(\.isOdd) except 21
+		var unknown3: UInt32 // no clue what this number means but when its 0 its all funky
+							 // 0, 0x100, 0x101, 0x102
+		var unknown4: UInt32 // 1, 2, 3, 4, 5, 6, 9
+		var unknown5: UInt32 // lots of values 1...300
+							 // number of keyframes?
+		
+		var unknown6: UInt32 // usually half of 0x8 (commandsLength)??
+		
+		@Offset(givenBy: \Self.commandsOffset)
+		@Length(givenBy: \Self.commandsLength)
+		var commands: Datastream
+		
+		@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength))
+		var boneTable: BoneTable
+		
+		@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength), .plus(\Self.boneTableLength))
+		var modelNames: ModelNames
+		
+		@BinaryConvertible
+		struct BoneTable {
+			var boneCount: UInt32
+			
+			@Count(givenBy: \Self.boneCount)
+			var bones: [Bone]
+			
+			@BinaryConvertible
+			struct Bone {
+				@Length(16)
+				var name: String
+				var matrix: Matrix4x3_2012
+			}
+		}
+		
+		@BinaryConvertible
+		struct ModelNames {
+			var nameCount: UInt32
+			
+			@Count(givenBy: \Self.nameCount)
+			var names: [FixedLengthString]
+			
+			@BinaryConvertible
+			struct FixedLengthString {
+				@Length(16)
+				var string: String
+			}
+		}
+	}
+	
+	struct Unpacked: Codable {
+		var commandsLength: UInt32
+		
+		var boneTableLength: UInt32
+		
+		var modelNamesLength: UInt32
+		
+		var unknown2: UInt32
+		var unknown3: UInt32
+		var unknown4: UInt32
+		var unknown5: UInt32
+		
+		var unknown6: UInt32
+		
+		var commands: [GPUCommand]
+		
 		var bones: [Bone]
 		
-		@BinaryConvertible
-		struct Bone {
-			@Length(16)
+		var modelNames: [String]
+		
+		struct Bone: Codable {
 			var name: String
-			var matrix: Matrix4x3_2012
-		}
-	}
-	
-	@BinaryConvertible
-	struct ModelNames {
-		var nameCount: UInt32
-		
-		@Count(givenBy: \Self.nameCount)
-		var names: [FixedLengthString]
-		
-		@BinaryConvertible
-		struct FixedLengthString {
-			@Length(16)
-			var string: String
+			var matrix: Matrix4x3<Double>
 		}
 	}
 }
 
-extension SIMD3<Double> {
-	init(_ vector3_2012: Vector3_2012) {
-		self.init(
-			Double(vector3_2012.x),
-			Double(vector3_2012.y),
-			Double(vector3_2012.z)
+// MARK: packed
+extension VertexData.Packed: ProprietaryFileData {
+	static let fileExtension = ""
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .packed
+	
+	func packed(configuration: Configuration) -> Self { self }
+	
+	func unpacked(configuration: Configuration) throws -> VertexData.Unpacked {
+		try VertexData.Unpacked(self, configuration: configuration)
+	}
+	
+	fileprivate init(_ unpacked: VertexData.Unpacked, configuration: Configuration) {
+		commandsLength = unpacked.commandsLength
+		boneTableLength = unpacked.boneTableLength
+		modelNamesLength = unpacked.modelNamesLength
+		
+		unknown2 = unpacked.unknown2
+		unknown3 = unpacked.unknown3
+		unknown4 = unpacked.unknown4
+		unknown5 = unpacked.unknown5
+		unknown6 = unpacked.unknown6
+		
+//		commands = unpacked.commands
+		
+		boneTable = BoneTable(
+			boneCount: UInt32(unpacked.bones.count),
+			bones: unpacked.bones.map(BoneTable.Bone.init)
 		)
+		
+		modelNames = ModelNames(
+			nameCount: UInt32(unpacked.modelNames.count),
+			names: unpacked.modelNames.map(ModelNames.FixedLengthString.init)
+		)
+		
+		todo()
+	}
+}
+
+extension VertexData.Packed.BoneTable.Bone {
+	fileprivate init(_ unpacked: VertexData.Unpacked.Bone) {
+		name = unpacked.name
+		matrix = Matrix4x3_2012(unpacked.matrix)
+	}
+}
+
+// MARK: unpacked
+extension VertexData.Unpacked: ProprietaryFileData {
+	static let fileExtension = ".vertexData.json"
+	static let magicBytes = ""
+	static let packedStatus: PackedStatus = .unpacked
+	
+	func packed(configuration: Configuration) -> VertexData.Packed {
+		VertexData.Packed(self, configuration: configuration)
+	}
+	
+	func unpacked(configuration: Configuration) -> Self { self }
+	
+	fileprivate init(_ packed: VertexData.Packed, configuration: Configuration) throws {
+		commandsLength = packed.commandsLength
+		boneTableLength = packed.boneTableLength
+		modelNamesLength = packed.modelNamesLength
+		
+		unknown2 = packed.unknown2
+		unknown3 = packed.unknown3
+		unknown4 = packed.unknown4
+		unknown5 = packed.unknown5
+		unknown6 = packed.unknown6
+		
+		commands = try packed.commands.readCommands()
+		
+		bones = packed.boneTable.bones.map(Bone.init)
+		
+		modelNames = packed.modelNames.names.map(\.string)
+	}
+}
+
+extension VertexData.Unpacked.Bone {
+	fileprivate init(_ packed: VertexData.Packed.BoneTable.Bone) {
+		name = packed.name
+		matrix = Matrix4x3(packed.matrix)
 	}
 }
 
@@ -95,190 +182,4 @@ extension Collection where Index == Int {
 	subscript(rel relativeIndex: Index) -> Element {
 		self[startIndex + relativeIndex]
 	}
-}
-
-extension VertexData {
-	/// creates an OBJ
-	/// - Parameters:
-	///   - matrices: the stack of matrices (usually offset by 5)
-	///   - textureNames: a mapping from palette offset to texture file name. the offset should be normalized (bit shifted according to type)
-	/// - Returns: an OBJ
-	func obj(
-		matrices: [Matrix4x3_2012]? = nil,
-		textureNames: [UInt32: String]
-	) throws -> OBJ<Double> {
-		let matrices = (matrices ?? self.boneTable.bones.map(\.matrix))
-			.map(Matrix4x3.init)
-		
-		// copy so theres no side effects
-		let commandData = Datastream(self.commands)
-		
-		let commands = try commandData.readCommands()
-		
-		var textureScale: SIMD2<Double> = SIMD2(1, 1)
-		
-		var currentMatrix: Matrix4x3<Double>?
-		var currentVertexMode: GPUCommand.VertexMode?
-		var currentVertex: SIMD3<Double> = .zero
-		var currentTextureVertex: SIMD2<Double> = .zero
-		var currentVertices: [(Int, texture: Int)] = []
-		var result = OBJ<Double>()
-		
-		func commitVertex() {
-			guard let currentMatrix else {
-				preconditionFailure("currentMatrix was nil")
-			}
-			
-			let vertex = currentVertex.transformed(by: currentMatrix)
-			
-			let vertexIndex: Int // plus 1 because 1-indexed
-			if let index = result.vertices.firstIndex(of: vertex) {
-				vertexIndex = index + 1
-			} else {
-				result.vertices.append(vertex)
-				vertexIndex = result.vertices.count
-			}
-			
-			// flip vertically
-			let textureVertex = SIMD2(
-				currentTextureVertex.x,
-				1 - currentTextureVertex.y
-			)
-			
-			let textureVertexIndex: Int // plus 1 because 1-indexed
-			if let index = result.textureVertices.firstIndex(of: textureVertex) {
-				textureVertexIndex = index + 1
-			} else {
-				result.textureVertices.append(textureVertex)
-				textureVertexIndex = result.textureVertices.count
-			}
-			
-			currentVertices.append((vertexIndex, textureVertexIndex))
-		}
-		
-		func commitVertices() {
-			let newFaces: [(SIMD3<Int>, SIMD3<Int>)]
-			switch currentVertexMode! {
-				case .triangle:
-					guard currentVertices.count.isMultiple(of: 3) else {
-						todo("throw here")
-					}
-					newFaces = currentVertices
-						.chunked(exactSize: 3)
-						.map {(
-							SIMD3($0[rel: 0].0, $0[rel: 1].0, $0[rel: 2].0),
-							SIMD3($0[rel: 0].1, $0[rel: 1].1, $0[rel: 2].1)
-						)}
-				case .quadrilateral:
-					guard currentVertices.count.isMultiple(of: 4) else {
-						todo("throw here")
-					}
-					newFaces = currentVertices
-						.chunked(exactSize: 4)
-						.flatMap {[
-							(SIMD3($0[rel: 0].0, $0[rel: 1].0, $0[rel: 3].0),
-							 SIMD3($0[rel: 0].1, $0[rel: 1].1, $0[rel: 3].1)),
-							(SIMD3($0[rel: 1].0, $0[rel: 2].0, $0[rel: 3].0),
-							 SIMD3($0[rel: 1].1, $0[rel: 2].1, $0[rel: 3].1))
-						]}
-				case .triangleStrip:
-					guard currentVertices.count >= 3 else {
-						todo("throw here")
-					}
-					newFaces = currentVertices
-						.chunks(exactSize: 3, every: 1)
-						.enumerated()
-						.map { (index, vertices) in
-							if index.isEven {
-								(SIMD3(vertices[rel: 0].0, vertices[rel: 1].0, vertices[rel: 2].0),
-								 SIMD3(vertices[rel: 0].1, vertices[rel: 1].1, vertices[rel: 2].1))
-							} else {
-								// reverse winding order
-								(SIMD3(vertices[rel: 1].0, vertices[rel: 0].0, vertices[rel: 2].0),
-								 SIMD3(vertices[rel: 1].1, vertices[rel: 0].1, vertices[rel: 2].1))
-							}
-						}
-				case .quadrilateralStrip:
-					guard currentVertices.count >= 4,
-						  currentVertices.count.isMultiple(of: 2)
-					else {
-						todo("throw here")
-					}
-					newFaces = currentVertices
-						.chunks(exactSize: 4, every: 2)
-						.flatMap {[
-							(SIMD3($0[rel: 0].0, $0[rel: 1].0, $0[rel: 2].0),
-							 SIMD3($0[rel: 0].1, $0[rel: 1].1, $0[rel: 2].1)),
-							(SIMD3($0[rel: 1].0, $0[rel: 3].0, $0[rel: 2].0),
-							 SIMD3($0[rel: 1].1, $0[rel: 3].1, $0[rel: 2].1))
-						]}
-			}
-			
-			let newPolygons = newFaces.map {
-				OBJ<Double>.Polygon.face($0.0, texture: $0.1)
-			}
-			
-			result.polygons.append(contentsOf: newPolygons)
-		}
-		
-		for command in commands {
-			switch command {
-				case .noop: ()
-				case .matrixMode(_): () // ignore for now
-				case .matrixPop(_): () // ignore for now
-				case .matrixRestore(let index):
-					currentMatrix = matrices[Int(index) - 5]
-				case .matrixIdentity:
-					currentMatrix = .identity
-				case .matrixLoad4x3(_): () // ignore for now
-				case .matrixScale(_, _, _): () // ignore for now
-				case .color(_): () // ignore for now
-				case .normal(_): () // ignore for now
-				case .textureCoordinate(let textureVertex):
-					currentTextureVertex = textureVertex * textureScale
-				case .vertex16(let vertex):
-					currentVertex = vertex
-					commitVertex()
-				case .vertexXY(let x, let y):
-					currentVertex.x = x
-					currentVertex.y = y
-					commitVertex()
-				case .vertexXZ(let x, let z):
-					currentVertex.x = x
-					currentVertex.z = z
-					commitVertex()
-				case .vertexYZ(let y, let z):
-					currentVertex.y = y
-					currentVertex.z = z
-					commitVertex()
-				case .polygonAttributes(_): () // ignore for now
-				case .textureImageParameter(let raw):
-					textureScale = SIMD2(
-						textureSize(for: raw >> 20 & 0b111),
-						textureSize(for: raw >> 23 & 0b111)
-					)
-				case .texturePaletteBase(let value):
-					// if a texture isn't found, just use a blank one
-					let textureName = textureNames[value] ?? "none"
-					result.polygons.append(.useTexture(textureName))
-				case .vertexBegin(let vertexMode):
-					currentVertices = []
-					currentVertexMode = vertexMode
-				case .vertexEnd:
-					commitVertices()
-				case .unknown50: () // ignore for now
-				case .unknown51: () // ignore for now
-				case .commandsStart: ()
-				case .unknown53: () // ignore for now
-				case .commandsEnd: ()
-			}
-		}
-		
-		return result
-	}
-}
-
-func textureSize(for scale: UInt32) -> Double {
-	// inverse bc obj and collada texture coords are normalized
-	1 / Double(8 << scale)
 }

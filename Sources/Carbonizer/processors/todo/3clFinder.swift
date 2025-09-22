@@ -1,5 +1,6 @@
 import BinaryParser
 
+// vertex, texture, animation
 func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
 	let file: MAR.Unpacked
 	switch inputFile {
@@ -34,7 +35,7 @@ func tclFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 				}
 				
 				let modelData = Datastream(arc.files[Int(vivosaurAnimation.model.index)].content as! Datastream) // copy to not modify the original
-				let vertexData = try modelData.read(VertexData.self)
+				let vertexData = try modelData.read(VertexData.Packed.self)
 				
 				guard arc.files.indices.contains(Int(vivosaurAnimation.texture.index)) else {
 					throw BinaryParserError.indexOutOfBounds(

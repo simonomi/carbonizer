@@ -1,5 +1,6 @@
 func dbsNameLabellerF(
 	_ dbs: inout DBS.Unpacked,
+	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {

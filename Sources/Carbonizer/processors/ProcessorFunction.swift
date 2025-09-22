@@ -1,5 +1,6 @@
 typealias ProcessorFunction<T> = (
 	inout T,
+	_ path: [String],
 	_ environment: inout Processor.Environment,
 	_ configuration: Configuration
 ) throws -> Void
@@ -44,11 +45,11 @@ extension Folder {
 		at path: consuming [String],
 		configuration: Configuration
 	) throws {
-		path.append(self.name)
+		path.append(name)
 		guard glob.couldFindMatch(in: copy path) else { return }
 		
 		if var selfAsT = self as? T {
-			try processor(&selfAsT, &environment, configuration)
+			try processor(&selfAsT, path, &environment, configuration)
 			self = selfAsT as! Folder
 		}
 		
@@ -69,13 +70,14 @@ extension BinaryFile {
 		_ processor: ProcessorFunction<T>,
 		on glob: Glob,
 		in environment: inout Processor.Environment,
-		at path: [String],
+		at path: consuming [String],
 		configuration: Configuration
 	) throws {
-		guard glob.matches(path + [name]) else { return }
+		path.append(name)
+		guard glob.matches(copy path) else { return }
 		
 		if var selfAsT = self as? T {
-			try processor(&selfAsT, &environment, configuration)
+			try processor(&selfAsT, path, &environment, configuration)
 			self = selfAsT as! BinaryFile
 		}
 	}
@@ -89,11 +91,11 @@ extension MAR.Unpacked {
 		at path: consuming [String],
 		configuration: Configuration
 	) throws {
-		path.append(self.name)
+		path.append(name)
 		guard glob.couldFindMatch(in: copy path) else { return }
 		
 		if var selfAsT = self as? T {
-			try processor(&selfAsT, &environment, configuration)
+			try processor(&selfAsT, path, &environment, configuration)
 			self = selfAsT as! MAR.Unpacked
 		}
 		
@@ -101,6 +103,7 @@ extension MAR.Unpacked {
 			try files[0].content.runProcessor(
 				processor,
 				in: &environment,
+				at: path,
 				configuration: configuration
 			)
 		} else {
@@ -111,6 +114,7 @@ extension MAR.Unpacked {
 				try files[index].content.runProcessor(
 					processor,
 					in: &environment,
+					at: mcmPath,
 					configuration: configuration
 				)
 			}
@@ -135,14 +139,16 @@ extension ProprietaryFile {
 		_ processor: ProcessorFunction<T>,
 		on glob: Glob,
 		in environment: inout Processor.Environment,
-		at path: [String],
+		at path: consuming [String],
 		configuration: Configuration
 	) throws {
-		guard glob.matches(path + [name]) else { return }
+		path.append(name)
+		guard glob.matches(copy path) else { return }
 		
 		try data.runProcessor(
 			processor,
 			in: &environment,
+			at: path,
 			configuration: configuration
 		)
 	}
@@ -152,10 +158,11 @@ extension ProprietaryFileData {
 	mutating func runProcessor<T>(
 		_ processor: ProcessorFunction<T>,
 		in environment: inout Processor.Environment,
+		at path: consuming [String],
 		configuration: Configuration
 	) throws {
 		if var selfAsT = self as? T {
-			try processor(&selfAsT, &environment, configuration)
+			try processor(&selfAsT, path, &environment, configuration)
 			self = selfAsT as! Self
 		}
 	}

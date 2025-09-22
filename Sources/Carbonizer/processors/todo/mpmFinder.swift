@@ -1,6 +1,7 @@
 import BinaryParser
 import Foundation
 
+// palette, bitmap, bg map
 func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) throws -> [any FileSystemObject] {
 	let file: MAR.Unpacked
 	switch inputFile {
