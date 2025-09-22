@@ -68,9 +68,7 @@ func modelReparserF(
 			do {
 				// copy to not modify the original
 				let packed = try Datastream(data).read(Animation.Packed.self)
-				mar.files[fileIndex].content = packed
-				// TODO: enable once animation has an unpacked
-//					.unpacked(configuration: configuration)
+				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
 				// TODO: log properly
 				print(path + [String(fileIndex)])
