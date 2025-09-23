@@ -66,6 +66,7 @@ struct RoundTrips {
 			("map r 0025", .packed),
 			("museum_defs", .packed),
 			("btl_tuto_001", .packed),
+			("btl_adjust_defs", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
@@ -75,7 +76,7 @@ struct RoundTrips {
 			overwriteOutput: true,
 			dexCommandList: .ff1,
 			externalMetadata: false,
-			fileTypes: ["DBT"],
+			fileTypes: ["DBA"],
 			onlyUnpack: [],
 			skipUnpacking: [],
 			processors: [],

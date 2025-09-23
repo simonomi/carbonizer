@@ -133,6 +133,7 @@ public struct Configuration: Sendable {
 		"BCO": BCO.Unpacked.self,
 		"CHR": CHR.Unpacked.self,
 		"DAL": DAL.Unpacked.self,
+		"DBA": DBA.Unpacked.self,
 		"DBS": DBS.Unpacked.self,
 		"DBT": DBT.Unpacked.self,
 		"DCL": DCL.Unpacked.self,
