@@ -25,6 +25,8 @@ extension Processor {
 			}
 		}
 		
+		var foldersWithTextureArchives: Set<[String]>?
+		
 		struct MissingValue: Error, CustomStringConvertible {
 			var path: String
 			

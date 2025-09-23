@@ -40,8 +40,8 @@ func mpmFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 		let bitmapData = Datastream(bitmap.content as! Datastream) // copy so as not to modify the original
 		
 		let bitmapFile = Bitmap(
-			width: Int32(mpm.width),
-			height: Int32(mpm.height),
+			width: mpm.width,
+			height: mpm.height,
 			contents: bitmapData.bytes.flatMap {
 				// color 0 is transparent, which is indicated by nil
 				if palette.colors.count == 16 {

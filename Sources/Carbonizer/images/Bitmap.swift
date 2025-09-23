@@ -2,8 +2,8 @@ import BinaryParser
 import Foundation
 
 struct Bitmap {
-	var width: Int32
-	var height: Int32
+	var width: UInt32
+	var height: UInt32
 	var contents: [Color]
 	
 	@BinaryConvertible
@@ -13,6 +13,15 @@ struct Bitmap {
 		var green: UInt8
 		var red: UInt8
 		var alpha: UInt8
+	}
+}
+
+extension Bitmap.Color {
+	init(_ color: Color) {
+		blue = color.blue
+		green = color.green
+		red = color.red
+		alpha = 255
 	}
 }
 
@@ -33,7 +42,7 @@ extension Bitmap: BinaryConvertible {
 		
 		data.write(infoHeaderLength)
 		data.write(width)
-		data.write(-height)
+		data.write(-Int32(height))
 		data.write(UInt16(1)) // planes
 		data.write(UInt16(32)) // bits per pixel
 		data.write(UInt32(3)) // compression (BITFIELDS)

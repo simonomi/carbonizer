@@ -19,10 +19,17 @@ public enum Processor: Hashable, Sendable {
 		}
 	}
 	
+	// model exporter
+	// - for each mm3 or 3cl animation (mesh, texture, animation)
+	// - write into FOLDER
+	// - needs Mesh.Unpacked, texture name, Animation.Unpacked
+	//   - [[String]: (Int, Int, Int)]
+	//   - [path: [(mesh, texture, animation) indices]]
+	
 	var stages: [Stage] {
 		switch self {
-			case .tclFinder:           [.tclRipper, .modelReparser] // TODO: create texture files and model files
-			case .mm3Finder:           [.mm3Ripper, .modelReparser] // TODO: create texture files and model files
+			case .tclFinder:           [.tclRipper, .modelReparser, .textureExporter] // TODO: create model files
+			case .mm3Finder:           [.mm3Ripper, .modelReparser, .textureExporter] // TODO: create model files
 			case .mmsFinder:           todo() // TODO: everything
 			case .mpmFinder:           todo() // TODO: everything
 			case .dexDialogueLabeller: [.dmgRipper, .dexDialogueLabeller]
@@ -41,6 +48,7 @@ public enum Processor: Hashable, Sendable {
 	enum Stage: Equatable {
 		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, mm3Ripper, tclRipper
 		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, hmlNameLabeller, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
+		case textureExporter
 		
 		func run(
 			on file: inout any FileSystemObject,
@@ -164,6 +172,14 @@ public enum Processor: Hashable, Sendable {
 					try file.runProcessor(
 						museumLabellerF,
 						on: "etc/museum_defs",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .textureExporter:
+					try file.runProcessor(
+						textureExporterF,
+						on: "model/**",
 						in: &environment,
 						at: [],
 						configuration: configuration

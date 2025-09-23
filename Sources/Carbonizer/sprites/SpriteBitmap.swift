@@ -18,7 +18,7 @@ struct SpriteBitmap {
 }
 
 extension SpriteBitmap {
-	var width: Int32 {
+	var width: UInt32 {
 		switch widthAndHeight {
 			case 0, 2, 6: 8
 			case 1, 4, 10: 16
@@ -28,7 +28,7 @@ extension SpriteBitmap {
 		}
 	}
 	
-	var height: Int32 {
+	var height: UInt32 {
 		switch widthAndHeight {
 			case 0, 1, 5: 8
 			case 2, 4, 9: 16

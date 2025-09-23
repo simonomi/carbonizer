@@ -239,19 +239,20 @@ struct SpriteAnimation: BinaryConvertible {
 	) throws -> Bitmap {
 		let leastX = images
 			.map(\.position.x)
-			.map(Int32.init)
+			.map(UInt32.init)
 			.min()!
 		let leastY = images
 			.map(\.position.y)
-			.map(Int32.init)
+			.map(UInt32.init)
 			.min()!
 		let mostX = images
-			.map { Int32($0.position.x) + bitmaps[Int($0.bitmap)].width }
+			.map { UInt32($0.position.x) + bitmaps[Int($0.bitmap)].width }
 			.max()!
 		let mostY = images
-			.map { Int32($0.position.y) + bitmaps[Int($0.bitmap)].height }
+			.map { UInt32($0.position.y) + bitmaps[Int($0.bitmap)].height }
 			.max()!
 		
+		// TODO: this is not how the width should be calculated
 		let width = (mostX - leastX).magnitude
 		let height = (mostY - leastY).magnitude
 		
@@ -259,7 +260,7 @@ struct SpriteAnimation: BinaryConvertible {
 //		print("bounds (\(leastX), \(leastY)) (\(mostX), \(mostY))")
 		
 		// offset to make the least coordinate (0,0)
-		let offset = Point(x: Int16(-leastX), y: Int16(-leastY))
+		let offset = Point(x: -Int16(leastX), y: -Int16(leastY))
 //		print("offset", offset)
 //		print("positions", images.map(\.position))
 //		print("corners", images.map {
@@ -278,8 +279,8 @@ struct SpriteAnimation: BinaryConvertible {
 //		print()
 		
 		var canvas = Bitmap(
-			width: Int32(width),
-			height: Int32(height),
+			width: width,
+			height: height,
 			contents: Array(repeating: .transparent, count: Int(width) * Int(height))
 		)
 		
