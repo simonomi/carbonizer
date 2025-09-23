@@ -21,10 +21,10 @@ public enum Processor: Hashable, Sendable {
 	
 	var stages: [Stage] {
 		switch self {
-			case .tclFinder:           []
-			case .mm3Finder:           [.mm3Ripper, .modelReparser]
-			case .mmsFinder:           []
-			case .mpmFinder:           []
+			case .tclFinder:           [.tclRipper, .modelReparser] // TODO: create texture files and model files
+			case .mm3Finder:           [.mm3Ripper, .modelReparser] // TODO: create texture files and model files
+			case .mmsFinder:           todo() // TODO: everything
+			case .mpmFinder:           todo() // TODO: everything
 			case .dexDialogueLabeller: [.dmgRipper, .dexDialogueLabeller]
 			case .dexDialogueSaver:    [.dexDialogueRipper, .dexDialogueSaver]
 			case .dexBlockLabeller:    [.eventIDRipper, .dexBlockLabeller]
@@ -39,7 +39,7 @@ public enum Processor: Hashable, Sendable {
 	
 	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, mm3Ripper
+		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, mm3Ripper, tclRipper
 		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, hmlNameLabeller, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
 		
 		func run(
@@ -84,6 +84,14 @@ public enum Processor: Hashable, Sendable {
 					try file.runProcessor(
 						mm3RipperF,
 						on: "model/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .tclRipper:
+					try file.runProcessor(
+						tclRipperF,
+						on: "model/battle/**",
 						in: &environment,
 						at: [],
 						configuration: configuration

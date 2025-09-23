@@ -12,8 +12,6 @@ enum Texture {
 		
 		var palettes: [Datastream]
 		
-		// bitmap size: width * height
-		// palette size: ?
 		@BinaryConvertible
 		struct ImageHeader {
 			@Length(16)
@@ -22,7 +20,7 @@ enum Texture {
 			var bitmapOffset: UInt32
 			var paletteOffset: UInt32
 			
-			var unknown: UInt16 // redundant bitmap offset/8??
+			var unknown: FixedPoint124 // seem to be monotonically increasing over each image in a texture
 			
 			var info: UInt16
 		}
@@ -33,7 +31,7 @@ enum Texture {
 		
 		struct Image: Codable {
 			var name: String
-			var unknown: UInt16
+			var unknown: Double
 			var info: Info
 			
 			var bitmap: Datastream
@@ -184,7 +182,7 @@ extension Texture.Packed.ImageHeader {
 			paletteOffset += UInt32(unpacked.palette.count * 2)
 		}
 		
-		unknown = unpacked.unknown
+		unknown = FixedPoint124(unpacked.unknown)
 		
 		info = unpacked.info.raw
 	}
@@ -254,7 +252,7 @@ extension Texture.Unpacked.Image {
 		palette paletteData: Datastream
 	) throws {
 		name = header.name
-		unknown = header.unknown
+		unknown = Double(header.unknown)
 		info = try Info(raw: header.info)
 		
 		bitmap = bitmapData
