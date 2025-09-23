@@ -29,4 +29,27 @@ func mm3RipperF(
 	
 	let animationTablePath = Array(path.dropLast() + [mm3.animation.tableName])
 	environment.animationFiles![animationTablePath, default: []].insert(Int(mm3.animation.index))
+	
+	let folderPath: [String] = path.dropLast()
+	
+	let tableName = mm3.mesh.tableName
+	guard tableName == mm3.texture.tableName,
+		  tableName == mm3.animation.tableName
+	else {
+		todo("paths must match :/")
+	}
+	
+	let modelIndices = Processor.Environment.ModelIndices(
+		modelName: path.last!,
+		meshIndex: Int(mm3.mesh.index),
+		textureIndex: Int(mm3.texture.index),
+		animationIndex: Int(mm3.animation.index)
+	)
+	
+	if environment.modelIndices == nil {
+		environment.modelIndices = [:]
+	}
+	
+	environment.modelIndices![folderPath, default: [:]][tableName, default: []]
+		.insert(modelIndices)
 }

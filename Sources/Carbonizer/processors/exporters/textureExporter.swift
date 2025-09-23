@@ -4,10 +4,7 @@ func textureExporterF(
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {
-	guard let foldersWithTextureArchives = environment.foldersWithTextureArchives else {
-		throw TextureFoldersNotRipped()
-	}
-	
+	let foldersWithTextureArchives = try environment.get(\.foldersWithTextureArchives)
 	guard foldersWithTextureArchives.contains(path) else { return }
 	
 	var assets = Folder(name: "assets", metadata: .skipFile, contents: [])
@@ -42,10 +39,4 @@ func textureExporterF(
 	}
 	
 	folder.contents.append(assets)
-}
-
-struct TextureFoldersNotRipped: Error, CustomStringConvertible {
-	var description: String {
-		"textureExporter was run without having ripped the texture folders"
-	}
 }

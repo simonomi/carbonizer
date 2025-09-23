@@ -18,32 +18,29 @@ fileprivate extension String {
 }
 
 extension Collada {
-	// textureNames: a mapping from palette offset to texture file name. the offset should be normalized (bit shifted according to type)
+	/// - Parameters:
+	///   - texturePath: assets/mar name/texture index
+	///   - textureNames: a mapping from palette offset to texture file name. the offset should be normalized (bit shifted according to type)
 	init(
-		mesh: Mesh.Packed,
-		animationData: Animation.Packed,
+		mesh: Mesh.Unpacked,
+		animationData: Animation.Unpacked,
 		modelName: String,
+		texturePath: String,
 		textureNames: [UInt32: String]
 	) throws {
-		// copy so theres no side effects
-		let commandData = Datastream(mesh.commands)
-		let commands = try commandData.read(GPUCommands.self).commands
-		
 		let modelNameWithSpaces = modelName
 		let modelName = modelName.withoutSpaces()
 		
-		let matrices = mesh.boneTable.bones
-			.map(\.matrix)
-			.map(Matrix4x3.init)
+		let matrices = mesh.bones.map(\.matrix)
 		
-		let parsingResult = parseCommands(
-			commands,
+		let parsingResult = try parseCommands(
+			mesh.commands,
 			textureNames: textureNames,
 			matrices: matrices
 		)
 		
-		let boneCount = mesh.boneTable.bones.count
-		let boneNames = mesh.boneTable.bones.map(\.name)
+		let boneCount = mesh.bones.count
+		let boneNames = mesh.bones.map(\.name)
 		
 		precondition(boneCount > 0)
 		
@@ -64,7 +61,7 @@ extension Collada {
 					.profile_COMMON(
 						.image( // TODO: move to library_images?
 							id: "\(materialName)-image",
-							.init_from("\(materialName).bmp")
+							.init_from("\(texturePath)/\(materialName).bmp")
 						),
 						.technique(
 							sid: "technique",
@@ -130,17 +127,13 @@ extension Collada {
 				)
 			}
 		
-		precondition(animationData.keyframes.boneCount == boneCount, "the number of bones in the animation doesn't match the mesh")
+		precondition(animationData.keyframes[0].count == boneCount, "the number of bones in the animation doesn't match the mesh")
 		
-		let transforms = animationData.keyframes.transforms
-			.map(Matrix4x3.init)
-			.chunked(exactSize: boneCount)
-			.map(Array.init)
-			.transposed()
+		let transforms = animationData.keyframes.transposed()
 		
 		// this can differ from animationData.keyFrameCount, but it's *always* <=, so use it
 		// if it's different, it's usually 1, except in o09warp1_01 for some reason
-		let frameCount = Int(animationData.keyframes.frameCount)
+		let frameCount = Int(animationData.keyframes.count)
 		
 		precondition(boneCount == transforms.count)
 		
@@ -165,7 +158,7 @@ extension Collada {
 		
 		let keyframeTimestamps = (0..<frameCount)
 			.map(Double.init)
-			.map { $0 * (1 / 30) } // play everything at 30fps for now
+			.map { $0 * (1 / 60) } // play everything at 30fps for now
 		
 		let commonSamplers: [XMLNode] = [
 			.source(
@@ -351,13 +344,13 @@ extension Collada {
 						.node(
 							id: "\(modelName)-skeleton",
 							type: "JOINT",
-							mesh.boneTable.bones
+							mesh.bones
 								.map {
 									.node( // NOTE: if a bone name has a " in it, it'll break
 										sid: $0.name,
 										name: $0.name,
 										type: "JOINT",
-										.matrix(sid: "transform", Matrix4x3($0.matrix))
+										.matrix(sid: "transform", $0.matrix)
 									)
 								}
 						),

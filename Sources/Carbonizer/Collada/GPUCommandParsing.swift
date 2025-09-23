@@ -8,6 +8,17 @@ struct PolygonPoint {
 	}
 }
 
+enum ModelParsingError: Error, CustomStringConvertible {
+	case negativeOneBone
+	
+	var description: String {
+		switch self {
+			case .negativeOneBone:
+				"THE BONE IS NEGATIVE 1"
+		}
+	}
+}
+
 fileprivate struct CommandParsingState {
 	var vertex: SIMD3<Double> = .zero // ?
 	var vertexMode: GPUCommands.Command.VertexMode?
@@ -21,8 +32,10 @@ fileprivate struct CommandParsingState {
 	
 	var vertices: [PolygonPoint] = []
 	
-	mutating func commitVertex(for result: inout CommandParsingResult, matrices: [Matrix4x3<Double>]) {
-		if bone == -1 { preconditionFailure("THE BONE IS NEGATIVE 1") }
+	mutating func commitVertex(for result: inout CommandParsingResult, matrices: [Matrix4x3<Double>]) throws {
+		if bone == -1 {
+			throw ModelParsingError.negativeOneBone
+		}
 		let vertex = vertex.transformed(by: matrices[bone])
 		
 		let textureInfo = material.map {
@@ -124,11 +137,11 @@ func parseCommands(
 	_ commands: [GPUCommands.Command],
 	textureNames: [UInt32: String],
 	matrices: [Matrix4x3<Double>]
-) -> CommandParsingResult {
+) throws -> CommandParsingResult {
 	let initialState = (state: CommandParsingState(), result: CommandParsingResult())
-	return commands
+	return try commands
 		.reduce(into: initialState) { partialResult, command in
-			parseCommand(
+			try parseCommand(
 				state: &partialResult.state,
 				result: &partialResult.result,
 				command: command,
@@ -144,7 +157,7 @@ fileprivate func parseCommand(
 	command: GPUCommands.Command,
 	textureNames: [UInt32: String],
 	matrices: [Matrix4x3<Double>]
-) {
+) throws {
 	switch command {
 		case .noop: ()
 		case .matrixMode(_): () // ignore for now
@@ -162,19 +175,19 @@ fileprivate func parseCommand(
 			state.textureVertex = (textureVertex * state.textureScale).flippedVertically()
 		case .vertex16(let vertex):
 			state.vertex = vertex
-			state.commitVertex(for: &result, matrices: matrices)
+			try state.commitVertex(for: &result, matrices: matrices)
 		case .vertexXY(let x, let y):
 			state.vertex.x = x
 			state.vertex.y = y
-			state.commitVertex(for: &result, matrices: matrices)
+			try state.commitVertex(for: &result, matrices: matrices)
 		case .vertexXZ(let x, let z):
 			state.vertex.x = x
 			state.vertex.z = z
-			state.commitVertex(for: &result, matrices: matrices)
+			try state.commitVertex(for: &result, matrices: matrices)
 		case .vertexYZ(let y, let z):
 			state.vertex.y = y
 			state.vertex.z = z
-			state.commitVertex(for: &result, matrices: matrices)
+			try state.commitVertex(for: &result, matrices: matrices)
 		case .polygonAttributes(_): () // ignore for now
 		case .textureImageParameter(let raw):
 			state.textureScale = SIMD2(

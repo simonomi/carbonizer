@@ -196,7 +196,7 @@ extension Datastream {
 				whileReading: String.self
 			)
 		}
-		guard let string = String(data: Data(bytes[offset..<endIndex]), encoding: .utf8) else {
+		guard let string = String(bytes: bytes[offset..<endIndex], encoding: .utf8) else {
 			throw StringParsingError.invalidUTF8(showInvalidUTF8(in: bytes[offset..<endIndex]))
 		}
 		
@@ -270,7 +270,7 @@ extension Datastream {
 				whileReading: String.self
 			)
 		}
-		guard let string = String(data: Data(bytes[offset..<endOffset]), encoding: .utf8) else {
+		guard let string = String(bytes: bytes[offset..<endOffset], encoding: .utf8) else {
 			throw StringParsingError.invalidUTF8(showInvalidUTF8(in: bytes[offset..<endOffset]))
 		}
 		
@@ -289,7 +289,7 @@ extension Datastream {
 				whileReading: String.self
 			)
 		}
-		guard let string = String(data: Data(bytes[offset..<endOffset]), encoding: .utf8) else {
+		guard let string = String(bytes: bytes[offset..<endOffset], encoding: .utf8) else {
 			throw StringParsingError.invalidUTF8(showInvalidUTF8(in: bytes[offset..<endOffset]))
 		}
 		

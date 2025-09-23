@@ -77,7 +77,7 @@ extension DefaultStringInterpolation {
 }
 
 @usableFromInline
-func showInvalidUTF8(in bytes: ArraySlice<UInt8>) -> String {
+func showInvalidUTF8(in bytes: some Sequence<UInt8>) -> String {
 	bytes
 		.compactMap(UnicodeScalar.init)
 		.map(\.debugDescription)

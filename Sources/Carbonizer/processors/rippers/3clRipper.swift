@@ -20,10 +20,14 @@ func tclRipperF(
 		environment.animationFiles = [:]
 	}
 	
-	for vivosaur in tcl.vivosaurs {
+	if environment.modelIndices == nil {
+		environment.modelIndices = [:]
+	}
+	
+	for (vivosaurID, vivosaur) in tcl.vivosaurs.enumerated() {
 		guard let vivosaur else { continue }
 		
-		for animation in vivosaur.animations {
+		for (animationID, animation) in vivosaur.animations.enumerated() {
 			guard let animation else { continue }
 			
 			let meshTablePath = Array(path.dropLast(2) + [animation.mesh.tableName])
@@ -35,6 +39,25 @@ func tclRipperF(
 			
 			let animationTablePath = Array(path.dropLast(2) + [animation.animation.tableName])
 			environment.animationFiles![animationTablePath, default: []].insert(Int(animation.animation.index))
+			
+			let folderPath: [String] = path.dropLast(2)
+			
+			let tableName = animation.mesh.tableName
+			guard tableName == animation.texture.tableName,
+				  tableName == animation.animation.tableName
+			else {
+				todo("paths must match :/")
+			}
+			
+			let modelIndices = Processor.Environment.ModelIndices(
+				modelName: "vivosaur \(vivosaurID) animation \(animationID)",
+				meshIndex: Int(animation.mesh.index),
+				textureIndex: Int(animation.texture.index),
+				animationIndex: Int(animation.animation.index)
+			)
+			
+			environment.modelIndices![folderPath, default: [:]][tableName, default: []]
+				.insert(modelIndices)
 		}
 	}
 }

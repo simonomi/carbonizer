@@ -27,6 +27,16 @@ extension Processor {
 		
 		var foldersWithTextureArchives: Set<[String]>?
 		
+		//                  folder    table
+		var modelIndices: [[String]: [String: Set<ModelIndices>]]?
+		
+		struct ModelIndices: Hashable {
+			var modelName: String
+			var meshIndex: Int
+			var textureIndex: Int
+			var animationIndex: Int
+		}
+		
 		struct MissingValue: Error, CustomStringConvertible {
 			var path: String
 			

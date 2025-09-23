@@ -34,6 +34,8 @@ enum Texture {
 			var unknown: Double
 			var info: Info
 			
+			var paletteOffset: UInt32 // need this because it needs to match mesh's
+			
 			var bitmap: Datastream
 			var palette: [Color]
 			
@@ -136,10 +138,9 @@ extension Texture.Packed: ProprietaryFileData {
 //		imageCount = UInt32(unpacked.images.count)
 //		
 //		var bitmapOffset: UInt32 = 0
-//		var paletteOffset: UInt32 = 0
-//		
+//
 //		imageHeaders = unpacked.images.map {
-//			ImageHeader($0, bitmapOffset: &bitmapOffset, paletteOffset: &paletteOffset)
+//			ImageHeader($0, bitmapOffset: &bitmapOffset)
 //		}
 //		
 //		bitmaps = unpacked.images.map(\.bitmap)
@@ -163,8 +164,7 @@ extension Texture.Packed: ProprietaryFileData {
 extension Texture.Packed.ImageHeader {
 	fileprivate init(
 		_ unpacked: Texture.Unpacked.Image,
-		bitmapOffset: inout UInt32,
-		paletteOffset: inout UInt32
+		bitmapOffset: inout UInt32
 	) {
 		name = unpacked.name
 		
@@ -175,12 +175,7 @@ extension Texture.Packed.ImageHeader {
 			bitmapOffset += UInt32(unpacked.bitmap.bytes.count)
 		}
 		
-		if unpacked.palette.count == 0 {
-			self.paletteOffset = 0
-		} else {
-			self.paletteOffset = paletteOffset
-			paletteOffset += UInt32(unpacked.palette.count * 2)
-		}
+		paletteOffset = unpacked.paletteOffset
 		
 		unknown = FixedPoint124(unpacked.unknown)
 		
@@ -255,6 +250,8 @@ extension Texture.Unpacked.Image {
 		unknown = Double(header.unknown)
 		info = try Info(raw: header.info)
 		
+		paletteOffset = header.paletteOffset
+		
 		bitmap = bitmapData
 		
 		palette = try paletteData.read(
@@ -300,7 +297,32 @@ extension Texture.Unpacked.Image.Info.TextureFormat {
 	}
 }
 
+struct DuplicatePaletteOffsets: Error, CustomStringConvertible {
+	var firstName: String
+	var secondName: String
+	
+	var description: String {
+		"duplicate palette offsets for \(.cyan)\(firstName)\(.normal) and \(.cyan)\(secondName)\(.normal)"
+	}
+}
+
 extension Texture.Unpacked {
+	func textureNames() throws -> [UInt32: String] {
+		try Dictionary(
+			images.map {
+				// see http://problemkaputt.de/gbatek-ds-3d-texture-attributes.htm
+				switch $0.info.textureFormat {
+					case .twoBits:
+						($0.paletteOffset >> 3, "\($0.name)")
+					default:
+						($0.paletteOffset >> 4, "\($0.name)")
+				}
+			}
+		) {
+			throw DuplicatePaletteOffsets(firstName: $0, secondName: $1)
+		}
+	}
+	
 	func folder(named name: String) throws -> Folder {
 		Folder(
 			name: name,
