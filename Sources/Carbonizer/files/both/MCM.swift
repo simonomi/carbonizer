@@ -94,7 +94,7 @@ extension MCM.Unpacked {
 		}
 	}
 	
-	init(_ packed: MCM.Packed, configuration: Configuration) throws {
+	init(_ packed: MCM.Packed, in marName: String, configuration: Configuration) throws {
 		compression = (
 			CompressionType(rawValue: packed.compressionType1) ?? .none,
 			CompressionType(rawValue: packed.compressionType2) ?? .none
@@ -117,7 +117,7 @@ extension MCM.Unpacked {
 				.joined()
 			
 			content = try makeFileData(
-				name: "",
+				name: marName,
 				data: data,
 				configuration: configuration
 			)?.unpacked(configuration: configuration) ?? data

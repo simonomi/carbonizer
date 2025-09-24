@@ -1,8 +1,7 @@
 import BinaryParser
 
 // etc/creature_defs
-// ffc is completely different, needs new file type
-enum DCL {
+enum DCL_FF1 {
 	@BinaryConvertible
 	struct Packed {
 		@Include
@@ -127,7 +126,7 @@ enum DCL {
 			@Offset(givenBy: \Self.healthAtEachRankOffset)
 			var healthAtEachRank: [UInt16]
 			
-			enum Element: UInt8 {
+			enum Element: UInt8, RawRepresentable {
 				case fire = 1, air, earth, water, neutral, legendary
 			}
 			
@@ -412,13 +411,7 @@ enum DCL {
 	}
 }
 
-extension DCL.Packed.Vivosaur.Element?: BinaryConvertible {
-	struct InvalidElement: Error {
-		var raw: UInt8
-		
-		// TODO: custom description
-	}
-	
+extension DCL_FF1.Packed.Vivosaur.Element?: BinaryConvertible {
 	public init(_ data: Datastream) throws {
 		let rawByte = try data.read(UInt8.self)
 		
@@ -427,34 +420,30 @@ extension DCL.Packed.Vivosaur.Element?: BinaryConvertible {
 			return
 		}
 		
-		guard let element = DCL.Packed.Vivosaur.Element(rawValue: rawByte) else {
-			throw InvalidElement(raw: rawByte)
+		guard let element = DCL_FF1.Packed.Vivosaur.Element(rawValue: rawByte) else {
+			throw InvalidRawValue(rawByte, for: DCL_FF1.Packed.Vivosaur.Element.self)
 		}
 		
 		self = element
 	}
 	
 	public func write(to data: Datawriter) {
-		if let rawValue = self?.rawValue {
-			data.write(rawValue)
-		} else {
-			data.write(UInt8.zero)
-		}
+		data.write(self?.rawValue ?? 0)
 	}
 }
 
 // MARK: packed
-extension DCL.Packed: ProprietaryFileData {
+extension DCL_FF1.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Configuration) -> DCL.Unpacked {
-		DCL.Unpacked(self, configuration: configuration)
+	func unpacked(configuration: Configuration) -> DCL_FF1.Unpacked {
+		DCL_FF1.Unpacked(self, configuration: configuration)
 	}
 	
-	fileprivate init(_ unpacked: DCL.Unpacked, configuration: Configuration) {
+	fileprivate init(_ unpacked: DCL_FF1.Unpacked, configuration: Configuration) {
 		unknown1 = unpacked.unknown1
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
@@ -477,10 +466,10 @@ extension DCL.Packed: ProprietaryFileData {
 	}
 }
 
-extension DCL.Packed.Vivosaur {
-	static let null = Self(id: 0, unknown01: 0, unknown02: 0, length: 0, rank12HealthDividedBy2: 0, attack: .null, defense: .null, accuracy: .null, evasion: .null, critRate: 0, typeAdvantageCritRate: 0, linkChance: 0, unknown03: 0, teams: Teams(rawValue: 0), moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown04: 0, unknown05: 0, unknown06: 0, unknown07: 0, unknown08: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, requiredFossilsForTeamSkill: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
+extension DCL_FF1.Packed.Vivosaur {
+	static let null = Self(id: 0, unknown01: 0, unknown02: 0, length: 0, rank12HealthDividedBy2: 0, attack: .null, defense: .null, accuracy: .null, evasion: .null, critRate: 0, typeAdvantageCritRate: 0, linkChance: 0, unknown03: 0, teams: [], moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown04: 0, unknown05: 0, unknown06: 0, unknown07: 0, unknown08: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, requiredFossilsForTeamSkill: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
 	
-	fileprivate init(_ unpacked: DCL.Unpacked.Vivosaur) {
+	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur) {
 		id = unpacked.id
 		
 		length = unpacked.length
@@ -566,8 +555,8 @@ extension DCL.Packed.Vivosaur {
 	}
 }
 
-extension DCL.Packed.Vivosaur.Element {
-	fileprivate init(_ unpacked: DCL.Unpacked.Vivosaur.Element) {
+extension DCL_FF1.Packed.Vivosaur.Element {
+	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur.Element) {
 		self = switch unpacked {
 			case .fire: .fire
 			case .air: .air
@@ -579,10 +568,10 @@ extension DCL.Packed.Vivosaur.Element {
 	}
 }
 
-extension DCL.Packed.Vivosaur.Stat {
+extension DCL_FF1.Packed.Vivosaur.Stat {
 	static let null = Self(growthRate: 0, rank08Value: 0, rank01Value: 0, rank12Value: 0)
 	
-	fileprivate init(_ unpacked: DCL.Unpacked.Vivosaur.Stat) {
+	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur.Stat) {
 		growthRate = unpacked.growthRate
 		rank08Value = unpacked.rank08Value
 		rank01Value = unpacked.rank01Value
@@ -590,8 +579,8 @@ extension DCL.Packed.Vivosaur.Stat {
 	}
 }
 
-extension DCL.Packed.Vivosaur.Teams {
-	fileprivate init(_ unpacked: DCL.Unpacked.Vivosaur.Team) {
+extension DCL_FF1.Packed.Vivosaur.Teams {
+	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur.Team) {
 		self = switch unpacked {
 			case .fireType: .fireType
 			case .airType: .airType
@@ -613,8 +602,8 @@ extension DCL.Packed.Vivosaur.Teams {
 	}
 }
 
-extension DCL.Packed.Vivosaur.PassiveAbility {
-	fileprivate init(_ unpacked: DCL.Unpacked.Vivosaur.PassiveAbility?) {
+extension DCL_FF1.Packed.Vivosaur.PassiveAbility {
+	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur.PassiveAbility?) {
 		self = switch unpacked {
 			case nil: .none
 			case .nothing: .nothing
@@ -627,10 +616,10 @@ extension DCL.Packed.Vivosaur.PassiveAbility {
 	}
 }
 
-extension DCL.Packed.Vivosaur.SupportEffects {
+extension DCL_FF1.Packed.Vivosaur.SupportEffects {
 	static let null = Self(attack: 0, defense: 0, accuracy: 0, evasion: 0)
 	
-	fileprivate init(_ unpacked: DCL.Unpacked.Vivosaur.SupportEffects) {
+	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur.SupportEffects) {
 		attack = unpacked.attack
 		defense = unpacked.defense
 		accuracy = unpacked.accuracy
@@ -639,18 +628,18 @@ extension DCL.Packed.Vivosaur.SupportEffects {
 }
 
 // MARK: unpacked
-extension DCL.Unpacked: ProprietaryFileData {
+extension DCL_FF1.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dcl.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
-	func packed(configuration: Configuration) -> DCL.Packed {
-		DCL.Packed(self, configuration: configuration)
+	func packed(configuration: Configuration) -> DCL_FF1.Packed {
+		DCL_FF1.Packed(self, configuration: configuration)
 	}
 	
 	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DCL.Packed, configuration: Configuration) {
+	fileprivate init(_ packed: DCL_FF1.Packed, configuration: Configuration) {
 		unknown1 = packed.unknown1
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3
@@ -664,8 +653,8 @@ extension DCL.Unpacked: ProprietaryFileData {
 	}
 }
 
-extension DCL.Unpacked.Vivosaur {
-	init?(_ packed: DCL.Packed.Vivosaur) {
+extension DCL_FF1.Unpacked.Vivosaur {
+	init?(_ packed: DCL_FF1.Packed.Vivosaur) {
 		guard packed.id != 0 else { return nil }
 		
 		_label = vivosaurNames[packed.id]
@@ -728,8 +717,8 @@ extension DCL.Unpacked.Vivosaur {
 	}
 }
 
-extension DCL.Unpacked.Vivosaur.Element: Codable {
-	init(_ packed: DCL.Packed.Vivosaur.Element) {
+extension DCL_FF1.Unpacked.Vivosaur.Element: Codable {
+	init(_ packed: DCL_FF1.Packed.Vivosaur.Element) {
 		self = switch packed {
 			case .fire: .fire
 			case .air: .air
@@ -741,8 +730,8 @@ extension DCL.Unpacked.Vivosaur.Element: Codable {
 	}
 }
 
-extension DCL.Unpacked.Vivosaur.Stat {
-	init(_ packed: DCL.Packed.Vivosaur.Stat) {
+extension DCL_FF1.Unpacked.Vivosaur.Stat {
+	init(_ packed: DCL_FF1.Packed.Vivosaur.Stat) {
 		growthRate = packed.growthRate
 		rank08Value = packed.rank08Value
 		rank01Value = packed.rank01Value
@@ -750,15 +739,15 @@ extension DCL.Unpacked.Vivosaur.Stat {
 	}
 }
 
-extension [DCL.Unpacked.Vivosaur.Team] {
-	init(_ packed: DCL.Packed.Vivosaur.Teams) {
-		self = DCL.Unpacked.Vivosaur.Team.allCases
-			.filter { packed.contains(DCL.Packed.Vivosaur.Teams($0)) }
+extension [DCL_FF1.Unpacked.Vivosaur.Team] {
+	init(_ packed: DCL_FF1.Packed.Vivosaur.Teams) {
+		self = DCL_FF1.Unpacked.Vivosaur.Team.allCases
+			.filter { packed.contains(DCL_FF1.Packed.Vivosaur.Teams($0)) }
 	}
 }
 
-extension DCL.Unpacked.Vivosaur.PassiveAbility? {
-	init(_ packed: DCL.Packed.Vivosaur.PassiveAbility) {
+extension DCL_FF1.Unpacked.Vivosaur.PassiveAbility? {
+	init(_ packed: DCL_FF1.Packed.Vivosaur.PassiveAbility) {
 		self = switch packed {
 			case .none: nil
 			case .nothing: .nothing
@@ -771,7 +760,7 @@ extension DCL.Unpacked.Vivosaur.PassiveAbility? {
 	}
 }
 
-extension DCL.Unpacked.Vivosaur.PassiveAbility: Codable {
+extension DCL_FF1.Unpacked.Vivosaur.PassiveAbility: Codable {
 	enum CodingKeys: CodingKey {
 		case type
 		case argument
@@ -825,8 +814,8 @@ extension DCL.Unpacked.Vivosaur.PassiveAbility: Codable {
 	}
 }
 
-extension DCL.Unpacked.Vivosaur.SupportEffects {
-	init(_ packed: DCL.Packed.Vivosaur.SupportEffects) {
+extension DCL_FF1.Unpacked.Vivosaur.SupportEffects {
+	init(_ packed: DCL_FF1.Packed.Vivosaur.SupportEffects) {
 		attack = packed.attack
 		defense = packed.defense
 		accuracy = packed.accuracy

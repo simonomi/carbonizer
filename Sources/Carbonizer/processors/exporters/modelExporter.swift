@@ -20,8 +20,11 @@ func modelExporterF(
 					throw MissingComponent.mesh(modelIndices.meshIndex)
 				}
 				
-				guard let texture = mar.files[modelIndices.textureIndex].content as? Texture.Unpacked else {
-					throw MissingComponent.texture(modelIndices.textureIndex)
+				let texture = mar.files[modelIndices.textureIndex].content as? Texture.Unpacked
+				
+				if texture == nil {
+					// TODO: log properly
+					print("warning: textures missing for \(modelIndices.modelName)")
 				}
 				
 				guard let animation = mar.files[modelIndices.animationIndex].content as? Animation.Unpacked else {
@@ -36,7 +39,7 @@ func modelExporterF(
 					animationData: animation,
 					modelName: modelIndices.modelName,
 					texturePath: "assets/\(mar.name)/\(textureName)",
-					textureNames: try texture.textureNames()
+					textureNames: try texture?.textureNames()
 				)
 				
 				let colladaFile = BinaryFile(

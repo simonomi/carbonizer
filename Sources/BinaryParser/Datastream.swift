@@ -386,6 +386,34 @@ extension Datastream {
 	
 	@inlinable
 	public func read(_: ()) throws {}
+	
+	@inlinable
+	@_disfavoredOverload
+	public func read<T: RawRepresentable>(
+		_ type: T.Type
+	) throws -> T where T.RawValue: FixedWidthInteger {
+		let raw = try read(T.RawValue.self)
+		
+		guard let result = T(rawValue: raw) else {
+			throw InvalidRawValue(raw, for: type)
+		}
+		
+		return result
+	}
+	
+	@inlinable
+	@_disfavoredOverload
+	public func read<T: RawRepresentable>(
+		_ type: T.Type
+	) throws -> T where T.RawValue: BinaryConvertible {
+		let raw = try read(T.RawValue.self)
+		
+		guard let result = T(rawValue: raw) else {
+			throw InvalidRawValue(raw, for: type)
+		}
+		
+		return result
+	}
 }
 
 // MARK: offset

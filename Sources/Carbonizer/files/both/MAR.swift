@@ -148,7 +148,7 @@ extension MAR.Unpacked: FileSystemObject {
 						configuration.log("Decompressing", name, $0)
 					}
 					
-					return try MCM.Unpacked($1, configuration: configuration)
+					return try MCM.Unpacked($1, in: name, configuration: configuration)
 				}
 		} catch {
 			throw BinaryParserError.whileReadingFile(name, error)

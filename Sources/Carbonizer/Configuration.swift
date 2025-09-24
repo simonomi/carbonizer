@@ -2,7 +2,7 @@ import Foundation
 
 public struct Configuration: Sendable {
 	var overwriteOutput: Bool
-	var dexCommandList: DEXCommandList // TODO: more general ff1/ffc
+	var game: Game
 	var externalMetadata: Bool
 	
 	var fileTypes: Set<String>
@@ -16,8 +16,8 @@ public struct Configuration: Sendable {
 	
 	var logHandler: (@Sendable (String) -> Void)?
 	
-	public enum DEXCommandList: Sendable {
-		case ff1, ffc, none
+	public enum Game: Sendable {
+		case ff1, ffc
 	}
 	
 	public struct ExperimentalOptions: Sendable {
@@ -48,8 +48,8 @@ public struct Configuration: Sendable {
 		var fileExtensions: [(extension: String, type: any ProprietaryFileData.Type)]
 		var magicBytes: [String: any ProprietaryFileData.Type]
 		
-		init(inputFileTypes: Set<String>) {
-			let enabledFileTypes: [any ProprietaryFileData.Type] = Configuration.allFileTypes
+		init(inputFileTypes: Set<String>, game: Game) {
+			let enabledFileTypes: [any ProprietaryFileData.Type] = Configuration.fileTypes(for: game)
 				.filter { (fileTypeName, _) in
 					inputFileTypes.contains(fileTypeName)
 				}
@@ -86,9 +86,9 @@ public struct Configuration: Sendable {
 		}
 	}
 	
-	public init(overwriteOutput: Bool, dexCommandList: DEXCommandList, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], processors: Set<Processor>, logHandler: (@Sendable (String) -> Void)?) throws {
+	public init(overwriteOutput: Bool, game: Game, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], processors: Set<Processor>, logHandler: (@Sendable (String) -> Void)?) throws {
 		self.overwriteOutput = overwriteOutput
-		self.dexCommandList = dexCommandList
+		self.game = game
 		self.externalMetadata = externalMetadata
 		self.fileTypes = fileTypes
 		self.onlyUnpack = onlyUnpack
@@ -96,7 +96,7 @@ public struct Configuration: Sendable {
 		self.processors = processors
 		self.logHandler = logHandler
 		
-		let allowedInputFileTypes = Self.allFileTypes.keys + ["MAR", "NDS", "_match"]
+		let allowedInputFileTypes = Self.fileTypes(for: game).keys + ["MAR", "NDS", "_match"]
 		
 		guard fileTypes.allSatisfy(allowedInputFileTypes.contains) else {
 			throw UnsupportedFileTypes(
@@ -106,7 +106,7 @@ public struct Configuration: Sendable {
 			)
 		}
 		
-		cache = Cache(inputFileTypes: fileTypes)
+		cache = Cache(inputFileTypes: fileTypes, game: game)
 	}
 	
 	func log(_ items: Any...) {
@@ -126,38 +126,55 @@ public struct Configuration: Sendable {
 	// - test entire rom ffc round trip
 	// - add to config (test both ff1/ffc)
 	// - add to fftechwiki
-	fileprivate static var allFileTypes: [String: any ProprietaryFileData.Type] {[
-		"3BA": TBA.Unpacked.self,
-		"3CL": TCL.Unpacked.self,
-		"BBG": BBG.Unpacked.self,
-		"BCO": BCO.Unpacked.self,
-		"CHR": CHR.Unpacked.self,
-		"DAL": DAL.Unpacked.self,
-		"DBA": DBA.Unpacked.self,
-		"DBS": DBS.Unpacked.self,
-		"DBT": DBT.Unpacked.self,
-		"DCL": DCL.Unpacked.self,
-		"DEP": DEP.Unpacked.self,
-		"DEX": DEX.Unpacked.self,
-		"DMG": DMG.Unpacked.self,
-		"DML": DML.Unpacked.self,
-		"DMS": DMS.Unpacked.self,
-		"DSL": DSL.Unpacked.self,
-		"DTX": DTX.Unpacked.self,
-		"ECS": ECS.Unpacked.self,
-		"GRD": GRD.Unpacked.self,
-		"HML": HML.Unpacked.self,
-		"KIL": KIL.Unpacked.self,
-		"KPS": KPS.Unpacked.self,
-		"MAP": MAP.Unpacked.self,
-		"MFS": MFS.Unpacked.self,
-		"MM3": MM3.Unpacked.self,
-		"MMS": MMS.Unpacked.self,
-		"MPM": MPM.Unpacked.self,
-		"RLS": RLS.Unpacked.self,
-		"SDAT": SDAT.Unpacked.self,
-		"SHP": SHP.Unpacked.self,
-	]}
+	static func fileTypes(for game: Game) -> [String: any ProprietaryFileData.Type] {
+		let bothGameFileTypes: [String: any ProprietaryFileData.Type] = [
+			"DEX": DEX.Unpacked.self,
+			"DMG": DMG.Unpacked.self,
+			"DMS": DMS.Unpacked.self,
+			"DSL": DSL.Unpacked.self,
+			"DTX": DTX.Unpacked.self,
+			"GRD": GRD.Unpacked.self,
+			"KIL": KIL.Unpacked.self,
+			"MMS": MMS.Unpacked.self,
+			"MPM": MPM.Unpacked.self,
+		]
+		
+		let gameSpecificFileTypes: [String: any ProprietaryFileData.Type] = switch game {
+			case .ff1:
+				[
+					"3BA": TBA.Unpacked.self,
+					"3CL": TCL.Unpacked.self,
+					"BBG": BBG.Unpacked.self,
+					"BCO": BCO.Unpacked.self,
+					"CHR": CHR.Unpacked.self,
+					"DAL": DAL.Unpacked.self,
+					"DBA": DBA.Unpacked.self,
+					"DBS": DBS.Unpacked.self,
+					"DBT": DBT.Unpacked.self,
+					"DCL": DCL_FF1.Unpacked.self,
+					"DEP": DEP.Unpacked.self,
+					"DML": DML.Unpacked.self,
+					"ECS": ECS.Unpacked.self,
+					"HML": HML.Unpacked.self,
+					"KPS": KPS.Unpacked.self,
+					"MAP": MAP.Unpacked.self,
+					"MFS": MFS.Unpacked.self,
+					"MM3": MM3.Unpacked.self,
+					"RLS": RLS.Unpacked.self,
+					"SDAT": SDAT.Unpacked.self,
+					"SHP": SHP.Unpacked.self,
+				]
+			case .ffc:
+				[
+					"DCL": DCL_FFC.Unpacked.self,
+				]
+		}
+		
+		return gameSpecificFileTypes.merging(bothGameFileTypes) { _, _ in
+			print("duplicate file type keys for \(game)")
+			fatalError()
+		}
+	}
 	
 	func shouldUnpack(_ path: [String]) -> Bool {
 		if skipUnpacking.contains(where: { $0.matches(path) }) {

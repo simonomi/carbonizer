@@ -67,22 +67,32 @@ struct RoundTrips {
 			("museum_defs", .packed),
 			("btl_tuto_001", .packed),
 			("btl_adjust_defs", .packed),
+			("ffc creature_defs", .packed),
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
 		let inputFilePath = filePath(for: fileName)
 		
+		let game: Configuration.Game = if fileName.contains("ffc") {
+			.ffc
+		} else {
+			.ff1
+		}
+		
+		let fileTypes = Set(Configuration.fileTypes(for: game).keys)
+		
 		let configurationWithFileTypes = try Configuration(
 			overwriteOutput: true,
-			dexCommandList: .ff1,
+			game: game,
 			externalMetadata: false,
-			fileTypes: ["DBA"],
+			fileTypes: fileTypes,
 			onlyUnpack: [],
 			skipUnpacking: [],
 			processors: [],
 			logHandler: nil
 		)
 		
+		// TODO: use the new library API
 		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		
 		let toggledFile: any FileSystemObject = switch packedStatus {
@@ -124,11 +134,13 @@ struct RoundTrips {
 	func roundTripROM() throws {
 		guard let wholeROMPath = URL.wholeROMPath else { return }
 		
+		let fileTypes = Set(Configuration.fileTypes(for: .ff1).keys)
+		
 		let configuration = try Configuration(
 			overwriteOutput: true,
-			dexCommandList: .ff1,
+			game: .ff1,
 			externalMetadata: false,
-			fileTypes: [],
+			fileTypes: fileTypes,
 			onlyUnpack: [],
 			skipUnpacking: [],
 			processors: [],

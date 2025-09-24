@@ -189,6 +189,22 @@ extension Datawriter {
 	
 	@inlinable
 	public func write(_: ()) {}
+	
+	@inlinable
+	@_disfavoredOverload
+	public func write<T: RawRepresentable>(
+		_ value: T
+	) where T.RawValue: FixedWidthInteger {
+		write(value.rawValue)
+	}
+	
+	@inlinable
+	@_disfavoredOverload
+	public func write<T: RawRepresentable>(
+		_ value: T
+	) where T.RawValue: BinaryConvertible {
+		write(value.rawValue)
+	}
 }
 
 // MARK: offset

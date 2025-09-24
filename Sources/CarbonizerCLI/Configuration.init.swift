@@ -8,7 +8,7 @@ extension Configuration {
 		
 		try self.init(
 			overwriteOutput: cliConfiguration.overwriteOutput,
-			dexCommandList: .init(cliConfiguration.dexCommandList),
+			game: .init(cliConfiguration.game),
 			externalMetadata: cliConfiguration.externalMetadata,
 			fileTypes: cliConfiguration.fileTypes,
 			onlyUnpack: cliConfiguration.onlyUnpack,
@@ -19,12 +19,11 @@ extension Configuration {
 	}
 }
 
-extension Configuration.DEXCommandList {
-	init(_ cli: CLIConfiguration.DEXCommandList) {
+extension Configuration.Game {
+	init(_ cli: CLIConfiguration.Game) {
 		self = switch cli {
 			case .ff1: .ff1
 			case .ffc: .ffc
-			case .none: .none
 		}
 	}
 }

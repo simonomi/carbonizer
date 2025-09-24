@@ -65,7 +65,7 @@ enum DAL {
 				var effectArgument1: UInt8
 				var effectArgument2: UInt8
 				
-				enum Effect: UInt8 {
+				enum Effect: UInt8, RawRepresentable {
 					case nothing = 1, poison, sleep, scare, excite, confusion, enrage, counter, enflame, harden, quicken
 				}
 			}
@@ -86,7 +86,7 @@ enum DAL {
 				@FourByteAlign
 				var fourByteAlgin: ()
 				
-				enum Effect: UInt8 {
+				enum Effect: UInt8, RawRepresentable {
 					case nothing = 1, transformation, allZoneAttack, stealLPEqualToDamage, stealFP, spiteBlast, powerScale, knockToEZ, unused1, healWholeTeam, sacrifice, lawOfTheJungle, healOneAlly, unused2, cureAllStatuses, swapZones
 				}
 			}
@@ -324,29 +324,6 @@ extension DAL.Unpacked.Attack.PrimaryEffect.Effect {
 		}
 	}
 }
-
-extension DAL.Packed.Attack.PrimaryEffect.Effect: BinaryConvertible {
-	struct InvalidPrimaryEffectID: Error, CustomStringConvertible {
-		var id: UInt8
-		
-		var description: String {
-			"invalid effect ID for primary effect: \(.red)\(id)\(.normal), expected \(.green)1–11\(.red)"
-		}
-	}
-	
-	init(_ data: Datastream) throws {
-		let raw = try data.read(UInt8.self)
-		guard let effect = Self(rawValue: raw) else {
-			throw InvalidPrimaryEffectID(id: raw)
-		}
-		self = effect
-	}
-	
-	func write(to data: Datawriter) {
-		data.write(rawValue)
-	}
-}
-
 extension DAL.Packed.Attack.SecondaryEffect {
 	fileprivate init(_ unpacked: DAL.Unpacked.Attack.SecondaryEffect?) {
 		guard let unpacked else {
@@ -417,28 +394,6 @@ extension DAL.Unpacked.Attack.SecondaryEffect.Effect {
 				argument
 			case .nothing, .allZoneAttack, .stealLPEqualToDamage, .powerScale, .knockToEZ, .sacrifice, .lawOfTheJungle, .cureAllStatuses, .swapZones: 0
 		}
-	}
-}
-
-extension DAL.Packed.Attack.SecondaryEffect.Effect: BinaryConvertible {
-	struct InvalidSecondaryEffectID: Error, CustomStringConvertible {
-		var id: UInt8
-		
-		var description: String {
-			"invalid effect ID for secondary effect: \(.red)\(id)\(.normal), expected \(.green)1–16\(.red)"
-		}
-	}
-	
-	init(_ data: Datastream) throws {
-		let raw = try data.read(UInt8.self)
-		guard let effect = Self(rawValue: raw) else {
-			throw InvalidSecondaryEffectID(id: raw)
-		}
-		self = effect
-	}
-	
-	func write(to data: Datawriter) {
-		data.write(rawValue)
 	}
 }
 

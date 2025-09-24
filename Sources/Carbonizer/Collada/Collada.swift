@@ -26,7 +26,7 @@ extension Collada {
 		animationData: Animation.Unpacked,
 		modelName: String,
 		texturePath: String,
-		textureNames: [UInt32: String]
+		textureNames: [UInt32: String]?
 	) throws {
 		let modelNameWithSpaces = modelName
 		let modelName = modelName.withoutSpaces()

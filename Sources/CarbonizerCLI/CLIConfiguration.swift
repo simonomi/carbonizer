@@ -10,7 +10,7 @@ struct CLIConfiguration : Sendable {
 	var showProgress: Bool
 	var keepWindowOpen: KeepWindowOpen
 	var useColor: Bool // TODO: use environment variable (COLORTERM is nil on windows tho)
-	var dexCommandList: DEXCommandList
+	var game: Game
 	var externalMetadata: Bool
 	
 	var fileTypes: Set<String>
@@ -54,8 +54,8 @@ struct CLIConfiguration : Sendable {
 		}
 	}
 	
-	enum DEXCommandList: String, Decodable {
-		case ff1, ffc, none
+	enum Game: String, Decodable {
+		case ff1, ffc
 	}
 	
 	// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns?
@@ -78,23 +78,21 @@ struct CLIConfiguration : Sendable {
 			// enables pretty colorful output! not all terminals support colors though :(
 			"useColor": true,
 			
-			// ff1 and ffc use different commands in their DEX files (episode folder), you should
-			// pick the one that matches the game you're unpacking. setting this to none may
-			// fix some weird bugs if something unexpected occurs (but it'll make episode files
-			// less readable)
-			"dexCommandList": "ff1", // ff1, ffc, none
-			
 			// stores metadata for MAR files in a separate file, rather than the creation
 			// date. this can avoid some problems, but creates a bunch of annoying extra files.
 			// required to make MAR packing work on linux
 			"externalMetadata": false,
 			
+			// ff1 and ffc have different formats for the "same" files (DEX, DCL, etc),
+			// so you need to select which game is being run on
+			"game": "ff1", // ff1, ffc
+			
 			// basically required for anything useful: NDS, MAR
 			//
-			// both ff1/ffc: _match, DEX, DMG, DMS, DTX, GRD, KIL, MPM, MMS, MPM 
-			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DCL, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
+			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MPM, MMS, MPM 
+			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
 			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBA", "DBS", "DBT", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
-			// "fileTypes": ["_match", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MPM", "MMS", "MPM", "NDS"], // ffc-compatible
+			// "fileTypes": ["_match", "DCL", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MPM", "MMS", "MPM", "NDS"], // ffc-compatible
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
 			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
@@ -171,7 +169,7 @@ struct CLIConfiguration : Sendable {
 	
 extension CLIConfiguration: Decodable {
 	enum CodingKeys: CodingKey {
-		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, dexCommandList, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, experimental
+		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, game, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, experimental
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -194,8 +192,8 @@ extension CLIConfiguration: Decodable {
 		fallback.keepWindowOpen
 		useColor =         try container.decodeIfPresent(Bool.self,                forKey: .useColor) ??
 		fallback.useColor
-		dexCommandList =   try container.decodeIfPresent(DEXCommandList.self,      forKey: .dexCommandList) ??
-		fallback.dexCommandList
+		game =             try container.decodeIfPresent(Game.self,                forKey: .game) ??
+		fallback.game
 		externalMetadata = try container.decodeIfPresent(Bool.self,                forKey: .externalMetadata) ??
 		fallback.externalMetadata
 		fileTypes =        try container.decodeIfPresent(Set<String>.self,         forKey: .fileTypes) ??

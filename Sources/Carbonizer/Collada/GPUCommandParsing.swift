@@ -135,7 +135,7 @@ struct CommandParsingResult {
 
 func parseCommands(
 	_ commands: [GPUCommands.Command],
-	textureNames: [UInt32: String],
+	textureNames: [UInt32: String]?,
 	matrices: [Matrix4x3<Double>]
 ) throws -> CommandParsingResult {
 	let initialState = (state: CommandParsingState(), result: CommandParsingResult())
@@ -155,7 +155,7 @@ fileprivate func parseCommand(
 	state: inout CommandParsingState,
 	result: inout CommandParsingResult,
 	command: GPUCommands.Command,
-	textureNames: [UInt32: String],
+	textureNames: [UInt32: String]?,
 	matrices: [Matrix4x3<Double>]
 ) throws {
 	switch command {
@@ -197,8 +197,9 @@ fileprivate func parseCommand(
 		case .texturePaletteBase(let index):
 			// TODO: should have some fallback for this case?
 			precondition(state.vertices.isEmpty, "Uh oh, a model has multiple textures for the same polygon, but collada doesn't support that")
-			
-			state.material = textureNames[index]
+			if let textureNames {
+				state.material = textureNames[index]
+			}
 		case .vertexBegin(let vertexMode):
 			state.vertexMode = vertexMode
 		case .vertexEnd:

@@ -34,7 +34,7 @@ enum DBA {
 		// 0x40
 		var partingBlowDefenseMultiplier: FixedPoint2012 // 0.5
 		var partingBlowAccuracyMultiplier: FixedPoint2012 // 1
-		var partingBlowSpeedMultiplier: FixedPoint2012 // 0.5
+		var partingBlowEvasionMultiplier: FixedPoint2012 // 0.5
 		
 		var unknown019: FixedPoint2012 // 1
 		
@@ -216,7 +216,7 @@ enum DBA {
 		var partingBlowAttackMultiplier: Double
 		var partingBlowDefenseMultiplier: Double
 		var partingBlowAccuracyMultiplier: Double
-		var partingBlowSpeedMultiplier: Double
+		var partingBlowEvasionMultiplier: Double
 		var unknown019: Double
 		
 		var autoCounterFactor: Double
@@ -364,7 +364,7 @@ extension DBA.Packed: ProprietaryFileData {
 		partingBlowAttackMultiplier = FixedPoint2012(unpacked.partingBlowAttackMultiplier)
 		partingBlowDefenseMultiplier = FixedPoint2012(unpacked.partingBlowDefenseMultiplier)
 		partingBlowAccuracyMultiplier = FixedPoint2012(unpacked.partingBlowAccuracyMultiplier)
-		partingBlowSpeedMultiplier = FixedPoint2012(unpacked.partingBlowSpeedMultiplier)
+		partingBlowEvasionMultiplier = FixedPoint2012(unpacked.partingBlowEvasionMultiplier)
 		
 		unknown019 = FixedPoint2012(unpacked.unknown019)
 		
@@ -530,7 +530,7 @@ extension DBA.Unpacked: ProprietaryFileData {
 		partingBlowAttackMultiplier = Double(packed.partingBlowAttackMultiplier)
 		partingBlowDefenseMultiplier = Double(packed.partingBlowDefenseMultiplier)
 		partingBlowAccuracyMultiplier = Double(packed.partingBlowAccuracyMultiplier)
-		partingBlowSpeedMultiplier = Double(packed.partingBlowSpeedMultiplier)
+		partingBlowEvasionMultiplier = Double(packed.partingBlowEvasionMultiplier)
 		unknown019 = Double(packed.unknown019)
 		
 		autoCounterFactor = Double(packed.autoCounterFactor)

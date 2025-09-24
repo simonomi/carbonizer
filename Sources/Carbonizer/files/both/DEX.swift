@@ -253,10 +253,9 @@ enum DEX {
 		]
 		
 		static func knownCommands(for configuration: Configuration) -> [UInt32: CommandDefinition] {
-			switch configuration.dexCommandList {
+			switch configuration.game {
 				case .ff1: ff1Commands
 				case .ffc: ffcCommands
-				case .none: [:]
 			}
 		}
 		
