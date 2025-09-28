@@ -1,5 +1,9 @@
 import Foundation
 
+#if os(Windows)
+import WinSDK
+#endif
+
 // from https://github.com/vapor/console-kit/blob/4.15.2/Sources/ConsoleKitTerminal/Terminal/Terminal.swift#L142
 func terminalSize() -> (width: Int, height: Int) {
 #if os(Windows)
