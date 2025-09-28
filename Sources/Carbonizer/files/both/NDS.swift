@@ -1,7 +1,6 @@
 import BinaryParser
 import Foundation
 
-// TODO: make unpacked not include `data/` subfolder
 enum NDS {
 	struct Packed {
 		var name: String

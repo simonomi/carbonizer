@@ -45,7 +45,7 @@ enum DCL_FF1 {
 			var evasion: Stat
 			
 			var critRate: UInt8
-			var typeAdvantageCritRate: UInt8 // always the same as crit
+			var critRateForTypeAdvantage: UInt8 // always the same as crit
 			
 			var linkChance: UInt8
 			
@@ -140,7 +140,7 @@ enum DCL_FF1 {
 			
 			@BinaryConvertible
 			struct Teams: OptionSet {
-				let rawValue: UInt32 // only the first 16 bits are used in FF1
+				let rawValue: UInt32
 				
 				static let fireType    = Self(rawValue: 1 << 0)
 				static let airType     = Self(rawValue: 1 << 1)
@@ -248,7 +248,7 @@ enum DCL_FF1 {
 				var evasion: Int8
 			}
 			
-			init(id: Int32, unknown01: UInt32, unknown02: UInt32, length: UInt8, element: Element? = nil, rank12HealthDividedBy2: UInt16, attack: Stat, defense: Stat, accuracy: Stat, evasion: Stat, critRate: UInt8, typeAdvantageCritRate: UInt8, linkChance: UInt8, unknown03: UInt8, teams: Teams, moveCount: UInt32, skillIdsOffset: UInt32, teamSkill: UInt32, linkSkill: UInt32, long1234Count: UInt32, long1234Offset: UInt32, unknown04: UInt32, unknown05: UInt32, unknown06: UInt32, unknown07: UInt32, unknown08: UInt32, allySupportEffectsOffset: UInt32, enemySupportEffectsOffset: UInt32, requiredFossilsForTeamSkill: UInt8, unknown10: UInt8, unknown11: UInt8, unknown12: UInt8, unknown13: UInt8, passiveAbility: PassiveAbility, statusChancesCount: UInt32, statusChancesOffset: UInt32, szDamageMultiplier: UInt32, unknown16: UInt32, moveCountAgainAgain: UInt32, moveListOrderOffset: UInt32, rankCount: UInt32, healthAtEachRankOffset: UInt32, displayNumber: UInt32, alphabeticalOrder: UInt32, skillIds: [UInt32], long1234: [UInt32], allySupportEffects: SupportEffects, enemySupportEffects: SupportEffects, statusChances: [UInt8], moveListOrder: [UInt8], padding: UInt8? = nil, healthAtEachRank: [UInt16]) {
+			init(id: Int32, unknown01: UInt32, unknown02: UInt32, length: UInt8, element: Element? = nil, rank12HealthDividedBy2: UInt16, attack: Stat, defense: Stat, accuracy: Stat, evasion: Stat, critRate: UInt8, critRateForTypeAdvantage: UInt8, linkChance: UInt8, unknown03: UInt8, teams: Teams, moveCount: UInt32, skillIdsOffset: UInt32, teamSkill: UInt32, linkSkill: UInt32, long1234Count: UInt32, long1234Offset: UInt32, unknown04: UInt32, unknown05: UInt32, unknown06: UInt32, unknown07: UInt32, unknown08: UInt32, allySupportEffectsOffset: UInt32, enemySupportEffectsOffset: UInt32, requiredFossilsForTeamSkill: UInt8, unknown10: UInt8, unknown11: UInt8, unknown12: UInt8, unknown13: UInt8, passiveAbility: PassiveAbility, statusChancesCount: UInt32, statusChancesOffset: UInt32, szDamageMultiplier: UInt32, unknown16: UInt32, moveCountAgainAgain: UInt32, moveListOrderOffset: UInt32, rankCount: UInt32, healthAtEachRankOffset: UInt32, displayNumber: UInt32, alphabeticalOrder: UInt32, skillIds: [UInt32], long1234: [UInt32], allySupportEffects: SupportEffects, enemySupportEffects: SupportEffects, statusChances: [UInt8], moveListOrder: [UInt8], padding: UInt8? = nil, healthAtEachRank: [UInt16]) {
 				self.id = id
 				self.unknown01 = unknown01
 				self.unknown02 = unknown02
@@ -260,7 +260,7 @@ enum DCL_FF1 {
 				self.accuracy = accuracy
 				self.evasion = evasion
 				self.critRate = critRate
-				self.typeAdvantageCritRate = typeAdvantageCritRate
+				self.critRateForTypeAdvantage = critRateForTypeAdvantage
 				self.linkChance = linkChance
 				self.unknown03 = unknown03
 				self.teams = teams
@@ -331,7 +331,7 @@ enum DCL_FF1 {
 			var evasion: Stat
 			
 			var critRate: UInt8
-			var typeAdvantageCritRate: UInt8
+			var critRateForTypeAdvantage: UInt8
 			
 			var linkChance: UInt8
 			
@@ -467,7 +467,7 @@ extension DCL_FF1.Packed: ProprietaryFileData {
 }
 
 extension DCL_FF1.Packed.Vivosaur {
-	static let null = Self(id: 0, unknown01: 0, unknown02: 0, length: 0, rank12HealthDividedBy2: 0, attack: .null, defense: .null, accuracy: .null, evasion: .null, critRate: 0, typeAdvantageCritRate: 0, linkChance: 0, unknown03: 0, teams: [], moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown04: 0, unknown05: 0, unknown06: 0, unknown07: 0, unknown08: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, requiredFossilsForTeamSkill: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
+	static let null = Self(id: 0, unknown01: 0, unknown02: 0, length: 0, rank12HealthDividedBy2: 0, attack: .null, defense: .null, accuracy: .null, evasion: .null, critRate: 0, critRateForTypeAdvantage: 0, linkChance: 0, unknown03: 0, teams: [], moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown04: 0, unknown05: 0, unknown06: 0, unknown07: 0, unknown08: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, requiredFossilsForTeamSkill: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
 	
 	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur) {
 		id = unpacked.id
@@ -482,7 +482,7 @@ extension DCL_FF1.Packed.Vivosaur {
 		evasion = Stat(unpacked.evasion)
 		
 		critRate = unpacked.critRate
-		typeAdvantageCritRate = unpacked.typeAdvantageCritRate
+		critRateForTypeAdvantage = unpacked.critRateForTypeAdvantage
 		
 		linkChance = unpacked.linkChance
 		
@@ -671,7 +671,7 @@ extension DCL_FF1.Unpacked.Vivosaur {
 		evasion = Stat(packed.evasion)
 		
 		critRate = packed.critRate
-		typeAdvantageCritRate = packed.typeAdvantageCritRate
+		critRateForTypeAdvantage = packed.critRateForTypeAdvantage
 		
 		linkChance = packed.linkChance
 		

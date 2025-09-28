@@ -44,7 +44,7 @@ enum DCL_FFC {
 			var speed: Stat
 			
 			var critRate: UInt8
-			var typeAdvantageCritRate: UInt8
+			var critRateForTypeAdvantage: UInt8
 			
 			// 0x14
 			var linkChance: UInt8
@@ -241,38 +241,38 @@ enum DCL_FFC {
 			struct Teams: OptionSet {
 				let rawValue: UInt32
 				
-				static let group8 = Self(rawValue: 1 << 0)
-				static let group7 = Self(rawValue: 1 << 1)
-				static let violent = Self(rawValue: 1 << 2)
-				static let neutralType = Self(rawValue: 1 << 3)
-				static let waterType = Self(rawValue: 1 << 4)
-				static let earthType = Self(rawValue: 1 << 5)
-				static let airType = Self(rawValue: 1 << 6)
-				static let fireType = Self(rawValue: 1 << 7)
-				static let japanese = Self(rawValue: 1 << 8)
-				static let group15 = Self(rawValue: 1 << 9)
-				static let group14 = Self(rawValue: 1 << 10)
-				static let group13 = Self(rawValue: 1 << 11)
-				static let group12 = Self(rawValue: 1 << 12)
-				static let group11 = Self(rawValue: 1 << 13)
-				static let group10 = Self(rawValue: 1 << 14)
-				static let group9 = Self(rawValue: 1 << 15)
-				static let group24 = Self(rawValue: 1 << 16)
-				static let zombie = Self(rawValue: 1 << 17)
-				static let boney = Self(rawValue: 1 << 18)
-				static let group21 = Self(rawValue: 1 << 19)
-				static let group20 = Self(rawValue: 1 << 20)
-				static let group19 = Self(rawValue: 1 << 21)
-				static let group18 = Self(rawValue: 1 << 22)
-				static let group17 = Self(rawValue: 1 << 23)
-				static let unusedGroup32 = Self(rawValue: 1 << 24)
-				static let group31 = Self(rawValue: 1 << 25)
-				static let dinaurians = Self(rawValue: 1 << 26)
-				static let group29 = Self(rawValue: 1 << 27)
-				static let group28 = Self(rawValue: 1 << 28)
-				static let group27 = Self(rawValue: 1 << 29)
-				static let group26 = Self(rawValue: 1 << 30)
-				static let group25 = Self(rawValue: 1 << 31)
+				static let fireType      = Self(rawValue: 1 << 0)
+				static let airType       = Self(rawValue: 1 << 1)
+				static let earthType     = Self(rawValue: 1 << 2)
+				static let waterType     = Self(rawValue: 1 << 3)
+				static let neutralType   = Self(rawValue: 1 << 4)
+				static let violent       = Self(rawValue: 1 << 5)
+				static let group7        = Self(rawValue: 1 << 6)
+				static let group8        = Self(rawValue: 1 << 7)
+				static let group9        = Self(rawValue: 1 << 8)
+				static let group10       = Self(rawValue: 1 << 9)
+				static let group11       = Self(rawValue: 1 << 10)
+				static let group12       = Self(rawValue: 1 << 11)
+				static let group13       = Self(rawValue: 1 << 12)
+				static let group14       = Self(rawValue: 1 << 13)
+				static let group15       = Self(rawValue: 1 << 14)
+				static let japanese      = Self(rawValue: 1 << 15)
+				static let group17       = Self(rawValue: 1 << 16)
+				static let group18       = Self(rawValue: 1 << 17)
+				static let group19       = Self(rawValue: 1 << 18)
+				static let group20       = Self(rawValue: 1 << 19)
+				static let group21       = Self(rawValue: 1 << 20)
+				static let boney         = Self(rawValue: 1 << 21)
+				static let zombie        = Self(rawValue: 1 << 22)
+				static let group24       = Self(rawValue: 1 << 23)
+				static let group25       = Self(rawValue: 1 << 24)
+				static let group26       = Self(rawValue: 1 << 25)
+				static let group27       = Self(rawValue: 1 << 26)
+				static let group28       = Self(rawValue: 1 << 27)
+				static let group29       = Self(rawValue: 1 << 28)
+				static let dinaurians    = Self(rawValue: 1 << 29)
+				static let group31       = Self(rawValue: 1 << 30)
+				static let unusedGroup32 = Self(rawValue: 1 << 31)
 			}
 			
 			@BinaryConvertible
@@ -311,6 +311,8 @@ enum DCL_FFC {
 		var vivosaurs: [Vivosaur?]
 		
 		struct Vivosaur: Codable {
+			var _label: String?
+			
 			var isEntry: Bool
 			
 			var element: Element
@@ -321,7 +323,7 @@ enum DCL_FFC {
 			var speed: Stat
 			
 			var critRate: UInt8
-			var typeAdvantageCritRate: UInt8
+			var critRateForTypeAdvantage: UInt8
 			
 			var linkChance: UInt8
 			
@@ -448,7 +450,7 @@ enum DCL_FFC {
 			}
 			
 			enum Team: String, Codable, CaseIterable {
-				case group8, group7, violent, neutralType, waterType, earthType, airType, fireType, japanese, group15, group14, group13, group12, group11, group10, group9, group24, zombie, boney, group21, group20, group19, group18, group17, unusedGroup32, group31, dinaurians, group29, group28, group27, group26, group25
+				case fireType, airType, earthType, waterType, neutralType, violent, group7, group8, group9, group10, group11, group12, group13, group14, group15, japanese, group17, group18, group19, group20, group21, boney, zombie, group24, group25, group26, group27, group28, group29, dinaurians, group31, unusedGroup32
 			}
 			
 			struct Position: Codable {
@@ -507,7 +509,7 @@ extension DCL_FFC.Packed: ProprietaryFileData {
 }
 
 extension DCL_FFC.Packed.Vivosaur {
-	static let null = Self(isEntry: 0, element: .none, attack: .null, defense: .null, accuracy: .null, speed: .null, critRate: 0, typeAdvantageCritRate: 0, linkChance: 0, sortOrderDiet: .none, sortOrderEra: .none, sortOrderLP: 0, sortOrderDigsite: .none, staticBlueMove: .none, range: .none, rangeMultiplier1: 0, rangeMultiplier2: 0, rangeMultiplier3: 0, rangeMultiplier4: 0, rangeMultiplier5: 0, rangeMultiplier6: 0, rangeMultiplier7: 0, rangeMultiplier8: 0, poisonImmunity: 0, sleepImmunity: 0, scareImmunity: 0, enrageImmunity: 0, confusionImmunity: 0, exciteImmunity: 0, infectionImmunity: 0, instantKOImmunity: 0, unknown02: 0, unknown03: 0, unknown04: 0, defaultNameID: 0, unknown05: 0, id: 0, superEvolvesIntoID: 0, superEvolvesFromID: 0, modelID: 0, unknown06: 0, unknown07: 0, spriteIDs: 0, animationPackID: 0, unknown08: 0, headColorPalette: 0, bodyColorPalette: 0, armsColorPalette: 0, legsColorPalette: 0, teamSkillID: 0, linkMoveID: 0, unknown09: 0, abilityArgument: 0, sortOrderName: 0, unknown10: 0, unknown11: 0, teams: [], formationScreenPlacement: .null, statsScreenPlacement: .null, fossilaryPlacement: .null, revivalScreenPlacement: .null, shadowSize: 0, moveCount: 0, moveLearningLevelCount: 0, moveLearningLevelsOffset: 0xBC, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, moveListOrderCount: 0, moveListOrderOffset: 0xBC, rankCount: 0, healthAtEachRankOffset: 0xBC, moves: [], moveLearningLevels: [], moveListOrder: [], healthAtEachRank: [])
+	static let null = Self(isEntry: 0, element: .none, attack: .null, defense: .null, accuracy: .null, speed: .null, critRate: 0, critRateForTypeAdvantage: 0, linkChance: 0, sortOrderDiet: .none, sortOrderEra: .none, sortOrderLP: 0, sortOrderDigsite: .none, staticBlueMove: .none, range: .none, rangeMultiplier1: 0, rangeMultiplier2: 0, rangeMultiplier3: 0, rangeMultiplier4: 0, rangeMultiplier5: 0, rangeMultiplier6: 0, rangeMultiplier7: 0, rangeMultiplier8: 0, poisonImmunity: 0, sleepImmunity: 0, scareImmunity: 0, enrageImmunity: 0, confusionImmunity: 0, exciteImmunity: 0, infectionImmunity: 0, instantKOImmunity: 0, unknown02: 0, unknown03: 0, unknown04: 0, defaultNameID: 0, unknown05: 0, id: 0, superEvolvesIntoID: 0, superEvolvesFromID: 0, modelID: 0, unknown06: 0, unknown07: 0, spriteIDs: 0, animationPackID: 0, unknown08: 0, headColorPalette: 0, bodyColorPalette: 0, armsColorPalette: 0, legsColorPalette: 0, teamSkillID: 0, linkMoveID: 0, unknown09: 0, abilityArgument: 0, sortOrderName: 0, unknown10: 0, unknown11: 0, teams: [], formationScreenPlacement: .null, statsScreenPlacement: .null, fossilaryPlacement: .null, revivalScreenPlacement: .null, shadowSize: 0, moveCount: 0, moveLearningLevelCount: 0, moveLearningLevelsOffset: 0xBC, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, moveListOrderCount: 0, moveListOrderOffset: 0xBC, rankCount: 0, healthAtEachRankOffset: 0xBC, moves: [], moveLearningLevels: [], moveListOrder: [], healthAtEachRank: [])
 	
 	fileprivate init(_ unpacked: DCL_FFC.Unpacked.Vivosaur?) {
 		guard let unpacked else {
@@ -525,7 +527,7 @@ extension DCL_FFC.Packed.Vivosaur {
 		speed = Stat(unpacked.speed)
 		
 		critRate = unpacked.critRate
-		typeAdvantageCritRate = unpacked.typeAdvantageCritRate
+		critRateForTypeAdvantage = unpacked.critRateForTypeAdvantage
 		
 		linkChance = unpacked.linkChance
 		
@@ -788,38 +790,38 @@ extension DCL_FFC.Packed.Vivosaur.Range {
 extension DCL_FFC.Packed.Vivosaur.Teams {
 	fileprivate init(_ unpacked: DCL_FFC.Unpacked.Vivosaur.Team) {
 		self = switch unpacked {
-			case .group8: .group8
-			case .group7: .group7
-			case .violent: .violent
-			case .neutralType: .neutralType
-			case .waterType: .waterType
-			case .earthType: .earthType
-			case .airType: .airType
 			case .fireType: .fireType
-			case .japanese: .japanese
-			case .group15: .group15
-			case .group14: .group14
-			case .group13: .group13
-			case .group12: .group12
-			case .group11: .group11
-			case .group10: .group10
+			case .airType: .airType
+			case .earthType: .earthType
+			case .waterType: .waterType
+			case .neutralType: .neutralType
+			case .violent: .violent
+			case .group7: .group7
+			case .group8: .group8
 			case .group9: .group9
-			case .group24: .group24
-			case .zombie: .zombie
-			case .boney: .boney
-			case .group21: .group21
-			case .group20: .group20
-			case .group19: .group19
-			case .group18: .group18
+			case .group10: .group10
+			case .group11: .group11
+			case .group12: .group12
+			case .group13: .group13
+			case .group14: .group14
+			case .group15: .group15
+			case .japanese: .japanese
 			case .group17: .group17
-			case .unusedGroup32: .unusedGroup32
-			case .group31: .group31
-			case .dinaurians: .dinaurians
-			case .group29: .group29
-			case .group28: .group28
-			case .group27: .group27
-			case .group26: .group26
+			case .group18: .group18
+			case .group19: .group19
+			case .group20: .group20
+			case .group21: .group21
+			case .boney: .boney
+			case .zombie: .zombie
+			case .group24: .group24
 			case .group25: .group25
+			case .group26: .group26
+			case .group27: .group27
+			case .group28: .group28
+			case .group29: .group29
+			case .dinaurians: .dinaurians
+			case .group31: .group31
+			case .unusedGroup32: .unusedGroup32
 		}
 	}
 }
@@ -889,7 +891,7 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		speed = Stat(packed.speed)
 		
 		critRate = packed.critRate
-		typeAdvantageCritRate = packed.typeAdvantageCritRate
+		critRateForTypeAdvantage = packed.critRateForTypeAdvantage
 		
 		linkChance = packed.linkChance
 		
@@ -932,6 +934,7 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		unknown05 = packed.unknown05
 		
 		id = packed.id
+		_label = ffcVivosaurNames[id]
 		superEvolvesIntoID = packed.superEvolvesIntoID
 		superEvolvesFromID = packed.superEvolvesFromID
 		
