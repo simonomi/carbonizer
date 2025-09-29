@@ -30,6 +30,8 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         draft: true
+        name: "Version 2.?"
+        body: "\n\n## how to use\n\ndrag and drop an `.nds` file onto `carbonizer.exe` to unpack it, then drop the resulting folder back onto `carbonizer.exe` to repack it."
         files: carbonizer-macOS.zip
 
   build-windows:
@@ -61,6 +63,8 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         draft: true
+        name: "Version 2.?"
+        body: "\n\n## how to use\n\ndrag and drop an `.nds` file onto `carbonizer.exe` to unpack it, then drop the resulting folder back onto `carbonizer.exe` to repack it."
         files: carbonizer-Windows.zip
 
   build-linux:
@@ -85,6 +89,8 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         draft: true
+        name: "Version 2.?"
+        body: "\n\n## how to use\n\ndrag and drop an `.nds` file onto `carbonizer.exe` to unpack it, then drop the resulting folder back onto `carbonizer.exe` to repack it."
         files: carbonizer-linux-x86.zip
 
   build-linux-arm:
@@ -109,5 +115,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         draft: true
+        name: "Version 2.?"
+        body: "\n\n## how to use\n\ndrag and drop an `.nds` file onto `carbonizer.exe` to unpack it, then drop the resulting folder back onto `carbonizer.exe` to repack it."
         files: carbonizer-linux-arm.zip
 
