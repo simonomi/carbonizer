@@ -28,6 +28,7 @@ struct CLIConfiguration : Sendable {
 		var dexDialogueSaver: Bool
 		var dexBlockLabeller: Bool
 		var dbsNameLabeller: Bool
+		var ffcCreatureLabeller: Bool
 		var hmlNameLabeller: Bool
 		var keyItemLabeller: Bool
 		var mapLabeller: Bool
@@ -138,6 +139,11 @@ struct CLIConfiguration : Sendable {
 				// make sure to enable both the DBS and DTX file types or nothing will happen
 				"dbsNameLabeller": false,
 				
+				// adds labels for the names of vivosaurs in creature_defs
+				//
+				// make sure to enable both the DCL and DTX file types or nothing will happen
+				"ffcCreatureLabeller": false,
+				
 				// adds labels for the names of masks in `etc/headmask_defs`
 				//
 				// make sure to enable both the HML and DTX file types or nothing will happen
@@ -209,7 +215,7 @@ extension CLIConfiguration: Decodable {
 
 extension CLIConfiguration.ExperimentalOptions: Decodable {
 	enum CodingKeys: CodingKey {
-		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -219,25 +225,27 @@ extension CLIConfiguration.ExperimentalOptions: Decodable {
 		lazy var fallback = CLIConfiguration.defaultConfiguration.experimental
 		
 		hotReloading =        try container.decodeIfPresent(Bool.self,     forKey: .hotReloading) ??
-		fallback.hotReloading
+			fallback.hotReloading
 		postProcessors =      try container.decodeIfPresent([String].self, forKey: .postProcessors) ??
-		fallback.postProcessors
+			fallback.postProcessors
 		dexDialogueLabeller = try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueLabeller) ??
-		fallback.dexDialogueLabeller
+			fallback.dexDialogueLabeller
 		dexDialogueSaver =    try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueSaver) ??
-		fallback.dexDialogueSaver
+			fallback.dexDialogueSaver
 		dexBlockLabeller =    try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
-		fallback.dexBlockLabeller
+			fallback.dexBlockLabeller
 		dbsNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
-		fallback.dbsNameLabeller
+			fallback.dbsNameLabeller
+		ffcCreatureLabeller = try container.decodeIfPresent(Bool.self,     forKey: .ffcCreatureLabeller) ??
+			fallback.ffcCreatureLabeller
 		hmlNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .hmlNameLabeller) ??
-		fallback.hmlNameLabeller
+			fallback.hmlNameLabeller
 		keyItemLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .keyItemLabeller) ??
-		fallback.keyItemLabeller
+			fallback.keyItemLabeller
 		mapLabeller =         try container.decodeIfPresent(Bool.self,     forKey: .mapLabeller) ??
-		fallback.mapLabeller
+			fallback.mapLabeller
 		museumLabeller =      try container.decodeIfPresent(Bool.self,     forKey: .museumLabeller) ??
-		fallback.museumLabeller
+			fallback.museumLabeller
 	}
 }
 

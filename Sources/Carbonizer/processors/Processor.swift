@@ -1,6 +1,8 @@
-public enum Processor: Hashable, Sendable {
+public enum Processor: String, Hashable, Sendable {
 	// TODO: give these all nicer names
-	case tclFinder, mm3Finder, mmsFinder, mpmFinder, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+	case tclFinder, mm3Finder, mmsFinder, mpmFinder, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+	
+	var name: String { rawValue }
 	
 	var shouldRunWhen: PackOrUnpack {
 		switch self {
@@ -12,6 +14,7 @@ public enum Processor: Hashable, Sendable {
 			case .dexDialogueSaver:    .pack
 			case .dexBlockLabeller:    .unpack
 			case .dbsNameLabeller:     .unpack
+			case .ffcCreatureLabeller: .unpack
 			case .hmlNameLabeller:     .unpack
 			case .keyItemLabeller:     .unpack
 			case .mapLabeller:         .unpack
@@ -29,6 +32,7 @@ public enum Processor: Hashable, Sendable {
 			case .dexDialogueSaver:    [.dexDialogueRipper, .dexDialogueSaver]
 			case .dexBlockLabeller:    [.eventIDRipper, .dexBlockLabeller]
 			case .dbsNameLabeller:     [.dtxRipper, .dbsNameLabeller]
+			case .ffcCreatureLabeller: [.ffcTextRipper, .ffcCreatureLabeller]
 			case .hmlNameLabeller:     [.dtxRipper, .hmlNameLabeller]
 			case .keyItemLabeller:     [.dtxRipper, .keyItemLabeller]
 			case .mapLabeller:         [.dtxRipper, .mapLabeller]
@@ -36,11 +40,31 @@ public enum Processor: Hashable, Sendable {
 		}
 	}
 	
+	// TODO: define these on stages and just join them here ?
+	var requiredFileTypes: [String] {
+		switch self {
+			case .tclFinder:           ["MAR", "3CL"]
+			case .mm3Finder:           ["MAR", "MM3"]
+			case .mmsFinder:           todo()
+			case .mpmFinder:           todo()
+			case .dexDialogueLabeller: ["MAR", "DMG", "DEX"]
+			case .dexDialogueSaver:    ["MAR", "DEX", "DMG"]
+			case .dexBlockLabeller:    ["MAR", "DEP", "DEX"]
+			case .dbsNameLabeller:     ["MAR", "DTX", "DBS"]
+			case .ffcCreatureLabeller: ["MAR", "DTX", "DCL"]
+			case .hmlNameLabeller:     ["MAR", "DTX", "HML"]
+			case .keyItemLabeller:     ["MAR", "DTX", "KIL"]
+			case .mapLabeller:         ["MAR", "DTX", "MAP"]
+			case .museumLabeller:      ["MAR", "DTX", "DML"]
+		}
+	}
+	
 	enum Stage: Equatable {
 		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper
-		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, hmlNameLabeller, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
+		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
 		case modelExporter, textureExporter
 		
+		// TODO: instead of calling runProcessor, just return a ProcessorFunction?
 		func run(
 			on file: inout any FileSystemObject,
 			in environment: inout Environment,
@@ -129,8 +153,16 @@ public enum Processor: Hashable, Sendable {
 					)
 				case .dexDialogueSaver:
 					try file.runProcessor(
-						dexDialogueRipperF,
+						dexDialogueSaverF,
 						on: "episode/e*",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .ffcCreatureLabeller:
+					try file.runProcessor(
+						ffcCreatureLabellerF,
+						on: "etc/creature_defs",
 						in: &environment,
 						at: [],
 						configuration: configuration

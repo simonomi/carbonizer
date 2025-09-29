@@ -61,6 +61,10 @@ extension Set<Processor> {
 			result.insert(.dbsNameLabeller)
 		}
 		
+		if cli.ffcCreatureLabeller {
+			result.insert(.ffcCreatureLabeller)
+		}
+		
 		if cli.hmlNameLabeller {
 			result.insert(.hmlNameLabeller)
 		}

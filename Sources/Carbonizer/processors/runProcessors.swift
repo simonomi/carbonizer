@@ -3,8 +3,18 @@ func runProcessors(
 	when: PackOrUnpack,
 	configuration: Configuration
 ) throws {
-	let pipeline = configuration.processors
+	let processorsToRun = configuration.processors
 		.filter { $0.shouldRunWhen == when }
+	
+	for processor in processorsToRun {
+		for fileType in processor.requiredFileTypes {
+			guard configuration.fileTypes.contains(fileType) else {
+				throw FileTypeNotEnabled(fileType: fileType, processor: processor)
+			}
+		}
+	}
+	
+	let pipeline = processorsToRun
 		.map(\.stages)
 		.pipelined()
 	

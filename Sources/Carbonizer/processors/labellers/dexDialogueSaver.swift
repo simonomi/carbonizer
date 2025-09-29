@@ -1,4 +1,4 @@
-func dexDialogueSaver(
+func dexDialogueSaverF(
 	_ dmg: inout DMG.Unpacked,
 	at path: [String],
 	in environment: inout Processor.Environment,

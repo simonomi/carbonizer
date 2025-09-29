@@ -311,7 +311,7 @@ enum DCL_FFC {
 		var vivosaurs: [Vivosaur?]
 		
 		struct Vivosaur: Codable {
-			var _label: String?
+			var _defaultName: String?
 			
 			var isEntry: Bool
 			
@@ -450,7 +450,7 @@ enum DCL_FFC {
 			}
 			
 			enum Team: CaseIterable {
-				case fireType, airType, earthType, waterType, neutralType, violent, group7, group8, group9, group10, group11, group12, group13, group14, group15, japanese, group17, group18, group19, group20, group21, boney, zombie, poisonous, group25, group26, group27, group28, group29, dinaurians, feathered, unusedGroup32
+				case fireType, airType, earthType, waterType, neutralType, violent, group7, group8, group9, group10, group11, group12, group13, group14, group15, japanese, group17, group18, group19, cenozoic, group21, boney, zombie, poisonous, group25, group26, group27, group28, group29, dinaurians, feathered, unusedGroup32
 			}
 			
 			struct Position: Codable {
@@ -809,7 +809,7 @@ extension DCL_FFC.Packed.Vivosaur.Teams {
 			case .group17: .group17
 			case .group18: .group18
 			case .group19: .group19
-			case .group20: .group20
+			case .cenozoic: .cenozoic
 			case .group21: .group21
 			case .boney: .boney
 			case .zombie: .zombie
@@ -1140,7 +1140,7 @@ extension DCL_FFC.Unpacked.Vivosaur.Team: Codable {
 		case group17       = "group17"
 		case group18       = "group18"
 		case group19       = "group19"
-		case group20       = "group20"
+		case cenozoic      = "cenozoic"
 		case group21       = "group21"
 		case boney         = "boney (22)"
 		case zombie        = "zombie (23)"
