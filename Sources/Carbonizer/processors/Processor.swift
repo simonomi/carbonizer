@@ -37,7 +37,7 @@ public enum Processor: Hashable, Sendable {
 	}
 	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, mm3Ripper, tclRipper
+		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper
 		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, hmlNameLabeller, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
 		case modelExporter, textureExporter
 		
@@ -75,6 +75,14 @@ public enum Processor: Hashable, Sendable {
 					try file.runProcessor(
 						eventIDRipperF,
 						on: "episode/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .ffcTextRipper:
+					try file.runProcessor(
+						ffcTextRipperF,
+						on: "text/**",
 						in: &environment,
 						at: [],
 						configuration: configuration

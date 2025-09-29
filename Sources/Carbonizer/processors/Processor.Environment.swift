@@ -1,6 +1,7 @@
 extension Processor {
 	struct Environment {
 		var text: [String]?
+		var ffcText: [String: [String]]?
 		var dialogue: [UInt32: String]?
 		var blockIDs: [String: [Int32]]?
 		

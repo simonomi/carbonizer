@@ -38,10 +38,10 @@ enum DCL_FFC {
 			
 			var element: Element
 			
-			var attack: Stat
-			var defense: Stat
-			var accuracy: Stat
-			var speed: Stat
+			var statAttack: Stat
+			var statDefense: Stat
+			var statAccuracy: Stat
+			var statSpeed: Stat
 			
 			var critRate: UInt8
 			var critRateForTypeAdvantage: UInt8
@@ -73,16 +73,16 @@ enum DCL_FFC {
 			var rangeMultiplier7: UInt8
 			var rangeMultiplier8: UInt8
 			
-			var poisonImmunity: UInt8 // bool
+			var immunityToPoison: UInt8 // bool
 			// 0x24
-			var sleepImmunity: UInt8
-			var scareImmunity: UInt8
-			var enrageImmunity: UInt8
-			var confusionImmunity: UInt8
+			var immunityToSleep: UInt8
+			var immunityToScare: UInt8
+			var immunityToEnrage: UInt8
+			var immunityToConfusion: UInt8
 			// 0x28
-			var exciteImmunity: UInt8
-			var infectionImmunity: UInt8
-			var instantKOImmunity: UInt8
+			var immunityToExcite: UInt8
+			var immunityToInfection: UInt8
+			var immunityToInstantKO: UInt8
 			
 			var unknown02: UInt8
 			// 0x2c
@@ -114,12 +114,12 @@ enum DCL_FFC {
 			// 0x44
 			var unknown08: UInt16
 			
-			var headColorPalette: UInt16
+			var colorPaletteForHead: UInt16
 			// 0x48
-			var bodyColorPalette: UInt16
-			var armsColorPalette: UInt16
+			var colorPaletteForBody: UInt16
+			var colorPaletteForArms: UInt16
 			// 0x4c
-			var legsColorPalette: UInt16
+			var colorPaletteForLegs: UInt16
 			
 			var teamSkillID: UInt16
 			
@@ -156,10 +156,10 @@ enum DCL_FFC {
 			var teams: Teams
 			
 			// 0x60
-			var formationScreenPlacement: Position
-			var statsScreenPlacement: Position
-			var fossilaryPlacement: Position
-			var revivalScreenPlacement: Position
+			var positionInFormationScreen: Position
+			var positionInStatsScreen: Position
+			var positionInFossilary: Position
+			var positionInRevivalScreen: Position
 			
 			// 0x90
 			var shadowSize: FixedPoint2012
@@ -260,18 +260,18 @@ enum DCL_FFC {
 				static let group17       = Self(rawValue: 1 << 16)
 				static let group18       = Self(rawValue: 1 << 17)
 				static let group19       = Self(rawValue: 1 << 18)
-				static let group20       = Self(rawValue: 1 << 19)
+				static let cenozoic      = Self(rawValue: 1 << 19)
 				static let group21       = Self(rawValue: 1 << 20)
 				static let boney         = Self(rawValue: 1 << 21)
 				static let zombie        = Self(rawValue: 1 << 22)
-				static let group24       = Self(rawValue: 1 << 23)
+				static let poisonous     = Self(rawValue: 1 << 23)
 				static let group25       = Self(rawValue: 1 << 24)
 				static let group26       = Self(rawValue: 1 << 25)
 				static let group27       = Self(rawValue: 1 << 26)
 				static let group28       = Self(rawValue: 1 << 27)
 				static let group29       = Self(rawValue: 1 << 28)
 				static let dinaurians    = Self(rawValue: 1 << 29)
-				static let group31       = Self(rawValue: 1 << 30)
+				static let feathered     = Self(rawValue: 1 << 30)
 				static let unusedGroup32 = Self(rawValue: 1 << 31)
 			}
 			
@@ -317,10 +317,10 @@ enum DCL_FFC {
 			
 			var element: Element
 			
-			var attack: Stat
-			var defense: Stat
-			var accuracy: Stat
-			var speed: Stat
+			var statAttack: Stat
+			var statDefense: Stat
+			var statAccuracy: Stat
+			var statSpeed: Stat
 			
 			var critRate: UInt8
 			var critRateForTypeAdvantage: UInt8
@@ -348,14 +348,14 @@ enum DCL_FFC {
 			var rangeMultiplier7: UInt8
 			var rangeMultiplier8: UInt8
 			
-			var poisonImmunity: Bool
-			var sleepImmunity: Bool
-			var scareImmunity: Bool
-			var enrageImmunity: Bool
-			var confusionImmunity: Bool
-			var exciteImmunity: Bool
-			var infectionImmunity: Bool
-			var instantKOImmunity: Bool
+			var immunityToPoison: Bool
+			var immunityToSleep: Bool
+			var immunityToScare: Bool
+			var immunityToEnrage: Bool
+			var immunityToConfusion: Bool
+			var immunityToExcite: Bool
+			var immunityToInfection: Bool
+			var immunityToInstantKO: Bool
 			
 			var unknown02: UInt8
 			var unknown03: UInt16
@@ -380,10 +380,10 @@ enum DCL_FFC {
 			
 			var unknown08: UInt16
 			
-			var headColorPalette: UInt16
-			var bodyColorPalette: UInt16
-			var armsColorPalette: UInt16
-			var legsColorPalette: UInt16
+			var colorPaletteForHead: UInt16
+			var colorPaletteForBody: UInt16
+			var colorPaletteForArms: UInt16
+			var colorPaletteForLegs: UInt16
 			
 			var teamSkillID: UInt16
 			
@@ -399,10 +399,10 @@ enum DCL_FFC {
 			
 			var teams: [Team]
 			
-			var formationScreenPlacement: Position
-			var statsScreenPlacement: Position
-			var fossilaryPlacement: Position
-			var revivalScreenPlacement: Position
+			var positionInFormationScreen: Position
+			var positionInStatsScreen: Position
+			var positionInFossilary: Position
+			var positionInRevivalScreen: Position
 			
 			var shadowSize: Double
 			
@@ -449,8 +449,8 @@ enum DCL_FFC {
 				case none, close, mid, long
 			}
 			
-			enum Team: String, Codable, CaseIterable {
-				case fireType, airType, earthType, waterType, neutralType, violent, group7, group8, group9, group10, group11, group12, group13, group14, group15, japanese, group17, group18, group19, group20, group21, boney, zombie, group24, group25, group26, group27, group28, group29, dinaurians, group31, unusedGroup32
+			enum Team: CaseIterable {
+				case fireType, airType, earthType, waterType, neutralType, violent, group7, group8, group9, group10, group11, group12, group13, group14, group15, japanese, group17, group18, group19, group20, group21, boney, zombie, poisonous, group25, group26, group27, group28, group29, dinaurians, feathered, unusedGroup32
 			}
 			
 			struct Position: Codable {
@@ -509,7 +509,7 @@ extension DCL_FFC.Packed: ProprietaryFileData {
 }
 
 extension DCL_FFC.Packed.Vivosaur {
-	static let null = Self(isEntry: 0, element: .none, attack: .null, defense: .null, accuracy: .null, speed: .null, critRate: 0, critRateForTypeAdvantage: 0, linkChance: 0, sortOrderDiet: .none, sortOrderEra: .none, sortOrderLP: 0, sortOrderDigsite: .none, staticBlueMove: .none, range: .none, rangeMultiplier1: 0, rangeMultiplier2: 0, rangeMultiplier3: 0, rangeMultiplier4: 0, rangeMultiplier5: 0, rangeMultiplier6: 0, rangeMultiplier7: 0, rangeMultiplier8: 0, poisonImmunity: 0, sleepImmunity: 0, scareImmunity: 0, enrageImmunity: 0, confusionImmunity: 0, exciteImmunity: 0, infectionImmunity: 0, instantKOImmunity: 0, unknown02: 0, unknown03: 0, unknown04: 0, defaultNameID: 0, unknown05: 0, id: 0, superEvolvesIntoID: 0, superEvolvesFromID: 0, modelID: 0, unknown06: 0, unknown07: 0, spriteIDs: 0, animationPackID: 0, unknown08: 0, headColorPalette: 0, bodyColorPalette: 0, armsColorPalette: 0, legsColorPalette: 0, teamSkillID: 0, linkMoveID: 0, unknown09: 0, abilityArgument: 0, sortOrderName: 0, unknown10: 0, unknown11: 0, teams: [], formationScreenPlacement: .null, statsScreenPlacement: .null, fossilaryPlacement: .null, revivalScreenPlacement: .null, shadowSize: 0, moveCount: 0, moveLearningLevelCount: 0, moveLearningLevelsOffset: 0xBC, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, moveListOrderCount: 0, moveListOrderOffset: 0xBC, rankCount: 0, healthAtEachRankOffset: 0xBC, moves: [], moveLearningLevels: [], moveListOrder: [], healthAtEachRank: [])
+	static let null = Self(isEntry: 0, element: .none, statAttack: .null, statDefense: .null, statAccuracy: .null, statSpeed: .null, critRate: 0, critRateForTypeAdvantage: 0, linkChance: 0, sortOrderDiet: .none, sortOrderEra: .none, sortOrderLP: 0, sortOrderDigsite: .none, staticBlueMove: .none, range: .none, rangeMultiplier1: 0, rangeMultiplier2: 0, rangeMultiplier3: 0, rangeMultiplier4: 0, rangeMultiplier5: 0, rangeMultiplier6: 0, rangeMultiplier7: 0, rangeMultiplier8: 0, immunityToPoison: 0, immunityToSleep: 0, immunityToScare: 0, immunityToEnrage: 0, immunityToConfusion: 0, immunityToExcite: 0, immunityToInfection: 0, immunityToInstantKO: 0, unknown02: 0, unknown03: 0, unknown04: 0, defaultNameID: 0, unknown05: 0, id: 0, superEvolvesIntoID: 0, superEvolvesFromID: 0, modelID: 0, unknown06: 0, unknown07: 0, spriteIDs: 0, animationPackID: 0, unknown08: 0, colorPaletteForHead: 0, colorPaletteForBody: 0, colorPaletteForArms: 0, colorPaletteForLegs: 0, teamSkillID: 0, linkMoveID: 0, unknown09: 0, abilityArgument: 0, sortOrderName: 0, unknown10: 0, unknown11: 0, teams: [], positionInFormationScreen: .null, positionInStatsScreen: .null, positionInFossilary: .null, positionInRevivalScreen: .null, shadowSize: 0, moveCount: 0, moveLearningLevelCount: 0, moveLearningLevelsOffset: 0xBC, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, moveListOrderCount: 0, moveListOrderOffset: 0xBC, rankCount: 0, healthAtEachRankOffset: 0xBC, moves: [], moveLearningLevels: [], moveListOrder: [], healthAtEachRank: [])
 	
 	fileprivate init(_ unpacked: DCL_FFC.Unpacked.Vivosaur?) {
 		guard let unpacked else {
@@ -521,10 +521,10 @@ extension DCL_FFC.Packed.Vivosaur {
 		
 		element = Element(unpacked.element)
 		
-		attack = Stat(unpacked.attack)
-		defense = Stat(unpacked.defense)
-		accuracy = Stat(unpacked.accuracy)
-		speed = Stat(unpacked.speed)
+		statAttack = Stat(unpacked.statAttack)
+		statDefense = Stat(unpacked.statDefense)
+		statAccuracy = Stat(unpacked.statAccuracy)
+		statSpeed = Stat(unpacked.statSpeed)
 		
 		critRate = unpacked.critRate
 		critRateForTypeAdvantage = unpacked.critRateForTypeAdvantage
@@ -552,14 +552,14 @@ extension DCL_FFC.Packed.Vivosaur {
 		rangeMultiplier7 = unpacked.rangeMultiplier7
 		rangeMultiplier8 = unpacked.rangeMultiplier8
 		
-		poisonImmunity = unpacked.poisonImmunity ? 1 : 0
-		sleepImmunity = unpacked.sleepImmunity ? 1 : 0
-		scareImmunity = unpacked.scareImmunity ? 1 : 0
-		enrageImmunity = unpacked.enrageImmunity ? 1 : 0
-		confusionImmunity = unpacked.confusionImmunity ? 1 : 0
-		exciteImmunity = unpacked.exciteImmunity ? 1 : 0
-		infectionImmunity = unpacked.infectionImmunity ? 1 : 0
-		instantKOImmunity = unpacked.instantKOImmunity ? 1 : 0
+		immunityToPoison = unpacked.immunityToPoison ? 1 : 0
+		immunityToSleep = unpacked.immunityToSleep ? 1 : 0
+		immunityToScare = unpacked.immunityToScare ? 1 : 0
+		immunityToEnrage = unpacked.immunityToEnrage ? 1 : 0
+		immunityToConfusion = unpacked.immunityToConfusion ? 1 : 0
+		immunityToExcite = unpacked.immunityToExcite ? 1 : 0
+		immunityToInfection = unpacked.immunityToInfection ? 1 : 0
+		immunityToInstantKO = unpacked.immunityToInstantKO ? 1 : 0
 		
 		unknown02 = unpacked.unknown02
 		unknown03 = unpacked.unknown03
@@ -584,10 +584,10 @@ extension DCL_FFC.Packed.Vivosaur {
 		
 		unknown08 = unpacked.unknown08
 		
-		headColorPalette = unpacked.headColorPalette
-		bodyColorPalette = unpacked.bodyColorPalette
-		armsColorPalette = unpacked.armsColorPalette
-		legsColorPalette = unpacked.legsColorPalette
+		colorPaletteForHead = unpacked.colorPaletteForHead
+		colorPaletteForBody = unpacked.colorPaletteForBody
+		colorPaletteForArms = unpacked.colorPaletteForArms
+		colorPaletteForLegs = unpacked.colorPaletteForLegs
 		
 		teamSkillID = unpacked.teamSkillID
 		
@@ -605,10 +605,10 @@ extension DCL_FFC.Packed.Vivosaur {
 			.map(Teams.init)
 			.reduce([]) { $0.union($1) }
 		
-		formationScreenPlacement = Position(unpacked.formationScreenPlacement)
-		statsScreenPlacement = Position(unpacked.statsScreenPlacement)
-		fossilaryPlacement = Position(unpacked.fossilaryPlacement)
-		revivalScreenPlacement = Position(unpacked.revivalScreenPlacement)
+		positionInFormationScreen = Position(unpacked.positionInFormationScreen)
+		positionInStatsScreen = Position(unpacked.positionInStatsScreen)
+		positionInFossilary = Position(unpacked.positionInFossilary)
+		positionInRevivalScreen = Position(unpacked.positionInRevivalScreen)
 		
 		shadowSize = FixedPoint2012(unpacked.shadowSize)
 		
@@ -813,14 +813,14 @@ extension DCL_FFC.Packed.Vivosaur.Teams {
 			case .group21: .group21
 			case .boney: .boney
 			case .zombie: .zombie
-			case .group24: .group24
+			case .poisonous: .poisonous
 			case .group25: .group25
 			case .group26: .group26
 			case .group27: .group27
 			case .group28: .group28
 			case .group29: .group29
 			case .dinaurians: .dinaurians
-			case .group31: .group31
+			case .feathered: .feathered
 			case .unusedGroup32: .unusedGroup32
 		}
 	}
@@ -885,10 +885,10 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		
 		element = Element(packed.element)
 		
-		attack = Stat(packed.attack)
-		defense = Stat(packed.defense)
-		accuracy = Stat(packed.accuracy)
-		speed = Stat(packed.speed)
+		statAttack = Stat(packed.statAttack)
+		statDefense = Stat(packed.statDefense)
+		statAccuracy = Stat(packed.statAccuracy)
+		statSpeed = Stat(packed.statSpeed)
 		
 		critRate = packed.critRate
 		critRateForTypeAdvantage = packed.critRateForTypeAdvantage
@@ -916,14 +916,14 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		rangeMultiplier7 = packed.rangeMultiplier7
 		rangeMultiplier8 = packed.rangeMultiplier8
 		
-		poisonImmunity = packed.poisonImmunity > 0
-		sleepImmunity = packed.sleepImmunity > 0
-		scareImmunity = packed.scareImmunity > 0
-		enrageImmunity = packed.enrageImmunity > 0
-		confusionImmunity = packed.confusionImmunity > 0
-		exciteImmunity = packed.exciteImmunity > 0
-		infectionImmunity = packed.infectionImmunity > 0
-		instantKOImmunity = packed.instantKOImmunity > 0
+		immunityToPoison = packed.immunityToPoison > 0
+		immunityToSleep = packed.immunityToSleep > 0
+		immunityToScare = packed.immunityToScare > 0
+		immunityToEnrage = packed.immunityToEnrage > 0
+		immunityToConfusion = packed.immunityToConfusion > 0
+		immunityToExcite = packed.immunityToExcite > 0
+		immunityToInfection = packed.immunityToInfection > 0
+		immunityToInstantKO = packed.immunityToInstantKO > 0
 		
 		unknown02 = packed.unknown02
 		unknown03 = packed.unknown03
@@ -934,7 +934,6 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		unknown05 = packed.unknown05
 		
 		id = packed.id
-		_label = ffcVivosaurNames[id]
 		superEvolvesIntoID = packed.superEvolvesIntoID
 		superEvolvesFromID = packed.superEvolvesFromID
 		
@@ -949,10 +948,10 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		
 		unknown08 = packed.unknown08
 		
-		headColorPalette = packed.headColorPalette
-		bodyColorPalette = packed.bodyColorPalette
-		armsColorPalette = packed.armsColorPalette
-		legsColorPalette = packed.legsColorPalette
+		colorPaletteForHead = packed.colorPaletteForHead
+		colorPaletteForBody = packed.colorPaletteForBody
+		colorPaletteForArms = packed.colorPaletteForArms
+		colorPaletteForLegs = packed.colorPaletteForLegs
 		
 		teamSkillID = packed.teamSkillID
 		
@@ -968,10 +967,10 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		
 		teams = [Team](packed.teams)
 		
-		formationScreenPlacement = Position(packed.formationScreenPlacement)
-		statsScreenPlacement = Position(packed.statsScreenPlacement)
-		fossilaryPlacement = Position(packed.fossilaryPlacement)
-		revivalScreenPlacement = Position(packed.revivalScreenPlacement)
+		positionInFormationScreen = Position(packed.positionInFormationScreen)
+		positionInStatsScreen = Position(packed.positionInStatsScreen)
+		positionInFossilary = Position(packed.positionInFossilary)
+		positionInRevivalScreen = Position(packed.positionInRevivalScreen)
 		
 		shadowSize = Double(packed.shadowSize)
 		
@@ -1117,6 +1116,43 @@ extension [DCL_FFC.Unpacked.Vivosaur.Team] {
 	fileprivate init(_ packed: DCL_FFC.Packed.Vivosaur.Teams) {
 		self = DCL_FFC.Unpacked.Vivosaur.Team.allCases
 			.filter { packed.contains(DCL_FFC.Packed.Vivosaur.Teams($0)) }
+	}
+}
+
+extension DCL_FFC.Unpacked.Vivosaur.Team: Codable {
+	enum CodingKeys: String, CodingKey {
+		case fireType      = "fire-type (1)"
+		case airType       = "air-type (2)"
+		case earthType     = "earth-type (3)"
+		case waterType     = "water-type (4)"
+		case neutralType   = "neutral-type (5)"
+		case violent       = "violent (6)"
+		case group7        = "group7"
+		case group8        = "group8"
+		case group9        = "group9"
+		case group10       = "group10"
+		case group11       = "group11"
+		case group12       = "group12"
+		case group13       = "group13"
+		case group14       = "group14"
+		case group15       = "group15"
+		case japanese      = "japanese (16)"
+		case group17       = "group17"
+		case group18       = "group18"
+		case group19       = "group19"
+		case group20       = "group20"
+		case group21       = "group21"
+		case boney         = "boney (22)"
+		case zombie        = "zombie (23)"
+		case poisonous     = "poisonous (24)"
+		case group25       = "group25"
+		case group26       = "group26"
+		case group27       = "group27"
+		case group28       = "group28"
+		case group29       = "group29"
+		case dinaurians    = "dinaurians (30)"
+		case feathered     = "feathered (31)"
+		case unusedGroup32 = "unusedGroup32"
 	}
 }
 

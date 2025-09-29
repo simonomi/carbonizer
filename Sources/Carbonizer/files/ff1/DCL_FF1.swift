@@ -39,10 +39,10 @@ enum DCL_FF1 {
 			var element: Element?
 			var rank12HealthDividedBy2: UInt16
 			
-			var attack: Stat
-			var defense: Stat
-			var accuracy: Stat
-			var evasion: Stat
+			var statAttack: Stat
+			var statDefense: Stat
+			var statAccuracy: Stat
+			var statEvasion: Stat
 			
 			var critRate: UInt8
 			var critRateForTypeAdvantage: UInt8 // always the same as crit
@@ -72,7 +72,7 @@ enum DCL_FF1 {
 			var allySupportEffectsOffset: UInt32
 			var enemySupportEffectsOffset: UInt32
 			
-			var requiredFossilsForTeamSkill: UInt8 // always 1
+			var teamSkillRequiredFossils: UInt8 // always 1
 			var unknown10: UInt8 // always 1
 			var unknown11: UInt8 // always 100
 			var unknown12: UInt8 // always 100
@@ -142,6 +142,8 @@ enum DCL_FF1 {
 			struct Teams: OptionSet {
 				let rawValue: UInt32
 				
+				// dialogue to do with teams: 8486, 12299, 12254, 5310
+				
 				static let fireType    = Self(rawValue: 1 << 0)
 				static let airType     = Self(rawValue: 1 << 1)
 				static let earthType   = Self(rawValue: 1 << 2)
@@ -156,7 +158,7 @@ enum DCL_FF1 {
 				static let group12     = Self(rawValue: 1 << 11)
 				static let group13     = Self(rawValue: 1 << 12)
 				static let group14     = Self(rawValue: 1 << 13)
-				static let group15     = Self(rawValue: 1 << 14)
+				static let group15     = Self(rawValue: 1 << 14) // same family (see dialogue 12126)
 				static let japanese    = Self(rawValue: 1 << 15)
 			}
 			
@@ -248,17 +250,17 @@ enum DCL_FF1 {
 				var evasion: Int8
 			}
 			
-			init(id: Int32, unknown01: UInt32, unknown02: UInt32, length: UInt8, element: Element? = nil, rank12HealthDividedBy2: UInt16, attack: Stat, defense: Stat, accuracy: Stat, evasion: Stat, critRate: UInt8, critRateForTypeAdvantage: UInt8, linkChance: UInt8, unknown03: UInt8, teams: Teams, moveCount: UInt32, skillIdsOffset: UInt32, teamSkill: UInt32, linkSkill: UInt32, long1234Count: UInt32, long1234Offset: UInt32, unknown04: UInt32, unknown05: UInt32, unknown06: UInt32, unknown07: UInt32, unknown08: UInt32, allySupportEffectsOffset: UInt32, enemySupportEffectsOffset: UInt32, requiredFossilsForTeamSkill: UInt8, unknown10: UInt8, unknown11: UInt8, unknown12: UInt8, unknown13: UInt8, passiveAbility: PassiveAbility, statusChancesCount: UInt32, statusChancesOffset: UInt32, szDamageMultiplier: UInt32, unknown16: UInt32, moveCountAgainAgain: UInt32, moveListOrderOffset: UInt32, rankCount: UInt32, healthAtEachRankOffset: UInt32, displayNumber: UInt32, alphabeticalOrder: UInt32, skillIds: [UInt32], long1234: [UInt32], allySupportEffects: SupportEffects, enemySupportEffects: SupportEffects, statusChances: [UInt8], moveListOrder: [UInt8], padding: UInt8? = nil, healthAtEachRank: [UInt16]) {
+			init(id: Int32, unknown01: UInt32, unknown02: UInt32, length: UInt8, element: Element? = nil, rank12HealthDividedBy2: UInt16, statAttack: Stat, statDefense: Stat, statAccuracy: Stat, statEvasion: Stat, critRate: UInt8, critRateForTypeAdvantage: UInt8, linkChance: UInt8, unknown03: UInt8, teams: Teams, moveCount: UInt32, skillIdsOffset: UInt32, teamSkill: UInt32, linkSkill: UInt32, long1234Count: UInt32, long1234Offset: UInt32, unknown04: UInt32, unknown05: UInt32, unknown06: UInt32, unknown07: UInt32, unknown08: UInt32, allySupportEffectsOffset: UInt32, enemySupportEffectsOffset: UInt32, teamSkillRequiredFossils: UInt8, unknown10: UInt8, unknown11: UInt8, unknown12: UInt8, unknown13: UInt8, passiveAbility: PassiveAbility, statusChancesCount: UInt32, statusChancesOffset: UInt32, szDamageMultiplier: UInt32, unknown16: UInt32, moveCountAgainAgain: UInt32, moveListOrderOffset: UInt32, rankCount: UInt32, healthAtEachRankOffset: UInt32, displayNumber: UInt32, alphabeticalOrder: UInt32, skillIds: [UInt32], long1234: [UInt32], allySupportEffects: SupportEffects, enemySupportEffects: SupportEffects, statusChances: [UInt8], moveListOrder: [UInt8], padding: UInt8? = nil, healthAtEachRank: [UInt16]) {
 				self.id = id
 				self.unknown01 = unknown01
 				self.unknown02 = unknown02
 				self.length = length
 				self.element = element
 				self.rank12HealthDividedBy2 = rank12HealthDividedBy2
-				self.attack = attack
-				self.defense = defense
-				self.accuracy = accuracy
-				self.evasion = evasion
+				self.statAttack = statAttack
+				self.statDefense = statDefense
+				self.statAccuracy = statAccuracy
+				self.statEvasion = statEvasion
 				self.critRate = critRate
 				self.critRateForTypeAdvantage = critRateForTypeAdvantage
 				self.linkChance = linkChance
@@ -277,7 +279,7 @@ enum DCL_FF1 {
 				self.unknown08 = unknown08
 				self.allySupportEffectsOffset = allySupportEffectsOffset
 				self.enemySupportEffectsOffset = enemySupportEffectsOffset
-				self.requiredFossilsForTeamSkill = requiredFossilsForTeamSkill
+				self.teamSkillRequiredFossils = teamSkillRequiredFossils
 				self.unknown10 = unknown10
 				self.unknown11 = unknown11
 				self.unknown12 = unknown12
@@ -325,10 +327,10 @@ enum DCL_FF1 {
 			var element: Element?
 			var rank12HealthDividedBy2: UInt16
 			
-			var attack: Stat
-			var defense: Stat
-			var accuracy: Stat
-			var evasion: Stat
+			var statAttack: Stat
+			var statDefense: Stat
+			var statAccuracy: Stat
+			var statEvasion: Stat
 			
 			var critRate: UInt8
 			var critRateForTypeAdvantage: UInt8
@@ -344,7 +346,7 @@ enum DCL_FF1 {
 			
 			var unknown04: UInt32
 			
-			var requiredFossilsForTeamSkill: UInt8
+			var teamSkillRequiredFossils: UInt8
 			var unknown10: UInt8
 			var unknown11: UInt8
 			var unknown12: UInt8
@@ -388,7 +390,7 @@ enum DCL_FF1 {
 				var rank12Value: UInt8
 			}
 			
-			enum Team: String, Codable, CaseIterable {
+			enum Team: CaseIterable {
 				case fireType, airType, earthType, waterType, neutralType, violent, group7, group8, group9, group10, group11, group12, group13, group14, group15, japanese
 			}
 			
@@ -467,7 +469,7 @@ extension DCL_FF1.Packed: ProprietaryFileData {
 }
 
 extension DCL_FF1.Packed.Vivosaur {
-	static let null = Self(id: 0, unknown01: 0, unknown02: 0, length: 0, rank12HealthDividedBy2: 0, attack: .null, defense: .null, accuracy: .null, evasion: .null, critRate: 0, critRateForTypeAdvantage: 0, linkChance: 0, unknown03: 0, teams: [], moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown04: 0, unknown05: 0, unknown06: 0, unknown07: 0, unknown08: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, requiredFossilsForTeamSkill: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
+	static let null = Self(id: 0, unknown01: 0, unknown02: 0, length: 0, rank12HealthDividedBy2: 0, statAttack: .null, statDefense: .null, statAccuracy: .null, statEvasion: .null, critRate: 0, critRateForTypeAdvantage: 0, linkChance: 0, unknown03: 0, teams: [], moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown04: 0, unknown05: 0, unknown06: 0, unknown07: 0, unknown08: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, teamSkillRequiredFossils: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
 	
 	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur) {
 		id = unpacked.id
@@ -476,10 +478,10 @@ extension DCL_FF1.Packed.Vivosaur {
 		element = unpacked.element.map(Element.init)
 		rank12HealthDividedBy2 = unpacked.rank12HealthDividedBy2
 		
-		attack = Stat(unpacked.attack)
-		defense = Stat(unpacked.defense)
-		accuracy = Stat(unpacked.accuracy)
-		evasion = Stat(unpacked.evasion)
+		statAttack = Stat(unpacked.statAttack)
+		statDefense = Stat(unpacked.statDefense)
+		statAccuracy = Stat(unpacked.statAccuracy)
+		statEvasion = Stat(unpacked.statEvasion)
 		
 		critRate = unpacked.critRate
 		critRateForTypeAdvantage = unpacked.critRateForTypeAdvantage
@@ -505,7 +507,7 @@ extension DCL_FF1.Packed.Vivosaur {
 		allySupportEffectsOffset = long1234Offset + long1234Count * 4
 		enemySupportEffectsOffset = allySupportEffectsOffset + 4
 		
-		requiredFossilsForTeamSkill = unpacked.requiredFossilsForTeamSkill
+		teamSkillRequiredFossils = unpacked.teamSkillRequiredFossils
 		unknown10 = unpacked.unknown10
 		unknown11 = unpacked.unknown11
 		unknown12 = unpacked.unknown12
@@ -665,10 +667,10 @@ extension DCL_FF1.Unpacked.Vivosaur {
 		element = packed.element.map(Element.init)
 		rank12HealthDividedBy2 = packed.rank12HealthDividedBy2
 		
-		attack = Stat(packed.attack)
-		defense = Stat(packed.defense)
-		accuracy = Stat(packed.accuracy)
-		evasion = Stat(packed.evasion)
+		statAttack = Stat(packed.statAttack)
+		statDefense = Stat(packed.statDefense)
+		statAccuracy = Stat(packed.statAccuracy)
+		statEvasion = Stat(packed.statEvasion)
 		
 		critRate = packed.critRate
 		critRateForTypeAdvantage = packed.critRateForTypeAdvantage
@@ -684,7 +686,7 @@ extension DCL_FF1.Unpacked.Vivosaur {
 		
 		unknown04 = packed.unknown04
 		
-		requiredFossilsForTeamSkill = packed.requiredFossilsForTeamSkill
+		teamSkillRequiredFossils = packed.teamSkillRequiredFossils
 		unknown10 = packed.unknown10
 		unknown11 = packed.unknown11
 		unknown12 = packed.unknown12
@@ -743,6 +745,27 @@ extension [DCL_FF1.Unpacked.Vivosaur.Team] {
 	init(_ packed: DCL_FF1.Packed.Vivosaur.Teams) {
 		self = DCL_FF1.Unpacked.Vivosaur.Team.allCases
 			.filter { packed.contains(DCL_FF1.Packed.Vivosaur.Teams($0)) }
+	}
+}
+
+extension DCL_FF1.Unpacked.Vivosaur.Team: Codable {
+	enum CodingKeys: String, CodingKey {
+		case fireType      = "fire-type (1)"
+		case airType       = "air-type (2)"
+		case earthType     = "earth-type (3)"
+		case waterType     = "water-type (4)"
+		case neutralType   = "neutral-type (5)"
+		case violent       = "violent (6)"
+		case group7        = "group7"
+		case group8        = "group8"
+		case group9        = "group9"
+		case group10       = "group10"
+		case group11       = "group11"
+		case group12       = "group12"
+		case group13       = "group13"
+		case group14       = "group14"
+		case group15       = "group15"
+		case japanese      = "japanese (16)"
 	}
 }
 
