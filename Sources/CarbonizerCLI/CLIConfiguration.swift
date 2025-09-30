@@ -108,60 +108,63 @@ struct CLIConfiguration : Sendable {
 				"hotReloading": false, // macOS only
 				
 				// 3clFinder: extract vivosaur 3D model files
-				//            make sure to enable the 3CL file type or nothing will happen
+				//            make sure to enable the MAR and 3CL file type
 				// mm3Finder: extract non-vivosaur 3D model files
-				//            make sure to enable the MM3 file type or nothing will happen
+				//            make sure to enable the MAR and MM3 file type
 				// mmsFinder: extract sprites (motion folder)
-				//            make sure to enable the MMS file type or nothing will happen
+				//            make sure to enable the MAR and MMS file type
 				// mpmFinder: extract images (image folder)
-				//            make sure to enablethe  MPM file type or nothing will happen
+				//            make sure to enable the MAR and MPM file type
+				//
+				// NOTE: mmsFinder and mpmFinder are temporarily broken,
+				// trying to use them will crash carbonizer 
 				"postProcessors": [],
 				
 				// adds comments to DEX files that show the dialogue used in a given command
 				//
-				// make sure to enable the DEX and DMG file types or nothing will happen
+				// make sure to enable the MAR, DEX, and DMG file types
 				"dexDialogueLabeller": false,
 				
 				// allows editing the comments made by dexDialogueLabeller, which will be
 				// saved to the correct MSG file. new lines of dialogue cannot be added
 				//
-				// make sure to enable the DEX and DMG file types or nothing will happen 
+				// make sure to enable the MAR, DEX, and DMG file types 
 				"dexDialogueSaver": false,
 				
 				// labels the blocks of commands in DEX files with their block number. this number
 				// is used by DEP files to control when a block triggers
 				//
-				// make sure to enable both the DEX and DEP file types or nothing will happen
+				// make sure to enable the MAR, DEX, and DEP file types
 				"dexBlockLabeller": false,
 				
 				// adds labels for the names of fighters in DBS files (battle folder)
 				//
-				// make sure to enable both the DBS and DTX file types or nothing will happen
+				// make sure to enable the MAR, DBS, and DTX file types
 				"dbsNameLabeller": false,
 				
 				// adds labels for the names of vivosaurs in creature_defs
 				//
-				// make sure to enable both the DCL and DTX file types or nothing will happen
+				// make sure to enable the MAR, DCL, and DTX file types
 				"ffcCreatureLabeller": false,
 				
 				// adds labels for the names of masks in `etc/headmask_defs`
 				//
-				// make sure to enable both the HML and DTX file types or nothing will happen
+				// make sure to enable the MAR, HML, and DTX file types
 				"hmlNameLabeller": false,
 				
 				// adds labels for the text in `etc/keyitem_defs`
 				//
-				// make sure to enable both the KIL and DTX file types or nothing will happen
+				// make sure to enable the MAR, KIL, and DTX file types
 				"keyItemLabeller": false,
 				
 				// adds labels for the names of maps in MAP files (`map/m/` folder)
 				//
-				// make sure to enable both the MAP and DTX file types or nothing will happen
+				// make sure to enable the MAR, MAP, and DTX file types
 				"mapLabeller": false,
 				
 				// adds labels for the descriptions in `etc/museum_defs`
 				//
-				// make sure to enable both the DML and DTX file types or nothing will happen
+				// make sure to enable the MAR, DML, and DTX file types
 				"museumLabeller": false
 			}
 		}
