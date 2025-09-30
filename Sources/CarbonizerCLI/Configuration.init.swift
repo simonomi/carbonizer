@@ -5,7 +5,6 @@ extension Configuration {
 		_ cliConfiguration: CLIConfiguration,
 		logHandler: (@Sendable (String) -> Void)?
 	) throws {
-		
 		try self.init(
 			overwriteOutput: cliConfiguration.overwriteOutput,
 			game: .init(cliConfiguration.game),
@@ -13,7 +12,7 @@ extension Configuration {
 			fileTypes: cliConfiguration.fileTypes,
 			onlyUnpack: cliConfiguration.onlyUnpack,
 			skipUnpacking: cliConfiguration.skipUnpacking,
-			processors: .init(cliConfiguration.experimental),
+			processors: .init(cliConfiguration.processors),
 			logHandler: logHandler
 		)
 	}
@@ -29,20 +28,24 @@ extension Configuration.Game {
 }
 
 extension Set<Processor> {
-	init(_ cli: CLIConfiguration.ExperimentalOptions) {
+	init(_ cli: CLIConfiguration.Processors) {
 		var result: Set<Processor> = []
 		
-		for postProcessor in cli.postProcessors {
-			let newProcessor: Processor = switch postProcessor {
-				case "3clFinder": .tclFinder
-				case "mm3Finder": .mm3Finder
-				case "mmsFinder": .mmsFinder
-				case "mpmFinder": .mpmFinder
-				default:
-					fatalError("TODO: throw")
-			}
-			
-			result.insert(newProcessor)
+		// TODO: ff1/ffc processors
+		if cli.exportVivosaurModels {
+			result.insert(.exportVivosaurModels)
+		}
+		
+		if cli.exportModels {
+			result.insert(.exportModels)
+		}
+		
+		if cli.exportSprites {
+			result.insert(.exportSprites)
+		}
+		
+		if cli.exportImages {
+			result.insert(.exportImages)
 		}
 		
 		if cli.dexDialogueLabeller {
@@ -57,16 +60,16 @@ extension Set<Processor> {
 			result.insert(.dexBlockLabeller)
 		}
 		
-		if cli.dbsNameLabeller {
-			result.insert(.dbsNameLabeller)
+		if cli.battleFighterNameLabeller {
+			result.insert(.battleFighterNameLabeller)
 		}
 		
 		if cli.ffcCreatureLabeller {
 			result.insert(.ffcCreatureLabeller)
 		}
 		
-		if cli.hmlNameLabeller {
-			result.insert(.hmlNameLabeller)
+		if cli.maskNameLabeller {
+			result.insert(.maskNameLabeller)
 		}
 		
 		if cli.keyItemLabeller {

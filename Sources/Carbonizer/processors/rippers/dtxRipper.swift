@@ -1,4 +1,4 @@
-func dtxRipperF(
+func textRipperF(
 	_ dtx: inout DTX.Unpacked,
 	at path: [String],
 	in environment: inout Processor.Environment,

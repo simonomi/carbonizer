@@ -49,7 +49,7 @@ func makeFile(
 	data: Datastream,
 	configuration: Configuration
 ) throws -> any FileSystemObject {
-	if configuration.fileTypes.contains("NDS"), name.hasSuffix(NDS.Packed.fileExtension) {
+	if name.hasSuffix(NDS.Packed.fileExtension) {
 		return NDS.Packed(
 			name: String(name.dropLast(NDS.Packed.fileExtension.count)),
 			binary: try data.read(NDS.Packed.Binary.self)

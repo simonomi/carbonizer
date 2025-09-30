@@ -18,18 +18,21 @@ struct CLIConfiguration : Sendable {
 	var onlyUnpack: [Glob]
 	var skipUnpacking: [Glob]
 	
-	var experimental: ExperimentalOptions
+	var hotReloading: Bool
 	
-	// TODO: rename processors, split into 'processors' section, make hotreloading stable
-	struct ExperimentalOptions {
-		var hotReloading: Bool
-		var postProcessors: [String]
+	var processors: Processors
+	
+	struct Processors {
+		var exportVivosaurModels: Bool
+		var exportModels: Bool
+		var exportSprites: Bool
+		var exportImages: Bool
 		var dexDialogueLabeller: Bool
 		var dexDialogueSaver: Bool
 		var dexBlockLabeller: Bool
-		var dbsNameLabeller: Bool
+		var battleFighterNameLabeller: Bool
 		var ffcCreatureLabeller: Bool
-		var hmlNameLabeller: Bool
+		var maskNameLabeller: Bool
 		var keyItemLabeller: Bool
 		var mapLabeller: Bool
 		var museumLabeller: Bool
@@ -88,12 +91,12 @@ struct CLIConfiguration : Sendable {
 			// so you need to select which game is being run on
 			"game": "ff1", // ff1, ffc
 			
-			// basically required for anything useful: NDS, MAR
+			// basically required for anything useful: MAR
 			//
 			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MPM, MMS, MPM 
 			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
-			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBA", "DBS", "DBT", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "NDS", "RLS", "SHP"],
-			// "fileTypes": ["_match", "DCL", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MMS", "MPM", "NDS"], // ffc-compatible
+			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBA", "DBS", "DBT", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "RLS", "SHP"],
+			// "fileTypes": ["_match", "DCL", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MMS", "MPM"], // ffc-compatible
 			
 			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
 			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
@@ -104,67 +107,61 @@ struct CLIConfiguration : Sendable {
 			"onlyUnpack": [],
 			"skipUnpacking": [],
 			
-			"experimental": {
-				"hotReloading": false, // macOS only
+			"hotReloading": false, // macOS only
+			
+			"processors": {
+				// extract vivosaur 3D model files
+				// required file types: MAR, 3CL
+				"exportVivosaurModels": false,
 				
-				// 3clFinder: extract vivosaur 3D model files
-				//            make sure to enable the MAR and 3CL file type
-				// mm3Finder: extract non-vivosaur 3D model files
-				//            make sure to enable the MAR and MM3 file type
-				// mmsFinder: extract sprites (motion folder)
-				//            make sure to enable the MAR and MMS file type
-				// mpmFinder: extract images (image folder)
-				//            make sure to enable the MAR and MPM file type
-				//
-				// NOTE: mmsFinder and mpmFinder are temporarily broken,
-				// trying to use them will crash carbonizer 
-				"postProcessors": [],
+				// extract non-vivosaur 3D model files
+				// required file types: MAR, MM3
+				"exportModels": false,
+				
+				// extract sprites (motion folder)    *temporarily broken, do not use*
+				// required file types: MAR, MMS
+				// "exportSprites": false,
+				
+				// extract images (image folder)    *temporarily broken, do not use*
+				// required file types: MAR, MPM
+				// "exportImages": false,
 				
 				// adds comments to DEX files that show the dialogue used in a given command
-				//
-				// make sure to enable the MAR, DEX, and DMG file types
+				// required file types: MAR, DEX, DMG
 				"dexDialogueLabeller": false,
 				
 				// allows editing the comments made by dexDialogueLabeller, which will be
 				// saved to the correct MSG file. new lines of dialogue cannot be added
-				//
-				// make sure to enable the MAR, DEX, and DMG file types 
+				// required file types: MAR, DEX, DMG 
 				"dexDialogueSaver": false,
 				
 				// labels the blocks of commands in DEX files with their block number. this number
 				// is used by DEP files to control when a block triggers
-				//
-				// make sure to enable the MAR, DEX, and DEP file types
+				// required file types: MAR, DEX, DEP
 				"dexBlockLabeller": false,
 				
 				// adds labels for the names of fighters in DBS files (battle folder)
-				//
-				// make sure to enable the MAR, DBS, and DTX file types
-				"dbsNameLabeller": false,
+				// required file types: MAR, DBS, DTX
+				"battleFighterNameLabeller": false,
 				
 				// adds labels for the names of vivosaurs in creature_defs
-				//
-				// make sure to enable the MAR, DCL, and DTX file types
+				// required file types: MAR, DCL, DTX
 				"ffcCreatureLabeller": false,
 				
 				// adds labels for the names of masks in `etc/headmask_defs`
-				//
-				// make sure to enable the MAR, HML, and DTX file types
-				"hmlNameLabeller": false,
+				// required file types: MAR, HML, DTX
+				"maskNameLabeller": false,
 				
 				// adds labels for the text in `etc/keyitem_defs`
-				//
-				// make sure to enable the MAR, KIL, and DTX file types
+				// required file types: MAR, KIL, DTX
 				"keyItemLabeller": false,
 				
 				// adds labels for the names of maps in MAP files (`map/m/` folder)
-				//
-				// make sure to enable the MAR, MAP, and DTX file types
+				// required file types: MAR, MAP, DTX
 				"mapLabeller": false,
 				
 				// adds labels for the descriptions in `etc/museum_defs`
-				//
-				// make sure to enable the MAR, DML, and DTX file types
+				// required file types: MAR, DML, DTX
 				"museumLabeller": false
 			}
 		}
@@ -178,7 +175,7 @@ struct CLIConfiguration : Sendable {
 	
 extension CLIConfiguration: Decodable {
 	enum CodingKeys: CodingKey {
-		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, game, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, experimental
+		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, game, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, hotReloading, processors
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -188,66 +185,72 @@ extension CLIConfiguration: Decodable {
 		lazy var fallback = Self.defaultConfiguration
 		
 		compressionMode =  try container.decodeIfPresent(CompressionMode.self,     forKey: .compressionMode) ??
-		fallback.compressionMode
+			fallback.compressionMode
 		inputFiles =       try container.decodeIfPresent([String].self,            forKey: .inputFiles) ??
-		fallback.inputFiles
+			fallback.inputFiles
 		outputFolder =     try container.decodeIfPresent(String.self,              forKey: .outputFolder) ??
-		nil
+			fallback.outputFolder
 		overwriteOutput =  try container.decodeIfPresent(Bool.self,                forKey: .overwriteOutput) ??
-		fallback.overwriteOutput
+			fallback.overwriteOutput
 		showProgress =     try container.decodeIfPresent(Bool.self,                forKey: .showProgress) ??
-		fallback.showProgress
+			fallback.showProgress
 		keepWindowOpen =   try container.decodeIfPresent(KeepWindowOpen.self,      forKey: .keepWindowOpen) ??
-		fallback.keepWindowOpen
+			fallback.keepWindowOpen
 		useColor =         try container.decodeIfPresent(Bool.self,                forKey: .useColor) ??
-		fallback.useColor
+			fallback.useColor
 		game =             try container.decodeIfPresent(Game.self,                forKey: .game) ??
-		fallback.game
+			fallback.game
 		externalMetadata = try container.decodeIfPresent(Bool.self,                forKey: .externalMetadata) ??
-		fallback.externalMetadata
+			fallback.externalMetadata
 		fileTypes =        try container.decodeIfPresent(Set<String>.self,         forKey: .fileTypes) ??
-		fallback.fileTypes
+			fallback.fileTypes
 		onlyUnpack =       try container.decodeIfPresent([Glob].self,              forKey: .onlyUnpack) ??
-		fallback.onlyUnpack
+			fallback.onlyUnpack
 		skipUnpacking =    try container.decodeIfPresent([Glob].self,              forKey: .skipUnpacking) ??
-		fallback.skipUnpacking
-		experimental =     try container.decodeIfPresent(ExperimentalOptions.self, forKey: .experimental) ??
-		fallback.experimental
+			fallback.skipUnpacking
+		hotReloading =     try container.decodeIfPresent(Bool.self,                forKey: .hotReloading) ??
+			fallback.hotReloading
+		processors =       try container.decodeIfPresent(Processors.self,          forKey: .processors) ??
+			fallback.processors
 	}
 }
 
-extension CLIConfiguration.ExperimentalOptions: Decodable {
+extension CLIConfiguration.Processors: Decodable {
 	enum CodingKeys: CodingKey {
-		case hotReloading, postProcessors, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case exportVivosaurModels, exportModels, exportSprites, exportImages, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 		
 		// this is lazy to prevent infinite recursion
-		lazy var fallback = CLIConfiguration.defaultConfiguration.experimental
+		lazy var fallback = CLIConfiguration.defaultConfiguration.processors
 		
-		hotReloading =        try container.decodeIfPresent(Bool.self,     forKey: .hotReloading) ??
-			fallback.hotReloading
-		postProcessors =      try container.decodeIfPresent([String].self, forKey: .postProcessors) ??
-			fallback.postProcessors
-		dexDialogueLabeller = try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueLabeller) ??
+		exportVivosaurModels = try container.decodeIfPresent(Bool.self,     forKey: .exportVivosaurModels) ??
+			fallback.exportVivosaurModels
+		exportModels =         try container.decodeIfPresent(Bool.self,     forKey: .exportModels) ??
+			fallback.exportModels
+		exportSprites =        try container.decodeIfPresent(Bool.self,     forKey: .exportSprites) ??
+			fallback.exportSprites
+		exportImages =         try container.decodeIfPresent(Bool.self,     forKey: .exportImages) ??
+			fallback.exportImages
+		dexDialogueLabeller =  try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueLabeller) ??
 			fallback.dexDialogueLabeller
-		dexDialogueSaver =    try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueSaver) ??
+		dexDialogueSaver =     try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueSaver) ??
 			fallback.dexDialogueSaver
-		dexBlockLabeller =    try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
+		dexBlockLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
 			fallback.dexBlockLabeller
-		dbsNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
-			fallback.dbsNameLabeller
-		ffcCreatureLabeller = try container.decodeIfPresent(Bool.self,     forKey: .ffcCreatureLabeller) ??
+		battleFighterNameLabeller =      try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
+			fallback.battleFighterNameLabeller
+		ffcCreatureLabeller =  try container.decodeIfPresent(Bool.self,     forKey: .ffcCreatureLabeller) ??
 			fallback.ffcCreatureLabeller
-		hmlNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .hmlNameLabeller) ??
-			fallback.hmlNameLabeller
-		keyItemLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .keyItemLabeller) ??
+		maskNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .maskNameLabeller) ??
+			fallback.maskNameLabeller
+		keyItemLabeller =      try container.decodeIfPresent(Bool.self,     forKey: .keyItemLabeller) ??
 			fallback.keyItemLabeller
-		mapLabeller =         try container.decodeIfPresent(Bool.self,     forKey: .mapLabeller) ??
+		mapLabeller =          try container.decodeIfPresent(Bool.self,     forKey: .mapLabeller) ??
 			fallback.mapLabeller
-		museumLabeller =      try container.decodeIfPresent(Bool.self,     forKey: .museumLabeller) ??
+		museumLabeller =       try container.decodeIfPresent(Bool.self,     forKey: .museumLabeller) ??
 			fallback.museumLabeller
 	}
 }

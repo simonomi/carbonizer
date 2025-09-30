@@ -85,7 +85,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 			for filePath in filePaths {
 				let outputFolder = cliConfiguration.outputFolder.map(URL.fromFilePath) ?? filePath.deletingLastPathComponent()
 				
-				if cliConfiguration.experimental.hotReloading {
+				if cliConfiguration.hotReloading {
 					try await Carbonizer.monitor(
 						filePath,
 						into: outputFolder,

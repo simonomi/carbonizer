@@ -1,70 +1,67 @@
 public enum Processor: String, Hashable, Sendable {
-	// TODO: give these all nicer names
-	case tclFinder, mm3Finder, mmsFinder, mpmFinder, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+	case exportVivosaurModels, exportModels, exportSprites, exportImages, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	
 	var name: String { rawValue }
 	
 	var shouldRunWhen: PackOrUnpack {
 		switch self {
-			case .tclFinder:           .unpack
-			case .mm3Finder:           .unpack
-			case .mmsFinder:           .unpack
-			case .mpmFinder:           .unpack
-			case .dexDialogueLabeller: .unpack
-			case .dexDialogueSaver:    .pack
-			case .dexBlockLabeller:    .unpack
-			case .dbsNameLabeller:     .unpack
-			case .ffcCreatureLabeller: .unpack
-			case .hmlNameLabeller:     .unpack
-			case .keyItemLabeller:     .unpack
-			case .mapLabeller:         .unpack
-			case .museumLabeller:      .unpack
+			case .exportVivosaurModels:      .unpack
+			case .exportModels:              .unpack
+			case .exportSprites:             .unpack
+			case .exportImages:              .unpack
+			case .dexDialogueLabeller:       .unpack
+			case .dexDialogueSaver:          .pack
+			case .dexBlockLabeller:          .unpack
+			case .battleFighterNameLabeller: .unpack
+			case .ffcCreatureLabeller:       .unpack
+			case .maskNameLabeller:          .unpack
+			case .keyItemLabeller:           .unpack
+			case .mapLabeller:               .unpack
+			case .museumLabeller:            .unpack
 		}
 	}
 	
 	var stages: [Stage] {
 		switch self {
-			case .tclFinder:           [.tclRipper, .modelReparser, .textureExporter, .modelExporter]
-			case .mm3Finder:           [.mm3Ripper, .modelReparser, .textureExporter, .modelExporter]
-			case .mmsFinder:           todo() // TODO: everything
-			case .mpmFinder:           todo() // TODO: everything
-			case .dexDialogueLabeller: [.dmgRipper, .dexDialogueLabeller]
-			case .dexDialogueSaver:    [.dexDialogueRipper, .dexDialogueSaver]
-			case .dexBlockLabeller:    [.eventIDRipper, .dexBlockLabeller]
-			case .dbsNameLabeller:     [.dtxRipper, .dbsNameLabeller]
-			case .ffcCreatureLabeller: [.ffcTextRipper, .ffcCreatureLabeller]
-			case .hmlNameLabeller:     [.dtxRipper, .hmlNameLabeller]
-			case .keyItemLabeller:     [.dtxRipper, .keyItemLabeller]
-			case .mapLabeller:         [.dtxRipper, .mapLabeller]
-			case .museumLabeller:      [.dtxRipper, .museumLabeller]
+			case .exportVivosaurModels:      [.tclRipper, .modelReparser, .textureExporter, .modelExporter]
+			case .exportModels:              [.mm3Ripper, .modelReparser, .textureExporter, .modelExporter]
+			case .exportSprites:             todo() // TODO: everything
+			case .exportImages:              todo() // TODO: everything
+			case .dexDialogueLabeller:       [.dialogueRipper, .dexDialogueLabeller]
+			case .dexDialogueSaver:          [.dexDialogueRipper, .dexDialogueSaver]
+			case .dexBlockLabeller:          [.eventIDRipper, .dexBlockLabeller]
+			case .battleFighterNameLabeller: [.textRipper, .dbsNameLabeller]
+			case .ffcCreatureLabeller:       [.ffcTextRipper, .ffcCreatureLabeller]
+			case .maskNameLabeller:          [.textRipper, .hmlNameLabeller]
+			case .keyItemLabeller:           [.textRipper, .keyItemLabeller]
+			case .mapLabeller:               [.textRipper, .mapLabeller]
+			case .museumLabeller:            [.textRipper, .museumLabeller]
 		}
 	}
 	
-	// TODO: define these on stages and just join them here ?
 	var requiredFileTypes: [String] {
 		switch self {
-			case .tclFinder:           ["MAR", "3CL"]
-			case .mm3Finder:           ["MAR", "MM3"]
-			case .mmsFinder:           todo()
-			case .mpmFinder:           todo()
-			case .dexDialogueLabeller: ["MAR", "DMG", "DEX"]
-			case .dexDialogueSaver:    ["MAR", "DEX", "DMG"]
-			case .dexBlockLabeller:    ["MAR", "DEP", "DEX"]
-			case .dbsNameLabeller:     ["MAR", "DTX", "DBS"]
-			case .ffcCreatureLabeller: ["MAR", "DTX", "DCL"]
-			case .hmlNameLabeller:     ["MAR", "DTX", "HML"]
-			case .keyItemLabeller:     ["MAR", "DTX", "KIL"]
-			case .mapLabeller:         ["MAR", "DTX", "MAP"]
-			case .museumLabeller:      ["MAR", "DTX", "DML"]
+			case .exportVivosaurModels:      ["MAR", "3CL"]
+			case .exportModels:              ["MAR", "MM3"]
+			case .exportSprites:             todo()
+			case .exportImages:              todo()
+			case .dexDialogueLabeller:       ["MAR", "DMG", "DEX"]
+			case .dexDialogueSaver:          ["MAR", "DEX", "DMG"]
+			case .dexBlockLabeller:          ["MAR", "DEP", "DEX"]
+			case .battleFighterNameLabeller: ["MAR", "DTX", "DBS"]
+			case .ffcCreatureLabeller:       ["MAR", "DTX", "DCL"]
+			case .maskNameLabeller:          ["MAR", "DTX", "HML"]
+			case .keyItemLabeller:           ["MAR", "DTX", "KIL"]
+			case .mapLabeller:               ["MAR", "DTX", "MAP"]
+			case .museumLabeller:            ["MAR", "DTX", "DML"]
 		}
 	}
 	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dmgRipper, dtxRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper
+		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper
 		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
 		case modelExporter, textureExporter
 		
-		// TODO: instead of calling runProcessor, just return a ProcessorFunction?
 		func run(
 			on file: inout any FileSystemObject,
 			in environment: inout Environment,
@@ -79,17 +76,17 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
-				case .dmgRipper:
+				case .dialogueRipper:
 					try file.runProcessor(
-						dmgRipperF,
+						dialogueRipperF,
 						on: "msg/**",
 						in: &environment,
 						at: [],
 						configuration: configuration
 					)
-				case .dtxRipper:
+				case .textRipper:
 					try file.runProcessor(
-						dtxRipperF,
+						textRipperF,
 						on: "text/japanese",
 						in: &environment,
 						at: [],

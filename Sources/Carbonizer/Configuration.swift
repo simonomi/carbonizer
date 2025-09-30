@@ -96,7 +96,7 @@ public struct Configuration: Sendable {
 		self.processors = processors
 		self.logHandler = logHandler
 		
-		let allowedInputFileTypes = Self.fileTypes(for: game).keys + ["MAR", "NDS", "_match"]
+		let allowedInputFileTypes = Self.fileTypes(for: game).keys + ["MAR", "_match"]
 		
 		guard fileTypes.allSatisfy(allowedInputFileTypes.contains) else {
 			throw UnsupportedFileTypes(
