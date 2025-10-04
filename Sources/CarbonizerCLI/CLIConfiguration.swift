@@ -120,11 +120,11 @@ struct CLIConfiguration : Sendable {
 				
 				// extract sprites (motion folder)    *temporarily broken, do not use*
 				// required file types: MAR, MMS
-				// "exportSprites": false,
+				"exportSprites": false,
 				
 				// extract images (image folder)    *temporarily broken, do not use*
 				// required file types: MAR, MPM
-				// "exportImages": false,
+				"exportImages": false,
 				
 				// adds comments to DEX files that show the dialogue used in a given command
 				// required file types: MAR, DEX, DMG
@@ -184,40 +184,40 @@ extension CLIConfiguration: Decodable {
 		// this is lazy to prevent infinite recursion
 		lazy var fallback = Self.defaultConfiguration
 		
-		compressionMode =  try container.decodeIfPresent(CompressionMode.self,     forKey: .compressionMode) ??
+		compressionMode =  try container.decodeIfPresent(CompressionMode.self, forKey: .compressionMode) ??
 			fallback.compressionMode
-		inputFiles =       try container.decodeIfPresent([String].self,            forKey: .inputFiles) ??
+		inputFiles =       try container.decodeIfPresent([String].self,        forKey: .inputFiles) ??
 			fallback.inputFiles
-		outputFolder =     try container.decodeIfPresent(String.self,              forKey: .outputFolder) ??
-			fallback.outputFolder
-		overwriteOutput =  try container.decodeIfPresent(Bool.self,                forKey: .overwriteOutput) ??
+		// since outputFolder is nil, having a fallback crashes
+		outputFolder =     try container.decodeIfPresent(String.self,          forKey: .outputFolder)
+		overwriteOutput =  try container.decodeIfPresent(Bool.self,            forKey: .overwriteOutput) ??
 			fallback.overwriteOutput
-		showProgress =     try container.decodeIfPresent(Bool.self,                forKey: .showProgress) ??
+		showProgress =     try container.decodeIfPresent(Bool.self,            forKey: .showProgress) ??
 			fallback.showProgress
-		keepWindowOpen =   try container.decodeIfPresent(KeepWindowOpen.self,      forKey: .keepWindowOpen) ??
+		keepWindowOpen =   try container.decodeIfPresent(KeepWindowOpen.self,  forKey: .keepWindowOpen) ??
 			fallback.keepWindowOpen
-		useColor =         try container.decodeIfPresent(Bool.self,                forKey: .useColor) ??
+		useColor =         try container.decodeIfPresent(Bool.self,            forKey: .useColor) ??
 			fallback.useColor
-		game =             try container.decodeIfPresent(Game.self,                forKey: .game) ??
+		game =             try container.decodeIfPresent(Game.self,            forKey: .game) ??
 			fallback.game
-		externalMetadata = try container.decodeIfPresent(Bool.self,                forKey: .externalMetadata) ??
+		externalMetadata = try container.decodeIfPresent(Bool.self,            forKey: .externalMetadata) ??
 			fallback.externalMetadata
-		fileTypes =        try container.decodeIfPresent(Set<String>.self,         forKey: .fileTypes) ??
+		fileTypes =        try container.decodeIfPresent(Set<String>.self,     forKey: .fileTypes) ??
 			fallback.fileTypes
-		onlyUnpack =       try container.decodeIfPresent([Glob].self,              forKey: .onlyUnpack) ??
+		onlyUnpack =       try container.decodeIfPresent([Glob].self,          forKey: .onlyUnpack) ??
 			fallback.onlyUnpack
-		skipUnpacking =    try container.decodeIfPresent([Glob].self,              forKey: .skipUnpacking) ??
+		skipUnpacking =    try container.decodeIfPresent([Glob].self,          forKey: .skipUnpacking) ??
 			fallback.skipUnpacking
-		hotReloading =     try container.decodeIfPresent(Bool.self,                forKey: .hotReloading) ??
+		hotReloading =     try container.decodeIfPresent(Bool.self,            forKey: .hotReloading) ??
 			fallback.hotReloading
-		processors =       try container.decodeIfPresent(Processors.self,          forKey: .processors) ??
+		processors =       try container.decodeIfPresent(Processors.self,      forKey: .processors) ??
 			fallback.processors
 	}
 }
 
 extension CLIConfiguration.Processors: Decodable {
 	enum CodingKeys: CodingKey {
-		case exportVivosaurModels, exportModels, exportSprites, exportImages, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, dbsNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case exportVivosaurModels, exportModels, exportSprites, exportImages, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -226,31 +226,31 @@ extension CLIConfiguration.Processors: Decodable {
 		// this is lazy to prevent infinite recursion
 		lazy var fallback = CLIConfiguration.defaultConfiguration.processors
 		
-		exportVivosaurModels = try container.decodeIfPresent(Bool.self,     forKey: .exportVivosaurModels) ??
+		exportVivosaurModels =      try container.decodeIfPresent(Bool.self, forKey: .exportVivosaurModels) ??
 			fallback.exportVivosaurModels
-		exportModels =         try container.decodeIfPresent(Bool.self,     forKey: .exportModels) ??
+		exportModels =              try container.decodeIfPresent(Bool.self, forKey: .exportModels) ??
 			fallback.exportModels
-		exportSprites =        try container.decodeIfPresent(Bool.self,     forKey: .exportSprites) ??
+		exportSprites =             try container.decodeIfPresent(Bool.self, forKey: .exportSprites) ??
 			fallback.exportSprites
-		exportImages =         try container.decodeIfPresent(Bool.self,     forKey: .exportImages) ??
+		exportImages =              try container.decodeIfPresent(Bool.self, forKey: .exportImages) ??
 			fallback.exportImages
-		dexDialogueLabeller =  try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueLabeller) ??
+		dexDialogueLabeller =       try container.decodeIfPresent(Bool.self, forKey: .dexDialogueLabeller) ??
 			fallback.dexDialogueLabeller
-		dexDialogueSaver =     try container.decodeIfPresent(Bool.self,     forKey: .dexDialogueSaver) ??
+		dexDialogueSaver =          try container.decodeIfPresent(Bool.self, forKey: .dexDialogueSaver) ??
 			fallback.dexDialogueSaver
-		dexBlockLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .dexBlockLabeller) ??
+		dexBlockLabeller =          try container.decodeIfPresent(Bool.self, forKey: .dexBlockLabeller) ??
 			fallback.dexBlockLabeller
-		battleFighterNameLabeller =      try container.decodeIfPresent(Bool.self,     forKey: .dbsNameLabeller) ??
+		battleFighterNameLabeller = try container.decodeIfPresent(Bool.self, forKey: .battleFighterNameLabeller) ??
 			fallback.battleFighterNameLabeller
-		ffcCreatureLabeller =  try container.decodeIfPresent(Bool.self,     forKey: .ffcCreatureLabeller) ??
+		ffcCreatureLabeller =       try container.decodeIfPresent(Bool.self, forKey: .ffcCreatureLabeller) ??
 			fallback.ffcCreatureLabeller
-		maskNameLabeller =     try container.decodeIfPresent(Bool.self,     forKey: .maskNameLabeller) ??
+		maskNameLabeller =          try container.decodeIfPresent(Bool.self, forKey: .maskNameLabeller) ??
 			fallback.maskNameLabeller
-		keyItemLabeller =      try container.decodeIfPresent(Bool.self,     forKey: .keyItemLabeller) ??
+		keyItemLabeller =           try container.decodeIfPresent(Bool.self, forKey: .keyItemLabeller) ??
 			fallback.keyItemLabeller
-		mapLabeller =          try container.decodeIfPresent(Bool.self,     forKey: .mapLabeller) ??
+		mapLabeller =               try container.decodeIfPresent(Bool.self, forKey: .mapLabeller) ??
 			fallback.mapLabeller
-		museumLabeller =       try container.decodeIfPresent(Bool.self,     forKey: .museumLabeller) ??
+		museumLabeller =            try container.decodeIfPresent(Bool.self, forKey: .museumLabeller) ??
 			fallback.museumLabeller
 	}
 }

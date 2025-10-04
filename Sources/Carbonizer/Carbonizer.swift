@@ -10,6 +10,7 @@ import Foundation
 // - make warning for using ffc settings for ff1 and vice versa
 // - add warning for MAR/NDS being disabled
 // - actually remove NDS config option
+// - warn for extra unused config variables
 
 public enum Carbonizer {
 	public static func auto(

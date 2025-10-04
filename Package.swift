@@ -52,7 +52,8 @@ let package = Package(
 //			swiftSettings: [
 //				.interoperabilityMode(.Cxx)
 //			]
-		)
+		),
+		.testTarget(name: "CarbonizerCLITests", dependencies: ["CarbonizerCLI"])
 	],
 	cxxLanguageStandard: .gnucxx17
 )

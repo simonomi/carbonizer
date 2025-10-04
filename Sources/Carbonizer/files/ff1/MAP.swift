@@ -230,7 +230,10 @@ enum MAP {
 		
 		@BinaryConvertible
 		struct BreakableRock { // map/g
-			var unknown1: Int32
+			var unknown1: Int32 // often 0, otherwise seems like an index?
+			                    // not dialogue, not event
+			                    // like in the ~5000s range
+			                    // a flag ?
 			var spawnCount: Int32
 			var entityID: Int32
 			var rotation: FixedPoint1616
@@ -249,8 +252,8 @@ enum MAP {
 			
 			@BinaryConvertible
 			struct Thing {
-				var unknown1: Int32
-				var unknown2: Int32
+				var unknown1: FixedPoint2012
+				var unknown2: FixedPoint2012
 			}
 		}
 	}
@@ -378,8 +381,8 @@ enum MAP {
 			var things: [Thing]
 			
 			struct Thing: Codable {
-				var unknown1: Int32
-				var unknown2: Int32
+				var unknown1: Double
+				var unknown2: Double
 			}
 		}
 	}
@@ -606,8 +609,8 @@ extension MAP.Packed.BreakableRock {
 
 extension MAP.Packed.BreakableRock.Thing {
 	init(_ unpacked: MAP.Unpacked.BreakableRock.Thing) {
-		unknown1 = unpacked.unknown1
-		unknown2 = unpacked.unknown2
+		unknown1 = FixedPoint2012(unpacked.unknown1)
+		unknown2 = FixedPoint2012(unpacked.unknown2)
 	}
 }
 
@@ -763,7 +766,7 @@ extension MAP.Unpacked.BreakableRock {
 
 extension MAP.Unpacked.BreakableRock.Thing {
 	init(_ packed: MAP.Packed.BreakableRock.Thing) {
-		unknown1 = packed.unknown1
-		unknown2 = packed.unknown2
+		unknown1 = Double(packed.unknown1)
+		unknown2 = Double(packed.unknown2)
 	}
 }

@@ -3,13 +3,6 @@ import Foundation
 
 @testable import Carbonizer
 
-//@Test
-//func defaultConfigurationIsValid() throws {
-//	_ = try Configuration(
-//		decoding: Configuration.defaultConfigurationString
-//	)
-//}
-
 @Suite
 struct Globs {
 	// examples: "text/japanese", "episode/*", "model/**", "**/arc*"
