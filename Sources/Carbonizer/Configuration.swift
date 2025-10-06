@@ -14,33 +14,30 @@ public struct Configuration: Sendable {
 	
 	var cache: Cache
 	
-	var logHandler: (@Sendable (String) -> Void)?
+	var logHandler: (@Sendable (Log) -> Void)?
 	
 	public enum Game: Sendable {
 		case ff1, ffc
 	}
 	
-	public struct ExperimentalOptions: Sendable {
-		var postProcessors: [String]
-		var dexDialogueLabeller: Bool
-		var dexDialogueSaver: Bool
-		var dexBlockLabeller: Bool
-		var dbsNameLabeller: Bool
-		var hmlNameLabeller: Bool
-		var keyItemLabeller: Bool
-		var mapLabeller: Bool
-		var museumLabeller: Bool
+	public struct Log {
+		public var kind: Kind
+		var _message: String
 		
-		public init(postProcessors: [String], dexDialogueLabeller: Bool, dexDialogueSaver: Bool, dexBlockLabeller: Bool, dbsNameLabeller: Bool, hmlNameLabeller: Bool, keyItemLabeller: Bool, mapLabeller: Bool, museumLabeller: Bool) {
-			self.postProcessors = postProcessors
-			self.dexDialogueLabeller = dexDialogueLabeller
-			self.dexDialogueSaver = dexDialogueSaver
-			self.dexBlockLabeller = dexBlockLabeller
-			self.dbsNameLabeller = dbsNameLabeller
-			self.hmlNameLabeller = hmlNameLabeller
-			self.keyItemLabeller = keyItemLabeller
-			self.mapLabeller = mapLabeller
-			self.museumLabeller = museumLabeller
+		public func message(withColor: Bool) -> String {
+			if withColor {
+				_message
+			} else {
+				_message.removingANSICodes()
+			}
+		}
+		
+		public enum Kind {
+			/// notable points in time, like when a new stage of work is started
+			case checkpoint
+			/// ongoing work, like which file is being read/decompressed/written
+			case transient
+			case warning
 		}
 	}
 	
@@ -86,7 +83,7 @@ public struct Configuration: Sendable {
 		}
 	}
 	
-	public init(overwriteOutput: Bool, game: Game, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], processors: Set<Processor>, logHandler: (@Sendable (String) -> Void)?) throws {
+	public init(overwriteOutput: Bool, game: Game, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], processors: Set<Processor>, logHandler: (@Sendable (Log) -> Void)?) throws {
 		self.overwriteOutput = overwriteOutput
 		self.game = game
 		self.externalMetadata = externalMetadata
@@ -109,14 +106,14 @@ public struct Configuration: Sendable {
 		cache = Cache(inputFileTypes: fileTypes, game: game)
 	}
 	
-	func log(_ items: Any...) {
+	func log(_ kind: Log.Kind, _ items: Any...) {
 		guard let logHandler else { return }
 		
-		logHandler(
-			items
-				.map { String(describing: $0) }
-				.joined(separator: " ")
-		)
+		let message = items
+			.map { String(describing: $0) }
+			.joined(separator: " ")
+		
+		logHandler(Log(kind: kind, _message: message))
 	}
 	
 	// when adding a new stable filetype:

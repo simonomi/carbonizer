@@ -8,8 +8,7 @@ import Foundation
 // - make reading (and writing?) use way fewer filesystem calls
 //   - enumerator
 // - make warning for using ffc settings for ff1 and vice versa
-// - add warning for MAR/NDS being disabled
-// - actually remove NDS config option
+// - add warning for MAR being disabled
 // - warn for extra unused config variables
 
 public enum Carbonizer {

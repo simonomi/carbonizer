@@ -30,8 +30,7 @@ extension Carbonizer {
 		let readStart = Date.now
 #endif
 		
-		// TODO: add priority to logs for things like this
-		configuration.log("reading", filePath.path(percentEncoded: false))
+		configuration.log(.checkpoint, "reading", filePath.path(percentEncoded: false))
 		
 		guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration),
 		      (file is NDS.Unpacked || file is NDS.Packed)
@@ -71,12 +70,12 @@ extension Carbonizer {
 		
 		let savePath = file.savePath(in: outputFolder, with: configuration)
 		
-		configuration.log("writing to", savePath.path(percentEncoded: false))
+		configuration.log(.checkpoint, "writing to", savePath.path(percentEncoded: false))
 		
 		// TODO: instead of deleting then writing, write to temporary then swap ?
 		// if the swap fails, thats wasteful :/ (but should preserve data)
 		if configuration.overwriteOutput && savePath.exists() {
-			configuration.log("removing existing file")
+			configuration.log(.checkpoint, "removing existing file")
 			
 #if !IN_CI
 			let removeStart = Date.now

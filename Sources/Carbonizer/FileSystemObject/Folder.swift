@@ -14,7 +14,7 @@ func makeFolder(
 	let metadata = try Metadata(forItemAt: path)
 	if metadata?.skipFile == true { return nil }
 	
-	configuration.log("Reading", path.path(percentEncoded: false))
+	configuration.log(.transient, "Reading", path.path(percentEncoded: false))
 	
 	let contentPaths = try path.contents()
 	
@@ -71,7 +71,7 @@ extension Folder: FileSystemObject {
 		with configuration: Configuration
 	) throws {
 		let path = savePath(in: folder, with: configuration)
-		configuration.log("Writing", path.path(percentEncoded: false))
+		configuration.log(.transient, "Writing", path.path(percentEncoded: false))
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
 		
 		if let metadata {

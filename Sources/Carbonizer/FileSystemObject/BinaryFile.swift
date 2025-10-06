@@ -31,7 +31,7 @@ extension BinaryFile: FileSystemObject {
 		with configuration: Configuration
 	) throws {
 		let path = savePath(in: folder, with: configuration)
-		configuration.log("Writing", path.path(percentEncoded: false))
+		configuration.log(.transient, "Writing", path.path(percentEncoded: false))
 		
 		do {
 			// TODO: can this be removed?

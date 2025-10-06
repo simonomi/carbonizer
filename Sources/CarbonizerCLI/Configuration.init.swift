@@ -3,7 +3,7 @@ import Carbonizer
 extension Configuration {
 	init(
 		_ cliConfiguration: CLIConfiguration,
-		logHandler: (@Sendable (String) -> Void)?
+		logHandler: (@Sendable (Configuration.Log) -> Void)?
 	) throws {
 		try self.init(
 			overwriteOutput: cliConfiguration.overwriteOutput,

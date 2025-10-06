@@ -52,7 +52,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 			return
 		}
 		
-		let logHandler: (@Sendable (String) -> Void)?
+		let logHandler: (@Sendable (Configuration.Log) -> Void)?
 		if cliConfiguration.showProgress {
 			let inputTerminalWidth = terminalSize().width
 			let terminalWidth = if inputTerminalWidth == 0 {
@@ -62,9 +62,20 @@ struct CarbonizerCLI: AsyncParsableCommand {
 			}
 			
 			logHandler = {
-				// TODO: do these ansi codes work on windows cmd?
-				print($0.prefix(max(0, terminalWidth - 3)) + "...\(.clearToEndOfLine)", terminator: "\r")
-				fflush(stdout)
+				let message = $0.message(withColor: cliConfiguration.useColor)
+				
+				switch $0.kind {
+					case .checkpoint:
+						print(message)
+					case .transient:
+						let shortenedMessage = message.prefix(max(0, terminalWidth - 3))
+						// TODO: does this ansi code work on windows cmd?
+						print("\(shortenedMessage)...\(.clearToEndOfLine)", terminator: "\r")
+						fflush(stdout)
+					case .warning:
+						var standardError = FileHandle.standardError
+						print("\(.yellow, .bold)warning:\(.normal)", message, to: &standardError)
+				}
 			}
 		} else {
 			logHandler = nil
@@ -117,7 +128,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 		} catch {
 			var standardError = FileHandle.standardError
 			if cliConfiguration.useColor {
-				print("\(.red)error:\(.normal)", error, to: &standardError)
+				print("\(.red, .bold)error:\(.normal)", error, to: &standardError)
 			} else {
 				print("error:", String(describing: error).removingANSICodes(), to: &standardError)
 			}

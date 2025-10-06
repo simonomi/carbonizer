@@ -23,8 +23,7 @@ func modelExporterF(
 				let texture = mar.files[modelIndices.textureIndex].content as? Texture.Unpacked
 				
 				if texture == nil {
-					// TODO: log properly
-					print("warning: textures missing for \(modelIndices.modelName)")
+					configuration.log(.warning, "textures missing for \(modelIndices.modelName)")
 				}
 				
 				guard let animation = mar.files[modelIndices.animationIndex].content as? Animation.Unpacked else {
@@ -50,9 +49,8 @@ func modelExporterF(
 				
 				folder.contents.append(colladaFile)
 			} catch {
-				// TODO: log properly
-				print(path + [modelIndices.modelName])
-				print(error)
+				let location = "\(path + [modelIndices.modelName]):"
+				configuration.log(.warning, location, error)
 			}
 		}
 	}
