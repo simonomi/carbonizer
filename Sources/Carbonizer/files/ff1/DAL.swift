@@ -493,7 +493,7 @@ extension DAL.Unpacked.Attack.PrimaryEffect.Effect: Codable {
 				case "confusion": .confusion
 				default: throw DecodingError.dataCorrupted(
 					DecodingError.Context(
-						codingPath: [],
+						codingPath: decoder.codingPath,
 						debugDescription: "invalid no-argument primary attack type"
 					)
 				)
@@ -526,7 +526,7 @@ extension DAL.Unpacked.Attack.PrimaryEffect.Effect: Codable {
 					.quicken(evasionRaised: try container.decode(UInt8.self, forKey: .evasionRaised))
 				default: throw DecodingError.dataCorrupted(
 					DecodingError.Context(
-						codingPath: [],
+						codingPath: decoder.codingPath,
 						debugDescription: "invalid multi-argument primary attack type"
 					)
 				)
@@ -637,7 +637,7 @@ extension DAL.Unpacked.Attack.SecondaryEffect.Effect: Codable {
 				case "swapZones": .swapZones
 				default: throw DecodingError.dataCorrupted(
 					DecodingError.Context(
-						codingPath: [],
+						codingPath: decoder.codingPath,
 						debugDescription: "invalid no-argument secondary attack type"
 					)
 				)
@@ -665,7 +665,7 @@ extension DAL.Unpacked.Attack.SecondaryEffect.Effect: Codable {
 					.unused2(healingAmount: try container.decode(UInt16.self, forKey: .healingAmount))
 				default: throw DecodingError.dataCorrupted(
 					DecodingError.Context(
-						codingPath: [],
+						codingPath: decoder.codingPath,
 						debugDescription: "invalid multi-argument secondary attack type"
 					)
 				)

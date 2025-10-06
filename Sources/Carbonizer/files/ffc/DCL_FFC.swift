@@ -449,8 +449,39 @@ enum DCL_FFC {
 				case none, close, mid, long
 			}
 			
-			enum Team: CaseIterable {
-				case fireType, airType, earthType, waterType, neutralType, violent, group7, group8, group9, group10, group11, group12, group13, group14, group15, japanese, group17, group18, group19, cenozoic, group21, boney, zombie, poisonous, group25, group26, group27, group28, group29, dinaurians, feathered, unusedGroup32
+			enum Team: String, Codable, CaseIterable {
+				case fireType      = "fire-type (1)"
+				case airType       = "air-type (2)"
+				case earthType     = "earth-type (3)"
+				case waterType     = "water-type (4)"
+				case neutralType   = "neutral-type (5)"
+				case violent       = "violent (6)"
+				case group7        = "group7"
+				case group8        = "group8"
+				case group9        = "group9"
+				case group10       = "group10"
+				case group11       = "group11"
+				case group12       = "group12"
+				case group13       = "group13"
+				case group14       = "group14"
+				case group15       = "group15"
+				case japanese      = "japanese (16)"
+				case group17       = "group17"
+				case group18       = "group18"
+				case group19       = "group19"
+				case cenozoic      = "cenozoic"
+				case group21       = "group21"
+				case boney         = "boney (22)"
+				case zombie        = "zombie (23)"
+				case poisonous     = "poisonous (24)"
+				case group25       = "group25"
+				case group26       = "group26"
+				case group27       = "group27"
+				case group28       = "group28"
+				case group29       = "group29"
+				case dinaurians    = "dinaurians (30)"
+				case feathered     = "feathered (31)"
+				case unusedGroup32 = "unusedGroup32"
 			}
 			
 			struct Position: Codable {
@@ -1116,43 +1147,6 @@ extension [DCL_FFC.Unpacked.Vivosaur.Team] {
 	fileprivate init(_ packed: DCL_FFC.Packed.Vivosaur.Teams) {
 		self = DCL_FFC.Unpacked.Vivosaur.Team.allCases
 			.filter { packed.contains(DCL_FFC.Packed.Vivosaur.Teams($0)) }
-	}
-}
-
-extension DCL_FFC.Unpacked.Vivosaur.Team: Codable {
-	enum CodingKeys: String, CodingKey {
-		case fireType      = "fire-type (1)"
-		case airType       = "air-type (2)"
-		case earthType     = "earth-type (3)"
-		case waterType     = "water-type (4)"
-		case neutralType   = "neutral-type (5)"
-		case violent       = "violent (6)"
-		case group7        = "group7"
-		case group8        = "group8"
-		case group9        = "group9"
-		case group10       = "group10"
-		case group11       = "group11"
-		case group12       = "group12"
-		case group13       = "group13"
-		case group14       = "group14"
-		case group15       = "group15"
-		case japanese      = "japanese (16)"
-		case group17       = "group17"
-		case group18       = "group18"
-		case group19       = "group19"
-		case cenozoic      = "cenozoic"
-		case group21       = "group21"
-		case boney         = "boney (22)"
-		case zombie        = "zombie (23)"
-		case poisonous     = "poisonous (24)"
-		case group25       = "group25"
-		case group26       = "group26"
-		case group27       = "group27"
-		case group28       = "group28"
-		case group29       = "group29"
-		case dinaurians    = "dinaurians (30)"
-		case feathered     = "feathered (31)"
-		case unusedGroup32 = "unusedGroup32"
 	}
 }
 

@@ -390,8 +390,23 @@ enum DCL_FF1 {
 				var rank12Value: UInt8
 			}
 			
-			enum Team: CaseIterable {
-				case fireType, airType, earthType, waterType, neutralType, violent, group7, group8, group9, group10, group11, group12, group13, group14, group15, japanese
+			enum Team: String, Codable, CaseIterable {
+				case fireType    = "fire-type (1)"
+				case airType     = "air-type (2)"
+				case earthType   = "earth-type (3)"
+				case waterType   = "water-type (4)"
+				case neutralType = "neutral-type (5)"
+				case violent     = "violent (6)"
+				case group7      = "group7"
+				case group8      = "group8"
+				case group9      = "group9"
+				case group10     = "group10"
+				case group11     = "group11"
+				case group12     = "group12"
+				case group13     = "group13"
+				case group14     = "group14"
+				case group15     = "group15"
+				case japanese    = "japanese (16)"
 			}
 			
 			enum PassiveAbility {
@@ -745,27 +760,6 @@ extension [DCL_FF1.Unpacked.Vivosaur.Team] {
 	init(_ packed: DCL_FF1.Packed.Vivosaur.Teams) {
 		self = DCL_FF1.Unpacked.Vivosaur.Team.allCases
 			.filter { packed.contains(DCL_FF1.Packed.Vivosaur.Teams($0)) }
-	}
-}
-
-extension DCL_FF1.Unpacked.Vivosaur.Team: Codable {
-	enum CodingKeys: String, CodingKey {
-		case fireType      = "fire-type (1)"
-		case airType       = "air-type (2)"
-		case earthType     = "earth-type (3)"
-		case waterType     = "water-type (4)"
-		case neutralType   = "neutral-type (5)"
-		case violent       = "violent (6)"
-		case group7        = "group7"
-		case group8        = "group8"
-		case group9        = "group9"
-		case group10       = "group10"
-		case group11       = "group11"
-		case group12       = "group12"
-		case group13       = "group13"
-		case group14       = "group14"
-		case group15       = "group15"
-		case japanese      = "japanese (16)"
 	}
 }
 
