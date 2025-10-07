@@ -9,6 +9,8 @@ import Foundation
 //   - enumerator
 
 public enum Carbonizer {
+	static let version = "v2.18"
+	
 	public static func auto(
 		_ filePath: URL,
 		into outputFolder: URL,

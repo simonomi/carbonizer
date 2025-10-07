@@ -20,6 +20,8 @@ jobs:
         swift-version: "6.2"
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Check Version
+      run: grep -q "${{ github.ref_name }}" Sources/Carbonizer/Carbonizer.swift
     - name: Build
       run: >
         swift build -c release
@@ -45,6 +47,8 @@ jobs:
         swift-build: 6.2-RELEASE
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Check Version
+      run: grep -q "${{ github.ref_name }}" Sources/Carbonizer/Carbonizer.swift
     - name: Build
       run: >
         swift build -c release
@@ -78,6 +82,8 @@ jobs:
         swift-version: "6.2"
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Check Version
+      run: grep -q "${{ github.ref_name }}" Sources/Carbonizer/Carbonizer.swift
     - name: Build
       run: >
         swift build -c release
@@ -104,6 +110,8 @@ jobs:
         swift-version: "6.2"
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Check Version
+      run: grep -q "${{ github.ref_name }}" Sources/Carbonizer/Carbonizer.swift
     - name: Build
       run: >
         swift build -c release
