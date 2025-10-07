@@ -1,3 +1,5 @@
+import ANSICodes
+
 public struct InvalidRawValue<T: RawRepresentable>: Error {
 	var raw: T.RawValue
 	

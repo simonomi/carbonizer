@@ -469,7 +469,7 @@ enum DCL_FFC {
 				case group17       = "group17"
 				case group18       = "group18"
 				case group19       = "group19"
-				case cenozoic      = "cenozoic"
+				case cenozoic      = "cenozoic (20)"
 				case group21       = "group21"
 				case boney         = "boney (22)"
 				case zombie        = "zombie (23)"

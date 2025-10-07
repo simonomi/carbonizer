@@ -39,7 +39,7 @@ enum NDS {
 			var files: [Datastream]
 			
 			@BinaryConvertible
-			struct Header: Codable {
+			struct Header {
 				@Length(12)
 				var gameTitle: String
 				@Length(4)
@@ -139,7 +139,7 @@ enum NDS {
 	
 	struct Unpacked {
 		var name: String
-		var header: NDS.Packed.Binary.Header
+		var header: Header
 		
 		var arm9: Datastream
 		var arm9OverlayTable: [NDS.Packed.Binary.OverlayTableEntry]
@@ -155,6 +155,52 @@ enum NDS {
 //		var fileAllocationTable: [NDS.Packed.Binary.FileAllocationTableEntry]
 		
 		var contents: [any FileSystemObject]
+		
+		struct Header: Codable {
+			var gameTitle: String
+			var gamecode: String
+			var makercode: String
+			var unitcode: UInt8
+			var encryptionSeedSelect: UInt8
+			var deviceCapacity: UInt8
+			var reserved1: Data
+			var ndsRegion: UInt16
+			var romVersion: UInt8
+			var internalFlags: UInt8
+			var arm9Offset: UInt32
+			var arm9EntryAddress: UInt32
+			var arm9LoadAddress: UInt32
+			var arm9Size: UInt32
+			var arm7Offset: UInt32
+			var arm7EntryAddress: UInt32
+			var arm7LoadAddress: UInt32
+			var arm7Size: UInt32
+			var fileNameTableOffset: UInt32
+			var fileNameTableSize: UInt32
+			var fileAllocationTableOffset: UInt32
+			var fileAllocationTableSize: UInt32
+			var arm9OverlayOffset: UInt32
+			var arm9OverlaySize: UInt32
+			var arm7OverlayOffset: UInt32
+			var arm7OverlaySize: UInt32
+			var normalCardControlRegisterSettings: UInt32
+			var secureCardControlRegisterSettings: UInt32
+			var iconBannerOffset: UInt32
+			var secureAreaCRC: UInt16
+			var secureTransferTimeout: UInt16
+			var arm9Autoload: UInt32
+			var arm7Autoload: UInt32
+			var secureDisable: UInt64
+			var totalROMSize: UInt32
+			var headerSize: UInt32
+			var reserved2: Data
+			var nintendoLogo: Data
+			var nintendoLogoCRC: UInt16
+			var headerCRC: UInt16
+			var reserved3: Data
+			
+			var carbonizerVersion: String
+		}
 	}
 }
 
@@ -199,7 +245,7 @@ extension NDS.Packed: FileSystemObject {
 
 extension NDS.Packed.Binary {
 	init(_ unpacked: NDS.Unpacked, configuration: Configuration) {
-		header = unpacked.header
+		header = Header(unpacked.header)
 		
 		arm9 = unpacked.arm9
 		arm9OverlayTable = unpacked.arm9OverlayTable
@@ -294,6 +340,12 @@ extension NDS.Packed.Binary {
 	}
 }
 
+extension NDS.Packed.Binary.Header {
+	init(_ unpacked: NDS.Unpacked.Header) {
+		todo()
+	}
+}
+
 // MARK: unpacked
 extension NDS.Unpacked: FileSystemObject {
 	func savePath(in directory: URL, with configuration: Configuration) -> URL {
@@ -342,7 +394,7 @@ extension NDS.Unpacked: FileSystemObject {
 	
 	init(name: String, binary: NDS.Packed.Binary, configuration: Configuration) throws {
 		self.name = name
-		header = binary.header
+		header = Header(binary.header)
 		
 		arm9 = binary.arm9
 		arm9OverlayTable = binary.arm9OverlayTable
@@ -385,6 +437,54 @@ extension NDS.Unpacked: FileSystemObject {
 	}
 }
 
+extension NDS.Unpacked.Header {
+	init(_ packed: NDS.Packed.Binary.Header) {
+		gameTitle = packed.gameTitle
+		gamecode = packed.gamecode
+		makercode = packed.makercode
+		unitcode = packed.unitcode
+		encryptionSeedSelect = packed.encryptionSeedSelect
+		deviceCapacity = packed.deviceCapacity
+		reserved1 = Data(packed.reserved1)
+		ndsRegion = packed.ndsRegion
+		romVersion = packed.romVersion
+		internalFlags = packed.internalFlags
+		arm9Offset = packed.arm9Offset
+		arm9EntryAddress = packed.arm9EntryAddress
+		arm9LoadAddress = packed.arm9LoadAddress
+		arm9Size = packed.arm9Size
+		arm7Offset = packed.arm7Offset
+		arm7EntryAddress = packed.arm7EntryAddress
+		arm7LoadAddress = packed.arm7LoadAddress
+		arm7Size = packed.arm7Size
+		fileNameTableOffset = packed.fileNameTableOffset
+		fileNameTableSize = packed.fileNameTableSize
+		fileAllocationTableOffset = packed.fileAllocationTableOffset
+		fileAllocationTableSize = packed.fileAllocationTableSize
+		arm9OverlayOffset = packed.arm9OverlayOffset
+		arm9OverlaySize = packed.arm9OverlaySize
+		arm7OverlayOffset = packed.arm7OverlayOffset
+		arm7OverlaySize = packed.arm7OverlaySize
+		normalCardControlRegisterSettings = packed.normalCardControlRegisterSettings
+		secureCardControlRegisterSettings = packed.secureCardControlRegisterSettings
+		iconBannerOffset = packed.iconBannerOffset
+		secureAreaCRC = packed.secureAreaCRC
+		secureTransferTimeout = packed.secureTransferTimeout
+		arm9Autoload = packed.arm9Autoload
+		arm7Autoload = packed.arm7Autoload
+		secureDisable = packed.secureDisable
+		totalROMSize = packed.totalROMSize
+		headerSize = packed.headerSize
+		reserved2 = Data(packed.reserved2)
+		nintendoLogo = Data(packed.nintendoLogo)
+		nintendoLogoCRC = packed.nintendoLogoCRC
+		headerCRC = packed.headerCRC
+		reserved3 = Data(packed.reserved3)
+		
+		carbonizerVersion = Carbonizer.version
+	}
+}
+
 extension [any FileSystemObject] {
 	fileprivate func getChild(named name: String) -> (any FileSystemObject)? {
 		first { $0.name == name }
@@ -392,9 +492,10 @@ extension [any FileSystemObject] {
 }
 
 extension NDS.Unpacked {
-	enum UnpackingError: Error {
+	enum UnpackingError: Error, CustomStringConvertible {
 		case invalidFolderStructure([String])
 		case filesAdded(expectedCount: UInt32, actualCount: Int)
+		case wrongVersion(String)
 		
 		var description: String {
 			switch self {
@@ -402,6 +503,8 @@ extension NDS.Unpacked {
 					"invalid folder structure: \(contentNames)"
 				case .filesAdded(expectedCount: let expectedCount, actualCount: let actualCount):
 					"file(s) added while unpacked (expected \(.green)\(expectedCount)\(.normal), got \(.red)\(actualCount)\(.normal)"
+				case .wrongVersion(let version):
+					"this ROM was unpacked with a different version of carbonizer (\(.red)\(version)\(.normal)), repack it with that version, then unpack it with this one (\(.green)\(Carbonizer.version)\(.normal))"
 			}
 		}
 	}
@@ -429,10 +532,11 @@ extension NDS.Unpacked {
 		let arm9OverlayTableData = Data(arm9OverlayTableFile.data.bytes)
 		let arm7OverlayTableData = Data(arm7OverlayTableFile.data.bytes)
 		
-		header = try JSONDecoder().decode(
-			NDS.Packed.Binary.Header.self,
-			from: headerData
-		)
+		header = try JSONDecoder().decode(Header.self, from: headerData)
+		
+		guard header.carbonizerVersion == Carbonizer.version else {
+			throw UnpackingError.wrongVersion(header.carbonizerVersion)
+		}
 		
 		arm9 = arm9File.data
 		arm9OverlayTable = try JSONDecoder().decode(

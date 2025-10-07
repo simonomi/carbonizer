@@ -128,9 +128,9 @@ struct CarbonizerCLI: AsyncParsableCommand {
 		} catch {
 			var standardError = FileHandle.standardError
 			if cliConfiguration.useColor {
-				print("\(.red, .bold)error:\(.normal)", error, to: &standardError)
+				print("\(.red, .bold)error:\(.normal) \(error)\(.clearToEndOfLine)", to: &standardError)
 			} else {
-				print("error:", String(describing: error).removingANSICodes(), to: &standardError)
+				print("error: \(String(describing: error).removingANSICodes())\(.clearToEndOfLine)", to: &standardError)
 			}
 			
 			if cliConfiguration.keepWindowOpen.isTrueOnError {

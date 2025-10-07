@@ -25,7 +25,10 @@ let package = Package(
 				.product(name: "SwiftCompilerPlugin", package: "swift-syntax")
 			]
 		),
-		.target(name: "BinaryParser", dependencies: ["BinaryParserMacros"]),
+		.target(
+			name: "BinaryParser",
+			dependencies: ["BinaryParserMacros", "ANSICodes"]
+		),
 		.target(
 			name: "Carbonizer",
 			dependencies: [

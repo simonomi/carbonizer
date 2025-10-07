@@ -137,7 +137,7 @@ extension MAR.Unpacked: FileSystemObject {
 		self.name = name
 		
 		if binary.files.count == 1 {
-			configuration.log(.transient, "Decompressing", name)
+			configuration.log(.transient, "decompressing", name)
 		}
 		
 		do {
@@ -145,7 +145,7 @@ extension MAR.Unpacked: FileSystemObject {
 				.enumerated()
 				.map {
 					if binary.files.count > 1 {
-						configuration.log(.transient, "Decompressing", name, $0)
+						configuration.log(.transient, "decompressing", name, $0)
 					}
 					
 					return try MCM.Unpacked($1, in: name, configuration: configuration)

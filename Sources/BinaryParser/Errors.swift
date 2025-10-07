@@ -1,3 +1,5 @@
+import ANSICodes
+
 public protocol WrappingError: Error {
 	var joinedErrorPrefix: String { get }
 }
