@@ -9,6 +9,7 @@ import Foundation
 //   - enumerator
 
 public enum Carbonizer {
+	// if run manually, CI will check for the string "main", so here you go :)
 	static let version = "v2.18"
 	
 	public static func auto(
