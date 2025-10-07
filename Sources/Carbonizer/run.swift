@@ -30,6 +30,10 @@ extension Carbonizer {
 		let readStart = Date.now
 #endif
 		
+		if !configuration.fileTypes.contains("MAR") {
+			configuration.log(.warning, "the \(.cyan)MAR\(.normal) file type was not enabled, no files inside the ROM will be processed")
+		}
+		
 		configuration.log(.checkpoint, "reading", filePath.path(percentEncoded: false))
 		
 		guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration),

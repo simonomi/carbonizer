@@ -172,7 +172,7 @@ struct CLIConfiguration : Sendable {
 	
 	static let defaultConfiguration = try! Self(decoding: defaultConfigurationString)
 }
-	
+
 extension CLIConfiguration: Decodable {
 	enum CodingKeys: CodingKey {
 		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, game, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, hotReloading, processors
@@ -215,12 +215,37 @@ extension CLIConfiguration: Decodable {
 	}
 }
 
+struct UnknownOptions: Error, CustomStringConvertible {
+	var options: Set<String>
+	
+	var description: String {
+		if options.count == 1 {
+			return "unknown configuration option: \(.red)\(options.first!)\(.normal)"
+		} else {
+			let optionList = options
+				.sorted()
+				.map { "\(.red)\($0)\(.normal)" }
+				.joined(separator: ", ")
+			
+			return "unknown configuration options: \(optionList)"
+		}
+	}
+}
+
 extension CLIConfiguration.Processors: Decodable {
-	enum CodingKeys: CodingKey {
+	enum CodingKeys: CodingKey, CaseIterable {
 		case exportVivosaurModels, exportModels, exportSprites, exportImages, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
+		let givenKeys = try [String: Bool](from: decoder).keys
+		let allowedKeys = CodingKeys.allCases.map(\.stringValue)
+		
+		let extraKeys = Set(givenKeys).subtracting(Set(allowedKeys))
+		guard extraKeys.isEmpty else {
+			throw UnknownOptions(options: extraKeys)
+		}
+		
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 		
 		// this is lazy to prevent infinite recursion
