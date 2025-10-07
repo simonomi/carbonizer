@@ -7,7 +7,6 @@ import Foundation
 //   - also the list of file types, so if some file types were extracted they need to be repacked
 // - make reading (and writing?) use way fewer filesystem calls
 //   - enumerator
-// - make warning for using ffc settings for ff1 and vice versa
 
 public enum Carbonizer {
 	public static func auto(

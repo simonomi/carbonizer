@@ -281,8 +281,8 @@ extension DEX.Packed: ProprietaryFileData {
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
-	func unpacked(configuration: Configuration) -> DEX.Unpacked {
-		DEX.Unpacked(self, configuration: configuration)
+	func unpacked(configuration: Configuration) throws -> DEX.Unpacked {
+		try DEX.Unpacked(self, configuration: configuration)
 	}
 	
 	fileprivate init(_ unpacked: DEX.Unpacked, configuration: Configuration) {
@@ -348,10 +348,10 @@ extension DEX.Unpacked: ProprietaryFileData {
 	
 	func unpacked(configuration: Configuration) -> Self { self }
 	
-	fileprivate init(_ packed: DEX.Packed, configuration: Configuration) {
-		commands = packed.blocks
+	fileprivate init(_ packed: DEX.Packed, configuration: Configuration) throws {
+		commands = try packed.blocks
 			.map(\.commands)
-			.recursiveMap { Command($0, configuration: configuration) }
+			.recursiveMap { try Command($0, configuration: configuration) }
 	}
 	
 	init(_ data: Datastream, configuration: Configuration) throws {
@@ -463,14 +463,26 @@ extension DEX.Unpacked.CommandDefinition: ExpressibleByStringInterpolation {
 }
 
 extension DEX.Unpacked.Command {
-	init(_ binaryCommand: DEX.Packed.Block.Command, configuration: Configuration) {
+	struct WrongArgumentCount: Error, CustomStringConvertible {
+		var type: UInt32
+		var expected: Int
+		var actual: Int
+		
+		var description: String {
+			"wrong number of arguments in binary for command \(.cyan)\(type)\(.normal): expected \(.green)\(expected)\(.normal), got \(.red)\(actual)\(.normal)"
+		}
+	}
+	
+	init(_ binaryCommand: DEX.Packed.Block.Command, configuration: Configuration) throws {
 		if let definition = DEX.Unpacked.knownCommands(for: configuration)[binaryCommand.type] {
 			// TODO: special case for 181?
 			
 			guard definition.argumentTypes.count == binaryCommand.arguments.count else {
-				print("wrong number of arguments in binary for command", binaryCommand.type)
-				print("got \(.red)\(binaryCommand.arguments.count)\(.normal), expected \(.green)\(definition.argumentTypes.count)\(.normal)")
-				fatalError()
+				throw WrongArgumentCount(
+					type: binaryCommand.type,
+					expected: definition.argumentTypes.count,
+					actual: binaryCommand.arguments.count
+				)
 			}
 			
 			self = .known(

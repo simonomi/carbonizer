@@ -373,6 +373,12 @@ extension NDS.Unpacked: FileSystemObject {
 					configuration: configuration
 				)
 			}
+			
+			if contents.contains(where: { $0.name == "battle_param" }) {
+				configuration.ensureGame(is: .ffc)
+			} else {
+				configuration.ensureGame(is: .ff1)
+			}
 		} catch {
 			throw BinaryParserError.whileReading(Self.self, error)
 		}
@@ -455,6 +461,14 @@ extension NDS.Unpacked {
 		
 		guard actualFileCount == expectedFileCount else {
 			throw UnpackingError.filesAdded(expectedCount: expectedFileCount, actualCount: actualFileCount)
+		}
+	}
+}
+
+fileprivate extension Configuration {
+	func ensureGame(is game: Game) {
+		if self.game != game {
+			log(.warning, "it looks like you're trying to unpack \(.green)\(game)\(.normal), but the configuration is set to \(.red)\(self.game)\(.normal)")
 		}
 	}
 }
