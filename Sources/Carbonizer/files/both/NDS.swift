@@ -200,6 +200,7 @@ enum NDS {
 			var reserved3: Data
 			
 			var carbonizerVersion: String
+			var fileTypes: Set<String>
 		}
 	}
 }
@@ -342,7 +343,47 @@ extension NDS.Packed.Binary {
 
 extension NDS.Packed.Binary.Header {
 	init(_ unpacked: NDS.Unpacked.Header) {
-		todo()
+		gameTitle = unpacked.gameTitle
+		gamecode = unpacked.gamecode
+		makercode = unpacked.makercode
+		unitcode = unpacked.unitcode
+		encryptionSeedSelect = unpacked.encryptionSeedSelect
+		deviceCapacity = unpacked.deviceCapacity
+		reserved1 = Datastream(unpacked.reserved1)
+		ndsRegion = unpacked.ndsRegion
+		romVersion = unpacked.romVersion
+		internalFlags = unpacked.internalFlags
+		arm9Offset = unpacked.arm9Offset
+		arm9EntryAddress = unpacked.arm9EntryAddress
+		arm9LoadAddress = unpacked.arm9LoadAddress
+		arm9Size = unpacked.arm9Size
+		arm7Offset = unpacked.arm7Offset
+		arm7EntryAddress = unpacked.arm7EntryAddress
+		arm7LoadAddress = unpacked.arm7LoadAddress
+		arm7Size = unpacked.arm7Size
+		fileNameTableOffset = unpacked.fileNameTableOffset
+		fileNameTableSize = unpacked.fileNameTableSize
+		fileAllocationTableOffset = unpacked.fileAllocationTableOffset
+		fileAllocationTableSize = unpacked.fileAllocationTableSize
+		arm9OverlayOffset = unpacked.arm9OverlayOffset
+		arm9OverlaySize = unpacked.arm9OverlaySize
+		arm7OverlayOffset = unpacked.arm7OverlayOffset
+		arm7OverlaySize = unpacked.arm7OverlaySize
+		normalCardControlRegisterSettings = unpacked.normalCardControlRegisterSettings
+		secureCardControlRegisterSettings = unpacked.secureCardControlRegisterSettings
+		iconBannerOffset = unpacked.iconBannerOffset
+		secureAreaCRC = unpacked.secureAreaCRC
+		secureTransferTimeout = unpacked.secureTransferTimeout
+		arm9Autoload = unpacked.arm9Autoload
+		arm7Autoload = unpacked.arm7Autoload
+		secureDisable = unpacked.secureDisable
+		totalROMSize = unpacked.totalROMSize
+		headerSize = unpacked.headerSize
+		reserved2 = Datastream(unpacked.reserved2)
+		nintendoLogo = Datastream(unpacked.nintendoLogo)
+		nintendoLogoCRC = unpacked.nintendoLogoCRC
+		headerCRC = unpacked.headerCRC
+		reserved3 = Datastream(unpacked.reserved3)
 	}
 }
 
@@ -394,7 +435,7 @@ extension NDS.Unpacked: FileSystemObject {
 	
 	init(name: String, binary: NDS.Packed.Binary, configuration: Configuration) throws {
 		self.name = name
-		header = Header(binary.header)
+		header = Header(binary.header, configuration: configuration)
 		
 		arm9 = binary.arm9
 		arm9OverlayTable = binary.arm9OverlayTable
@@ -438,7 +479,7 @@ extension NDS.Unpacked: FileSystemObject {
 }
 
 extension NDS.Unpacked.Header {
-	init(_ packed: NDS.Packed.Binary.Header) {
+	init(_ packed: NDS.Packed.Binary.Header, configuration: Configuration) {
 		gameTitle = packed.gameTitle
 		gamecode = packed.gamecode
 		makercode = packed.makercode
@@ -482,6 +523,7 @@ extension NDS.Unpacked.Header {
 		reserved3 = Data(packed.reserved3)
 		
 		carbonizerVersion = Carbonizer.version
+		fileTypes = configuration.fileTypes
 	}
 }
 
@@ -496,6 +538,7 @@ extension NDS.Unpacked {
 		case invalidFolderStructure([String])
 		case filesAdded(expectedCount: UInt32, actualCount: Int)
 		case wrongVersion(String)
+		case missingFileTypes(Set<String>)
 		
 		var description: String {
 			switch self {
@@ -505,6 +548,18 @@ extension NDS.Unpacked {
 					"file(s) added while unpacked (expected \(.green)\(expectedCount)\(.normal), got \(.red)\(actualCount)\(.normal)"
 				case .wrongVersion(let version):
 					"this ROM was unpacked with a different version of carbonizer (\(.red)\(version)\(.normal)), repack it with that version, then unpack it with this one (\(.green)\(Carbonizer.version)\(.normal))"
+				case .missingFileTypes(let fileTypes):
+					{
+						let fileTypeNames = fileTypes
+							.sorted()
+							.map { "\(.red)\($0)\(.normal)" }
+							.joined(separator: ", ")
+						
+						let sIfPlural = fileTypes.count == 1 ? "" : "s"
+						let itOrThem = fileTypes.count == 1 ? "it" : "them"
+						
+						return "this ROM was unpacked with the \(fileTypeNames) file type\(sIfPlural), enable \(itOrThem) to repack it"
+					}()
 			}
 		}
 	}
@@ -536,6 +591,11 @@ extension NDS.Unpacked {
 		
 		guard header.carbonizerVersion == Carbonizer.version else {
 			throw UnpackingError.wrongVersion(header.carbonizerVersion)
+		}
+		
+		let missingFileTypes = header.fileTypes.subtracting(configuration.fileTypes)
+		guard missingFileTypes.isEmpty else {
+			throw UnpackingError.missingFileTypes(missingFileTypes)
 		}
 		
 		arm9 = arm9File.data
