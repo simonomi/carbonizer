@@ -151,8 +151,8 @@ extension Huffman {
 					case .branch(left: let left, right: let right):
 						var nodeData = Byte(nodeWritingQueue.count / 2)
 						
-						// children offset should fit in lower 5 bits
-						precondition(nodeData & 0b11111 == nodeData, "more nodes than should be possible")
+						// children offset should fit in lower 6 bits
+						precondition(nodeData & 0b111111 == nodeData, "more nodes than should be possible")
 						
 						if left.isData {
 							nodeData |= 1 << 7
@@ -172,7 +172,15 @@ extension Huffman {
 			output.fourByteAlign()
 		}
 		
-		func write(_ inputData: ArraySlice<UInt8>, to output: Datawriter) {
+		struct TreeMissingValue: Error, CustomStringConvertible {
+			var key: UInt8
+			
+			var description: String {
+				"the huffman tree is missing a value for \(.cyan)\(key)\(.normal)"
+			}
+		}
+		
+		func write(_ inputData: ArraySlice<UInt8>, to output: Datawriter) throws {
 			let dictionary = dictionary()
 //			print(dictionary)
 			
@@ -184,7 +192,8 @@ extension Huffman {
 				}
 				
 				guard let newBits = dictionary[byte] else {
-					fatalError("this should never happen... right?")
+					print()
+					throw TreeMissingValue(key: byte)
 				}
 				
 //				print(String(byte, radix: 16, uppercase: true), newBits)

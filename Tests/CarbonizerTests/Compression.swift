@@ -22,7 +22,7 @@ struct Compression {
 			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
 //			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"), // 8-bit
 //			(.huffman, "msg_1007 - decompressed", "msg_1007 - huffman"), // 8-bit
-//			(.huffman, "kaseki_defs - lzss", "kaseki_defs - huffman"), // ?-bit
+			(.huffman, "kaseki_defs - lzss", "kaseki_defs - huffman"), // ?-bit
 			(.lzss, "kaseki_defs - decompressed", "kaseki_defs - lzss"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
@@ -39,7 +39,7 @@ struct Compression {
 
 		// lzss is *notably* slower, ~0.3–3s compared to ~0.001–0.01s (in debug mode)
 		// thats 300x!!
-		let compressedInput = type.compress(inputData, compressionInfo: compressionInfo)
+		let compressedInput = try type.compress(inputData, compressionInfo: compressionInfo)
 		
 //		print("\(.yellow)compress", type, start.timeElapsed, "\(.normal)")
 		

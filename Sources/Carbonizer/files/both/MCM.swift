@@ -24,7 +24,7 @@ enum MCM {
 		var compression: (CompressionType, CompressionType)
 		var maxChunkSize: UInt32
 		
-		var huffmanCompressionInfo: [Huffman.CompressionInfo]
+		var huffmanCompressionInfo: [(Huffman.CompressionInfo?, Huffman.CompressionInfo?)]
 		
 		var content: any ProprietaryFileData
 		
@@ -36,13 +36,25 @@ enum MCM {
 
 // MARK: packed
 extension MCM.Packed {
-	init(_ unpacked: MCM.Unpacked, configuration: Configuration) {
+	struct MissingCompressionInfo: Error, CustomStringConvertible {
+		var chunkCount: Int
+		var compressionInfoCount: Int
+		
+		var description: String {
+			"compression info is missing (expected \(.green)\(chunkCount)\(.normal) chunk\(sIfPlural(chunkCount)), got \(.red)\(compressionInfoCount)\(.normal))"
+		}
+	}
+	
+	init(_ unpacked: MCM.Unpacked, configuration: Configuration) throws {
 		maxChunkSize = unpacked.maxChunkSize
-		// TODO: turn back on once compression is implemented
-//		compressionType1 = unpacked.compression.0.rawValue
-//		compressionType2 = unpacked.compression.1.rawValue
-		compressionType1 = 0
-		compressionType2 = 0
+		
+		if configuration.compression {
+			compressionType1 = unpacked.compression.0.rawValue
+			compressionType2 = unpacked.compression.1.rawValue
+		} else {
+			compressionType1 = 0
+			compressionType2 = 0
+		}
 		
 		let data = Datawriter()
 		unpacked.content.packed(configuration: configuration).write(to: data)
@@ -53,12 +65,22 @@ extension MCM.Packed {
 			.intoDatastream()
 			.chunked(maxSize: Int(maxChunkSize))
 		
-		chunks = chunkedData
-//		let firstCompressionLayer = zip(chunkedData, unpacked.huffmanCompressionInfo)
-//			.map(unpacked.compression.1.compress)
-//		
-//		chunks = zip(firstCompressionLayer, unpacked.huffmanCompressionInfo)
-//			.map(unpacked.compression.0.compress)
+		if configuration.compression {
+			guard unpacked.huffmanCompressionInfo.count == chunkedData.count else {
+				throw MissingCompressionInfo(
+					chunkCount: chunkedData.count,
+					compressionInfoCount: unpacked.huffmanCompressionInfo.count
+				)
+			}
+			
+			let firstCompressionLayer = try zip(chunkedData, unpacked.huffmanCompressionInfo.map(\.1))
+				.map(unpacked.compression.1.compress)
+			
+			chunks = try zip(firstCompressionLayer, unpacked.huffmanCompressionInfo.map(\.0))
+				.map(unpacked.compression.0.compress)
+		} else {
+			chunks = chunkedData
+		}
 		
 		chunkCount = UInt32(chunks.count)
 		
@@ -109,8 +131,7 @@ extension MCM.Unpacked {
 				.map { [compression] in (try compression.1.decompress($0), $1) }
 			
 			huffmanCompressionInfo = decompressedChunksAndInfo
-				.flatMap { [$0.1, $0.0.1] }
-				.compactMap { $0 }
+				.map { ($0.1, $0.0.1) }
 			
 			let data = decompressedChunksAndInfo
 				.map(\.0.0)
@@ -182,12 +203,12 @@ extension ProprietaryFile {
 }
 
 extension MCM.Unpacked.CompressionType: Codable {
-	func compress(_ data: Datastream, compressionInfo: Huffman.CompressionInfo?) -> Datastream {
+	func compress(_ data: Datastream, compressionInfo: Huffman.CompressionInfo?) throws -> Datastream {
 		switch self {
 			case .none:                         data
 			case .runLength: RunLength.compress(data)
 			case .lzss:           LZSS.compress(data)
-			case .huffman:     Huffman.compress(data, info: compressionInfo)
+			case .huffman: try Huffman.compress(data, info: compressionInfo)
 		}
 	}
 	

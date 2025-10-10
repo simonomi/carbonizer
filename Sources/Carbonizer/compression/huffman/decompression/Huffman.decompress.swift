@@ -70,11 +70,7 @@ extension Huffman {
 			}
 		}
 		
-		let tree: CompressionInfo.Node? = if header.dataSize == 8 {
-			CompressionInfo.Node(traversing: inputData, at: rootNodeOffset)
-		} else {
-			nil
-		}
+		let tree = CompressionInfo.Node(traversing: inputData, at: rootNodeOffset)
 		
 //		if let tree {
 //			print(tree.mermaidDiagram())

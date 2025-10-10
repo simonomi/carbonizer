@@ -18,6 +18,8 @@ struct CLIConfiguration : Sendable {
 	var onlyUnpack: [Glob]
 	var skipUnpacking: [Glob]
 	
+	var compression: Bool
+	
 	var hotReloading: Bool
 	
 	var processors: Processors
@@ -107,6 +109,12 @@ struct CLIConfiguration : Sendable {
 			"onlyUnpack": [],
 			"skipUnpacking": [],
 			
+			// not fully supported right now, requires externalMetadata to be enabled.
+			// turning on compression will make the output ROM much smaller, but will
+			// take a good amount of time to run. it's also good for creating patches,
+			// so that the modded ROM matches the original as much as possible
+			"compression": false,
+			
 			"hotReloading": false, // macOS only
 			
 			"processors": {
@@ -175,7 +183,7 @@ struct CLIConfiguration : Sendable {
 
 extension CLIConfiguration: Decodable {
 	enum CodingKeys: CodingKey {
-		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, game, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, hotReloading, processors
+		case compressionMode, inputFiles, outputFolder, overwriteOutput, showProgress, keepWindowOpen, useColor, game, externalMetadata, fileTypes, onlyUnpack, skipUnpacking, compression, hotReloading, processors
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -208,6 +216,8 @@ extension CLIConfiguration: Decodable {
 			fallback.onlyUnpack
 		skipUnpacking =    try container.decodeIfPresent([Glob].self,          forKey: .skipUnpacking) ??
 			fallback.skipUnpacking
+		compression =      try container.decodeIfPresent(Bool.self,            forKey: .compression) ??
+			fallback.compression
 		hotReloading =     try container.decodeIfPresent(Bool.self,            forKey: .hotReloading) ??
 			fallback.hotReloading
 		processors =       try container.decodeIfPresent(Processors.self,      forKey: .processors) ??

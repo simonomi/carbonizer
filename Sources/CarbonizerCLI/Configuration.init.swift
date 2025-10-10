@@ -12,6 +12,7 @@ extension Configuration {
 			fileTypes: cliConfiguration.fileTypes,
 			onlyUnpack: cliConfiguration.onlyUnpack,
 			skipUnpacking: cliConfiguration.skipUnpacking,
+			compression: cliConfiguration.compression,
 			processors: .init(cliConfiguration.processors),
 			logHandler: logHandler
 		)

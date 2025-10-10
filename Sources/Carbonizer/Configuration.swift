@@ -10,6 +10,8 @@ public struct Configuration: Sendable {
 	var onlyUnpack: [Glob]
 	var skipUnpacking: [Glob]
 	
+	var compression: Bool
+	
 	var processors: Set<Processor>
 	
 	var cache: Cache
@@ -83,13 +85,14 @@ public struct Configuration: Sendable {
 		}
 	}
 	
-	public init(overwriteOutput: Bool, game: Game, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], processors: Set<Processor>, logHandler: (@Sendable (Log) -> Void)?) throws {
+	public init(overwriteOutput: Bool, game: Game, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], compression: Bool, processors: Set<Processor>, logHandler: (@Sendable (Log) -> Void)?) throws {
 		self.overwriteOutput = overwriteOutput
 		self.game = game
 		self.externalMetadata = externalMetadata
 		self.fileTypes = fileTypes
 		self.onlyUnpack = onlyUnpack
 		self.skipUnpacking = skipUnpacking
+		self.compression = compression
 		self.processors = processors
 		self.logHandler = logHandler
 		

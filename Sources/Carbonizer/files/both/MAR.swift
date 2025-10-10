@@ -72,10 +72,22 @@ extension MAR.Packed: FileSystemObject {
 }
 
 extension MAR.Packed.Binary {
-	init(_ mar: MAR.Unpacked, configuration: Configuration) {
+	init(_ mar: MAR.Unpacked, configuration: Configuration) throws {
 		fileCount = UInt32(mar.files.count)
 		
-		files = mar.files.map { MCM.Packed($0, configuration: configuration) }
+		if fileCount == 1 {
+			configuration.log(.transient, "compressing", mar.name)
+		}
+		
+		files = try mar.files
+			.enumerated()
+			.map {
+				if mar.files.count > 1 {
+					configuration.log(.transient, "compressing", mar.name, $0)
+				}
+				
+				return try MCM.Packed($1, configuration: configuration)
+			}
 		
 		let firstFileIndex = 8 + fileCount * 8
 		let mcmSizes = files.map(\.endOfFileOffset)
@@ -120,11 +132,15 @@ extension MAR.Unpacked: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .unpacked }
 	
-	func packed(configuration: Configuration) -> MAR.Packed {
-		MAR.Packed(
-			name: name,
-			binary: MAR.Packed.Binary(self, configuration: configuration)
-		)
+	func packed(configuration: Configuration) throws -> MAR.Packed {
+		do {
+			return MAR.Packed(
+				name: name,
+				binary: try MAR.Packed.Binary(self, configuration: configuration)
+			)
+		} catch {
+			throw BinaryParserError.whileReadingFile(name, error)
+		}
 	}
 	
 	func unpacked(path: [String] = [], configuration: Configuration) throws -> Self { self }

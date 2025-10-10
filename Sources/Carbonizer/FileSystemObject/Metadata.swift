@@ -7,7 +7,7 @@ struct Metadata {
 	var maxChunkSize: UInt32 // 4 bits, then multiplied by 4kB
 	var index: UInt16 // 16 bits
 	
-	var huffmanCompressionInfo: [Huffman.CompressionInfo]
+	var huffmanCompressionInfo: [(Huffman.CompressionInfo?, Huffman.CompressionInfo?)]
 	
 	init(
 		skipFile: Bool,
@@ -15,7 +15,7 @@ struct Metadata {
 		compression: (MCM.Unpacked.CompressionType, MCM.Unpacked.CompressionType),
 		maxChunkSize: UInt32,
 		index: UInt16,
-		huffmanCompressionInfo: [Huffman.CompressionInfo]
+		huffmanCompressionInfo: [(Huffman.CompressionInfo?, Huffman.CompressionInfo?)]
 	) {
 		self.skipFile = skipFile
 		self.standalone = standalone
@@ -117,18 +117,23 @@ extension Metadata: Codable {
 		maxChunkSize = try container.decode(UInt32.self, forKey: .maxChunkSize)
 		index = try container.decode(UInt16.self, forKey: .index)
 		
-		huffmanCompressionInfo = try container.decode([Huffman.CompressionInfo].self, forKey: .huffmanCompressionInfo)
+		huffmanCompressionInfo = try container.decode(
+			[[Huffman.CompressionInfo?]].self,
+			forKey: .huffmanCompressionInfo
+		).map { ($0[0], $0[1]) }
 	}
 	
 	func encode(to encoder: any Encoder) throws {
 		var container = encoder.container(keyedBy: CodingKeys.self)
 		
-		try container.encode(skipFile,               forKey: .skipFile)
-		try container.encode(standalone,             forKey: .standalone)
-		try container.encode(compression.0,          forKey: .firstCompressionType)
-		try container.encode(compression.1,          forKey: .secondCompressionType)
-		try container.encode(maxChunkSize,           forKey: .maxChunkSize)
-		try container.encode(index,                  forKey: .index)
-		try container.encode(huffmanCompressionInfo, forKey: .huffmanCompressionInfo)
+		try container.encode(skipFile,      forKey: .skipFile)
+		try container.encode(standalone,    forKey: .standalone)
+		try container.encode(compression.0, forKey: .firstCompressionType)
+		try container.encode(compression.1, forKey: .secondCompressionType)
+		try container.encode(maxChunkSize,  forKey: .maxChunkSize)
+		try container.encode(index,         forKey: .index)
+		
+		let compressionInfo = huffmanCompressionInfo.map { [$0, $1] }
+		try container.encode(compressionInfo, forKey: .huffmanCompressionInfo)
 	}
 }

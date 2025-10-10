@@ -88,6 +88,7 @@ struct RoundTrips {
 			fileTypes: fileTypes,
 			onlyUnpack: [],
 			skipUnpacking: [],
+			compression: false,
 			processors: [],
 			logHandler: nil
 		)
@@ -99,7 +100,7 @@ struct RoundTrips {
 			case .packed:
 				try file.unpacked(path: [], configuration: configurationWithFileTypes)
 			case .unpacked:
-				file.packed(configuration: configurationWithFileTypes)
+				try file.packed(configuration: configurationWithFileTypes)
 			case .unknown, .contradictory:
 				try Issue.failure("packed status must be either packed or unpacked")
 		}
@@ -111,7 +112,7 @@ struct RoundTrips {
 		
 		let retoggledFile: any FileSystemObject = switch packedStatus {
 			case .packed:
-				rereadFile.packed(configuration: configurationWithFileTypes)
+				try rereadFile.packed(configuration: configurationWithFileTypes)
 			case .unpacked:
 				try rereadFile.unpacked(path: [], configuration: configurationWithFileTypes)
 			case .unknown, .contradictory:
@@ -143,6 +144,7 @@ struct RoundTrips {
 			fileTypes: fileTypes,
 			onlyUnpack: [],
 			skipUnpacking: [],
+			compression: false,
 			processors: [],
 			logHandler: nil
 		)

@@ -1,7 +1,7 @@
 enum Huffman {
 	struct CompressionInfo: Codable {
 		var dataSize: UInt8
-		var tree: Node?
+		var tree: Node
 		
 		indirect enum Node: Codable {
 			case symbol(Byte)

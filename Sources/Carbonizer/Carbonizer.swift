@@ -4,7 +4,6 @@ import Foundation
 // TODO: list
 // - make reading (and writing?) use way fewer filesystem calls
 //   - enumerator
-// - error if packing with fewer filetypes
 
 public enum Carbonizer {
 	// if run manually, CI will check for the string "main", so here you go :)
