@@ -245,7 +245,7 @@ extension NDS.Packed: FileSystemObject {
 }
 
 extension NDS.Packed.Binary {
-	init(_ unpacked: NDS.Unpacked, configuration: Configuration) {
+	init(_ unpacked: NDS.Unpacked, configuration: Configuration) throws {
 		header = Header(unpacked.header)
 		
 		arm9 = unpacked.arm9
@@ -256,7 +256,7 @@ extension NDS.Packed.Binary {
 		
 		iconBanner = unpacked.iconBanner
 		
-		let contents = unpacked.contents.map { $0.packed(configuration: configuration) }
+		let contents = try unpacked.contents.map { try $0.packed(configuration: configuration) }
 		
 		let numberOfOverlays = UInt16(arm9OverlayTable.count + arm7OverlayTable.count)
 		fileNameTable = FileNameTable(contents, firstFileId: numberOfOverlays)
@@ -421,10 +421,10 @@ extension NDS.Unpacked: FileSystemObject {
 	
 	func packedStatus() -> PackedStatus { .unpacked }
 	
-	func packed(configuration: Configuration) -> NDS.Packed {
+	func packed(configuration: Configuration) throws -> NDS.Packed {
 		NDS.Packed(
 			name: name,
-			binary: NDS.Packed.Binary(self, configuration: configuration)
+			binary: try NDS.Packed.Binary(self, configuration: configuration)
 		)
 	}
 	

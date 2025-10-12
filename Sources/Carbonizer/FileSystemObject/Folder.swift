@@ -101,11 +101,11 @@ extension Folder: FileSystemObject {
 			.reduce(.unknown) { $0.combined(with: $1) }
 	}
 	
-	func packed(configuration: Configuration) -> Self {
+	func packed(configuration: Configuration) throws -> Self {
 		Folder(
 			name: name,
 			metadata: metadata,
-			contents: contents.map { $0.packed(configuration: configuration) }
+			contents: try contents.map { try $0.packed(configuration: configuration) }
 		)
 	}
 	

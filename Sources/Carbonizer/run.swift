@@ -56,7 +56,7 @@ extension Carbonizer {
 		
 		switch action {
 			case .pack:
-				file = file.packed(configuration: configuration)
+				file = try file.packed(configuration: configuration)
 			case .unpack:
 				file = try file.unpacked(path: [], configuration: configuration)
 		}

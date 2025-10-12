@@ -27,7 +27,7 @@ public extension Carbonizer {
 			
 			fileData.setFile(at: components, to: newFile)
 			
-			let packedData = fileData.packed(configuration: configuration)
+			let packedData = try fileData.packed(configuration: configuration)
 			let outputPath = packedData.savePath(in: outputFolder, with: configuration)
 			try packedData.write(into: outputFolder, with: configuration)
 			

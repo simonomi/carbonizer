@@ -10,7 +10,7 @@ protocol FileSystemObject {
 	func packedStatus() -> PackedStatus
 	
 	associatedtype Packed: FileSystemObject
-	func packed(configuration: Configuration) -> Packed
+	func packed(configuration: Configuration) throws -> Packed
 	
 	associatedtype Unpacked: FileSystemObject
 	func unpacked(path: [String], configuration: Configuration) throws -> Unpacked
