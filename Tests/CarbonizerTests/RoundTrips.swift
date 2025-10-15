@@ -79,16 +79,16 @@ struct RoundTrips {
 			.ff1
 		}
 		
-		let fileTypes = Set(Configuration.fileTypes(for: game).keys)
+		let fileTypes = Set(["MAR"] + Configuration.fileTypes(for: game).keys)
 		
 		let configurationWithFileTypes = try Configuration(
 			overwriteOutput: true,
 			game: game,
-			externalMetadata: false,
+			externalMetadata: true,
 			fileTypes: fileTypes,
 			onlyUnpack: [],
 			skipUnpacking: [],
-			compression: false,
+			compression: true,
 			processors: [],
 			logHandler: nil
 		)

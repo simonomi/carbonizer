@@ -1,4 +1,7 @@
 enum RunLength {
-	static let maxCompressedCount = Int(Byte.max) / 2 + 3
-	static let maxUncompressedCount = Int(Byte.max) / 2 + 1
+	static let minCompressedCount = 3
+	static let maxCompressedCount = Int(Flag.byteCountMask) + minCompressedCount
+	
+	// *should* be +1, but ff1 doesn't do that
+	static let maxUncompressedCount = Int(Flag.byteCountMask) // + 1
 }

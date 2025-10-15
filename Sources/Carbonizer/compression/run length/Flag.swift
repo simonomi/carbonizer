@@ -2,23 +2,23 @@ import BinaryParser
 
 extension RunLength {
 	struct Flag {
-		var raw: Byte
+		var raw: UInt8
 		
-		private static let compressionBit: Byte = 0b1000_0000
-		private static let byteCountMask: Byte = ~compressionBit
+		static let compressionBit: UInt8 = 0b1000_0000
+		static let byteCountMask: UInt8 = ~compressionBit
 		
-		init(_ raw: Byte) {
+		init(_ raw: UInt8) {
 			self.raw = raw
 		}
 		
-		// TODO: should these have 'Count' in the name??
 		init(compressedByteCount: Int) {
-			raw = Self.compressionBit | Byte(compressedByteCount - 3)
+			assert(compressedByteCount >= minCompressedCount, "tried to encode fewer than the minimum number of compressed bytes: \(compressedByteCount) (min \(minCompressedCount)")
+			raw = Self.compressionBit | UInt8(compressedByteCount - minCompressedCount)
 		}
 		
 		init(uncompressedByteCount: Int) {
-			raw = Byte(uncompressedByteCount - 1)
-			precondition(!isCompressed, "tried to encode more than the maximum number of uncompressed bytes: \(uncompressedByteCount) (max \(maxUncompressedCount))")
+			raw = UInt8(uncompressedByteCount - 1)
+			assert(!isCompressed, "tried to encode more than the maximum number of uncompressed bytes: \(uncompressedByteCount) (max \(maxUncompressedCount))")
 		}
 		
 		var isCompressed: Bool {
@@ -27,7 +27,7 @@ extension RunLength {
 		
 		var byteCount: Int {
 			if isCompressed {
-				Int(raw & Self.byteCountMask) + 3
+				Int(raw & Self.byteCountMask) + minCompressedCount
 			} else {
 				Int(raw & Self.byteCountMask) + 1
 			}

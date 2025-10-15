@@ -102,6 +102,7 @@ extension MFS.Unpacked: ProprietaryFileData {
 				.replacing("1", with: "█")
 			
 			print(letterString)
+			print("---")
 		}
 	}
 }

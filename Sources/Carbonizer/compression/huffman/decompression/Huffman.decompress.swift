@@ -6,7 +6,7 @@ extension Huffman {
 		let base = inputData.offset
 		
 		let header = try inputData.read(CompressionHeader.self)
-		precondition(header.type == .huffman)
+		precondition(header.type == .huffman) // TODO: better error
 		precondition(header.decompressedSize > 0)
 		precondition(header.dataSize == 4 || header.dataSize == 8)
 		

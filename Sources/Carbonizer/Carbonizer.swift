@@ -4,6 +4,10 @@ import Foundation
 // TODO: list
 // - make reading (and writing?) use way fewer filesystem calls
 //   - enumerator
+// - clean up utilities
+//   - remove as much platform-specific code as possible
+//     - in theory it should all be part of CLI, not library
+// - make a GUI
 
 public enum Carbonizer {
 	// if run manually, CI will check for the string "main", so here you go :)

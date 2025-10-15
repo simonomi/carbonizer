@@ -15,15 +15,14 @@ struct Compression {
 //			(.huffman, "map c 0004 - run length", "map c 0004 - huffman"), // 8-bit
 			(.runLength, "map e 0048 - decompressed", "map e 0048 - run length"),
 			(.runLength, "map g 0047 - decompressed", "map g 0047 - run length"),
-			(.runLength, "lorem ipsum - decompressed", "lorem ipsum - run length"),
-			(.lzss, "lorem ipsum - decompressed", "lorem ipsum - lzss"),
-//			(.huffman, "lorem ipsum - decompressed", "lorem ipsum - huffman"), // doesnt exist yet
 //			(.huffman, "e0046 - lzss", "e0046 - huffman"), // 4-bit
 			(.lzss, "e0046 - decompressed", "e0046 - lzss"),
 //			(.huffman, "msg_0911 - decompressed", "msg_0911 - huffman"), // 8-bit
 //			(.huffman, "msg_1007 - decompressed", "msg_1007 - huffman"), // 8-bit
-			(.huffman, "kaseki_defs - lzss", "kaseki_defs - huffman"), // ?-bit
+//			(.huffman, "kaseki_defs - lzss", "kaseki_defs - huffman"), // ?-bit
 			(.lzss, "kaseki_defs - decompressed", "kaseki_defs - lzss"),
+			(.runLength, "image_archive 0050 - decompressed", "image_archive 0050 - run-length"),
+			(.huffman, "image_archive 0050 - run-length", "image_archive 0050 - huffman"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
 	func compress(_ type: MCM.Unpacked.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {
@@ -33,7 +32,7 @@ struct Compression {
 			.appending(component: decompressedFileName)
 			.appendingPathExtension("bin")
 		
-		let compressionInfo = try Metadata(forItemAt: inputFilePath)?.huffmanCompressionInfo.first
+		let compressionInfo = try Metadata(forItemAt: inputFilePath)?.huffmanCompressionInfo.first?.0
 		
 //		let start = Date.now
 
@@ -76,15 +75,14 @@ struct Compression {
 			(.runLength, "map c 0004 - run length", "map c 0004 - decompressed"),
 			(.runLength, "map e 0048 - run length", "map e 0048 - decompressed"),
 			(.runLength, "map g 0047 - run length", "map g 0047 - decompressed"),
-			(.runLength, "lorem ipsum - run length", "lorem ipsum - decompressed"),
-			(.lzss, "lorem ipsum - lzss", "lorem ipsum - decompressed"),
-//			(.huffman, "lorem ipsum - huffman", "lorem ipsum - decompressed"),
 			(.huffman, "e0046 - huffman", "e0046 - lzss"),
 			(.lzss, "e0046 - lzss", "e0046 - decompressed"),
 			(.huffman, "msg_0911 - huffman", "msg_0911 - decompressed"),
 			(.huffman, "msg_1007 - huffman", "msg_1007 - decompressed"),
 			(.huffman, "kaseki_defs - huffman", "kaseki_defs - lzss"),
 			(.lzss, "kaseki_defs - lzss", "kaseki_defs - decompressed"),
+			(.huffman, "image_archive 0050 - huffman", "image_archive 0050 - run-length"),
+			(.runLength, "image_archive 0050 - run-length", "image_archive 0050 - decompressed"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
 	func decompress(_ type: MCM.Unpacked.CompressionType, _ compressedFileName: String, _ expectedFileName: String) throws {

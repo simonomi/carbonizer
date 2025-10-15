@@ -11,6 +11,8 @@ extension RunLength {
 		var outputData = [Byte]()
 		outputData.reserveCapacity(Int(header.decompressedSize))
 		
+//		print("new file")
+		
 		while outputData.count < header.decompressedSize {
 			let flag = Flag(inputData[inputOffset])
 			inputOffset += 1
@@ -19,8 +21,12 @@ extension RunLength {
 				let byte = inputData[inputOffset]
 				inputOffset += 1
 				
+//				print("compressed", byte, flag.byteCount)
+				
 				outputData.append(contentsOf: repeatElement(byte, count: flag.byteCount))
 			} else {
+//				print("uncompressed", flag.byteCount)
+				
 				let inputRange = Range(start: inputOffset, count: flag.byteCount)
 				inputOffset += flag.byteCount
 				

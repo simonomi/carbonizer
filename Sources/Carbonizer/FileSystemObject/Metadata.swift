@@ -26,6 +26,7 @@ struct Metadata {
 	}
 	
 	init?(forItemAt path: URL) throws {
+		// TODO: use config option instead of getting both
 		if let metadata = try path
 			.getCreationDate()
 			.flatMap(Self.init)

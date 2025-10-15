@@ -151,6 +151,7 @@ enum DEX {
 			37:  "turn2 \(0, .entity) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
 			38:  "turn \(0, .entity) towards \(1, .entity) over \(3, .frames), unknowns: \(2, .unknown) \(4, .unknown)",
 			39:  "move \(0, .entity) to \(1, .entity) over \(2, .frames), unknown: \(3, .unknown)",
+			// 40: (entity, entity, frames, smoothing)? probably another move
 			// 41: (entity?, #, frames?, #) another move-to? last # is probably smoothing
 			43:  "move \(0, .entity) to position \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
 			44:  "unknown 44: \(0, .entity) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",

@@ -23,12 +23,18 @@ extension RunLength {
 			
 			let compressedBytes = inputData[runIndices]
 			
-			for chunk in compressedBytes.chunked(maxSize: maxCompressedCount) {
+			let bigEnoughChunks = compressedBytes
+				.chunked(maxSize: maxCompressedCount)
+				.prefix { $0.count >= minCompressedCount }
+			
+			for chunk in bigEnoughChunks {
 				Flag(compressedByteCount: chunk.count).write(to: outputData)
 				outputData.write(chunk.first!)
 			}
 			
-			inputOffset = runIndices.endIndex
+			if let newOffset = bigEnoughChunks.last?.endIndex {
+				inputOffset = newOffset
+			}
 		}
 		
 		if inputOffset != inputData.endIndex {
