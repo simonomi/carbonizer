@@ -21,22 +21,26 @@ extension Datawriter {
 	}
 }
 
-typealias CompleteFNT = [UInt16 : [NDS.Packed.Binary.FileNameTable.FolderContent]]
+// folder id: content (with file id!)
+typealias CompleteFNT = [UInt16: [NDS.Packed.Binary.FileNameTable.FolderContent]]
 
 extension NDS.Packed.Binary.FileNameTable {
 	func completeTable() -> CompleteFNT {
 		let folderIds = (0..<rootFolder.totalFolderCount)
 			.map { $0 + 0xF000 }
+		
 		let entries = zip([rootFolder] + folders, [rootContents] + folderContents)
 			.map { folder, contents in
-				zip(contents, folder.firstChildId...)
-					.map { content, newId in
-						if content.type == .file {
-							content.givenId(newId)
-						} else {
-							content
-						}
+				var fileID = folder.firstChildId
+				
+				return contents.map {
+					if $0.type == .file {
+						defer { fileID += 1 }
+						return $0.givenId(fileID)
+					} else {
+						return $0
 					}
+				}
 			}
 		
 		return Dictionary(uniqueKeysWithValues: zip(folderIds, entries))
@@ -51,6 +55,10 @@ extension NDS.Packed.Binary.FileNameTable.FolderContent {
 		} else {
 			.folder
 		}
+	}
+	
+	var isFile: Bool {
+		type == .file
 	}
 	
 	func givenId(_ id: UInt16) -> Self {
@@ -147,7 +155,7 @@ extension NDS.Packed.Binary.OverlayTableEntry {
 
 extension NDS.Packed.Binary.FileNameTable {
 	init(_ files: [any FileSystemObject], firstFileId: UInt16) {
-		let allFolders = files.getAllFolders() // TODO: sort like ff1 does
+		let allFolders = files.getAllFolders()
 		let folderIds = Dictionary(
 			uniqueKeysWithValues: allFolders
 				.enumerated()
@@ -205,6 +213,34 @@ extension NDS.Packed.Binary.FileNameTable {
 			contentsOffset += 1
 		}
 	}
+	func size() -> Int {
+		FolderEntry.size +
+		folders.size +
+		rootContents.map(\.size).sum() +
+		folderContents
+			.flatMap { $0.map(\.size) }
+			.sum()
+	}
+}
+
+extension NDS.Packed.Binary.FileNameTable.FolderEntry {
+	static let size = 8
+}
+
+extension [NDS.Packed.Binary.FileNameTable.FolderEntry] {
+	var size: Int {
+		count * NDS.Packed.Binary.FileNameTable.FolderEntry.size
+	}
+}
+
+extension NDS.Packed.Binary.FileNameTable.FolderContent {
+	var size: Int {
+		// no null byte so count is +1
+		switch type {
+			case .file: name.utf8CString.count
+			case .folder: name.utf8CString.count + 2
+		}
+	}
 }
 
 extension NDS.Packed.Binary.FileNameTable.FolderContent {
@@ -220,7 +256,8 @@ extension NDS.Packed.Binary.FileNameTable.FolderContent {
 
 extension [any FileSystemObject] {
 	func getAllFiles() -> [any FileSystemObject] {
-		flatMap {
+		sorted(by: ffFileSort)
+		.flatMap {
 			switch $0 {
 				case let proprietaryFile as ProprietaryFile: [proprietaryFile]
 				case let binaryFile as BinaryFile: [binaryFile]
@@ -235,7 +272,29 @@ extension [any FileSystemObject] {
 	}
 	
 	func getAllFolders() -> [Folder] {
-		compactMap(as: Folder.self)
+		sorted(by: ffFileSort)
+		.compactMap(as: Folder.self)
 			.flatMap { [$0] + $0.contents.getAllFolders() }
+	}
+}
+
+fileprivate func ffFileSort(_ left: any FileSystemObject, _ right: any FileSystemObject) -> Bool {
+	left.name.isFFLessThan(right.name)
+}
+
+fileprivate extension String {
+	// ff sorts punctuation like "_" before letters like "A"
+	func isFFLessThan(_ other: String) -> Bool {
+		for (character, otherCharacter) in zip(self, other) {
+			guard character != otherCharacter else { continue }
+			
+			return if character.isPunctuation != otherCharacter.isPunctuation {
+				character.isPunctuation // sort punctuation first
+			} else {
+				character < otherCharacter
+			}
+		}
+		
+		return count < other.count
 	}
 }

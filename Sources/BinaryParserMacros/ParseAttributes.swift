@@ -13,7 +13,7 @@ extension Attributes {
 	mutating func parseAttribute(_ attribute: AttributeSyntax) throws {
 		let attributeName = attribute.attributeName.trimmedDescription
 		
-		let keyPaths: [String : WritableKeyPath<Self, ValueOrProperty?>] = [
+		let keyPaths: [String: WritableKeyPath<Self, ValueOrProperty?>] = [
 			"Padding": \.padding,
 			"Offset": \.offset,
 			"Count": \.count,

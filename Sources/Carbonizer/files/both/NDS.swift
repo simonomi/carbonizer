@@ -1,6 +1,8 @@
 import BinaryParser
 import Foundation
 
+fileprivate let iconBannerSize = 0x840
+
 enum NDS {
 	struct Packed {
 		var name: String
@@ -25,7 +27,7 @@ enum NDS {
 			var arm7OverlayTable: [OverlayTableEntry]
 			
 			@Offset(givenBy: \Self.header.iconBannerOffset)
-			@Length(0x840)
+			@Length(iconBannerSize)
 			var iconBanner: Datastream
 			
 			@Offset(givenBy: \Self.header.fileNameTableOffset)
@@ -44,6 +46,7 @@ enum NDS {
 				var gameTitle: String
 				@Length(4)
 				var gamecode: String
+				// 0x10
 				@Length(2)
 				var makercode: String
 				var unitcode: UInt8
@@ -54,30 +57,37 @@ enum NDS {
 				var ndsRegion: UInt16
 				var romVersion: UInt8
 				var internalFlags: UInt8
+				// 0x20
 				var arm9Offset: UInt32
 				var arm9EntryAddress: UInt32
 				var arm9LoadAddress: UInt32
 				var arm9Size: UInt32
+				// 0x30
 				var arm7Offset: UInt32
 				var arm7EntryAddress: UInt32
 				var arm7LoadAddress: UInt32
 				var arm7Size: UInt32
+				// 0x40
 				var fileNameTableOffset: UInt32
 				var fileNameTableSize: UInt32
 				var fileAllocationTableOffset: UInt32
 				var fileAllocationTableSize: UInt32
+				// 0x50
 				var arm9OverlayOffset: UInt32
 				var arm9OverlaySize: UInt32
 				var arm7OverlayOffset: UInt32
 				var arm7OverlaySize: UInt32
+				// 0x60
 				var normalCardControlRegisterSettings: UInt32
 				var secureCardControlRegisterSettings: UInt32
 				var iconBannerOffset: UInt32
 				var secureAreaCRC: UInt16
 				var secureTransferTimeout: UInt16
+				// 0x70
 				var arm9Autoload: UInt32
 				var arm7Autoload: UInt32
 				var secureDisable: UInt64
+				// 0x80
 				var totalROMSize: UInt32
 				var headerSize: UInt32
 				@Length(56)
@@ -119,6 +129,7 @@ enum NDS {
 				struct FolderEntry {
 					var contentsOffset: UInt32
 					var firstChildId: UInt16
+					// TODO: rename to parentID
 					var parentId: UInt16 // for first entry, number of folders instead of parent id
 					
 					// for clarity at use-site
@@ -139,6 +150,10 @@ enum NDS {
 			struct FileAllocationTableEntry: Codable {
 				var startAddress: UInt32
 				var endAddress: UInt32
+				
+				var size: UInt32 {
+					endAddress - startAddress
+				}
 			}
 		}
 	}
@@ -157,8 +172,7 @@ enum NDS {
 		
 		var iconBanner: Datastream
 		
-		// file name table somehow...
-//		var fileAllocationTable: [NDS.Packed.Binary.FileAllocationTableEntry]
+		var fileTables: FileTables
 		
 		var contents: [any FileSystemObject]
 		
@@ -264,6 +278,7 @@ extension NDS.Packed.Binary {
 		
 		let contents = try unpacked.contents.map { try $0.packed(configuration: configuration) }
 		
+		// TODO: overlay offsets wont be right if the sizes change
 		let numberOfOverlays = UInt16(arm9OverlayTable.count + arm7OverlayTable.count)
 		fileNameTable = FileNameTable(contents, firstFileId: numberOfOverlays)
 		
@@ -290,29 +305,6 @@ extension NDS.Packed.Binary {
 		
 		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while packing")
 		
-		let offsetIncrement: UInt32 = 0x200
-		let iconBannerSize: UInt32 = 0x840
-		
-		// ok, the original ff1 rom has the following:
-		// 0x004000 header size
-		// 0x004000 arm9 offset
-		// 0x0793D0 arm9 size
-		// 0x07D400 arm9 overlay offset
-		// 0x000100 arm9 overlay size
-		// overlays
-		// 0x119600 arm7 offset
-		// 0x02434C arm7 size
-		// 0x000000 arm7 overlay offset
-		// 0x000000 arm7 overlay size
-		// 0x13DA00 fnt offset
-		// 0x016D5F fnt size
-		// 0x154800 fat offset
-		// 0x0102B8 fat size
-		// 0x164C00 icon banner offset
-		
-		// TODO: file order is actually NOT just alphabetical
-		// - the original ROM sorts in a different way than swift (_ < A)
-		
 		// ok plan:
 		// - add setting for filling with 0xFF
 		// - enable compression
@@ -320,30 +312,107 @@ extension NDS.Packed.Binary {
 		// - if all sizes are <= original, fit everything into the same places
 		// - otherwise, move file(s) to the first available location (probably the end), based on which ends up with least displacement
 		
+		// updated plan:
+		// - if same number of files, and same size or smaller, everything is golden
+		// - otherwise.... if a file is bigger, check for intersection and move to end?
+		//   - move to end without checking for intersection?
+		//   - move to first available space?
+		// - if a file is added, uhhhhhhh
+		//   - FAT is easy, just add new entry to end
+		//   - FNT is tricky, a new file will offset a bunch of file/folder IDs
+		//     - the sort order doesn't matter, so it can be added to the end of its folder
+		//     - but itll offset the ids of EVERY FILE AFTER IT :/ i dont think theres a way around this
+		//       - compromise could be: move the *following* folder's ids to the end of the list, so only that following folder is messed with
+		// - if a folder is added??
+		//   - i think it can just be added to the end of the folder list
 		
-		// keep these from the original rom
-		// TODO: make sure no sizes have changed
-//		header.arm9Offset =                                                    header.headerSize              .roundedUpToTheNearest(offsetIncrement)
-//		header.arm9OverlayOffset =         (header.arm9Offset                + header.arm9Size)               .roundedUpToTheNearest(offsetIncrement)
-//		header.arm7Offset =                (header.arm9OverlayOffset         + header.arm9OverlaySize)        .roundedUpToTheNearest(offsetIncrement)
-//		header.arm7OverlayOffset =         (header.arm7Offset                + header.arm7Size)               .roundedUpToTheNearest(offsetIncrement)
-//		header.fileNameTableOffset =       (header.arm7OverlayOffset         + header.arm7OverlaySize)        .roundedUpToTheNearest(offsetIncrement)
-//		header.fileAllocationTableOffset = (header.fileNameTableOffset       + header.fileNameTableSize)      .roundedUpToTheNearest(offsetIncrement)
-//		header.iconBannerOffset =          (header.fileAllocationTableOffset + header.fileAllocationTableSize).roundedUpToTheNearest(offsetIncrement)
+		// this is all a huge pain though, maybe the FNT and FAT should just be changed however the fuck they're changed, but the offsets are preserved as much as possible
+		// - how big are the FNT+FAT? ~160KB
+		//   - hmm not negligable but not huge either
+		// - ok if we generate the FNT/FAT in the same way, and preserve file offsets as much as possible, what's the required algorithm?
+		//   - FNT is the same, but also returns a mapping of [file name: file id]
+		//   - unpacked contains a similar list, and an FAT
+		//   - for each file thats the same size or smaller, copy from the existing FAT
+		//   - for each file thats bigger, adds a new entry to the end of the FAT, after the last end address (cache?)
 		
-		let filesOffset = (header.iconBannerOffset + iconBannerSize)
-			.roundedUpToTheNearest(offsetIncrement)
+		
+		// TODO: fnt and fat sizes should be able to change
+		guard header.arm9Size == arm9.bytes.count,
+			  header.arm7Size == arm7.bytes.count,
+			  header.fileNameTableSize == fileNameTable.size(),
+			  header.fileAllocationTableSize == files.count * 8,
+			  header.arm9OverlaySize == arm9OverlayTable.count * 32,
+			  header.arm7OverlaySize == arm7OverlayTable.count * 32
+		else {
+			todo("sizes dont match")
+		}
+		
+		let headerEndAddresses = [
+			header.arm9Offset + header.arm9Size,
+			header.arm9OverlayOffset + header.arm9OverlaySize,
+			header.arm7Offset + header.arm7Size,
+			header.arm7OverlayOffset + header.arm7OverlaySize,
+			header.fileNameTableOffset + header.fileNameTableSize,
+			header.fileAllocationTableOffset + header.fileAllocationTableSize,
+			header.iconBannerOffset + UInt32(iconBannerSize),
+		]
+		
+		var lastAllocationEndAddress = (
+			unpacked.fileTables.allocations.values.map(\.endAddress) +
+			headerEndAddresses
+		).max()!
+		
+		let fileAllocationSpacing: UInt32 = 0x200
+		
+		// TODO: use unpacked.fileTables and the files to get the corresponding allocation table entries for each file
+		// - i need FileTable + ??? what i have now -> [Entry] // relative to THIS set of fileIDs tho
+		// - then compare each entry with fileSizes, handle each one accordingly
+		
+		let completeTable = fileNameTable.completeTable()
+		let originalOffsets = try unpacked.fileTables.existingOffsets(for: completeTable)
+		
+//		let filesOffset = (header.iconBannerOffset + iconBannerSize)
+//			.roundedUpToTheNearest(offsetIncrement)
 		
 		let fileSizes = files.map(\.bytes.count).map(UInt32.init)
-		fileAllocationTable = fileSizes.reduce(into: []) { fat, size in
-			let startAddress = fat.last?.endAddress ?? filesOffset
-			fat.append(
-				FileAllocationTableEntry(
-					startAddress: startAddress,
-					endAddress: startAddress + size
-				)
-			)
-		}
+//		fileAllocationTable = fileSizes.reduce(into: []) { fat, size in
+//			let startAddress = fat.last?.endAddress ?? filesOffset
+//			fat.append(
+//				FileAllocationTableEntry(
+//					startAddress: startAddress,
+//					endAddress: startAddress + size
+//				)
+//			)
+//		}
+		
+		fileAllocationTable = fileSizes
+			.enumerated()
+			.map { (id, size) in
+				if let originalEntry = originalOffsets[UInt16(id)],
+				   originalEntry.size >= size
+				{
+					return originalEntry
+				} else {
+					if let origEntry = originalOffsets[UInt16(id)] {
+						print("size changed for \(id) from \(origEntry.size) to \(size)")
+					} else {
+						print("no original offset for", id)
+					}
+					
+					let startAddress = lastAllocationEndAddress.roundedUpToTheNearest(fileAllocationSpacing)
+					let endAddress = startAddress + size
+					lastAllocationEndAddress = endAddress
+					
+					return FileAllocationTableEntry(
+						startAddress: startAddress,
+						endAddress: endAddress
+					)
+				}
+			}
+		
+		header.totalROMSize = lastAllocationEndAddress
+		// rounded up??? to the nearest 0x100_0000???? the nearest 16 MiB???
+		// ff1 does, ffc doesnt
 	}
 }
 
@@ -406,7 +475,9 @@ extension NDS.Unpacked: FileSystemObject {
 	) throws {
 		let encoder = JSONEncoder(.prettyPrinted, .sortedKeys)
 		
+		
 		let header           = Datastream(try encoder.encode(header))
+		let fileTablesData   = Datastream(try encoder.encode(fileTables))
 		let arm9OverlayTable = Datastream(try encoder.encode(arm9OverlayTable))
 		let arm7OverlayTable = Datastream(try encoder.encode(arm7OverlayTable))
 		
@@ -418,6 +489,7 @@ extension NDS.Unpacked: FileSystemObject {
 			BinaryFile(name: "arm7",                    data: arm7),
 			BinaryFile(name: "arm7 overlay table.json", data: arm7OverlayTable),
 			BinaryFile(name: "header.json",             data: header),
+			BinaryFile(name: "fileTables.json",         data: fileTablesData),
 			BinaryFile(name: "icon banner",             data: iconBanner)
 		] + contents
 		
@@ -443,6 +515,13 @@ extension NDS.Unpacked: FileSystemObject {
 		self.name = name
 		header = Header(binary.header, configuration: configuration)
 		
+		let completeNameTable = binary.fileNameTable.completeTable()
+		
+		fileTables = FileTables(
+			nameTable: completeNameTable,
+			allocationTable: binary.fileAllocationTable
+		)
+		
 		arm9 = binary.arm9
 		arm9OverlayTable = binary.arm9OverlayTable
 		arm9Overlays = arm9OverlayTable.map {
@@ -464,11 +543,10 @@ extension NDS.Unpacked: FileSystemObject {
 		iconBanner = binary.iconBanner
 		
 		do {
-			let completeTable = binary.fileNameTable.completeTable()
-			contents = try completeTable[0xF000]!.map {
+			contents = try completeNameTable[0xF000]!.map {
 				try $0.fileSystemObject(
 					files: binary.files,
-					fileNameTable: completeTable,
+					fileNameTable: completeNameTable,
 					configuration: configuration
 				)
 			}
@@ -578,6 +656,7 @@ extension NDS.Unpacked {
 		self.name = name
 		
 		guard let headerFile =           contents.getChild(named: "header.json") as? BinaryFile,
+			  let fileTablesFile =       contents.getChild(named: "fileTables.json") as? BinaryFile,
 			  let arm9File =             contents.getChild(named: "arm9") as? BinaryFile,
 			  let arm9OverlayTableFile = contents.getChild(named: "arm9 overlay table.json") as? BinaryFile,
 			  let arm9OverlaysFolder =   contents.getChild(named: "_arm9 overlays") as? Folder,
@@ -590,6 +669,7 @@ extension NDS.Unpacked {
 		}
 		
 		let headerData = Data(headerFile.data.bytes)
+		let fileTablesData = Data(fileTablesFile.data.bytes)
 		let arm9OverlayTableData = Data(arm9OverlayTableFile.data.bytes)
 		let arm7OverlayTableData = Data(arm7OverlayTableFile.data.bytes)
 		
@@ -603,6 +683,8 @@ extension NDS.Unpacked {
 		guard missingFileTypes.isEmpty else {
 			throw UnpackingError.missingFileTypes(missingFileTypes)
 		}
+		
+		fileTables = try JSONDecoder().decode(FileTables.self, from: fileTablesData)
 		
 		arm9 = arm9File.data
 		arm9OverlayTable = try JSONDecoder().decode(
@@ -623,7 +705,7 @@ extension NDS.Unpacked {
 		iconBanner = iconBannerFile.data
 		
 		self.contents = contents.filter {
-			!["header.json", "arm9", "arm9 overlay table.json", "_arm9 overlays", "arm7", "arm7 overlay table.json", "_arm7 overlays", "icon banner"].contains($0.name)
+			!["header.json", "fileTables.json", "arm9", "arm9 overlay table.json", "_arm9 overlays", "arm7", "arm7 overlay table.json", "_arm7 overlays", "icon banner"].contains($0.name)
 		}
 		
 		let expectedFileCount = header.fileAllocationTableSize / 8
