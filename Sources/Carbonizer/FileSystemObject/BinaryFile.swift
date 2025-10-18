@@ -48,7 +48,6 @@ extension BinaryFile: FileSystemObject {
 			do {
 				if configuration.externalMetadata {
 					let metadataPath = path
-						.deletingPathExtension()
 						.appendingPathExtension("metadata")
 					
 					try JSONEncoder(.prettyPrinted, .sortedKeys)

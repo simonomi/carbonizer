@@ -35,9 +35,7 @@ struct Metadata {
 			return
 		}
 		
-		let metadataPath = path
-			.deletingPathExtension()
-			.appendingPathExtension("metadata")
+		let metadataPath = path.appendingPathExtension("metadata")
 		
 		if metadataPath.exists() {
 			let rawMetadata = try Data(contentsOf: metadataPath)

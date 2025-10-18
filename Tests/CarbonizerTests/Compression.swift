@@ -118,6 +118,7 @@ struct Compression {
 				
 				let compressionInfoPath: URL = .compressionDirectory
 					.appending(component: expectedFileName)
+					.appendingPathExtension("bin")
 					.appendingPathExtension("metadata")
 				
 				try JSONEncoder().encode(metadata)
