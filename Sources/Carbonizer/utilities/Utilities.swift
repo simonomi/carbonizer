@@ -418,7 +418,7 @@ extension Collection where Element: Equatable {
 
 extension Collection<Byte> {
 	func firstRunIndices(minCount: Int) -> Range<Index>? {
-		for index in indices.dropLast(minCount) {
+		for index in indices.dropLast(minCount - 1) {
 			let window = self[index..<self.index(index, offsetBy: minCount)]
 			if window.areAllTheSame() {
 				let endOfRun = self[index...].firstIndex { $0 != self[index] } ?? endIndex

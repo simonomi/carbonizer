@@ -105,7 +105,7 @@ extension MAR.Unpacked: FileSystemObject {
 	
 	func savePath(in folder: URL, with configuration: Configuration) -> URL {
 		if files.count == 1 {
-			ProprietaryFile(name: name, data: Datastream())
+			ProprietaryFile(name: name, data: files.first!.content)
 				.savePath(in: folder, with: configuration)
 		} else {
 			Folder(
@@ -119,8 +119,8 @@ extension MAR.Unpacked: FileSystemObject {
 		into folder: URL,
 		with configuration: Configuration
 	) throws {
-		if files.count == 1, let file = files.first {
-			try ProprietaryFile(name: name, standaloneMCM: file)
+		if files.count == 1 {
+			try ProprietaryFile(name: name, standaloneMCM: files.first!)
 				.write(into: folder, with: configuration)
 		} else {
 			try Folder(

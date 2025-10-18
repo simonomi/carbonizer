@@ -68,6 +68,7 @@ struct RoundTrips {
 			("btl_tuto_001", .packed),
 			("btl_adjust_defs", .packed),
 			("ffc creature_defs", .packed),
+			("map c 0118", .packed), // MAR
 		] as [(String, PackedStatus)]
 	)
 	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {

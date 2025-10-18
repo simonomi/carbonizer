@@ -13,7 +13,7 @@ extension RunLength {
 		header.write(to: outputData)
 		
 		var inputOffset = inputData.startIndex
-		while let runIndices = inputData[inputOffset...].firstRunIndices(minCount: 3) {
+		while let runIndices = inputData[inputOffset...].firstRunIndices(minCount: minCompressedCount) {
 			let uncompressedBytes = inputData[inputOffset..<runIndices.lowerBound]
 			
 			for chunk in uncompressedBytes.chunked(maxSize: maxUncompressedCount) {

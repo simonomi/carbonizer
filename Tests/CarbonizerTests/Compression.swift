@@ -23,6 +23,8 @@ struct Compression {
 			(.lzss, "kaseki_defs - decompressed", "kaseki_defs - lzss"),
 			(.runLength, "image_archive 0050 - decompressed", "image_archive 0050 - run-length"),
 			(.huffman, "image_archive 0050 - run-length", "image_archive 0050 - huffman"),
+			(.runLength, "map c 0118 - decompressed", "map c 0118 - run-length"),
+			(.huffman, "map c 0118 - run-length", "map c 0118 - huffman"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
 	func compress(_ type: MCM.Unpacked.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {
@@ -83,6 +85,8 @@ struct Compression {
 			(.lzss, "kaseki_defs - lzss", "kaseki_defs - decompressed"),
 			(.huffman, "image_archive 0050 - huffman", "image_archive 0050 - run-length"),
 			(.runLength, "image_archive 0050 - run-length", "image_archive 0050 - decompressed"),
+			(.huffman, "map c 0118 - huffman", "map c 0118 - run-length"),
+			(.runLength, "map c 0118 - run-length", "map c 0118 - decompressed"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
 	func decompress(_ type: MCM.Unpacked.CompressionType, _ compressedFileName: String, _ expectedFileName: String) throws {
@@ -90,7 +94,7 @@ struct Compression {
 		
 //		let start = Date.now
 		
-		let (decompressedInput, _) = try type.decompress(inputData)
+		let (decompressedInput, compressionInfo) = try type.decompress(inputData)
 //		print(expectedFileName)
 		
 //		print("\(.yellow)decompress", type, start.timeElapsed, "\(.normal)")
@@ -102,14 +106,25 @@ struct Compression {
 			print("\(.green)saving decompression to '\(.cyan)\(expectedFileName).bin\(.green)'\(.normal)")
 			try Data(decompressedInput.bytes).write(to: expectedURL)
 			
-//			let metadata = compressionInfo.map {
-//				Metadata(skipFile: false, standalone: false, compression: (.huffman, .lzss), maxChunkSize: 4000, index: 0, huffmanCompressionInfo: [$0])
-//			}
-//			
-//			if let metadata {
-//				try JSONEncoder().encode(metadata).write(to: .temporaryDirectory.appending(component: expectedFileName + ".metadata"))
-//				print(URL.temporaryDirectory.appending(component: expectedFileName + ".metadata").path(percentEncoded: false))
-//			}
+			if let compressionInfo {
+				let metadata = Metadata(
+					skipFile: false,
+					standalone: false,
+					compression: (.huffman, .lzss),
+					maxChunkSize: 4000,
+					index: 0,
+					huffmanCompressionInfo: [(compressionInfo, nil)]
+				)
+				
+				let compressionInfoPath: URL = .compressionDirectory
+					.appending(component: expectedFileName)
+					.appendingPathExtension("metadata")
+				
+				try JSONEncoder().encode(metadata)
+					.write(to: compressionInfoPath)
+				
+				print("\(.green)saving compression info to '\(.cyan)\(compressionInfoPath.lastPathComponent)\(.green)'\(.normal)")
+			}
 		}
 		
 		let expectedOutput = try data(for: expectedFileName)
