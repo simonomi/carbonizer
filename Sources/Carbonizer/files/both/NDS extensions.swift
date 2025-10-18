@@ -1,11 +1,11 @@
 import BinaryParser
 import Foundation
 
-extension [NDS.Packed.Binary.FileNameTable.SubEntry]: BinaryConvertible {
+extension [NDS.Packed.Binary.FileNameTable.FolderContent]: BinaryConvertible {
 	public init(_ data: Datastream) throws {
 		self = []
 		while last?.typeAndNameLength != 0 {
-			append(try data.read(NDS.Packed.Binary.FileNameTable.SubEntry.self))
+			append(try data.read(NDS.Packed.Binary.FileNameTable.FolderContent.self))
 		}
 		removeLast()
 	}
@@ -16,25 +16,25 @@ extension [NDS.Packed.Binary.FileNameTable.SubEntry]: BinaryConvertible {
 }
 
 extension Datawriter {
-	func write(_ data: [NDS.Packed.Binary.FileNameTable.SubEntry]) {
+	func write(_ data: [NDS.Packed.Binary.FileNameTable.FolderContent]) {
 		data.write(to: self)
 	}
 }
 
-typealias CompleteFNT = [UInt16 : [NDS.Packed.Binary.FileNameTable.SubEntry]]
+typealias CompleteFNT = [UInt16 : [NDS.Packed.Binary.FileNameTable.FolderContent]]
 
 extension NDS.Packed.Binary.FileNameTable {
 	func completeTable() -> CompleteFNT {
-		let folderIds = (0..<rootFolder.parentId)
+		let folderIds = (0..<rootFolder.totalFolderCount)
 			.map { $0 + 0xF000 }
-		let entries = zip([rootFolder] + mainTable, [rootSubTable] + subTables)
-			.map { mainEntry, subEntries in
-				zip(subEntries, mainEntry.firstChildId...)
-					.map { subEntry, newId in
-						if subEntry.type == .file {
-							subEntry.givenId(newId)
+		let entries = zip([rootFolder] + folders, [rootContents] + folderContents)
+			.map { folder, contents in
+				zip(contents, folder.firstChildId...)
+					.map { content, newId in
+						if content.type == .file {
+							content.givenId(newId)
 						} else {
-							subEntry
+							content
 						}
 					}
 			}
@@ -43,7 +43,7 @@ extension NDS.Packed.Binary.FileNameTable {
 	}
 }
 
-extension NDS.Packed.Binary.FileNameTable.SubEntry {
+extension NDS.Packed.Binary.FileNameTable.FolderContent {
 	enum FileOrFolder { case file, folder }
 	var type: FileOrFolder {
 		if self.typeAndNameLength < 0x80 {
@@ -147,7 +147,7 @@ extension NDS.Packed.Binary.OverlayTableEntry {
 
 extension NDS.Packed.Binary.FileNameTable {
 	init(_ files: [any FileSystemObject], firstFileId: UInt16) {
-		let allFolders = files.getAllFolders()
+		let allFolders = files.getAllFolders() // TODO: sort like ff1 does
 		let folderIds = Dictionary(
 			uniqueKeysWithValues: allFolders
 				.enumerated()
@@ -160,32 +160,32 @@ extension NDS.Packed.Binary.FileNameTable {
 			.map { folder, id in (folder: folder, id: id) }
 		
 		var fileId = firstFileId
-		var subTableOffset = (folderIds.count + 1) * 8
+		var contentsOffset = (folderIds.count + 1) * 8
 		
-		func makeSubEntry(_ fileSystemObject: any FileSystemObject) -> SubEntry {
+		func makeFolderContents(_ fileSystemObject: any FileSystemObject) -> FolderContent {
 			switch fileSystemObject {
 				case is ProprietaryFile, is BinaryFile, is MAR.Unpacked, is MAR.Packed:
 					fileId += 1
-					subTableOffset += fileSystemObject.name.utf8CString.count
-					return SubEntry(.file, name: fileSystemObject.name)
+					contentsOffset += fileSystemObject.name.utf8CString.count
+					return FolderContent(.file, name: fileSystemObject.name)
 				case let folder as Folder:
-					subTableOffset += folder.name.utf8CString.count + 2
-					return SubEntry(.folder, name: folder.name, id: folderIds[folder]!)
+					contentsOffset += folder.name.utf8CString.count + 2
+					return FolderContent(.folder, name: folder.name, id: folderIds[folder]!)
 				default:
 					fatalError("unexpected FileSystemObject type: \(type(of: fileSystemObject))")
 			}
 		}
 		
-		rootFolder = MainEntry(
-			subTableOffset: UInt32(subTableOffset),
+		rootFolder = FolderEntry(
+			contentsOffset: UInt32(contentsOffset),
 			firstChildId: fileId,
 			parentId: UInt16(allFolders.count + 1)
 		)
-		rootSubTable = files.map(makeSubEntry) + [.end]
-		subTableOffset += 1
+		rootContents = files.map(makeFolderContents) + [.end]
+		contentsOffset += 1
 		
-		mainTable = []
-		subTables = []
+		folders = []
+		folderContents = []
 		
 		for folder in allFolders {
 			let parentId = foldersWithIds.first {
@@ -194,20 +194,20 @@ extension NDS.Packed.Binary.FileNameTable {
 					.contains { $0 == folder }
 			}?.id ?? 0xF000
 			
-			mainTable.append(
-				MainEntry(
-					subTableOffset: UInt32(subTableOffset),
+			folders.append(
+				FolderEntry(
+					contentsOffset: UInt32(contentsOffset),
 					firstChildId: fileId,
 					parentId: parentId
 				)
 			)
-			subTables.append(folder.contents.map(makeSubEntry) + [.end])
-			subTableOffset += 1
+			folderContents.append(folder.contents.map(makeFolderContents) + [.end])
+			contentsOffset += 1
 		}
 	}
 }
 
-extension NDS.Packed.Binary.FileNameTable.SubEntry {
+extension NDS.Packed.Binary.FileNameTable.FolderContent {
 	init(_ type: FileOrFolder, name: String, id: UInt16? = nil) {
 		let typeModifier = type == .folder ? 0x80 : 0
 		typeAndNameLength = UInt8(name.utf8.count + typeModifier)

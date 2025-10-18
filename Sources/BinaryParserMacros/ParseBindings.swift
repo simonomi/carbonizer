@@ -38,7 +38,7 @@ func parseBinding(_ binding: PatternBindingSyntax, with attributes: Attributes) 
 				.offsets(offsets)
 			} else if let count = attributes.count {
 				.count(count)
-			} else if type == "[SubEntry]" {
+			} else if type == "[FolderContent]" {
 				.auto // hacky solution to a problem i dont wanna deal with
 			} else {
 				throw PropertyParsingError.missingCount(for: name)

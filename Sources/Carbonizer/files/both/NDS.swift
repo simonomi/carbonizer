@@ -104,23 +104,29 @@ enum NDS {
 			
 			@BinaryConvertible
 			struct FileNameTable {
-				var rootFolder: MainEntry
-				@Count(givenBy: \Self.rootFolder.parentId, .minus(1))
-				var mainTable: [MainEntry]
-				@Offset(givenBy: \Self.rootFolder.subTableOffset)
-				var rootSubTable: [SubEntry]
-				@Offsets(givenBy: \Self.mainTable, at: \.subTableOffset)
-				var subTables: [[SubEntry]]
+				var rootFolder: FolderEntry
+				
+				@Count(givenBy: \Self.rootFolder.totalFolderCount, .minus(1))
+				var folders: [FolderEntry]
+				
+				@Offset(givenBy: \Self.rootFolder.contentsOffset)
+				var rootContents: [FolderContent]
+				
+				@Offsets(givenBy: \Self.folders, at: \.contentsOffset)
+				var folderContents: [[FolderContent]]
 				
 				@BinaryConvertible
-				struct MainEntry {
-					var subTableOffset: UInt32
+				struct FolderEntry {
+					var contentsOffset: UInt32
 					var firstChildId: UInt16
 					var parentId: UInt16 // for first entry, number of folders instead of parent id
+					
+					// for clarity at use-site
+					var totalFolderCount: UInt16 { parentId }
 				}
 				
 				@BinaryConvertible
-				struct SubEntry {
+				struct FolderContent {
 					var typeAndNameLength: UInt8
 					@Length(givenBy: \Self.typeAndNameLength, .modulo(0x80))
 					var name: String
@@ -130,7 +136,7 @@ enum NDS {
 			}
 			
 			@BinaryConvertible
-			struct FileAllocationTableEntry {
+			struct FileAllocationTableEntry: Codable {
 				var startAddress: UInt32
 				var endAddress: UInt32
 			}
