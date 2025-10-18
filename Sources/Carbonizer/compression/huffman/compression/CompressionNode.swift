@@ -48,6 +48,14 @@ extension Huffman {
 			}
 		}
 		
+		func symbols() -> Set<UInt8> {
+			switch kind {
+				case .symbol(let byte): [byte]
+				case .branch(let left, let right):
+					left.symbols().union(right.symbols())
+			}
+		}
+		
 		func dictionary() -> [Byte: BitArray] {
 			switch kind {
 				case .symbol(let byte):
@@ -134,14 +142,19 @@ extension Huffman {
 			}
 		}
 		
-		func write(to output: Datawriter) {
+		struct InvalidTreeShape: Error, CustomStringConvertible {
+			var description: String {
+				"couldn't create a properly sized huffman tree"
+			}
+		}
+		
+		func write(to output: Datawriter) throws {
 			// rounded up to align to the nearest word
 			let nodeCount = (self.nodeCount() + 1).roundedUpToTheNearest(4) - 1
 			let branchNodeCount = (nodeCount - 1) / 2
 			precondition(branchNodeCount <= Byte.max)
 			output.write(Byte(branchNodeCount))
 			
-			// TODO: this algorithm is wrong, it fails for kaseki_defs
 			var nodeWritingQueue: ArraySlice = [self]
 			
 			while let node = nodeWritingQueue.popFirst() {
@@ -152,7 +165,9 @@ extension Huffman {
 						var nodeData = Byte(nodeWritingQueue.count / 2)
 						
 						// children offset should fit in lower 6 bits
-						precondition(nodeData & 0b111111 == nodeData, "more nodes than should be possible")
+						guard nodeData & 0b111111 == nodeData else {
+							throw InvalidTreeShape()
+						}
 						
 						if left.isData {
 							nodeData |= 1 << 7
@@ -182,24 +197,20 @@ extension Huffman {
 		
 		func write(_ inputData: ArraySlice<UInt8>, to output: Datawriter) throws {
 			let dictionary = dictionary()
-//			print(dictionary)
 			
 			var currentWord: BitArray? = nil
 			
-			for byte in inputData { // e0046 stops too soon...?
+			for byte in inputData {
 				if currentWord == nil {
 					currentWord = BitArray()
 				}
 				
 				guard let newBits = dictionary[byte] else {
-					print()
 					throw TreeMissingValue(key: byte)
 				}
 				
-//				print(String(byte, radix: 16, uppercase: true), newBits)
 				
 				if let overflow = currentWord!.append(contentsOf: newBits) {
-//					print(currentWord!)
 					currentWord!.write(to: output)
 					currentWord = overflow
 				}
