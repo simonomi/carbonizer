@@ -209,7 +209,11 @@ extension NDS.Packed.Binary.FileNameTable {
 					parentId: parentId
 				)
 			)
-			folderContents.append(folder.contents.map(makeFolderContents) + [.end])
+			folderContents.append(
+				folder.contents
+					.sorted(by: ffFileSort)
+					.map(makeFolderContents) + [.end]
+			)
 			contentsOffset += 1
 		}
 	}
@@ -283,15 +287,21 @@ fileprivate func ffFileSort(_ left: any FileSystemObject, _ right: any FileSyste
 }
 
 fileprivate extension String {
-	// ff sorts punctuation like "_" before letters like "A"
+	// so "." < "0" < "_" < "a" < "A" < "b"
 	func isFFLessThan(_ other: String) -> Bool {
 		for (character, otherCharacter) in zip(self, other) {
-			guard character != otherCharacter else { continue }
+			guard character.lowercased() != otherCharacter.lowercased() else { continue }
 			
-			return if character.isPunctuation != otherCharacter.isPunctuation {
-				character.isPunctuation // sort punctuation first
+			return if character == "." {
+				true
+			} else if otherCharacter == "." {
+				false
+			} else if character.isNumber != otherCharacter.isNumber {
+				character.isNumber
+			} else if character.isPunctuation != otherCharacter.isPunctuation {
+				character.isPunctuation
 			} else {
-				character < otherCharacter
+				character.lowercased() < otherCharacter.lowercased()
 			}
 		}
 		

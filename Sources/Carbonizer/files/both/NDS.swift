@@ -394,13 +394,6 @@ extension NDS.Packed.Binary {
 				{
 					return originalEntry
 				} else {
-					if let origEntry = originalOffsets[UInt16(id)] {
-						print("size changed for \(id) from \(origEntry.size) to \(size)")
-						print(allFiles[id].name)
-					} else {
-						print("no original offset for", id)
-					}
-					
 					let startAddress = lastAllocationEndAddress.roundedUpToTheNearest(fileAllocationSpacing)
 					let endAddress = startAddress + size
 					lastAllocationEndAddress = endAddress
