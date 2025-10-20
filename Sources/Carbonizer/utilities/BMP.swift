@@ -1,14 +1,14 @@
 import BinaryParser
 import Foundation
 
-struct Bitmap {
+struct BMP {
 	var width: UInt32
 	var height: UInt32
 	var contents: [Color]
 	
 	@BinaryConvertible
 	struct Color {
-		// it's BGRA bc blender ignores the header info and assumes its BGRA no matter what
+		// BGRA bc blender ignores the header info and assumes its BGRA no matter what
 		var blue: UInt8
 		var green: UInt8
 		var red: UInt8
@@ -16,16 +16,35 @@ struct Bitmap {
 	}
 }
 
-extension Bitmap.Color {
-	init(_ color: Color) {
+extension BMP.Color {
+	init(_ color: Color, alpha: Double = 1) {
 		blue = color.blue
 		green = color.green
 		red = color.red
-		alpha = 255
+		self.alpha = UInt8(alpha * 255)
+	}
+	
+	init(_ rgb555: Color555, alpha: Double = 1) {
+		// 8 is the ratio between the number of colors in each (32:256)
+		red = rgb555.red * 8
+		green = rgb555.green * 8
+		blue = rgb555.blue * 8
+		self.alpha = UInt8(alpha * 255)
+	}
+	
+	static let transparent = Self(blue: 0, green: 0, red: 0, alpha: 0)
+	
+	mutating func replaceAlpha(with newAlpha: Double) {
+		alpha = UInt8(newAlpha * 255)
+	}
+	
+	consuming func replacingAlpha(with newAlpha: Double) -> Self {
+		replaceAlpha(with: newAlpha)
+		return self
 	}
 }
 
-extension Bitmap: BinaryConvertible {
+extension BMP: BinaryConvertible {
 	init(_ data: Datastream) throws {
 		fatalError("cannot read bmp file")
 	}
@@ -65,23 +84,7 @@ extension Bitmap: BinaryConvertible {
 	}
 }
 
-extension Bitmap.Color {
-	init(_ rgb555: RGB555Color, alpha: Double = 1) {
-		red = UInt8(rgb555.red * 255)
-		green = UInt8(rgb555.green * 255)
-		blue = UInt8(rgb555.blue * 255)
-		self.alpha = UInt8(alpha * 255)
-	}
-	
-	static let transparent = Self(blue: 0, green: 0, red: 0, alpha: 0)
-	
-	consuming func replacingAlpha(with newAlpha: Double) -> Self {
-		alpha = UInt8(newAlpha * 255)
-		return self
-	}
-}
-
-extension Bitmap: ProprietaryFileData {
+extension BMP: ProprietaryFileData {
 	static let fileExtension = ".bmp"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unknown

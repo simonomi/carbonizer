@@ -117,7 +117,7 @@ func mmsFinder(_ inputFile: consuming any FileSystemObject, _ parent: Folder) th
 			let animationFile = animationArchive.files[animationIndex]
 			let animationData = Datastream(animationFile.content as! Datastream) // copy so as not to modify the original
 			
-			let frames: [Bitmap]
+			let frames: [BMP]
 			do {
 				let animation = try animationData.read(SpriteAnimation.self)
 //				print(prettify(animation.commands))

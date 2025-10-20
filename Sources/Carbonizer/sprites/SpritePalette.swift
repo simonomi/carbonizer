@@ -5,7 +5,7 @@ struct SpritePalette {
 	var colorPaletteType: ColorPaletteType
 	@Padding(bytes: 3)
 	@Count(givenBy: \Self.colorPaletteType.count)
-	var colors: [RGB555Color]
+	var colors: [Color555]
 	
 	enum ColorPaletteType: UInt8, Codable, RawRepresentable {
 		case sixteenColors, twoFiftySixColors

@@ -21,7 +21,7 @@ func textureExporterF(
 			do {
 				textureFolders.append(try texture.folder(named: name))
 			} catch {
-				let location = "\(path + [mar.name, name]):"
+				let location = (path + [mar.name, name]).joined(separator: "/") + ":"
 				configuration.log(.warning, location, error)
 			}
 		}

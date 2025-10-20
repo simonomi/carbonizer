@@ -6,51 +6,61 @@ enum MFS {
 		@Include
 		static let magicBytes = "MFS"
 		var someCount: UInt32
-		var someOffset: UInt32
+		var someOffsetsOffset: UInt32 = 0xC
 		@Count(givenBy: \Self.someCount)
-		@Offset(givenBy: \Self.someOffset)
-		var someThings: [UInt32]
+		@Offset(givenBy: \Self.someOffsetsOffset)
+		var someOffsets: [UInt32]
 		
-		@Offsets(givenBy: \Self.someThings)
-		var noClue: [Something]
+		@Offsets(givenBy: \Self.someOffsets)
+		var somes: [Something]
 		
 		@BinaryConvertible
 		struct Something: Codable {
-			var colorPaletteCount: UInt32 // palette count
+			var colorPaletteCount: UInt32
 			var unknown2: UInt32 // correlates with unknown7 being 2
 			var unknown3: UInt32 // always 2 if unknown2 is 1 (and sometimes if not)
 								 // whether this file has multiple..... Somethings?
 								 // - 1 for no, 2 for yes
-			var letterLength: UInt32
+			var letterSize: UInt32
 			var unknown5: UInt32 = 0
-			var lettersCount: UInt32
+			var letterCount: UInt32
 			var unknown7: UInt32
 			var unknown8: UInt32
 			var unknown9: UInt32
 			var unknown10: UInt32
-			var colorPaletteLength: UInt32
+			var colorPaletteSize: UInt32
 			var colorPaletteOffset: UInt32 = 0x38
-			var lettersLength: UInt32
+			var lettersSize: UInt32
 			var lettersOffset: UInt32
 			
-//			var colorPalettes
+//			@Count(givenBy: \Self.colorPaletteCount)
+//			@Offset(givenBy: \Self.colorPaletteOffset)
+//			var colorPalettes: [Palette]
 			
-			@If(\Self.letterLength, is: .equalTo(16)) // skip every font but font12
+//			@If(\Self.letterSize, is: .equalTo(16)) // skip every font but font12
+			@If(\Self.letterSize, is: .equalTo(0x44)) // skip every font but font12
 													  // font10 seems to fail bc non-ascii
 													  // rv_num seems to fail bc direct color bitmap
 			@Offset(givenBy: \Self.lettersOffset)
-			@Count(givenBy: \Self.lettersCount)
+			@Count(givenBy: \Self.letterCount)
 			var letters: [Letter]?
+			
+//			struct Palette: Codable {
+//				@Count(0x20)
+//				var colors: [UInt8] // rgb555 probably
+//			}
 			
 			@BinaryConvertible
 			struct Letter: Codable {
-				var unknown: UInt8
+				var unknown: UInt8 // which palette? just spitballing here
 				var ascii: UInt8
 				var width: UInt8
-				var length: UInt8
-				@Count(givenBy: \Self.length)
+				var height: UInt8
+//				@Count(givenBy: \Self.width, .times(\Self.height), .dividedBy(2)) // uhhh (divided by 8 for b/w)
+				@Count(0x40)
 				var letterData: [UInt8] // if no palette, bitmask one byte per row
 										// if palette, 4 bits per color
+				
 			}
 		}
 	}
@@ -87,22 +97,43 @@ extension MFS.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: MFS.Packed, configuration: Configuration) {
-		guard packed.someCount == 3 else { return }
+		print()
+		print(packed.someCount)
 		
-		let something = packed.noClue.first!
+		guard packed.someCount == 1 else { return }
+//		guard packed.someCount == 3 else { return }
 		
-		guard something.letterLength == 16 else { return }
+		let something = packed.somes.first!
+		
+		print(something.letterSize)
+		
+//		guard something.letterLength == 16 else { return }
+		guard something.letterSize == 0x44 else { return }
+		
+		print("here")
 		
 		for letter in something.letters! {
-			let letterString = letter.letterData
-				.map { String($0, radix: 2) }
-				.map { $0.padded(toLength: 8, with: "0") }
-				.joined(separator: "\n")
-				.replacing("0", with: " ")
-				.replacing("1", with: "█")
-			
-			print(letterString)
+//			let letterString = letter.letterData
+//				.map { String($0, radix: 2) }
+//				.map { $0.padded(toLength: 8, with: "0") }
+//				.joined(separator: "\n")
+//				.replacing("0", with: " ")
+//				.replacing("1", with: "█")
+//			
+//			print(letterString)
+			print(String(letter.ascii, radix: 16))
+//			print(letter.letterData)
+			print(
+				letter.letterData
+					.flatMap { [$0 & 0b1111, $0 >> 4] }
+					.map { String($0, radix: 16) }
+					.chunked(exactSize: Int(letter.width))
+					.joined(separator: ["\n"])
+					.joined(separator: "")
+			)
 			print("---")
 		}
+		
+		todo()
 	}
 }

@@ -8,6 +8,8 @@ import Foundation
 //   - remove as much platform-specific code as possible
 //     - in theory it should all be part of CLI, not library
 // - make a GUI
+// - re-add sprite exporting
+// - check that processor is running on the right game
 
 public enum Carbonizer {
 	// if run manually, CI will check for the string "main", so here you go :)

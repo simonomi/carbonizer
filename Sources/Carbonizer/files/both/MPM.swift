@@ -12,7 +12,7 @@ enum MPM {
 		var width: UInt32
 		var height: UInt32
 		
-		var unknown4: UInt32
+		var colorCountDividedBy16: UInt32
 		var unknown5: UInt32
 		var unknown6: UInt32
 		
@@ -39,7 +39,7 @@ enum MPM {
 		var fourByteAlign: ()
 	}
 	
-	struct Unpacked {
+	struct Unpacked: Codable {
 		// always either 030, 404, or 508
 		// 030 means 8-bit texture with no bgmaps
 		var unknown1: UInt32
@@ -49,15 +49,15 @@ enum MPM {
 		var width: UInt32
 		var height: UInt32
 		
-		var unknown4: UInt32
-		var unknown5: UInt32
+		var colorCount: UInt32
+		var unknown5: UInt32 // 2 u16s ?
 		var unknown6: UInt32
 		
 		var palette: TableEntry
 		var bitmap: TableEntry
 		var bgMap: TableEntry?
 		
-		struct TableEntry {
+		struct TableEntry: Codable {
 			var index: UInt32
 			var tableName: String
 		}
@@ -83,7 +83,7 @@ extension MPM.Packed: ProprietaryFileData {
 		width = unpacked.width
 		height = unpacked.height
 		
-		unknown4 = unpacked.unknown4
+		colorCountDividedBy16 = unpacked.colorCount / 16
 		unknown5 = unpacked.unknown5
 		unknown6 = unpacked.unknown6
 		
@@ -122,7 +122,7 @@ extension MPM.Unpacked: ProprietaryFileData {
 		width = packed.width
 		height = packed.height
 		
-		unknown4 = packed.unknown4
+		colorCount = packed.colorCountDividedBy16 * 16
 		unknown5 = packed.unknown5
 		unknown6 = packed.unknown6
 		
@@ -131,32 +131,5 @@ extension MPM.Unpacked: ProprietaryFileData {
 		bgMap = packed.bgMapTableName.map {
 			TableEntry(index: packed.bgMapIndex, tableName: $0)
 		}
-	}
-}
-
-// MARK: unpacked codable
-extension MPM.Unpacked: Codable {
-	enum CodingKeys: String, CodingKey {
-		case unknown1 = "unknown 1"
-		case unknown2 = "unknown 2"
-		case unknown3 = "unknown 3"
-		
-		case width =  "width"
-		case height = "height"
-		
-		case unknown4 = "unknown 4"
-		case unknown5 = "unknown 5"
-		case unknown6 = "unknown 6"
-		
-		case palette = "palette"
-		case bitmap = "bitmap"
-		case bgMap = "BG map"
-	}
-}
-
-extension MPM.Unpacked.TableEntry: Codable {
-	enum CodingKeys: String, CodingKey {
-		case index =     "index"
-		case tableName = "table name"
 	}
 }

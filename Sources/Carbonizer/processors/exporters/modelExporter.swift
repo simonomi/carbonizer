@@ -17,7 +17,7 @@ func modelExporterF(
 		for modelIndices in indices {
 			do {
 				guard let mesh = mar.files[modelIndices.meshIndex].content as? Mesh.Unpacked else {
-					throw MissingComponent.mesh(modelIndices.meshIndex)
+					throw MissingModelComponent.mesh(modelIndices.meshIndex)
 				}
 				
 				let texture = mar.files[modelIndices.textureIndex].content as? Texture.Unpacked
@@ -27,7 +27,7 @@ func modelExporterF(
 				}
 				
 				guard let animation = mar.files[modelIndices.animationIndex].content as? Animation.Unpacked else {
-					throw MissingComponent.animation(modelIndices.animationIndex)
+					throw MissingModelComponent.animation(modelIndices.animationIndex)
 				}
 				
 				let textureName = String(modelIndices.textureIndex)
@@ -49,14 +49,14 @@ func modelExporterF(
 				
 				folder.contents.append(colladaFile)
 			} catch {
-				let location = "\(path + [modelIndices.modelName]):"
+				let location = (path + [modelIndices.modelName]).joined(separator: "/") + ":"
 				configuration.log(.warning, location, error)
 			}
 		}
 	}
 }
 
-enum MissingComponent: Error, CustomStringConvertible {
+enum MissingModelComponent: Error, CustomStringConvertible {
 	case mesh(Int)
 	case texture(Int)
 	case animation(Int)

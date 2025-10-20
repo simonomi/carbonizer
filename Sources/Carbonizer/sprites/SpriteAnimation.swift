@@ -168,7 +168,7 @@ struct SpriteAnimation: BinaryConvertible {
 		}
 	}
 	
-	func frames(palettes: [SpritePalette?], bitmaps: [SpriteBitmap]) throws -> [Bitmap] {
+	func frames(palettes: [SpritePalette?], bitmaps: [SpriteBitmap]) throws -> [BMP] {
 		// cant parse 7s
 		if commands.contains(where: \.isUnknown) {
 			print("unknown animation command")
@@ -187,7 +187,7 @@ struct SpriteAnimation: BinaryConvertible {
 			return []
 		}
 		
-		var frames = [Bitmap]()
+		var frames = [BMP]()
 		
 		var images = [Image]()
 		
@@ -236,7 +236,7 @@ struct SpriteAnimation: BinaryConvertible {
 		images: [Image],
 		palettes: [SpritePalette?],
 		bitmaps: [SpriteBitmap]
-	) throws -> Bitmap {
+	) throws -> BMP {
 		let leastX = images
 			.map(\.position.x)
 			.map(UInt32.init)
@@ -278,7 +278,7 @@ struct SpriteAnimation: BinaryConvertible {
 //		})
 //		print()
 		
-		var canvas = Bitmap(
+		var canvas = BMP(
 			width: width,
 			height: height,
 			contents: Array(repeating: .transparent, count: Int(width) * Int(height))

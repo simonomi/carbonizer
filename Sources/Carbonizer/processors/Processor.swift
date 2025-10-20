@@ -26,7 +26,7 @@ public enum Processor: String, Hashable, Sendable {
 			case .exportVivosaurModels:      [.tclRipper, .modelReparser, .textureExporter, .modelExporter]
 			case .exportModels:              [.mm3Ripper, .modelReparser, .textureExporter, .modelExporter]
 			case .exportSprites:             todo() // TODO: everything
-			case .exportImages:              todo() // TODO: everything
+			case .exportImages:              [.mpmRipper, .imageReparser, .imageExporter]
 			case .dexDialogueLabeller:       [.dialogueRipper, .dexDialogueLabeller]
 			case .dexDialogueSaver:          [.dexDialogueRipper, .dexDialogueSaver]
 			case .dexBlockLabeller:          [.eventIDRipper, .dexBlockLabeller]
@@ -44,7 +44,7 @@ public enum Processor: String, Hashable, Sendable {
 			case .exportVivosaurModels:      ["MAR", "3CL"]
 			case .exportModels:              ["MAR", "MM3"]
 			case .exportSprites:             todo()
-			case .exportImages:              todo()
+			case .exportImages:              ["MAR", "MPM"]
 			case .dexDialogueLabeller:       ["MAR", "DMG", "DEX"]
 			case .dexDialogueSaver:          ["MAR", "DEX", "DMG"]
 			case .dexBlockLabeller:          ["MAR", "DEP", "DEX"]
@@ -57,10 +57,12 @@ public enum Processor: String, Hashable, Sendable {
 		}
 	}
 	
+	// TODO: required game
+	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper
-		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
-		case modelExporter, textureExporter
+		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper, mpmRipper
+		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, ffcCreatureLabeller, hmlNameLabeller, imageReparser, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
+		case imageExporter, modelExporter, textureExporter
 		
 		func run(
 			on file: inout any FileSystemObject,
@@ -124,6 +126,14 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
+				case .mpmRipper:
+					try file.runProcessor(
+						mpmRipperF,
+						on: "image/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
 				case .dbsNameLabeller:
 					try file.runProcessor(
 						dbsNameLabellerF,
@@ -172,6 +182,14 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
+				case .imageReparser:
+					try file.runProcessor(
+						imageReparserF,
+						on: "image/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
 				case .keyItemLabeller:
 					try file.runProcessor(
 						keyItemLabellerF,
@@ -200,6 +218,14 @@ public enum Processor: String, Hashable, Sendable {
 					try file.runProcessor(
 						museumLabellerF,
 						on: "etc/museum_defs",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .imageExporter:
+					try file.runProcessor(
+						imageExporterF,
+						on: "image/**",
 						in: &environment,
 						at: [],
 						configuration: configuration

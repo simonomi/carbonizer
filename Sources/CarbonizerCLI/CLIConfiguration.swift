@@ -130,7 +130,7 @@ struct CLIConfiguration : Sendable {
 				// required file types: MAR, MMS
 				"exportSprites": false,
 				
-				// extract images (image folder)    *temporarily broken, do not use*
+				// extract images (image folder)
 				// required file types: MAR, MPM
 				"exportImages": false,
 				

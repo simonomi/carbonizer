@@ -106,7 +106,7 @@ extension GPUCommands: BinaryConvertible {
 							)
 					case .color: try {
 						let color: Command = .color(
-							Color(try data.read(RGB555Color.self))
+							Color(try data.read(Color555.self))
 						)
 						data.jump(bytes: 2)
 						return color

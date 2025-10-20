@@ -1,4 +1,3 @@
-// TODO: make this BinaryConvertible so no conversion is necessary when packing/unpacking?
 struct Color: Codable {
 	var red: UInt8
 	var green: UInt8
@@ -14,22 +13,37 @@ struct Color: Codable {
 		blue = bytes[2]
 	}
 	
-	init(_ rgb555: RGB555Color) {
-		red = UInt8(rgb555.red * 255)
-		green = UInt8(rgb555.green * 255)
-		blue = UInt8(rgb555.blue * 255)
+	init(_ rgb555: Color555) {
+		// 8 is the ratio between the number of colors in each (32:256)
+		red = rgb555.red * 8
+		green = rgb555.green * 8
+		blue = rgb555.blue * 8
 	}
 	
-	init(_ string: String) {
-		guard string.count == 7, string.hasPrefix("#") else {
-			todo("throw error")
+	enum ParseError: Error, CustomStringConvertible {
+		case wrongLength(String)
+		case invalidHex(String)
+		
+		var description: String {
+			switch self {
+				case .wrongLength(let string):
+					"invalid hex color: \(.red)'\(string)'\(.normal), must be a \(.green)#\(.normal) followed by 6 hex digits (for example: \(.green)#FFD800\(.normal))"
+				case .invalidHex(let string):
+					"invalid hex color: \(.red)'\(string)'\(.normal), only the digits \(.green)0–9 a–f A–F\(.normal) are allowed"
+			}
+		}
+	}
+	
+	init(_ raw: String) throws(ParseError) {
+		guard raw.count == 7, raw.hasPrefix("#") else {
+			throw .wrongLength(raw)
 		}
 		
-		guard let red = UInt8(string.dropFirst().prefix(2), radix: 16),
-			  let green = UInt8(string.dropFirst(3).prefix(2), radix: 16),
-			  let blue = UInt8(string.dropFirst(5).prefix(2), radix: 16)
+		guard let red = UInt8(raw.dropFirst().prefix(2), radix: 16),
+			  let green = UInt8(raw.dropFirst(3).prefix(2), radix: 16),
+			  let blue = UInt8(raw.dropFirst(5).prefix(2), radix: 16)
 		else {
-			todo("throw error")
+			throw .invalidHex(raw)
 		}
 		
 		self.red = red
@@ -49,7 +63,7 @@ struct Color: Codable {
 	}
 	
 	init(from decoder: any Decoder) throws {
-		self = Self(try String(from: decoder))
+		self = try Self(String(from: decoder))
 	}
 	
 	func encode(to encoder: any Encoder) throws {

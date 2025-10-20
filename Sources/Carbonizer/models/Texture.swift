@@ -255,7 +255,7 @@ extension Texture.Unpacked.Image {
 		bitmap = bitmapData
 		
 		palette = try paletteData.read(
-			[RGB555Color].self,
+			[Color555].self,
 			count: paletteData.bytes.count / 2
 		)
 		.map(Color.init)
@@ -334,14 +334,14 @@ extension Texture.Unpacked {
 
 extension Texture.Unpacked.Image {
 	fileprivate func file() throws -> ProprietaryFile {
-		var palette = palette.map { Bitmap.Color($0) }
+		var palette = palette.map { BMP.Color($0) }
 		
 		if info.transparent {
 			palette[0].alpha = 0
 		}
 		
 		let pixelData = bitmap.bytes
-		let pixels: [Bitmap.Color]
+		let pixels: [BMP.Color]
 		switch info.textureFormat {
 			case .a3i5:
 				pixels = try pixelData
@@ -424,7 +424,7 @@ extension Texture.Unpacked.Image {
 				pixels = pixelData
 					.chunked(exactSize: 2)
 					.map {
-						RGB555Color(
+						Color555(
 							raw: $0
 								.enumerated()
 								.map { (index, byte) in
@@ -433,10 +433,10 @@ extension Texture.Unpacked.Image {
 								.reduce(0, |)
 						)
 					}
-					.map { Bitmap.Color($0) }
+					.map { BMP.Color($0) }
 		}
 		
-		let bitmap = Bitmap(
+		let bitmap = BMP(
 			width: info.width,
 			height: info.height,
 			contents: pixels

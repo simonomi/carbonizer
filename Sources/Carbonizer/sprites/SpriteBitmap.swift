@@ -40,7 +40,7 @@ extension SpriteBitmap {
 	
 	// NOTE: this uses position as the anchor of the top left, not bottom left
 	func write(
-		to bitmap: inout Bitmap,
+		to bitmap: inout BMP,
 		with palette: SpritePalette,
 		at position: Point<Int16>
 	) {
@@ -76,7 +76,7 @@ extension SpriteBitmap {
 							x: x + gridX * gridSize + xOffset,
 							y: y + gridY * gridSize + yOffset,
 							width: Int(bitmap.width)
-						] = Bitmap.Color(color)
+						] = BMP.Color(color)
 					}
 					bitmapIndex += 1
 				}
@@ -91,19 +91,19 @@ extension SpriteBitmap {
 		}
 	}
 	
-	func toBitmap(with palette: SpritePalette) -> Bitmap {
+	func toBitmap(with palette: SpritePalette) -> BMP {
 		let contents =
 			switch colorPaletteType {
 				case .sixteenColors:
 					colorsindices16!.flatMap {[
 						// color 0 is transparent, which is indicated by nil
-						$0 & 0b1111 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0 & 0b1111)]),
-						$0 >> 4 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0 >> 4)])
+						$0 & 0b1111 == 0 ? .transparent : BMP.Color(palette.colors[Int($0 & 0b1111)]),
+						$0 >> 4 == 0 ? .transparent : BMP.Color(palette.colors[Int($0 >> 4)])
 					]}
 				case .twoFiftySixColors:
 					colorsindices256!.map {
 						// color 0 is transparent, which is indicated by nil
-						$0 == 0 ? .transparent : Bitmap.Color(palette.colors[Int($0)])
+						$0 == 0 ? .transparent : BMP.Color(palette.colors[Int($0)])
 					}
 			}
 		
@@ -113,7 +113,7 @@ extension SpriteBitmap {
 		var gridX = 0
 		var gridY = 0
 		
-		var gridContents = [Bitmap.Color](repeating: .transparent, count: contents.count)
+		var gridContents = [BMP.Color](repeating: .transparent, count: contents.count)
 		
 		while bitmapIndex < contents.count {
 			for y in 0..<gridSize {
@@ -135,6 +135,6 @@ extension SpriteBitmap {
 			}
 		}
 		
-		return Bitmap(width: width, height: height, contents: gridContents)
+		return BMP(width: width, height: height, contents: gridContents)
 	}
 }
