@@ -1,27 +1,42 @@
 extension NDS.Unpacked {
 	struct FileTables: Codable {
-		var allocations: [String: NDS.Packed.Binary.FileAllocationTableEntry]
+		typealias Entry = NDS.Packed.Binary.FileAllocationTableEntry
+		
+		var allocations: [String: Entry]
+		var arm7Overlays: [UInt16: Entry]
+		var arm9Overlays: [UInt16: Entry]
 		
 		init(
 			nameTable: CompleteFNT,
-			allocationTable: [NDS.Packed.Binary.FileAllocationTableEntry]
+			allocationTable: [Entry],
+			arm7OverlayTable: [NDS.Packed.Binary.OverlayTableEntry],
+			arm9OverlayTable: [NDS.Packed.Binary.OverlayTableEntry]
 		) {
 			let fileIDs = nameTable.fileIDs()
 			
-			// TODO: doesn't contain overlays
 			allocations = fileIDs.mapValues {
 				allocationTable[Int($0)] // TODO: bounds checking
 				// what to do if out of bounds?
 				// uhh what does that mean again??
 			}
+			
+			arm7Overlays = Dictionary(
+				uniqueKeysWithValues: arm7OverlayTable.map {
+					(UInt16($0.fileId), allocationTable[Int($0.fileId)])
+				}
+			)
+			
+			arm9Overlays = Dictionary(
+				uniqueKeysWithValues: arm9OverlayTable.map {
+					(UInt16($0.fileId), allocationTable[Int($0.fileId)])
+				}
+			)
 		}
 		
 		func existingOffsets(
 			for newNameTable: CompleteFNT
-		) throws -> [UInt16: NDS.Packed.Binary.FileAllocationTableEntry] {
+		) throws -> [UInt16: Entry] {
 			let newFileIDs = newNameTable.fileIDs()
-			
-			// TODO: doesn't contain overlays
 			
 			// there shouldn't be duplicate fileIDs unless there are duplicate paths,
 			// which are dictionary keys, so they should always be unique
@@ -32,6 +47,8 @@ extension NDS.Unpacked {
 					}
 				}
 			)
+			.merging(arm7Overlays) { _, _ in todo("duplicate file id with arm7 overlays") }
+			.merging(arm9Overlays) { _, _ in todo("duplicate file id with arm9 overlays") }
 		}
 	}
 }

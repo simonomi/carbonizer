@@ -279,6 +279,7 @@ extension NDS.Packed.Binary {
 		let contents = try unpacked.contents.map { try $0.packed(configuration: configuration) }
 		
 		// TODO: overlay offsets wont be right if the sizes change
+		// TODO: this is a hacky way to skip the overlay ids, should use the overlay tables' fileId instead
 		let numberOfOverlays = UInt16(arm9OverlayTable.count + arm7OverlayTable.count)
 		fileNameTable = FileNameTable(contents, firstFileId: numberOfOverlays)
 		
@@ -395,6 +396,7 @@ extension NDS.Packed.Binary {
 				} else {
 					if let origEntry = originalOffsets[UInt16(id)] {
 						print("size changed for \(id) from \(origEntry.size) to \(size)")
+						print(allFiles[id].name)
 					} else {
 						print("no original offset for", id)
 					}
@@ -517,11 +519,6 @@ extension NDS.Unpacked: FileSystemObject {
 		
 		let completeNameTable = binary.fileNameTable.completeTable()
 		
-		fileTables = FileTables(
-			nameTable: completeNameTable,
-			allocationTable: binary.fileAllocationTable
-		)
-		
 		arm9 = binary.arm9
 		arm9OverlayTable = binary.arm9OverlayTable
 		arm9Overlays = arm9OverlayTable.map {
@@ -541,6 +538,13 @@ extension NDS.Unpacked: FileSystemObject {
 		}
 		
 		iconBanner = binary.iconBanner
+		
+		fileTables = FileTables(
+			nameTable: completeNameTable,
+			allocationTable: binary.fileAllocationTable,
+			arm7OverlayTable: arm7OverlayTable,
+			arm9OverlayTable: arm9OverlayTable
+		)
 		
 		do {
 			contents = try completeNameTable[0xF000]!.map {
