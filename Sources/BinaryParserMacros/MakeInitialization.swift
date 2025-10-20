@@ -75,7 +75,7 @@ extension Property {
 		return ifCheck + setOffset + dataRead + assertExpected + endIfCheck
 	}
 	
-	func makeWriter() -> String {
+	func makeWriter(fillerByte: String?) -> String {
 		let (ifCheck, endIfCheck) =
 			if let ifCondition {
 				("if \(ifCondition), let \(name) {\n\t", "\n}")
@@ -83,13 +83,27 @@ extension Property {
 				("", "")
 			}
 		
+		let fillerArgument =
+			if let fillerByte {
+				", fillerByte: \(fillerByte)"
+			} else {
+				""
+			}
+		
+		let fillerArgumentWithoutComma =
+			if let fillerByte {
+				"fillerByte: \(fillerByte)"
+			} else {
+				""
+			}
+		
 		let setOffset =
 			if let offset {
-				"data.jump(to: base + \(offset.value))\n"
+				"data.jump(to: base + \(offset.value)\(fillerArgument))\n"
 			} else if let padding {
-				"data.jump(bytes: \(padding.value))\n"
+				"data.jump(bytes: \(padding.value)\(fillerArgument))\n"
 			} else if fourByteAlign {
-				"data.fourByteAlign()\n"
+				"data.fourByteAlign(\(fillerArgumentWithoutComma))\n"
 			} else {
 				""
 			}
@@ -113,11 +127,11 @@ extension Property {
 					"data.write(\(selfDot)\(name)\(lengthArgument))"
 				
 				case .offsets(.givenByPath(let path)):
-					"data.write(\(selfDot)\(name), offsets: \(path), relativeTo: base)"
+					"data.write(\(selfDot)\(name), offsets: \(path), relativeTo: base\(fillerArgument))"
 				
 				case .offsets(.givenByPathAndSubpath(let path, let subPath)),
 					 .offsets(.givenByPathStartToEnd(let path, let subPath, _)):
-					"data.write(\(selfDot)\(name), offsets: \(path).map(\(subPath)), relativeTo: base)"
+					"data.write(\(selfDot)\(name), offsets: \(path).map(\(subPath)), relativeTo: base\(fillerArgument))"
 			}
 		
 		return ifCheck + setOffset + dataWrite + endIfCheck

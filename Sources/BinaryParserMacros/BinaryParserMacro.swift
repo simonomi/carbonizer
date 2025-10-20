@@ -25,6 +25,18 @@ struct BinaryConvertibleMacro: ExtensionMacro {
 			throw BinaryConvertibleMacroError.invalidType
 		}
 		
+		let binaryConvertibleAttribute = structDecl.attributes
+			.first {
+				$0.as(AttributeSyntax.self)?
+					.attributeName.as(IdentifierTypeSyntax.self)?
+					.name.text == "BinaryConvertible"
+			}!
+			.as(AttributeSyntax.self)!
+		
+		let fillerByte = binaryConvertibleAttribute.arguments?.as(LabeledExprListSyntax.self)?
+			.first?.expression.as(IntegerLiteralExprSyntax.self)?
+			.literal.text
+		
 		let variableDecls = structDecl.memberBlock.members
 			.map(\.decl)
 			.compactMap(VariableDeclSyntax.init)
@@ -44,7 +56,7 @@ struct BinaryConvertibleMacro: ExtensionMacro {
 			}
 		
 		let writer = properties
-			.map { $0.makeWriter() }
+			.map { $0.makeWriter(fillerByte: fillerByte) }
 			.joined(separator: "\n")
 		
 		return [try ExtensionDeclSyntax(

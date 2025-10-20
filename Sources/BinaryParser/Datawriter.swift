@@ -42,12 +42,13 @@ extension Datawriter {
 	public func write(
 		_ data: [some BinaryConvertible],
 		offsets: [some BinaryInteger],
-		relativeTo baseOffset: Offset
+		relativeTo baseOffset: Offset,
+		fillerByte: UInt8 = 0
 	) {
 		let offsets = offsets.map { Int($0) + baseOffset.offest }
 		
 		for (offset, item) in zip(offsets, data) {
-			jump(to: Offset(offset))
+			jump(to: Offset(offset), fillerByte: fillerByte)
 			write(item)
 		}
 	}
@@ -60,7 +61,7 @@ extension Datawriter {
 		if offset == bytes.endIndex {
 			bytes.insert(byte, at: offset)
 		} else {
-			assert(bytes[offset] == fillerByte)
+			assert(bytes[offset].isFillerByte)
 			bytes[offset] = byte
 		}
 		
@@ -79,7 +80,7 @@ extension Datawriter {
 			bytes.insert(contentsOf: newBytes, at: offset)
 		} else {
 			let endIndex = offset + byteWidth
-			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			assert(bytes[offset..<endIndex].allSatisfy(\.isFillerByte))
 			bytes.replaceSubrange(offset..<endIndex, with: newBytes)
 		}
 		offset += byteWidth
@@ -97,7 +98,7 @@ extension Datawriter {
 			bytes.insert(contentsOf: data, at: offset)
 		} else {
 			let endIndex = offset + data.count
-			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			assert(bytes[offset..<endIndex].allSatisfy(\.isFillerByte))
 			bytes.replaceSubrange(offset..<endIndex, with: data)
 		}
 		offset += string.utf8CString.count
@@ -105,21 +106,27 @@ extension Datawriter {
 	
 	@inlinable
 	public func write(
-		_ data: [String], offsets: [some BinaryInteger], relativeTo baseOffset: Offset
+		_ data: [String],
+		offsets: [some BinaryInteger],
+		relativeTo baseOffset: Offset,
+		fillerByte: UInt8 = 0
 	) {
 		for (offset, item) in zip(offsets, data) {
-			jump(to: baseOffset + offset)
+			jump(to: baseOffset + offset, fillerByte: fillerByte)
 			write(item)
 		}
 	}
 	
 	@inlinable
 	public func write(
-		_ data: [[String]], offsets: [[some BinaryInteger]], relativeTo baseOffset: Offset
+		_ data: [[String]],
+		offsets: [[some BinaryInteger]],
+		relativeTo baseOffset: Offset,
+		fillerByte: UInt8 = 0
 	) {
 		for (offsetRow, dataRow) in zip(offsets, data) {
 			for (offset, item) in zip(offsetRow, dataRow) {
-				jump(to: baseOffset + offset)
+				jump(to: baseOffset + offset, fillerByte: fillerByte)
 				write(item)
 			}
 		}
@@ -139,7 +146,7 @@ extension Datawriter {
 			bytes.insert(contentsOf: data, at: offset)
 		} else {
 			let endIndex = offset + data.count
-			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			assert(bytes[offset..<endIndex].allSatisfy(\.isFillerByte))
 			bytes.replaceSubrange(offset..<endIndex, with: data)
 		}
 		offset += length
@@ -151,7 +158,7 @@ extension Datawriter {
 			bytes.insert(contentsOf: data.bytes[data.offset...], at: offset)
 		} else {
 			let endIndex = offset + data.bytes[data.offset...].count
-			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			assert(bytes[offset..<endIndex].allSatisfy(\.isFillerByte))
 			bytes.replaceSubrange(offset..<endIndex, with: data.bytes[data.offset...])
 		}
 		offset += data.bytes.count
@@ -169,7 +176,7 @@ extension Datawriter {
 			bytes.insert(contentsOf: data.bytes[data.offset..<endIndex], at: offset)
 		} else {
 			let endIndex = offset + data.bytes[data.offset..<endIndex].count
-			assert(bytes[offset..<endIndex].allSatisfy { $0 == fillerByte })
+			assert(bytes[offset..<endIndex].allSatisfy(\.isFillerByte))
 			bytes.replaceSubrange(offset..<endIndex, with: data.bytes[data.offset..<endIndex])
 		}
 		offset += length
@@ -177,12 +184,15 @@ extension Datawriter {
 	
 	@inlinable
 	public func write(
-		_ data: [Datastream], offsets: [some BinaryInteger], relativeTo baseOffset: Offset
+		_ data: [Datastream],
+		offsets: [some BinaryInteger],
+		relativeTo baseOffset: Offset,
+		fillerByte: UInt8 = 0
 	) {
 		let offsets = offsets.map { Int($0) + baseOffset.offest }
 		
 		for (offset, item) in zip(offsets, data) {
-			jump(to: Offset(offset))
+			jump(to: Offset(offset), fillerByte: fillerByte)
 			write(item)
 		}
 	}
@@ -230,34 +240,30 @@ extension Datawriter {
 	}
 }
 
-@usableFromInline
-//fileprivate let fillerByte: Byte = 0
-internal let fillerByte: Byte = 0 // for inlinability
-
 // MARK: jump
 extension Datawriter {
 	@inlinable
-	public func jump(bytes: some BinaryInteger) {
+	public func jump(bytes: some BinaryInteger, fillerByte: UInt8 = 0) {
 		offset += Int(bytes)
 		
 		if offset > self.bytes.endIndex {
-			self.bytes.append(contentsOf: repeatElement(fillerByte, count: offset -  self.bytes.endIndex))
+			self.bytes.append(contentsOf: repeatElement(fillerByte, count: offset - self.bytes.endIndex))
 		}
 	}
 	
 	@inlinable
-	public func jump(to offset: Offset) {
+	public func jump(to offset: Offset, fillerByte: UInt8 = 0) {
 		self.offset = offset.offest
 		
 		if self.offset > bytes.endIndex {
-			bytes.append(contentsOf: repeatElement(fillerByte, count: self.offset -  bytes.endIndex))
+			bytes.append(contentsOf: repeatElement(fillerByte, count: self.offset - bytes.endIndex))
 		}
 	}
 	
 	@inlinable
-	public func fourByteAlign() {
+	public func fourByteAlign(fillerByte: UInt8 = 0) {
 		if !offset.isMultiple(of: 4) {
-			jump(bytes: 4 - (offset % 4))
+			jump(bytes: 4 - (offset % 4), fillerByte: fillerByte)
 		}
 	}
 }

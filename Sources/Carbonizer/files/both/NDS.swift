@@ -8,9 +8,13 @@ enum NDS {
 		var name: String
 		var binary: Binary
 		
-		@BinaryConvertible
+		@BinaryConvertible(fillByte: 0xFF)
 		struct Binary {
 			var header: Header
+			
+			// the header is padded with 00s, but the rest of the ROM uses FFs
+			@EndOffset(givenBy: \Self.header.headerSize)
+			var headerPadding: Datastream
 			
 			@Offset(givenBy: \Self.header.arm9Offset)
 			@Length(givenBy: \Self.header.arm9Size)
@@ -39,6 +43,9 @@ enum NDS {
 			
 			@Offsets(givenBy: \Self.fileAllocationTable, from: \.startAddress, to: \.endAddress)
 			var files: [Datastream]
+			
+			// TODO: pad to the nearest 0x100_0000? the nearest 16 MiB???
+			// not sure if there's any actual reason to do this, other than perfectionism
 			
 			@BinaryConvertible
 			struct Header {
@@ -268,6 +275,9 @@ extension NDS.Packed.Binary {
 	init(_ unpacked: NDS.Unpacked, configuration: Configuration) throws {
 		header = Header(unpacked.header)
 		
+		let paddingSize = Int(header.headerSize - 0x180)
+		headerPadding = Datastream(Array(repeatElement(0, count: paddingSize)))
+		
 		arm9 = unpacked.arm9
 		arm9OverlayTable = unpacked.arm9OverlayTable
 		
@@ -302,40 +312,8 @@ extension NDS.Packed.Binary {
 			return writer.intoDatastream()
 		}
 		
-//		print(zip(allFiles, files).map { ($0.name, $1.bytes.count) })
-		
+		// TODO: allow adding/removing files
 		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while packing")
-		
-		// ok plan:
-		// - add setting for filling with 0xFF
-		// - enable compression
-		// - store fnt and fat
-		// - if all sizes are <= original, fit everything into the same places
-		// - otherwise, move file(s) to the first available location (probably the end), based on which ends up with least displacement
-		
-		// updated plan:
-		// - if same number of files, and same size or smaller, everything is golden
-		// - otherwise.... if a file is bigger, check for intersection and move to end?
-		//   - move to end without checking for intersection?
-		//   - move to first available space?
-		// - if a file is added, uhhhhhhh
-		//   - FAT is easy, just add new entry to end
-		//   - FNT is tricky, a new file will offset a bunch of file/folder IDs
-		//     - the sort order doesn't matter, so it can be added to the end of its folder
-		//     - but itll offset the ids of EVERY FILE AFTER IT :/ i dont think theres a way around this
-		//       - compromise could be: move the *following* folder's ids to the end of the list, so only that following folder is messed with
-		// - if a folder is added??
-		//   - i think it can just be added to the end of the folder list
-		
-		// this is all a huge pain though, maybe the FNT and FAT should just be changed however the fuck they're changed, but the offsets are preserved as much as possible
-		// - how big are the FNT+FAT? ~160KB
-		//   - hmm not negligable but not huge either
-		// - ok if we generate the FNT/FAT in the same way, and preserve file offsets as much as possible, what's the required algorithm?
-		//   - FNT is the same, but also returns a mapping of [file name: file id]
-		//   - unpacked contains a similar list, and an FAT
-		//   - for each file thats the same size or smaller, copy from the existing FAT
-		//   - for each file thats bigger, adds a new entry to the end of the FAT, after the last end address (cache?)
-		
 		
 		// TODO: fnt and fat sizes should be able to change
 		guard header.arm9Size == arm9.bytes.count,
@@ -365,26 +343,10 @@ extension NDS.Packed.Binary {
 		
 		let fileAllocationSpacing: UInt32 = 0x200
 		
-		// TODO: use unpacked.fileTables and the files to get the corresponding allocation table entries for each file
-		// - i need FileTable + ??? what i have now -> [Entry] // relative to THIS set of fileIDs tho
-		// - then compare each entry with fileSizes, handle each one accordingly
-		
 		let completeTable = fileNameTable.completeTable()
 		let originalOffsets = try unpacked.fileTables.existingOffsets(for: completeTable)
 		
-//		let filesOffset = (header.iconBannerOffset + iconBannerSize)
-//			.roundedUpToTheNearest(offsetIncrement)
-		
 		let fileSizes = files.map(\.bytes.count).map(UInt32.init)
-//		fileAllocationTable = fileSizes.reduce(into: []) { fat, size in
-//			let startAddress = fat.last?.endAddress ?? filesOffset
-//			fat.append(
-//				FileAllocationTableEntry(
-//					startAddress: startAddress,
-//					endAddress: startAddress + size
-//				)
-//			)
-//		}
 		
 		fileAllocationTable = fileSizes
 			.enumerated()
@@ -406,8 +368,6 @@ extension NDS.Packed.Binary {
 			}
 		
 		header.totalROMSize = lastAllocationEndAddress
-		// rounded up??? to the nearest 0x100_0000???? the nearest 16 MiB???
-		// ff1 does, ffc doesnt
 	}
 }
 
@@ -626,7 +586,7 @@ extension NDS.Unpacked {
 				case .invalidFolderStructure(let contentNames):
 					"invalid folder structure: \(contentNames)"
 				case .filesAdded(expectedCount: let expectedCount, actualCount: let actualCount):
-					"file(s) added while unpacked (expected \(.green)\(expectedCount)\(.normal), got \(.red)\(actualCount)\(.normal)"
+					"file(s) added while unpacked (expected \(.green)\(expectedCount)\(.normal), got \(.red)\(actualCount)\(.normal))"
 				case .wrongVersion(let version):
 					"this ROM was unpacked with a different version of carbonizer (\(.red)\(version)\(.normal)), repack it with that version, then unpack it with this one (\(.green)\(Carbonizer.version)\(.normal))"
 				case .missingFileTypes(let fileTypes):

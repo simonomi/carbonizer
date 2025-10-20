@@ -14,10 +14,8 @@ extension NDS.Unpacked {
 		) {
 			let fileIDs = nameTable.fileIDs()
 			
-			allocations = fileIDs.mapValues {
-				allocationTable[Int($0)] // TODO: bounds checking
-				// what to do if out of bounds?
-				// uhh what does that mean again??
+			allocations = fileIDs.compactMapValues {
+				allocationTable[safely: Int($0)]
 			}
 			
 			arm7Overlays = Dictionary(

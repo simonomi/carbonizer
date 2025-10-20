@@ -1,5 +1,5 @@
 @attached(extension, conformances: BinaryConvertible, names: named(init), named(write))
-public macro BinaryConvertible() = #externalMacro(module: "BinaryParserMacros", type: "BinaryConvertibleMacro")
+public macro BinaryConvertible(fillByte: UInt8 = 0) = #externalMacro(module: "BinaryParserMacros", type: "BinaryConvertibleMacro")
 
 public enum Operator<T> {
 	case plus(T)
