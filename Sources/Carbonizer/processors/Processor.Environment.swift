@@ -11,11 +11,15 @@ extension Processor {
 		
 		var meshFiles: [[String]: Set<Int>]?
 		var textureFiles: [[String]: Set<Int>]?
-		var animationFiles: [[String]: Set<Int>]?
+		var modelAnimationFiles: [[String]: Set<Int>]?
 		
-		var paletteFiles: [[String]: Set<Int>]?
-		var bitmapFiles: [[String]: Set<Int>]?
+		var imagePaletteFiles: [[String]: Set<Int>]?
+		var imageBitmapFiles: [[String]: Set<Int>]?
 		var bgMapFiles: [[String]: Set<Int>]?
+		
+		var spriteAnimationFiles: [[String]: Set<Int>]?
+		var spritePaletteFiles: [[String]: Set<Int>]?
+		var spriteBitmapFiles: [[String]: Set<Int>]?
 		
 		var _modelTableNameCache: Set<[String]>?
 		mutating func modelTableNames() throws -> Set<[String]> {
@@ -24,7 +28,7 @@ extension Processor {
 			} else {
 				_modelTableNameCache = Set(try get(\.meshFiles).keys)
 					.union(try get(\.textureFiles).keys)
-					.union(try get(\.animationFiles).keys)
+					.union(try get(\.modelAnimationFiles).keys)
 				
 				return _modelTableNameCache!
 			}
@@ -35,11 +39,24 @@ extension Processor {
 			if let _imageTableNameCache {
 				return _imageTableNameCache
 			} else {
-				_imageTableNameCache = Set(try get(\.paletteFiles).keys)
-					.union(try get(\.bitmapFiles).keys)
+				_imageTableNameCache = Set(try get(\.imagePaletteFiles).keys)
+					.union(try get(\.imageBitmapFiles).keys)
 					.union(try get(\.bgMapFiles).keys)
 				
 				return _imageTableNameCache!
+			}
+		}
+		
+		var _spriteTableNameCache: Set<[String]>?
+		mutating func spriteTableNames() throws -> Set<[String]> {
+			if let _spriteTableNameCache {
+				return _spriteTableNameCache
+			} else {
+				_spriteTableNameCache = Set(try get(\.spriteAnimationFiles).keys)
+					.union(try get(\.spritePaletteFiles).keys)
+					.union(try get(\.spriteBitmapFiles).keys)
+				
+				return _spriteTableNameCache!
 			}
 		}
 		
@@ -48,6 +65,7 @@ extension Processor {
 		//                  folder    table
 		var modelIndices: [[String]: [String: Set<ModelIndices>]]?
 		var imageIndices: [[String]: [String: Set<ImageIndices>]]?
+		var spriteIndices: [[String]: [String: Set<SpriteIndices>]]?
 		
 		struct ModelIndices: Hashable {
 			var modelName: String
@@ -63,6 +81,14 @@ extension Processor {
 			var paletteIndex: Int
 			var bitmapIndex: Int
 			var bgMapIndex: Int?
+		}
+		
+		struct SpriteIndices: Hashable {
+			var spriteName: String
+			// color palette count?
+			var animationIndices: [Int]
+			var paletteIndices: [Int]
+			var bitmapIndices: [Int]
 		}
 		
 		struct MissingValue: Error, CustomStringConvertible {

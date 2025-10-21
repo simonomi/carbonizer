@@ -16,8 +16,8 @@ func tclRipperF(
 		environment.foldersWithTextureArchives = []
 	}
 	
-	if environment.animationFiles == nil {
-		environment.animationFiles = [:]
+	if environment.modelAnimationFiles == nil {
+		environment.modelAnimationFiles = [:]
 	}
 	
 	if environment.modelIndices == nil {
@@ -38,7 +38,7 @@ func tclRipperF(
 			environment.foldersWithTextureArchives!.insert(path.dropLast())
 			
 			let animationTablePath = Array(path.dropLast(2) + [animation.animation.tableName])
-			environment.animationFiles![animationTablePath, default: []].insert(Int(animation.animation.index))
+			environment.modelAnimationFiles![animationTablePath, default: []].insert(Int(animation.animation.index))
 			
 			let folderPath: [String] = path.dropLast(2)
 			

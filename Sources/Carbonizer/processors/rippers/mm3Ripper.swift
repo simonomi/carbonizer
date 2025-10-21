@@ -23,12 +23,12 @@ func mm3RipperF(
 	environment.textureFiles![textureTablePath, default: []].insert(Int(mm3.texture.index))
 	environment.foldersWithTextureArchives!.insert(path.dropLast())
 	
-	if environment.animationFiles == nil {
-		environment.animationFiles = [:]
+	if environment.modelAnimationFiles == nil {
+		environment.modelAnimationFiles = [:]
 	}
 	
 	let animationTablePath = Array(path.dropLast() + [mm3.animation.tableName])
-	environment.animationFiles![animationTablePath, default: []].insert(Int(mm3.animation.index))
+	environment.modelAnimationFiles![animationTablePath, default: []].insert(Int(mm3.animation.index))
 	
 	let folderPath: [String] = path.dropLast()
 	

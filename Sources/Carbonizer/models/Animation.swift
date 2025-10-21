@@ -132,7 +132,7 @@ extension Animation.Packed.Keyframes {
 
 // MARK: unpacked
 extension Animation.Unpacked: ProprietaryFileData {
-	static let fileExtension = ".animation.json"
+	static let fileExtension = ".modelAnimation.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	

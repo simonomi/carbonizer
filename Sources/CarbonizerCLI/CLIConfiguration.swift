@@ -126,7 +126,7 @@ struct CLIConfiguration : Sendable {
 				// required file types: MAR, MM3
 				"exportModels": false,
 				
-				// extract sprites (motion folder)    *temporarily broken, do not use*
+				// extract sprites (motion folder)
 				// required file types: MAR, MMS
 				"exportSprites": false,
 				

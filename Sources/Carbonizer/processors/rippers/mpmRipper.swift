@@ -4,19 +4,19 @@ func mpmRipperF(
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {
-	if environment.paletteFiles == nil {
-		environment.paletteFiles = [:]
+	if environment.imagePaletteFiles == nil {
+		environment.imagePaletteFiles = [:]
 	}
 	
 	let paletteTablePath = Array(path.dropLast() + [mpm.palette.tableName])
-	environment.paletteFiles![paletteTablePath, default: []].insert(Int(mpm.palette.index))
+	environment.imagePaletteFiles![paletteTablePath, default: []].insert(Int(mpm.palette.index))
 	
-	if environment.bitmapFiles == nil {
-		environment.bitmapFiles = [:]
+	if environment.imageBitmapFiles == nil {
+		environment.imageBitmapFiles = [:]
 	}
 	
 	let bitmapTablePath = Array(path.dropLast() + [mpm.bitmap.tableName])
-	environment.bitmapFiles![bitmapTablePath, default: []].insert(Int(mpm.bitmap.index))
+	environment.imageBitmapFiles![bitmapTablePath, default: []].insert(Int(mpm.bitmap.index))
 	
 	if environment.bgMapFiles == nil {
 		environment.bgMapFiles = [:]

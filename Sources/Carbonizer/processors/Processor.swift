@@ -25,7 +25,7 @@ public enum Processor: String, Hashable, Sendable {
 		switch self {
 			case .exportVivosaurModels:      [.tclRipper, .modelReparser, .textureExporter, .modelExporter]
 			case .exportModels:              [.mm3Ripper, .modelReparser, .textureExporter, .modelExporter]
-			case .exportSprites:             todo() // TODO: everything
+			case .exportSprites:             [.mmsRipper, .spriteReparser, .spriteExporter]
 			case .exportImages:              [.mpmRipper, .imageReparser, .imageExporter]
 			case .dexDialogueLabeller:       [.dialogueRipper, .dexDialogueLabeller]
 			case .dexDialogueSaver:          [.dexDialogueRipper, .dexDialogueSaver]
@@ -43,7 +43,7 @@ public enum Processor: String, Hashable, Sendable {
 		switch self {
 			case .exportVivosaurModels:      ["MAR", "3CL"]
 			case .exportModels:              ["MAR", "MM3"]
-			case .exportSprites:             todo()
+			case .exportSprites:             ["MAR", "MMS"]
 			case .exportImages:              ["MAR", "MPM"]
 			case .dexDialogueLabeller:       ["MAR", "DMG", "DEX"]
 			case .dexDialogueSaver:          ["MAR", "DEX", "DMG"]
@@ -60,9 +60,10 @@ public enum Processor: String, Hashable, Sendable {
 	// TODO: required game
 	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper, mpmRipper
-		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, ffcCreatureLabeller, hmlNameLabeller, imageReparser, keyItemLabeller, mapLabeller, modelReparser, museumLabeller
-		case imageExporter, modelExporter, textureExporter
+		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper, mpmRipper, mmsRipper
+		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case imageReparser, modelReparser, spriteReparser
+		case imageExporter, modelExporter, spriteExporter, textureExporter
 		
 		func run(
 			on file: inout any FileSystemObject,
@@ -134,6 +135,14 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
+				case .mmsRipper:
+					try file.runProcessor(
+						mmsRipperF,
+						on: "motion/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
 				case .dbsNameLabeller:
 					try file.runProcessor(
 						dbsNameLabellerF,
@@ -182,14 +191,6 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
-				case .imageReparser:
-					try file.runProcessor(
-						imageReparserF,
-						on: "image/**",
-						in: &environment,
-						at: [],
-						configuration: configuration
-					)
 				case .keyItemLabeller:
 					try file.runProcessor(
 						keyItemLabellerF,
@@ -206,6 +207,22 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
+				case .museumLabeller:
+					try file.runProcessor(
+						museumLabellerF,
+						on: "etc/museum_defs",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .imageReparser:
+					try file.runProcessor(
+						imageReparserF,
+						on: "image/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
 				case .modelReparser:
 					try file.runProcessor(
 						modelReparserF,
@@ -214,10 +231,10 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
-				case .museumLabeller:
+				case .spriteReparser:
 					try file.runProcessor(
-						museumLabellerF,
-						on: "etc/museum_defs",
+						spriteReparserF,
+						on: "motion/**",
 						in: &environment,
 						at: [],
 						configuration: configuration
@@ -234,6 +251,14 @@ public enum Processor: String, Hashable, Sendable {
 					try file.runProcessor(
 						modelExporterF,
 						on: "model/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .spriteExporter:
+					try file.runProcessor(
+						spriteExporterF,
+						on: "motion/**",
 						in: &environment,
 						at: [],
 						configuration: configuration

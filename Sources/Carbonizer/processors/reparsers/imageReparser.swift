@@ -8,18 +8,18 @@ func imageReparserF(
 ) throws {
 	guard try environment.imageTableNames().contains(path) else { return }
 	
-	let paletteFiles = try environment.get(\.paletteFiles)
+	let paletteFiles = try environment.get(\.imagePaletteFiles)
 	if let paletteIndices = paletteFiles[path] {
 		for fileIndex in paletteIndices {
-			guard mar.files.indices.contains(fileIndex) else {
-				todo("invalid index")
-			}
-			
-			guard let data = mar.files[fileIndex].content as? Datastream else {
-				todo("invalid type")
-			}
-			
 			do {
+				guard mar.files.indices.contains(fileIndex) else {
+					throw ReparserError.invalidIndex(fileIndex, for: "image palette")
+				}
+				
+				guard let data = mar.files[fileIndex].content as? Datastream else {
+					throw ReparserError.invalidType(fileIndex, for: "image palette")
+				}
+				
 				// copy to not modify the original
 				let packed = try Datastream(data).read(Palette.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
@@ -33,19 +33,20 @@ func imageReparserF(
 	// bitmaps dont need to be reparsed, since they're literally just a list of indices
 	// i *would* parse them anyway into a nicer format, but we don't know here how big the
 	// color palette is so we can't
+	// update: we *do* know !!!! TODO: add palette size to bitmap indices, then reparse here
 	
 //	let bgMapFiles = try environment.get(\.bgMapFiles)
 //	if let bgMapIndices = bgMapFiles[path] {
 //		for fileIndex in bgMapIndices {
-//			guard mar.files.indices.contains(fileIndex) else {
-//				todo("invalid index")
-//			}
-//			
-//			guard let data = mar.files[fileIndex].content as? Datastream else {
-//				todo("invalid type")
-//			}
-//			
 //			do {
+//				guard mar.files.indices.contains(fileIndex) else {
+//					throw ReparserError.invalidIndex(fileIndex, for: "bg map")
+//				}
+//
+//				guard let data = mar.files[fileIndex].content as? Datastream else {
+//					throw ReparserError.invalidType(fileIndex, for: "bg map")
+//				}
+//
 //				// copy to not modify the original
 //				let packed = try Datastream(data).read(BGMap.Packed.self)
 //				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)

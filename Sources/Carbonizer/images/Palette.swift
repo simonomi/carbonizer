@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct Palette {
+enum Palette {
 	struct Packed: BinaryConvertible {
 		var colors: [Color555]
 		
@@ -52,7 +52,7 @@ extension Palette.Packed: ProprietaryFileData {
 
 // MARK: unpacked
 extension Palette.Unpacked: ProprietaryFileData {
-	static let fileExtension = ".palette.json"
+	static let fileExtension = ".imagePalette.json"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
