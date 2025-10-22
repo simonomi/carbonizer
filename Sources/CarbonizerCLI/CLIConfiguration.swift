@@ -136,7 +136,7 @@ struct CLIConfiguration : Sendable {
 				
 				// adds comments to DEX files that show the dialogue used in a given command
 				// required file types: MAR, DEX, DMG
-				"episodeDialogueLabeller": false,
+				"episodeDialogueLabeller": true,
 				
 				// allows editing the comments made by episodeDialogueLabeller, which will be
 				// saved to the correct MSG file. new lines of dialogue cannot be added
@@ -146,7 +146,7 @@ struct CLIConfiguration : Sendable {
 				// labels the events of commands in DEX files with their event number. this number
 				// is used by DEP files to control when an event triggers
 				// required file types: MAR, DEX, DEP
-				"eventLabeller": false,
+				"eventLabeller": true,
 				
 				// adds labels for the names of fighters in DBS files (battle folder)
 				// required file types: MAR, DBS, DTX
@@ -154,23 +154,23 @@ struct CLIConfiguration : Sendable {
 				
 				// adds labels for the names of vivosaurs in creature_defs
 				// required file types: MAR, DCL, DTX
-				"ffcCreatureLabeller": false,
+				"ffcCreatureLabeller": true,
 				
 				// adds labels for the names of masks in `etc/headmask_defs`
 				// required file types: MAR, HML, DTX
-				"maskNameLabeller": false,
+				"maskNameLabeller": true,
 				
 				// adds labels for the text in `etc/keyitem_defs`
 				// required file types: MAR, KIL, DTX
-				"keyItemLabeller": false,
+				"keyItemLabeller": true,
 				
 				// adds labels for the names of maps in MAP files (`map/m/` folder)
 				// required file types: MAR, MAP, DTX
-				"mapLabeller": false,
+				"mapLabeller": true,
 				
 				// adds labels for the descriptions in `etc/museum_defs`
 				// required file types: MAR, DML, DTX
-				"museumLabeller": false
+				"museumLabeller": true
 			}
 		}
 		"""

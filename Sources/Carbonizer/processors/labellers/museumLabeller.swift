@@ -10,6 +10,6 @@ func museumLabellerF(
 	}
 	
 	for (index, vivosaur) in museumDefs.vivosaurs.enumerated() {
-		museumDefs.vivosaurs[index]._description = japanese[Int(vivosaur.descriptionIndex)]
+		museumDefs.vivosaurs[index]._description = japanese[safely: Int(vivosaur.descriptionIndex)]
 	}
 }

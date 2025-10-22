@@ -8,11 +8,10 @@ import Foundation
 //   - remove as much platform-specific code as possible
 //     - in theory it should all be part of CLI, not library
 // - make a GUI
-// - check that processor is running on the right game
 
 public enum Carbonizer {
 	// if run manually, CI will check for the string "main", so here you go :)
-	static let version = "v2.18"
+	static let version = "v2.19"
 	
 	public static func auto(
 		_ filePath: URL,

@@ -10,7 +10,7 @@ func maskNameLabellerF(
 	}
 	
 	for (index, mask) in headmaskDefs.masks.enumerated() {
-		headmaskDefs.masks[index]._name = japanese[Int(mask.name)]
-		headmaskDefs.masks[index]._japaneseDebugName = japanese[Int(mask.japaneseDebugName)]
+		headmaskDefs.masks[index]._name = japanese[safely: Int(mask.name)]
+		headmaskDefs.masks[index]._japaneseDebugName = japanese[safely: Int(mask.japaneseDebugName)]
 	}
 }
