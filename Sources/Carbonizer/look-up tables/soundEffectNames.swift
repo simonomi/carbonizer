@@ -3,9 +3,10 @@ let soundEffectNames: [Int32: String] = [
 	132: "level up",
 	210: "haha blinking",
 	269: "museum startup",
+	301: "dino medal clink", // from handing over dino medals in chapter 1
 	307: "starting chime (dum dum dum dum!)",
 	915: "spinning whoosh", // kl33n spinning around
-	953: "meseum login",
+	953: "museum login",
 	1257: "Dropping Mask walking",
 	1258: "Hip-shaker Mask walking",
 	1259: "Stone Mask walking",

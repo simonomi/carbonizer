@@ -5,9 +5,14 @@ typealias EventHandler = @MainActor (URL) async throws -> Void
 
 struct PathMonitor {
 	var sources: [any DispatchSourceFileSystemObject]
+	
+	consuming func cancel() {
+		for source in sources {
+			source.cancel()
+		}
+	}
 }
 
-@discardableResult
 func monitorFiles(
 	in path: URL,
 	with eventHandler: sending @escaping @isolated(any) EventHandler
@@ -41,7 +46,7 @@ func monitorFiles(
 				try await Task.sleep(for: .seconds(0.1)) // give sime time for any editing to finish
 				try await eventHandler(latestModifiedPath)
 			} catch {
-				print(error)
+				print(error) // TODO: log with config
 			}
 		}
 	}

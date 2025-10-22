@@ -66,7 +66,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 				
 				switch $0.kind {
 					case .checkpoint:
-						print(message)
+						print(message + "\(.clearToEndOfLine)")
 					case .transient:
 						let shortenedMessage = message.prefix(max(0, terminalWidth - 3))
 						// TODO: does this ansi code work on windows cmd?
@@ -74,7 +74,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 						fflush(stdout)
 					case .warning:
 						var standardError = FileHandle.standardError
-						print("\(.yellow, .bold)warning:\(.normal)", message, to: &standardError)
+						print("\(.yellow, .bold)warning:\(.normal)", message + "\(.clearToEndOfLine)", to: &standardError)
 				}
 			}
 		} else {

@@ -146,12 +146,17 @@ enum DEX {
 			37:  "turn2 \(0, .entity) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
 			38:  "turn \(0, .entity) towards \(1, .entity) over \(3, .frames), unknowns: \(2, .unknown) \(4, .unknown)",
 			39:  "move \(0, .entity) to \(1, .entity) over \(2, .frames), unknown: \(3, .unknown)",
-			// 40: (entity, entity, frames, smoothing)? probably another move
-			// 41: (entity?, #, frames?, #) another move-to? last # is probably smoothing
+			40:  "unknown 40: \(0, .entity), \(1, .entity), \(2, .frames), \(3, .unknown)",
+			// ?
+			// probably another move
+			// last # is smoothing
+			41:  "unknown 41: \(0, .entity), \(1, .unknown), \(2, .frames), \(3, .unknown)",
+			// another move-to?
+			// last # is probably smoothing
 			43:  "move \(0, .entity) to position \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
 			44:  "unknown 44: \(0, .entity) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",
 			45:  "move \(0, .entity) by \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
-			// 46: (#, #, #.#, #, #)
+			// 46: (#, #, fp, #, #)
 			47:  "turn \(0, .entity) by \(1, .degrees), then move by \(2, .fixedPoint) over \(3, .frames). unknown: \(4, .unknown)",
 			// 4 seems to add a delay before they actually start moving? like theyre slow and then fast
 			// its basically a smoothing (ease in/out) effect
@@ -180,6 +185,8 @@ enum DEX {
 			90:  "set fighter level to \(0, .integer)",
 			91:  "set case page count to \(0, .integer)",
 			97:  "set \(0, .vivosaur) fossil scores to \(1, .integer) \(2, .integer) \(3, .integer) \(4, .integer)",
+			99:  "disable dino medals",
+			100: "enable dino medals",
 			102: "open fossil rock buying shop",
 			103: "open fossil rock selling shop",
 			104: "open mask buying shop",
@@ -206,6 +213,7 @@ enum DEX {
 			135: "movement \(1, .movement) on \(0, .entity)",
 			136: "unknown 136: \(0, .entity) \(1, .unknown)",
 			//   1 24 - makes hunter blush
+			137: "unknown 137: \(0, .entity)",
 			138: "shake screen for \(2, .frames) with intensity: \(0, .integer), gradual intensity: \(1, .integer)",
 			// 141: (#)
 			142: "modify player name", // has back button

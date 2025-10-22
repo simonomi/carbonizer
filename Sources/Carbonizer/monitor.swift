@@ -16,7 +16,7 @@ public extension Carbonizer {
 			throw InvalidInput()
 		}
 		
-		try monitorFiles(in: filePath) {
+		let monitor = try monitorFiles(in: filePath) {
 			let components = $0
 				.deletingPathExtension()
 				.deletingPathExtension()
@@ -34,7 +34,11 @@ public extension Carbonizer {
 			try shell("open \"\(outputPath.path(percentEncoded: false))\"")
 		}
 		
-		print("ready!")
+		configuration.log(.checkpoint, "ready!")
+		
+		// monitoring ends when the monitor is dropped, so wait for 32 years before dropping it
+		try await Task.sleep(for: .seconds(999_999_999))
+		monitor.cancel()
 #else
 		throw OSNotSupported()
 #endif
