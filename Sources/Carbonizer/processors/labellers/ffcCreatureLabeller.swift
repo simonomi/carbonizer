@@ -4,10 +4,10 @@ func ffcCreatureLabellerF(
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {
-	let ffcText = try environment.get(\.ffcText)
+	let text = try environment.get(\.text)
 	
-	guard let vivosaurNames = ffcText["text_dino_short_name"] else {
-		throw MissingShortNameText()
+	guard let vivosaurNames = text["text_dino_short_name"] else {
+		throw MissingTextFile(name: "text_dino_short_name")
 	}
 	
 	for index in dcl.vivosaurs.indices {
@@ -16,11 +16,5 @@ func ffcCreatureLabellerF(
 		{
 			dcl.vivosaurs[index]!._defaultName = name
 		}
-	}
-}
-
-struct MissingShortNameText: Error, CustomStringConvertible {
-	var description: String {
-		"couldn't find unpacked \(.red)text_dino_short_name\(.normal) in \(.cyan)text/\(.normal)"
 	}
 }

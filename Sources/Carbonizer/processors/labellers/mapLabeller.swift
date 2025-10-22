@@ -6,5 +6,9 @@ func mapLabellerF(
 ) throws {
 	let text = try environment.get(\.text)
 	
-	map._bannerText = text[safely: Int(map.bannerTextID)]
+	guard let japanese = text["japanese"] else {
+		throw MissingTextFile(name: "japanese")
+	}
+	
+	map._bannerText = japanese[safely: Int(map.bannerTextID)]
 }

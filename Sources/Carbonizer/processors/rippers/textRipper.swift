@@ -4,14 +4,9 @@ func textRipperF(
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {
-	guard environment.text == nil else {
-		throw TooManyTextFiles()
+	if environment.text == nil {
+		environment.text = [:]
 	}
-	environment.text = dtx.strings
-}
-
-struct TooManyTextFiles: Error, CustomStringConvertible {
-	var description: String {
-		"somehow there are more than one text file"
-	}
+	
+	environment.text![path.last!] = dtx.strings
 }

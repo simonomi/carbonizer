@@ -3,11 +3,14 @@ func maskNameLabellerF(
 	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration
-) throws {
-	let text = try environment.get(\.text)
+) throws {let text = try environment.get(\.text)
+	
+	guard let japanese = text["japanese"] else {
+		throw MissingTextFile(name: "japanese")
+	}
 	
 	for (index, mask) in headmaskDefs.masks.enumerated() {
-		headmaskDefs.masks[index]._name = text[Int(mask.name)]
-		headmaskDefs.masks[index]._japaneseDebugName = text[Int(mask.japaneseDebugName)]
+		headmaskDefs.masks[index]._name = japanese[Int(mask.name)]
+		headmaskDefs.masks[index]._japaneseDebugName = japanese[Int(mask.japaneseDebugName)]
 	}
 }

@@ -31,7 +31,7 @@ public enum Processor: String, Hashable, Sendable {
 			case .exportImages:              [.mpmRipper, .imageReparser, .imageExporter]
 			case .eventLabeller:             [.eventIDRipper, .eventLabeller]
 			case .battleFighterNameLabeller: [.textRipper, .dbsNameLabeller]
-			case .ffcCreatureLabeller:       [.ffcTextRipper, .ffcCreatureLabeller]
+			case .ffcCreatureLabeller:       [.textRipper, .ffcCreatureLabeller]
 			case .maskNameLabeller:          [.textRipper, .hmlNameLabeller]
 			case .keyItemLabeller:           [.textRipper, .keyItemLabeller]
 			case .mapLabeller:               [.textRipper, .mapLabeller]
@@ -49,9 +49,9 @@ public enum Processor: String, Hashable, Sendable {
 			case .exportImages:              [.ff1] // TODO: ffc?
 			case .eventLabeller:             [.ff1]
 			case .battleFighterNameLabeller: [.ff1]
-			case .ffcCreatureLabeller:       [.ffc] // TODO: add ff1 support
+			case .ffcCreatureLabeller:       [.ffc]
 			case .maskNameLabeller:          [.ff1]
-			case .keyItemLabeller:           [.ff1] // TODO: add ffc support
+			case .keyItemLabeller:           [.ff1, .ffc]
 			case .mapLabeller:               [.ff1]
 			case .museumLabeller:            [.ff1]
 		}
@@ -107,7 +107,7 @@ public enum Processor: String, Hashable, Sendable {
 	}
 	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper, mpmRipper, mmsRipper
+		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, mm3Ripper, tclRipper, mpmRipper, mmsRipper
 		case dbsNameLabeller, dexDialogueLabeller, dexDialogueSaver, eventLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 		case imageReparser, modelReparser, spriteReparser
 		case imageExporter, modelExporter, spriteExporter, textureExporter
@@ -137,7 +137,7 @@ public enum Processor: String, Hashable, Sendable {
 				case .textRipper:
 					try file.runProcessor(
 						textRipperF,
-						on: "text/japanese",
+						on: "text/**",
 						in: &environment,
 						at: [],
 						configuration: configuration
@@ -146,14 +146,6 @@ public enum Processor: String, Hashable, Sendable {
 					try file.runProcessor(
 						eventIDRipperF,
 						on: "episode/**",
-						in: &environment,
-						at: [],
-						configuration: configuration
-					)
-				case .ffcTextRipper:
-					try file.runProcessor(
-						ffcTextRipperF,
-						on: "text/**",
 						in: &environment,
 						at: [],
 						configuration: configuration
