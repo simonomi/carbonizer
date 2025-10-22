@@ -342,7 +342,7 @@ extension DEX.Unpacked.Command {
 
 // MARK: unpacked
 extension DEX.Unpacked: ProprietaryFileData {
-	static let fileExtension = ".dex.txt"
+	static let fileExtension = ".dex"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	

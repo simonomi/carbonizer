@@ -219,7 +219,7 @@ extension DEP.Packed.Event.Requirement.Argument {
 
 // MARK: unpacked
 extension DEP.Unpacked: ProprietaryFileData {
-	static let fileExtension = ".dep.txt"
+	static let fileExtension = ".dep"
 	static let magicBytes = ""
 	static let packedStatus: PackedStatus = .unpacked
 	
