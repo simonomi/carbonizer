@@ -358,7 +358,7 @@ enum MAP {
 				var vivosaurID: Int32
 				var _vivosaur: String?
 				
-				var unknown2: Int32
+				var unknown2: Int32 // chance of getting this vivo (within the thingc list)
 				var unknown3: Int32
 				var unknown4: Int32
 				

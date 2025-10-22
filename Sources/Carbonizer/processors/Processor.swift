@@ -39,25 +39,72 @@ public enum Processor: String, Hashable, Sendable {
 		}
 	}
 	
-	var requiredFileTypes: [String] {
+	var supportedGames: [Configuration.Game] {
 		switch self {
-			case .episodeDialogueLabeller:   ["MAR", "DMG", "DEX"]
-			case .episodeDialogueSaver:      ["MAR", "DEX", "DMG"]
-			case .exportVivosaurModels:      ["MAR", "3CL"]
-			case .exportModels:              ["MAR", "MM3"]
-			case .exportSprites:             ["MAR", "MMS"]
-			case .exportImages:              ["MAR", "MPM"]
-			case .eventLabeller:             ["MAR", "DEP", "DEX"]
-			case .battleFighterNameLabeller: ["MAR", "DTX", "DBS"]
-			case .ffcCreatureLabeller:       ["MAR", "DTX", "DCL"]
-			case .maskNameLabeller:          ["MAR", "DTX", "HML"]
-			case .keyItemLabeller:           ["MAR", "DTX", "KIL"]
-			case .mapLabeller:               ["MAR", "DTX", "MAP"]
-			case .museumLabeller:            ["MAR", "DTX", "DML"]
+			case .episodeDialogueLabeller:   [.ff1]
+			case .episodeDialogueSaver:      [.ff1]
+			case .exportVivosaurModels:      [.ff1]
+			case .exportModels:              [.ff1] // TODO: ffc?
+			case .exportSprites:             [.ff1] // TODO: ffc?
+			case .exportImages:              [.ff1] // TODO: ffc?
+			case .eventLabeller:             [.ff1]
+			case .battleFighterNameLabeller: [.ff1]
+			case .ffcCreatureLabeller:       [.ffc] // TODO: add ff1 support
+			case .maskNameLabeller:          [.ff1]
+			case .keyItemLabeller:           [.ff1] // TODO: add ffc support
+			case .mapLabeller:               [.ff1]
+			case .museumLabeller:            [.ff1]
 		}
 	}
 	
-	// TODO: required game
+	// MAR is dontWarn because it's already warned about elsewhere
+	var requiredFileTypes: (warn: Set<String>, dontWarn: Set<String>) {
+		switch self {
+			case .episodeDialogueLabeller:   (warn: ["DMG"], dontWarn: ["MAR", "DEX"])
+			case .episodeDialogueSaver:      (warn: ["DMG"], dontWarn: ["MAR", "DEX"])
+			case .exportVivosaurModels:      (warn: ["3CL"], dontWarn: ["MAR"])
+			case .exportModels:              (warn: ["MM3"], dontWarn: ["MAR"])
+			case .exportSprites:             (warn: ["MMS"], dontWarn: ["MAR"])
+			case .exportImages:              (warn: ["MPM"], dontWarn: ["MAR"])
+			case .eventLabeller:             (warn: ["DEP"], dontWarn: ["MAR", "DEX"])
+			case .battleFighterNameLabeller: (warn: ["DTX"], dontWarn: ["MAR", "DBS"])
+			case .ffcCreatureLabeller:       (warn: ["DTX"], dontWarn: ["MAR", "DCL"])
+			case .maskNameLabeller:          (warn: ["DTX"], dontWarn: ["MAR", "HML"])
+			case .keyItemLabeller:           (warn: ["DTX"], dontWarn: ["MAR", "KIL"])
+			case .mapLabeller:               (warn: ["DTX"], dontWarn: ["MAR", "MAP"])
+			case .museumLabeller:            (warn: ["DTX"], dontWarn: ["MAR", "DML"])
+		}
+	}
+	
+	// a warning is only shown if every type *except* warn are enabled, to prevent
+	// extra warnings when no file types are enabled
+	func shouldRun(with configuration: Configuration) -> Bool {
+		guard supportedGames.contains(configuration.game) else { return false }
+		
+		let (warn, dontWarn) = requiredFileTypes
+		
+		if !dontWarn.isSubset(of: configuration.fileTypes) {
+			return false
+		} else if !warn.isSubset(of: configuration.fileTypes) {
+			let missingFileTypes = warn.subtracting(configuration.fileTypes)
+			
+			let fileTypeList = missingFileTypes
+				.sorted()
+				.map { "\(.red)\($0)\(.normal)" }
+				.joined(separator: ", ")
+			
+			let isOrAre = if missingFileTypes.count == 1 {
+				"is"
+			} else {
+				"are"
+			}
+			
+			configuration.log(.warning, "the \(fileTypeList) file type\(sIfPlural(missingFileTypes.count)) \(isOrAre) not enabled, so \(.cyan)\(name)\(.normal) will not run")
+			return false
+		} else {
+			return true
+		}
+	}
 	
 	enum Stage: Equatable {
 		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper, mpmRipper, mmsRipper

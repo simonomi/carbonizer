@@ -4,6 +4,10 @@ func dialogueRipperF(
 	in environment: inout Processor.Environment,
 	configuration: Configuration
 ) throws {
+	// this is ff1-only for now bc ffc has duplicate dialogue indices
+	// - instead of erroring, just ignore them? maybe warn?
+	// - see how many there are and maybe special-case them in ffc?
+	
 	func uniqueKeys(_ firstLine: String, _ secondLine: String) throws -> String {
 		if firstLine == secondLine {
 			firstLine

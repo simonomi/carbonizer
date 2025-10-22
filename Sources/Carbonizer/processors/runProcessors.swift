@@ -5,14 +5,7 @@ func runProcessors(
 ) throws {
 	let processorsToRun = configuration.processors
 		.filter { $0.shouldRunWhen == when }
-	
-	for processor in processorsToRun {
-		for fileType in processor.requiredFileTypes {
-			guard configuration.fileTypes.contains(fileType) else {
-				throw FileTypeNotEnabled(fileType: fileType, processor: processor)
-			}
-		}
-	}
+		.filter { $0.shouldRun(with: configuration) }
 	
 	let pipeline = processorsToRun
 		.map(\.stages)
