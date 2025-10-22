@@ -29,9 +29,9 @@ struct CLIConfiguration : Sendable {
 		var exportModels: Bool
 		var exportSprites: Bool
 		var exportImages: Bool
-		var dexDialogueLabeller: Bool
-		var dexDialogueSaver: Bool
-		var dexBlockLabeller: Bool
+		var episodeDialogueLabeller: Bool
+		var episodeDialogueSaver: Bool
+		var eventLabeller: Bool
 		var battleFighterNameLabeller: Bool
 		var ffcCreatureLabeller: Bool
 		var maskNameLabeller: Bool
@@ -136,17 +136,17 @@ struct CLIConfiguration : Sendable {
 				
 				// adds comments to DEX files that show the dialogue used in a given command
 				// required file types: MAR, DEX, DMG
-				"dexDialogueLabeller": false,
+				"episodeDialogueLabeller": false,
 				
-				// allows editing the comments made by dexDialogueLabeller, which will be
+				// allows editing the comments made by episodeDialogueLabeller, which will be
 				// saved to the correct MSG file. new lines of dialogue cannot be added
 				// required file types: MAR, DEX, DMG 
-				"dexDialogueSaver": false,
+				"episodeDialogueSaver": false,
 				
-				// labels the blocks of commands in DEX files with their block number. this number
-				// is used by DEP files to control when a block triggers
+				// labels the events of commands in DEX files with their event number. this number
+				// is used by DEP files to control when an event triggers
 				// required file types: MAR, DEX, DEP
-				"dexBlockLabeller": false,
+				"eventLabeller": false,
 				
 				// adds labels for the names of fighters in DBS files (battle folder)
 				// required file types: MAR, DBS, DTX
@@ -244,7 +244,7 @@ struct UnknownOptions: Error, CustomStringConvertible {
 
 extension CLIConfiguration.Processors: Decodable {
 	enum CodingKeys: CodingKey, CaseIterable {
-		case exportVivosaurModels, exportModels, exportSprites, exportImages, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case exportVivosaurModels, exportModels, exportSprites, exportImages, episodeDialogueLabeller, episodeDialogueSaver, eventLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -269,12 +269,12 @@ extension CLIConfiguration.Processors: Decodable {
 			fallback.exportSprites
 		exportImages =              try container.decodeIfPresent(Bool.self, forKey: .exportImages) ??
 			fallback.exportImages
-		dexDialogueLabeller =       try container.decodeIfPresent(Bool.self, forKey: .dexDialogueLabeller) ??
-			fallback.dexDialogueLabeller
-		dexDialogueSaver =          try container.decodeIfPresent(Bool.self, forKey: .dexDialogueSaver) ??
-			fallback.dexDialogueSaver
-		dexBlockLabeller =          try container.decodeIfPresent(Bool.self, forKey: .dexBlockLabeller) ??
-			fallback.dexBlockLabeller
+		episodeDialogueLabeller =   try container.decodeIfPresent(Bool.self, forKey: .episodeDialogueLabeller) ??
+			fallback.episodeDialogueLabeller
+		episodeDialogueSaver =      try container.decodeIfPresent(Bool.self, forKey: .episodeDialogueSaver) ??
+			fallback.episodeDialogueSaver
+		eventLabeller =             try container.decodeIfPresent(Bool.self, forKey: .eventLabeller) ??
+			fallback.eventLabeller
 		battleFighterNameLabeller = try container.decodeIfPresent(Bool.self, forKey: .battleFighterNameLabeller) ??
 			fallback.battleFighterNameLabeller
 		ffcCreatureLabeller =       try container.decodeIfPresent(Bool.self, forKey: .ffcCreatureLabeller) ??

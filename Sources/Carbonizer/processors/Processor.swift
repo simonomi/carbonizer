@@ -1,17 +1,17 @@
 public enum Processor: String, Hashable, Sendable {
-	case exportVivosaurModels, exportModels, exportSprites, exportImages, dexDialogueLabeller, dexDialogueSaver, dexBlockLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+	case episodeDialogueLabeller, episodeDialogueSaver, exportVivosaurModels, exportModels, exportSprites, exportImages, eventLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	
 	var name: String { rawValue }
 	
 	var shouldRunWhen: PackOrUnpack {
 		switch self {
+			case .episodeDialogueLabeller:   .unpack
+			case .episodeDialogueSaver:      .pack
 			case .exportVivosaurModels:      .unpack
 			case .exportModels:              .unpack
 			case .exportSprites:             .unpack
 			case .exportImages:              .unpack
-			case .dexDialogueLabeller:       .unpack
-			case .dexDialogueSaver:          .pack
-			case .dexBlockLabeller:          .unpack
+			case .eventLabeller:             .unpack
 			case .battleFighterNameLabeller: .unpack
 			case .ffcCreatureLabeller:       .unpack
 			case .maskNameLabeller:          .unpack
@@ -23,13 +23,13 @@ public enum Processor: String, Hashable, Sendable {
 	
 	var stages: [Stage] {
 		switch self {
+			case .episodeDialogueLabeller:   [.dialogueRipper, .dexDialogueLabeller]
+			case .episodeDialogueSaver:      [.dexDialogueRipper, .dexDialogueSaver]
 			case .exportVivosaurModels:      [.tclRipper, .modelReparser, .textureExporter, .modelExporter]
 			case .exportModels:              [.mm3Ripper, .modelReparser, .textureExporter, .modelExporter]
 			case .exportSprites:             [.mmsRipper, .spriteReparser, .spriteExporter]
 			case .exportImages:              [.mpmRipper, .imageReparser, .imageExporter]
-			case .dexDialogueLabeller:       [.dialogueRipper, .dexDialogueLabeller]
-			case .dexDialogueSaver:          [.dexDialogueRipper, .dexDialogueSaver]
-			case .dexBlockLabeller:          [.eventIDRipper, .dexBlockLabeller]
+			case .eventLabeller:             [.eventIDRipper, .eventLabeller]
 			case .battleFighterNameLabeller: [.textRipper, .dbsNameLabeller]
 			case .ffcCreatureLabeller:       [.ffcTextRipper, .ffcCreatureLabeller]
 			case .maskNameLabeller:          [.textRipper, .hmlNameLabeller]
@@ -41,13 +41,13 @@ public enum Processor: String, Hashable, Sendable {
 	
 	var requiredFileTypes: [String] {
 		switch self {
+			case .episodeDialogueLabeller:   ["MAR", "DMG", "DEX"]
+			case .episodeDialogueSaver:      ["MAR", "DEX", "DMG"]
 			case .exportVivosaurModels:      ["MAR", "3CL"]
 			case .exportModels:              ["MAR", "MM3"]
 			case .exportSprites:             ["MAR", "MMS"]
 			case .exportImages:              ["MAR", "MPM"]
-			case .dexDialogueLabeller:       ["MAR", "DMG", "DEX"]
-			case .dexDialogueSaver:          ["MAR", "DEX", "DMG"]
-			case .dexBlockLabeller:          ["MAR", "DEP", "DEX"]
+			case .eventLabeller:             ["MAR", "DEP", "DEX"]
 			case .battleFighterNameLabeller: ["MAR", "DTX", "DBS"]
 			case .ffcCreatureLabeller:       ["MAR", "DTX", "DCL"]
 			case .maskNameLabeller:          ["MAR", "DTX", "HML"]
@@ -61,7 +61,7 @@ public enum Processor: String, Hashable, Sendable {
 	
 	enum Stage: Equatable {
 		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ffcTextRipper, mm3Ripper, tclRipper, mpmRipper, mmsRipper
-		case dbsNameLabeller, dexBlockLabeller, dexDialogueLabeller, dexDialogueSaver, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case dbsNameLabeller, dexDialogueLabeller, dexDialogueSaver, eventLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 		case imageReparser, modelReparser, spriteReparser
 		case imageExporter, modelExporter, spriteExporter, textureExporter
 		
@@ -151,14 +151,6 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
-				case .dexBlockLabeller:
-					try file.runProcessor(
-						dexBlockLabellerF,
-						on: "episode/e*",
-						in: &environment,
-						at: [],
-						configuration: configuration
-					)
 				case .dexDialogueLabeller:
 					try file.runProcessor(
 						dexDialogueLabellerF,
@@ -170,6 +162,14 @@ public enum Processor: String, Hashable, Sendable {
 				case .dexDialogueSaver:
 					try file.runProcessor(
 						dexDialogueSaverF,
+						on: "episode/e*",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .eventLabeller:
+					try file.runProcessor(
+						dexEventLabellerF,
 						on: "episode/e*",
 						in: &environment,
 						at: [],

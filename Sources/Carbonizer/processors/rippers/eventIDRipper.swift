@@ -10,15 +10,15 @@ func eventIDRipperF(
 		return
 	}
 	
-	if environment.blockIDs == nil {
-		environment.blockIDs = [:]
+	if environment.eventIDs == nil {
+		environment.eventIDs = [:]
 	}
 	
-	guard environment.blockIDs![mar.name] == nil else {
+	guard environment.eventIDs![mar.name] == nil else {
 		throw DuplicateDEPFiles(name: mar.name)
 	}
 	
-	environment.blockIDs![mar.name] = dep.blocks.map(\.id)
+	environment.eventIDs![mar.name] = dep.events.map(\.id)
 }
 
 struct DuplicateDEPFiles: Error, CustomStringConvertible {

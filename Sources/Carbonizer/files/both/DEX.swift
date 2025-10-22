@@ -1,30 +1,25 @@
 import BinaryParser
 import Foundation
 
-// TODO: parsing ffc with ff1's commands crashes instead of giving an error message
-// WHILE WRITING??
-
-// TODO: the game files call 'blocks' 'events'
-
 enum DEX {
 	@BinaryConvertible
 	struct Packed {
 		@Include
 		static let magicBytes = "DEX"
-		var numberOfBlocks: UInt32
-		var blockOffsetsStart: UInt32 = 0xC
-		@Count(givenBy: \Self.numberOfBlocks)
-		@Offset(givenBy: \Self.blockOffsetsStart)
-		var blockOffsets: [UInt32]
-		@Offsets(givenBy: \Self.blockOffsets)
-		var blocks: [Block]
+		var eventCount: UInt32
+		var eventOffsetsOffset: UInt32 = 0xC
+		@Count(givenBy: \Self.eventCount)
+		@Offset(givenBy: \Self.eventOffsetsOffset)
+		var eventOffsets: [UInt32]
+		@Offsets(givenBy: \Self.eventOffsets)
+		var events: [Event]
 		
 		@BinaryConvertible
-		struct Block {
+		struct Event {
 			var numberOfCommands: UInt32
-			var offsetsOffset: UInt32 = 0x8
+			var commandOffsetsOffset: UInt32 = 0x8
 			@Count(givenBy: \Self.numberOfCommands)
-			@Offset(givenBy: \Self.offsetsOffset)
+			@Offset(givenBy: \Self.commandOffsetsOffset)
 			var commandOffsets: [UInt32]
 			@Offsets(givenBy: \Self.commandOffsets)
 			var commands: [Command]
@@ -55,9 +50,9 @@ enum DEX {
 			//   - 0: used for flag4s, dialogue with choice (both kinds) result
 			//     dep: never (read with 8? maybe 9?)
 			//   - 2: never
-			//     dep: has played, has not played (blocks)
+			//     dep: has played, has not played (events)
 			//   - 3: never
-			//     dep: has played, has not played (blocks)
+			//     dep: has played, has not played (events)
 			//   - 5: used for flag5 and flag6
 			//     dep: 19 20 21 22 (boolean)
 			//   - 6: used for flag5 and flag6
@@ -112,8 +107,8 @@ enum DEX {
 		static let ff1Commands: [UInt32: CommandDefinition] = [
 			1:   "dialogue \(0, .dialogue)",
 			2:   "centered dialogue \(0, .dialogue)",
-			3:   "unknown 3 \(0, .flag)", // (flag is a block)
-			//    marks a block as having played/not played?
+			3:   "unknown 3 \(0, .flag)", // (flag is an event)
+			//    marks an event as having played/not played?
 			//     7025 freezes camera focus (?)
 			4:   "clear flag \(0, .flag)",
 			// wipes some stored dialogue answer. argument is the index in DEP
@@ -287,25 +282,25 @@ extension DEX.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: DEX.Unpacked, configuration: Configuration) {
-		numberOfBlocks = UInt32(unpacked.commands.count)
+		eventCount = UInt32(unpacked.commands.count)
 		
-		blocks = unpacked.commands.map(Block.init)
+		events = unpacked.commands.map(Event.init)
 		
-		blockOffsets = makeOffsets(
-			start: blockOffsetsStart + numberOfBlocks * 4,
-			sizes: blocks.map { $0.size() }
+		eventOffsets = makeOffsets(
+			start: eventOffsetsOffset + eventCount * 4,
+			sizes: events.map { $0.size() }
 		)
 	}
 }
 
-extension DEX.Packed.Block {
+extension DEX.Packed.Event {
 	init(_ commands: [DEX.Unpacked.Command]) {
 		self.commands = commands.compactMap(Command.init)
 		
 		numberOfCommands = UInt32(self.commands.count)
 		
 		commandOffsets = makeOffsets(
-			start: offsetsOffset + numberOfCommands * 4,
+			start: commandOffsetsOffset + numberOfCommands * 4,
 			sizes: self.commands.map(\.size)
 		)
 	}
@@ -315,7 +310,7 @@ extension DEX.Packed.Block {
 	}
 }
 
-extension DEX.Packed.Block.Command {
+extension DEX.Packed.Event.Command {
 	init?(_ command: DEX.Unpacked.Command) {
 		guard let typeAndArguments = command.typeAndArguments else { return nil }
 		(type, arguments) = typeAndArguments
@@ -350,7 +345,7 @@ extension DEX.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: DEX.Packed, configuration: Configuration) throws {
-		commands = try packed.blocks
+		commands = try packed.events
 			.map(\.commands)
 			.recursiveMap { try Command($0, configuration: configuration) }
 	}
@@ -474,7 +469,7 @@ extension DEX.Unpacked.Command {
 		}
 	}
 	
-	init(_ binaryCommand: DEX.Packed.Block.Command, configuration: Configuration) throws {
+	init(_ binaryCommand: DEX.Packed.Event.Command, configuration: Configuration) throws {
 		if let definition = DEX.Unpacked.knownCommands(for: configuration)[binaryCommand.type] {
 			// TODO: special case for 181?
 			

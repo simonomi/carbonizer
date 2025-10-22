@@ -6,16 +6,16 @@ enum DEP {
 		@Include
 		static let magicBytes = "DEP"
 		
-		var blockCount: UInt32
-		var blockOffsetsOffset: UInt32 = 0xC
-		@Count(givenBy: \Self.blockCount)
-		@Offset(givenBy: \Self.blockOffsetsOffset)
-		var blockOffsets: [UInt32]
-		@Offsets(givenBy: \Self.blockOffsets)
-		var blocks: [Block]
+		var eventCount: UInt32
+		var eventOffsetsOffset: UInt32 = 0xC
+		@Count(givenBy: \Self.eventCount)
+		@Offset(givenBy: \Self.eventOffsetsOffset)
+		var eventOffsets: [UInt32]
+		@Offsets(givenBy: \Self.eventOffsets)
+		var events: [Event]
 		
 		@BinaryConvertible
-		struct Block {
+		struct Event {
 			var id: Int32
 			
 			var unknown1: Int32 // 0 for and, 1 for or!
@@ -51,10 +51,10 @@ enum DEP {
 	}
 	
 	struct Unpacked {
-		var blocks: [Block]
+		var events: [Event]
 		
 		enum ArgumentType {
-			case block, entity, flag, door, firstNumberOnly, unknown, vivosaur
+			case event, entity, flag, door, firstNumberOnly, unknown, vivosaur
 		}
 		
 		struct RequirementDefinition {
@@ -65,7 +65,7 @@ enum DEP {
 		}
 		
 		// requirements with variadic arguments may only have that variadic argument, and NO OTHERS
-		// this is because of some kinda hacky code in DEP.Block.Requirement.init(_: Substring)
+		// this is because of some kinda hacky code in DEP.Event.Requirement.init(_: Substring)
 		static let knownRequirements: [UInt32: RequirementDefinition] = [
 			1:  "unconditional/always",
 			2:  "talked to \(0, .entity)",
@@ -115,14 +115,14 @@ enum DEP {
 			// 22: requires NOT an unknown5, but ||
 			23: "\(0, .entity) is spawned in",
 			// used to trigger rex and snivels when you get close enough to them (chapter 4)
-			36: "\(0..., .block) has played", // wait, if this is variadic, how is it different from the others?
-			37: "at least one of \(0..., .block) has played",
-			38: "\(0..., .block) has not played", // wait, if this is variadic, how is it different from the others?
-			39: "none of \(0..., .block) have played",
+			36: "\(0..., .event) has played", // wait, if this is variadic, how is it different from the others?
+			37: "at least one of \(0..., .event) has played",
+			38: "\(0..., .event) has not played", // wait, if this is variadic, how is it different from the others?
+			39: "none of \(0..., .event) have played",
 			41: "has \(0, .vivosaur)",
 		]
 		
-		struct Block {
+		struct Event {
 			var id: Int32
 			var unknown1: Int32
 			var unknown2: Int32
@@ -145,7 +145,7 @@ enum DEP {
 			case failedToParse(Substring, in: Substring)
 			case incorrectArgumentCount(requirement: Substring, actual: Int, expected: Int)
 			case unknownRequirement(Substring)
-			case blockMissingID(blockText: Substring)
+			case eventMissingID(eventText: Substring)
 			case mismatchedAngleBrackets(requirement: Substring)
 		}
 	}
@@ -163,17 +163,17 @@ extension DEP.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: DEP.Unpacked, configuration: Configuration) {
-		blocks = unpacked.blocks.compactMap(Block.init)
-		blockCount = UInt32(blocks.count)
-		blockOffsets = makeOffsets(
-			start: blockOffsetsOffset + UInt32(blocks.count * 4),
-			sizes: blocks.map { $0.size() }
+		events = unpacked.events.compactMap(Event.init)
+		eventCount = UInt32(events.count)
+		eventOffsets = makeOffsets(
+			start: eventOffsetsOffset + UInt32(events.count * 4),
+			sizes: events.map { $0.size() }
 		)
 	}
 }
 
-extension DEP.Packed.Block {
-	init?(_ unpacked: DEP.Unpacked.Block) {
+extension DEP.Packed.Event {
+	init?(_ unpacked: DEP.Unpacked.Event) {
 		guard !unpacked.isComment else { return nil }
 		
 		id = unpacked.id
@@ -193,8 +193,8 @@ extension DEP.Packed.Block {
 	}
 }
 
-extension DEP.Packed.Block.Requirement {
-	init?(_ unpacked: DEP.Unpacked.Block.Requirement) {
+extension DEP.Packed.Event.Requirement {
+	init?(_ unpacked: DEP.Unpacked.Event.Requirement) {
 		switch unpacked {
 			case .known(let type, _, let arguments), .unknown(let type, let arguments):
 				self.type = type
@@ -210,8 +210,8 @@ extension DEP.Packed.Block.Requirement {
 	}
 }
 
-extension DEP.Packed.Block.Requirement.Argument {
-	init(_ unpacked: DEP.Unpacked.Block.Requirement.Argument) {
+extension DEP.Packed.Event.Requirement.Argument {
+	init(_ unpacked: DEP.Unpacked.Event.Requirement.Argument) {
 		unknown1 = unpacked.unknown1
 		unknown2 = unpacked.unknown2
 	}
@@ -230,20 +230,20 @@ extension DEP.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: DEP.Packed, configuration: Configuration) {
-		blocks = packed.blocks.map(Block.init)
+		events = packed.events.map(Event.init)
 	}
 	
 	init(_ data: Datastream, configuration: Configuration) throws {
 		let fileLength = data.bytes.endIndex - data.offset
 		let string = try data.read(String.self, exactLength: fileLength)
 		
-		blocks = try string
+		events = try string
 			.split(separator: "\n\n")
-			.map(DEP.Unpacked.Block.init)
+			.map(DEP.Unpacked.Event.init)
 	}
 	
 	func write(to data: Datawriter) {
-		let string = blocks
+		let string = events
 			.map(String.init)
 			.joined(separator: "\n\n")
 		
@@ -251,18 +251,18 @@ extension DEP.Unpacked: ProprietaryFileData {
 	}
 }
 
-extension DEP.Unpacked.Block {
-	init(_ binaryBlock: DEP.Packed.Block) {
-		id = binaryBlock.id
-		unknown1 = binaryBlock.unknown1
-		unknown2 = binaryBlock.unknown2
+extension DEP.Unpacked.Event {
+	init(_ packed: DEP.Packed.Event) {
+		id = packed.id
+		unknown1 = packed.unknown1
+		unknown2 = packed.unknown2
 		isComment = false
-		requirements = binaryBlock.requirements.map(Requirement.init)
+		requirements = packed.requirements.map(Requirement.init)
 	}
 }
 
-extension DEP.Unpacked.Block.Requirement {
-	init(_ binaryRequirement: DEP.Packed.Block.Requirement) {
+extension DEP.Unpacked.Event.Requirement {
+	init(_ binaryRequirement: DEP.Packed.Event.Requirement) {
 		self = if let definition = DEP.Unpacked.knownRequirements[binaryRequirement.type] {
 			.known(
 				type: binaryRequirement.type,
@@ -278,56 +278,56 @@ extension DEP.Unpacked.Block.Requirement {
 	}
 }
 
-extension DEP.Unpacked.Block.Requirement.Argument {
-	init(_ binaryArgument: DEP.Packed.Block.Requirement.Argument) {
+extension DEP.Unpacked.Event.Requirement.Argument {
+	init(_ binaryArgument: DEP.Packed.Event.Requirement.Argument) {
 		unknown1 = binaryArgument.unknown1
 		unknown2 = binaryArgument.unknown2
 	}
 }
 
-extension DEP.Unpacked.Block {
+extension DEP.Unpacked.Event {
 	init(_ text: Substring) throws(DEP.Unpacked.ParseError) {
 		let lines = text.split(separator: "\n")
 		let firstLine = lines.first!
 		
-		if firstLine.hasPrefix("// block") {
+		if firstLine.hasPrefix("// event") {
 			isComment = true
-		} else if firstLine.hasPrefix("block") {
+		} else if firstLine.hasPrefix("event") {
 			isComment = false
 		} else {
-			throw .blockMissingID(blockText: text)
+			throw .eventMissingID(eventText: text)
 		}
 		
-		guard let (blockArguments, _) = extractAngleBrackets(from: firstLine) else {
+		guard let (eventArguments, _) = extractAngleBrackets(from: firstLine) else {
 			throw .mismatchedAngleBrackets(requirement: text)
 		}
 		
-		guard blockArguments.count == 3 else {
+		guard eventArguments.count == 3 else {
 			throw .incorrectArgumentCount(
 				requirement: text,
-				actual: blockArguments.count,
+				actual: eventArguments.count,
 				expected: 3
 			)
 		}
 		
-		let parsedBlockArguments = try blockArguments.map { (argument) throws(DEP.Unpacked.ParseError) in
+		let parsedEventArguments = try eventArguments.map { (argument) throws(DEP.Unpacked.ParseError) in
 			guard let number = Int32(argument) else {
 				throw .failedToParse(argument, in: text)
 			}
 			return number
 		}
 		
-		id = parsedBlockArguments[0]
-		unknown1 = parsedBlockArguments[1]
-		unknown2 = parsedBlockArguments[2]
+		id = parsedEventArguments[0]
+		unknown1 = parsedEventArguments[1]
+		unknown2 = parsedEventArguments[2]
 		
 		requirements = try lines
 			.dropFirst()
-			.map(DEP.Unpacked.Block.Requirement.init)
+			.map(DEP.Unpacked.Event.Requirement.init)
 	}
 }
 
-extension DEP.Unpacked.Block.Requirement {
+extension DEP.Unpacked.Event.Requirement {
 	init(_ text: Substring) throws(DEP.Unpacked.ParseError) {
 		if text.hasPrefix("// ") {
 			self = .comment(String(text.dropFirst(3)))
@@ -405,20 +405,20 @@ extension DEP.Unpacked.Block.Requirement {
 }
 
 extension String {
-	init(_ block: DEP.Unpacked.Block) {
-		let commentPrefix = block.isComment ? "// " : ""
+	init(_ event: DEP.Unpacked.Event) {
+		let commentPrefix = event.isComment ? "// " : ""
 		
-		let header = "\(commentPrefix)block <\(block.id)>, unknowns: <\(block.unknown1)>, <\(block.unknown2)>"
+		let header = "\(commentPrefix)event <\(event.id)>, unknowns: <\(event.unknown1)>, <\(event.unknown2)>"
 		
-		let requirements = block.requirements.map { String($0, isInComment: block.isComment) }
+		let requirements = event.requirements.map { String($0, isInComment: event.isComment) }
 		
 		self = ([header] + requirements).joined(separator: "\n")
 	}
 	
-	init(_ requirement: DEP.Unpacked.Block.Requirement, isInComment: Bool) {
+	init(_ requirement: DEP.Unpacked.Event.Requirement, isInComment: Bool) {
 		guard !isInComment else {
 			let originalText = String(requirement, isInComment: false)
-			let comment: DEP.Unpacked.Block.Requirement = .comment(originalText)
+			let comment: DEP.Unpacked.Event.Requirement = .comment(originalText)
 			self = String(comment, isInComment: false)
 			return
 		}
@@ -468,7 +468,7 @@ extension String {
 	}
 }
 
-extension DEP.Unpacked.Block.Requirement.Argument: Equatable {}
+extension DEP.Unpacked.Event.Requirement.Argument: Equatable {}
 
 extension DEP.Unpacked.ParseError: CustomStringConvertible {
 	var description: String {
@@ -479,8 +479,8 @@ extension DEP.Unpacked.ParseError: CustomStringConvertible {
 				"incorrect number of arguments in requirement '\(.cyan)\(requirement)\(.normal)', expected \(.green)\(expected)\(.normal), got \(.red)\(actual)\(.normal)"
 			case .unknownRequirement(let text):
 				"unknown requirement: '\(.red)\(text)\(.normal)'"
-			case .blockMissingID(blockText: let blockText):
-				"first line of block is not block id: '\(.cyan)\(blockText)\(.normal)'"
+			case .eventMissingID(eventText: let eventText):
+				"first line of event is not event id: '\(.cyan)\(eventText)\(.normal)'"
 			case .mismatchedAngleBrackets(let requirement):
 				"requirement '\(.cyan)\(requirement)\(.normal)' has misimatching angle brackets"
 		}
@@ -577,9 +577,9 @@ extension DEP.Unpacked.RequirementDefinition: ExpressibleByStringInterpolation {
 }
 
 extension DEP.Unpacked.ArgumentType {
-	func parse(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
+	func parse(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
 		switch self {
-			case .block:           parseBlock(text)
+			case .event:           parseEvent(text)
 			case .entity:          parseLookupTable(entityIDs, text: text) ?? parsePrefix(text)
 			case .flag:            parseUnknown(text)
 			case .door:            parseLookupTable(doorIDs, text: text) ?? parsePrefix(text)
@@ -589,34 +589,34 @@ extension DEP.Unpacked.ArgumentType {
 		}
 	}
 	
-	private func parsePrefix(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
+	private func parsePrefix(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
 		text
 			.split(whereSeparator: \.isWhitespace)
 			.last
 			.flatMap { UInt16($0) }
-			.map { DEP.Unpacked.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
+			.map { DEP.Unpacked.Event.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}
 	
-	private func parseLookupTable(_ table: [String: Int32], text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
+	private func parseLookupTable(_ table: [String: Int32], text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
 		table[text.lowercased()]
 			.map(UInt16.init)
-			.map { DEP.Unpacked.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
+			.map { DEP.Unpacked.Event.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}
 	
-	private func parseBlock(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
-		if text.hasPrefix("block ") {
+	private func parseEvent(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
+		if text.hasPrefix("event ") {
 			parseUnknown(text.dropFirst(6))
 		} else {
 			parseUnknown(text)
 		}
 	}
 	
-	private func parseFirstNumberOnly(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
+	private func parseFirstNumberOnly(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
 		UInt16(text)
-			.map { DEP.Unpacked.Block.Requirement.Argument(unknown1: $0, unknown2: 0) }
+			.map { DEP.Unpacked.Event.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}
 	
-	private func parseUnknown(_ text: Substring) -> DEP.Unpacked.Block.Requirement.Argument? {
+	private func parseUnknown(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
 		let unknowns = text.split(separator: " ")
 		
 		guard unknowns.count == 2,
@@ -624,13 +624,13 @@ extension DEP.Unpacked.ArgumentType {
 			  let unknown2 = UInt8(unknowns[1])
 		else { return nil }
 		
-		return DEP.Unpacked.Block.Requirement.Argument(unknown1: unknown1, unknown2: unknown2)
+		return DEP.Unpacked.Event.Requirement.Argument(unknown1: unknown1, unknown2: unknown2)
 	}
 	
-	func format(_ argument: DEP.Unpacked.Block.Requirement.Argument) -> String {
+	func format(_ argument: DEP.Unpacked.Event.Requirement.Argument) -> String {
 		validate(argument)
 		return switch self {
-			case .block:           "block \(argument.unknown1) \(argument.unknown2)"
+			case .event:           "event \(argument.unknown1) \(argument.unknown2)"
 			case .entity:          "\(entityNames[Int32(argument.unknown1)] ?? "entity \(argument.unknown1)")"
 			case .flag:            "\(argument.unknown1) \(argument.unknown2)"
 			case .door:            "\(doorNames[Int32(argument.unknown1)] ?? "door \(argument.unknown1)")"
@@ -640,7 +640,7 @@ extension DEP.Unpacked.ArgumentType {
 		}
 	}
 	
-	func validate(_ argument: DEP.Unpacked.Block.Requirement.Argument) {
+	func validate(_ argument: DEP.Unpacked.Event.Requirement.Argument) {
 		switch self {
 			case .entity, .door, .firstNumberOnly, .vivosaur:
 				// TODO: this should fail better

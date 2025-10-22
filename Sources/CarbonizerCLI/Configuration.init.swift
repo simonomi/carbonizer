@@ -49,16 +49,16 @@ extension Set<Processor> {
 			result.insert(.exportImages)
 		}
 		
-		if cli.dexDialogueLabeller {
-			result.insert(.dexDialogueLabeller)
+		if cli.episodeDialogueLabeller {
+			result.insert(.episodeDialogueLabeller)
 		}
 		
-		if cli.dexDialogueSaver {
-			result.insert(.dexDialogueSaver)
+		if cli.episodeDialogueSaver {
+			result.insert(.episodeDialogueSaver)
 		}
 		
-		if cli.dexBlockLabeller {
-			result.insert(.dexBlockLabeller)
+		if cli.eventLabeller {
+			result.insert(.eventLabeller)
 		}
 		
 		if cli.battleFighterNameLabeller {

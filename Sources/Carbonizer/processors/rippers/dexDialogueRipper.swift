@@ -13,7 +13,7 @@ func dexDialogueRipperF(
 	for event in dex.commands {
 		for command in event {
 			if case .comment(let string) = command {
-				guard string.wholeMatch(of: /block \d+/) == nil else { continue }
+				guard string.wholeMatch(of: /event \d+/) == nil else { continue }
 				
 				currentComments.append(string)
 			} else if command.linesOfDialogue().isNotEmpty {

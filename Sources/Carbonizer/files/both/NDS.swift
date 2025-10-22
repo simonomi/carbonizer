@@ -44,9 +44,6 @@ enum NDS {
 			@Offsets(givenBy: \Self.fileAllocationTable, from: \.startAddress, to: \.endAddress)
 			var files: [Datastream]
 			
-			// TODO: pad to the nearest 0x100_0000? the nearest 16 MiB???
-			// not sure if there's any actual reason to do this, other than perfectionism
-			
 			@BinaryConvertible
 			struct Header {
 				@Length(12)

@@ -3,7 +3,7 @@ extension Processor {
 		var text: [String]?
 		var ffcText: [String: [String]]?
 		var dialogue: [UInt32: String]?
-		var blockIDs: [String: [Int32]]?
+		var eventIDs: [String: [Int32]]?
 		
 		// dialogue ripped from DEX files
 		var conflictedDexDialogue: [UInt32: WithPossibleMergeConflict<String>]?

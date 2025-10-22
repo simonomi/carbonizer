@@ -5,7 +5,6 @@ func makeFileData(
 	data: Datastream,
 	configuration: Configuration
 ) throws -> (any ProprietaryFileData)? {
-	// TODO: (how) does this work?? shouldnt the name be nil bc its in a mar??
 	if configuration.fileTypes.contains("_match") {
 		if name == "region_center_match" {
 			return try Match<UInt32>.Packed.init(data, configuration: configuration)
