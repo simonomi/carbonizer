@@ -456,7 +456,6 @@ enum ECS {
 // MARK: packed
 extension ECS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -672,7 +671,6 @@ extension ECS.Packed.DonationPointForScore {
 extension ECS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".ecs.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> ECS.Packed {
 		ECS.Packed(self, configuration: configuration)

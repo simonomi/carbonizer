@@ -26,7 +26,6 @@ enum TBC { // 3BC
 // MARK: packed
 extension TBC.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -43,7 +42,6 @@ extension TBC.Packed: ProprietaryFileData {
 extension TBC.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".3bc.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> TBC.Packed {
 		TBC.Packed(self, configuration: configuration)

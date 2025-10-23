@@ -87,7 +87,6 @@ extension BMP: BinaryConvertible {
 extension BMP: ProprietaryFileData {
 	static let fileExtension = ".bmp"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unknown
 	
 	func packed(configuration: Configuration) -> Self { self }
 	func unpacked(configuration: Configuration) -> Self { self }

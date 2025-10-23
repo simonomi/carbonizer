@@ -86,7 +86,6 @@ enum MMS {
 // MARK: packed
 extension MMS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -138,7 +137,6 @@ extension MMS.Packed.ColorPaletteType {
 extension MMS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".mms.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> MMS.Packed {
 		MMS.Packed(self, configuration: configuration)

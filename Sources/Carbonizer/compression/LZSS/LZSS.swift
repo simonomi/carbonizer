@@ -1,5 +1,3 @@
-import BinaryParser
-
 enum LZSS {
 	static let minCompressedCount = 3
 	static let maxCompressedCount = 0b1111 + minCompressedCount

@@ -37,7 +37,6 @@ extension Palette.Unpacked {
 extension Palette.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -54,7 +53,6 @@ extension Palette.Packed: ProprietaryFileData {
 extension Palette.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".imagePalette.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> Palette.Packed {
 		Palette.Packed(self, configuration: configuration)

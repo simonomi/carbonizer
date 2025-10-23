@@ -3,7 +3,7 @@ import ANSICodes
 public struct InvalidRawValue<T: RawRepresentable>: Error {
 	var raw: T.RawValue
 	
-	public init(_ raw: T.RawValue, for type: T.Type) {
+	public init(_ raw: T.RawValue, for _: T.Type) {
 		self.raw = raw
 	}
 }

@@ -25,7 +25,6 @@ enum DTX {
 // MARK: packed
 extension DTX.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -51,7 +50,6 @@ extension DTX.Packed: ProprietaryFileData {
 extension DTX.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dtx.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DTX.Packed {
 		DTX.Packed(self, configuration: configuration)

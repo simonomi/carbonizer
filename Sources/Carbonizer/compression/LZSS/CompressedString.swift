@@ -4,10 +4,10 @@ extension LZSS {
 	struct CompressedString {
 		// count displacement
 		//  0000_1111_1111_1111
-		var firstByte: Byte
-		var secondByte: Byte
+		var firstByte: UInt8
+		var secondByte: UInt8
 		
-		init(_ firstByte: Byte, _ secondByte: Byte) {
+		init(_ firstByte: UInt8, _ secondByte: UInt8) {
 			self.firstByte = firstByte
 			self.secondByte = secondByte
 		}
@@ -16,11 +16,11 @@ extension LZSS {
 			precondition((minCompressedCount...maxCompressedCount).contains(count), "invalid count: \(count)")
 			precondition((minDisplacement...maxDisplacement).contains(displacement), "invalid displacement: \(displacement)")
 			
-			let count = Byte(count - minCompressedCount)
+			let count = UInt8(count - minCompressedCount)
 			
 			let displacement = displacement - minDisplacement
-			let disp = Byte(displacement >> 8)
-			let lacement = Byte(displacement & 0b1111_1111)
+			let disp = UInt8(displacement >> 8)
+			let lacement = UInt8(displacement & 0b1111_1111)
 			
 			firstByte = (count << 4) | disp
 			secondByte = lacement

@@ -37,7 +37,6 @@ enum KIL {
 // MARK: packed
 extension KIL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -62,7 +61,6 @@ extension KIL.Packed.KeyItem {
 extension KIL.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".kil.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> KIL.Packed {
 		KIL.Packed(self, configuration: configuration)

@@ -34,7 +34,6 @@ enum BCO {
 // MARK: packed
 extension BCO.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -65,7 +64,6 @@ extension BCO.Packed.Element {
 extension BCO.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".bco.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> BCO.Packed {
 		BCO.Packed(self, configuration: configuration)

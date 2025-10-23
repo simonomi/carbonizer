@@ -33,7 +33,6 @@ enum GRD {
 // MARK: packed
 extension GRD.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -55,7 +54,6 @@ extension GRD.Packed: ProprietaryFileData {
 extension GRD.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".grd.txt"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> GRD.Packed {
 		GRD.Packed(self, configuration: configuration)

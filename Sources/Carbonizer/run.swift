@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Action {
+enum Action {
 	case auto, pack, unpack
 	
 	func resolved(for path: URL) throws -> PackOrUnpack {

@@ -332,7 +332,6 @@ enum DBA {
 // MARK: packed
 extension DBA.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -498,7 +497,6 @@ extension DBA.Packed.Pair32 {
 extension DBA.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dba.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DBA.Packed {
 		DBA.Packed(self, configuration: configuration)

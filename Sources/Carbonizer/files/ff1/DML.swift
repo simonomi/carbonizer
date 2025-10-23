@@ -62,7 +62,6 @@ enum DML {
 // MARK: packed
 extension DML.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -97,7 +96,6 @@ extension DML.Packed.Vivosaur {
 extension DML.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dml.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DML.Packed {
 		DML.Packed(self, configuration: configuration)

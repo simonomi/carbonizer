@@ -40,7 +40,6 @@ enum MM3 {
 // MARK: packed
 extension MM3.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -68,7 +67,6 @@ extension MM3.Packed: ProprietaryFileData {
 extension MM3.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".mm3.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> MM3.Packed {
 		MM3.Packed(self, configuration: configuration)

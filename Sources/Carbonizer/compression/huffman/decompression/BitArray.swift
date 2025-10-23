@@ -25,11 +25,6 @@ extension Huffman {
 			}
 		}
 		
-		consuming func appending(_ bit: Bool) -> Self {
-			append(bit)
-			return self
-		}
-		
 		mutating func prepend(_ bit: Bool) {
 			precondition(count < Self.maxCount)
 			count += 1

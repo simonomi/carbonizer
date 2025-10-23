@@ -58,7 +58,6 @@ extension MAR.Packed: FileSystemObject {
 		}
 	}
 	
-	func packedStatus() -> PackedStatus { .packed }
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -130,7 +129,6 @@ extension MAR.Unpacked: FileSystemObject {
 		}
 	}
 	
-	func packedStatus() -> PackedStatus { .unpacked }
 	
 	func packed(configuration: Configuration) throws -> MAR.Packed {
 		do {

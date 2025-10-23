@@ -1,5 +1,3 @@
-import BinaryParser
-
 enum GPUCommandType: UInt8, Equatable {
 	case noop = 0x00
 	case matrixMode = 0x10

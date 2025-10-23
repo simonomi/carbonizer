@@ -16,7 +16,6 @@ enum DMS {
 // MARK: packed
 extension DMS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -33,7 +32,6 @@ extension DMS.Packed: ProprietaryFileData {
 extension DMS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dms.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DMS.Packed {
 		DMS.Packed(self, configuration: configuration)

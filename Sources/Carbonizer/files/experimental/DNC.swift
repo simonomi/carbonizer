@@ -51,7 +51,6 @@ enum DNC {
 // MARK: packed
 extension DNC.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -68,7 +67,6 @@ extension DNC.Packed: ProprietaryFileData {
 extension DNC.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dnc.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DNC.Packed {
 		DNC.Packed(self, configuration: configuration)

@@ -503,7 +503,6 @@ enum DCL_FFC {
 // MARK: packed
 extension DCL_FFC.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -880,7 +879,6 @@ extension DCL_FFC.Packed.Vivosaur.SupportEffects {
 extension DCL_FFC.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dcl.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DCL_FFC.Packed {
 		DCL_FFC.Packed(self, configuration: configuration)

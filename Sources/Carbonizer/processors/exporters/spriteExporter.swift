@@ -1,5 +1,3 @@
-import BinaryParser
-
 func spriteExporterF(
 	_ folder: inout Folder,
 	at path: [String],
@@ -74,23 +72,6 @@ func spriteExporterF(
 					configuration.log(.warning, location, "animation \(index):", error)
 				}
 			}
-		}
-	}
-}
-
-enum MissingSpriteComponent: Error, CustomStringConvertible {
-	case animation(Int)
-	case palette(Int)
-	case bitmap(Int)
-	
-	var description: String {
-		switch self {
-			case .animation(let index):
-				"missing sprite animation \(index)"
-			case .palette(let index):
-				"missing sprite palette \(index)"
-			case .bitmap(let index):
-				"missing sprite bitmap \(index)"
 		}
 	}
 }

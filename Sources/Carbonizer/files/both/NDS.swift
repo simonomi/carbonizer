@@ -258,7 +258,6 @@ extension NDS.Packed: FileSystemObject {
 		}
 	}
 	
-	func packedStatus() -> PackedStatus { .packed }
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -449,7 +448,6 @@ extension NDS.Unpacked: FileSystemObject {
 			.write(into: path, with: configuration)
 	}
 	
-	func packedStatus() -> PackedStatus { .unpacked }
 	
 	func packed(configuration: Configuration) throws -> NDS.Packed {
 		NDS.Packed(

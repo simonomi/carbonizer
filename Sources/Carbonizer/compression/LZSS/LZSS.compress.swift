@@ -17,7 +17,7 @@ extension LZSS {
 	mainloop:
 		while true {
 			let flagIndex = outputData.bytes.endIndex
-			outputData.write(Byte(0))
+			outputData.write(UInt8(0))
 			
 			for flagBit in (0..<8).reversed() {
 				if let compressedString = inputData.longestCompressedString(at: inputOffset) {
@@ -41,7 +41,7 @@ extension LZSS {
 	}
 }
 
-fileprivate extension Collection<Byte> where Index == Int, Indices == Range<Index> {
+fileprivate extension Collection<UInt8> where Index == Int, Indices == Range<Index> {
 	// TODO: this is slow (at least in debug mode)... can it be improved?
 	func longestCompressedString(at index: Index) -> LZSS.CompressedString? {
 		let goal = self[index...]

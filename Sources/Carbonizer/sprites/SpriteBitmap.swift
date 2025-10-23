@@ -76,7 +76,6 @@ extension BMP {
 extension SpriteBitmap.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -108,7 +107,6 @@ extension SpriteBitmap.Packed: ProprietaryFileData {
 extension SpriteBitmap.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".spriteBitmap.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> SpriteBitmap.Packed {
 		SpriteBitmap.Packed(self, configuration: configuration)

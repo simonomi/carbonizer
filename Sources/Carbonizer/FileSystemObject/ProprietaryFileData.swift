@@ -8,7 +8,6 @@ protocol SendableMetatype {}
 protocol ProprietaryFileData: SendableMetatype {
 	static var fileExtension: String { get }
 	static var magicBytes: String { get }
-	static var packedStatus: PackedStatus { get }
 	
 	associatedtype Packed: ProprietaryFileData
 	func packed(configuration: Configuration) -> Packed
@@ -43,7 +42,6 @@ extension ProprietaryFileData where Self: Codable {
 extension Datastream: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unknown
 	
 	func packed(configuration: Configuration) -> Datastream { self }
 	func unpacked(configuration: Configuration) -> Datastream { self }

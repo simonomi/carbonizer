@@ -28,7 +28,6 @@ extension MMS.Packed.ColorPaletteType {
 extension SpritePalette.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -46,7 +45,6 @@ extension SpritePalette.Packed: ProprietaryFileData {
 extension SpritePalette.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".spritePalette.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> SpritePalette.Packed {
 		SpritePalette.Packed(self, configuration: configuration)

@@ -154,7 +154,6 @@ enum DEP {
 // MARK: packed
 extension DEP.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -221,7 +220,6 @@ extension DEP.Packed.Event.Requirement.Argument {
 extension DEP.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dep"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DEP.Packed {
 		DEP.Packed(self, configuration: configuration)

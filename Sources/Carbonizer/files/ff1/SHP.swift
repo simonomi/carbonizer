@@ -34,7 +34,6 @@ enum SHP {
 // MARK: packed
 extension SHP.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -57,7 +56,6 @@ extension SHP.Packed: ProprietaryFileData {
 extension SHP.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".shp.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> SHP.Packed {
 		SHP.Packed(self, configuration: configuration)

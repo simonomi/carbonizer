@@ -31,7 +31,6 @@ enum AIS {
 // MARK: packed
 extension AIS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -48,7 +47,6 @@ extension AIS.Packed: ProprietaryFileData {
 extension AIS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".ais.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> AIS.Packed {
 		AIS.Packed(self, configuration: configuration)

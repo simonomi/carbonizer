@@ -54,7 +54,6 @@ enum CHR {
 // MARK: packed
 extension CHR.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -102,7 +101,6 @@ extension CHR.Packed: ProprietaryFileData {
 extension CHR.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".chr.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> CHR.Packed {
 		CHR.Packed(self, configuration: configuration)

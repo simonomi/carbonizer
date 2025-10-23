@@ -67,7 +67,6 @@ enum MPM {
 // MARK: packed
 extension MPM.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -106,7 +105,6 @@ extension MPM.Packed: ProprietaryFileData {
 extension MPM.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".mpm.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> MPM.Packed {
 		MPM.Packed(self, configuration: configuration)

@@ -86,7 +86,6 @@ enum Mesh {
 extension Mesh.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -143,7 +142,6 @@ extension Mesh.Packed.ModelNames {
 extension Mesh.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".mesh.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> Mesh.Packed {
 		Mesh.Packed(self, configuration: configuration)

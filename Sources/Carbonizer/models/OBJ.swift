@@ -1,5 +1,3 @@
-import BinaryParser
-
 struct OBJ<Scalar: SIMDScalar> {
 	var vertices: [SIMD3<Scalar>]
 	var textureVertices: [SIMD2<Scalar>]

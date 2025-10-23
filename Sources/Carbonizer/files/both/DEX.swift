@@ -281,7 +281,6 @@ enum DEX {
 // MARK: packed
 extension DEX.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -344,7 +343,6 @@ extension DEX.Unpacked.Command {
 extension DEX.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dex"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DEX.Packed {
 		DEX.Packed(self, configuration: configuration)

@@ -41,7 +41,6 @@ enum KPS {
 // MARK: packed
 extension KPS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -70,7 +69,6 @@ extension KPS.Packed.Level {
 extension KPS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".kps.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> KPS.Packed {
 		KPS.Packed(self, configuration: configuration)

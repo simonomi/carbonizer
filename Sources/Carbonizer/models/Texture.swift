@@ -122,7 +122,6 @@ fileprivate extension [UInt32] {
 extension Texture.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -221,7 +220,6 @@ extension Texture.Unpacked.Image.Info.TextureFormat {
 extension Texture.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".texture.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> Texture.Packed {
 		Texture.Packed(self, configuration: configuration)

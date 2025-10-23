@@ -87,12 +87,6 @@ struct Metadata {
 		return Date(timeIntervalSince1970: TimeInterval(outputBits))
 	}
 	
-	func swizzled(_ body: (inout Self) -> Void) -> Self {
-		var mutableSelf = self
-		body(&mutableSelf)
-		return mutableSelf
-	}
-	
 	static let skipFile: Self = Metadata(skipFile: true, standalone: false, compression: (.none, .none), maxChunkSize: 0, index: 0, huffmanCompressionInfo: [])
 }
 

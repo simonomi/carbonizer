@@ -391,7 +391,6 @@ enum MAP {
 // MARK: packed
 extension MAP.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -618,7 +617,6 @@ extension MAP.Packed.BreakableRock.Thing {
 extension MAP.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".map.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> MAP.Packed {
 		MAP.Packed(self, configuration: configuration)

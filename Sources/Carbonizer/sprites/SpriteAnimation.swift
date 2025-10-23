@@ -308,7 +308,6 @@ fileprivate func drawFrame(
 extension SpriteAnimation.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -360,7 +359,6 @@ extension SpriteAnimation.Packed.Command {
 extension SpriteAnimation.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".spriteAnimation.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> SpriteAnimation.Packed {
 		SpriteAnimation.Packed(self, configuration: configuration)

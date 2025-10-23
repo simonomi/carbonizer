@@ -191,7 +191,6 @@ enum DAL {
 // MARK: packed
 extension DAL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -401,7 +400,6 @@ extension DAL.Unpacked.Attack.SecondaryEffect.Effect {
 extension DAL.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dal.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DAL.Packed {
 		DAL.Packed(self, configuration: configuration)

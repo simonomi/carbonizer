@@ -2,7 +2,7 @@ import Foundation
 
 /// Documentation
 final public class Datastream: BinaryConvertible, Codable {
-	public let bytes: ArraySlice<Byte> // for inlinability
+	public let bytes: ArraySlice<UInt8> // for inlinability
 	
 //	public private(set) var offset: Int
 	public var offset: Int // for inlinability
@@ -14,16 +14,16 @@ final public class Datastream: BinaryConvertible, Codable {
 	
 	@inlinable
 	public convenience init(_ data: Data) {
-		self.init([Byte](data))
+		self.init([UInt8](data))
 	}
 	
 	@inlinable
-	public convenience init(_ bytes: [Byte]) {
+	public convenience init(_ bytes: [UInt8]) {
 		self.init(bytes[...])
 	}
 	
 	@inlinable
-	public init(_ bytes: ArraySlice<Byte>) {
+	public init(_ bytes: ArraySlice<UInt8>) {
 		self.bytes = bytes
 		offset = bytes.startIndex
 	}
@@ -58,7 +58,7 @@ final public class Datastream: BinaryConvertible, Codable {
 // MARK: read
 extension Datastream {
 	@inlinable
-	public func read<T: BinaryConvertible>(_ type: T.Type) throws -> T {
+	public func read<T: BinaryConvertible>(_: T.Type) throws -> T {
 		do {
 			return try T(self)
 		} catch {
@@ -68,7 +68,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read<T: BinaryConvertible>(
-		_ type: [T].Type, count: some BinaryInteger
+		_: [T].Type, count: some BinaryInteger
 	) throws -> [T] {
 		let count = Int(count)
 		do {
@@ -82,7 +82,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read<T: BinaryConvertible>(
-		_ type: [T].Type, offsets: [some BinaryInteger], relativeTo baseOffset: Offset
+		_: [T].Type, offsets: [some BinaryInteger], relativeTo baseOffset: Offset
 	) throws -> [T] {
 		let offsets = offsets.map { Int($0) + baseOffset.offset }
 		do {
@@ -99,7 +99,7 @@ extension Datastream {
 // MARK: primitives
 extension Datastream {
 	@inlinable
-	public func read(_ type: UInt8.Type) throws -> UInt8 {
+	public func read(_: UInt8.Type) throws -> UInt8 {
 		guard canRead(bytes: 1) else {
 			throw BinaryParserError.indexOutOfBounds(
 				index: offset + 1,
@@ -114,7 +114,7 @@ extension Datastream {
 	
 	// special case for Int8 so that UInt8 -> Int8 doesnt overflow
 	@inlinable
-	public func read(_ type: Int8.Type) throws -> Int8 {
+	public func read(_: Int8.Type) throws -> Int8 {
 		guard canRead(bytes: 1) else {
 			throw BinaryParserError.indexOutOfBounds(
 				index: offset + 1,
@@ -128,7 +128,7 @@ extension Datastream {
 	}
 	
 	@inlinable
-	public func read<T: FixedWidthInteger>(_ type: T.Type) throws -> T {
+	public func read<T: FixedWidthInteger>(_: T.Type) throws -> T {
 		let byteWidth = T.bitWidth / 8
 		guard canRead(bytes: byteWidth) else {
 			throw BinaryParserError.indexOutOfBounds(
@@ -159,7 +159,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read<T: FixedWidthInteger>(
-		_ type: [T].Type, count: some BinaryInteger
+		_: [T].Type, count: some BinaryInteger
 	) throws -> [T] {
 		let count = Int(count)
 		do {
@@ -178,7 +178,7 @@ extension Datastream {
 	}
 	
 	@inlinable
-	public func read(_ type: String.Type) throws -> String {
+	public func read(_: String.Type) throws -> String {
 		guard canRead(until: offset) else {
 			throw BinaryParserError.indexOutOfBounds(
 				index: offset,
@@ -206,7 +206,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read(
-		_ type: [String].Type, count: some BinaryInteger
+		_: [String].Type, count: some BinaryInteger
 	) throws -> [String] {
 		let count = Int(count)
 		do {
@@ -220,7 +220,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read(
-		_ type: [String].Type, offsets: [some BinaryInteger], relativeTo baseOffset: Offset
+		_: [String].Type, offsets: [some BinaryInteger], relativeTo baseOffset: Offset
 	) throws -> [String] {
 		do {
 			return try offsets.map {
@@ -234,7 +234,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read(
-		_ type: [[String]].Type, offsets: [[some BinaryInteger]], relativeTo baseOffset: Offset
+		_: [[String]].Type, offsets: [[some BinaryInteger]], relativeTo baseOffset: Offset
 	) throws -> [[String]] {
 		do {
 			return try offsets.map {
@@ -249,7 +249,7 @@ extension Datastream {
 	}
 	
 	@inlinable
-	public func read(_ type: String.Type, length inputLength: some BinaryInteger) throws -> String {
+	public func read(_: String.Type, length inputLength: some BinaryInteger) throws -> String {
 		guard canRead(until: offset) else {
 			throw BinaryParserError.indexOutOfBounds(
 				index: offset,
@@ -279,7 +279,7 @@ extension Datastream {
 	}
 	
 	@inlinable
-	public func read(_ type: String.Type, exactLength inputLength: some BinaryInteger) throws -> String {
+	public func read(_: String.Type, exactLength inputLength: some BinaryInteger) throws -> String {
 		let endOffset = offset + Int(inputLength)
 		
 		guard canRead(until: endOffset) else {
@@ -299,7 +299,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read(
-		_ type: Datastream.Type, endOffset: some BinaryInteger, relativeTo baseOffset: Offset
+		_: Datastream.Type, endOffset: some BinaryInteger, relativeTo baseOffset: Offset
 	) throws -> Datastream {
 		let endOffset = Int(endOffset) + baseOffset.offset
 		
@@ -317,7 +317,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read(
-		_ type: Datastream.Type, length: some BinaryInteger
+		_: Datastream.Type, length: some BinaryInteger
 	) throws -> Datastream {
 		let length = Int(length)
 		
@@ -335,7 +335,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read<T: BinaryInteger>(
-		_ type: [Datastream].Type, offsets: [T], endOffset: T, relativeTo baseOffset: Offset
+		_: [Datastream].Type, offsets: [T], endOffset: T, relativeTo baseOffset: Offset
 	) throws -> [Datastream] {
 		let offsets = offsets.map { Int($0) + baseOffset.offset }
 		let endOffset = Int(endOffset) + baseOffset.offset
@@ -361,7 +361,7 @@ extension Datastream {
 	
 	@inlinable
 	public func read<T: BinaryInteger>(
-		_ type: [Datastream].Type, startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
+		_: [Datastream].Type, startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
 	) throws -> [Datastream] {
 		assert(startOffsets.count == endOffsets.count)
 		
@@ -390,12 +390,12 @@ extension Datastream {
 	@inlinable
 	@_disfavoredOverload
 	public func read<T: RawRepresentable>(
-		_ type: T.Type
+		_: T.Type
 	) throws -> T where T.RawValue: FixedWidthInteger {
 		let raw = try read(T.RawValue.self)
 		
 		guard let result = T(rawValue: raw) else {
-			throw InvalidRawValue(raw, for: type)
+			throw InvalidRawValue(raw, for: T.self)
 		}
 		
 		return result
@@ -404,12 +404,12 @@ extension Datastream {
 	@inlinable
 	@_disfavoredOverload
 	public func read<T: RawRepresentable>(
-		_ type: T.Type
+		_: T.Type
 	) throws -> T where T.RawValue: BinaryConvertible {
 		let raw = try read(T.RawValue.self)
 		
 		guard let result = T(rawValue: raw) else {
-			throw InvalidRawValue(raw, for: type)
+			throw InvalidRawValue(raw, for: T.self)
 		}
 		
 		return result

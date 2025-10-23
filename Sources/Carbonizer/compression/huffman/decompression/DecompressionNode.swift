@@ -1,6 +1,6 @@
 extension Huffman {
 	struct DecompressionNode {
-		var nodeData: Byte
+		var nodeData: UInt8
 		
 		func leftOffset(currentOffset: Int) -> Int {
 			let offset = Int(nodeData) & 0b111111 + 1

@@ -76,20 +76,8 @@ func makeFile(
 	)
 	
 	if let fileData {
-		let fileType = type(of: fileData)
-		
-		guard let isPacked = fileType.packedStatus.isPacked else {
-			preconditionFailure("proprietary file type \(fileType) is neither packed or unpacked")
-		}
-		
-		let newName = if isPacked {
-			name
-		} else {
-			String(name.dropLast(fileType.fileExtension.count))
-		}
-		
 		return ProprietaryFile(
-			name: newName,
+			name: String(name.dropLast(type(of: fileData).fileExtension.count)),
 			metadata: metadata,
 			data: fileData
 		)

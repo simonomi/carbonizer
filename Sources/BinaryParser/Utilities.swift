@@ -1,7 +1,5 @@
 import Foundation
 
-public typealias Byte = UInt8
-
 extension String {
 	@usableFromInline
 	enum Direction {

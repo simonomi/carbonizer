@@ -51,7 +51,6 @@ enum BBG {
 // MARK: packed
 extension BBG.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -87,7 +86,6 @@ extension BBG.Packed.Kasekium {
 extension BBG.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".bbg.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> BBG.Packed {
 		BBG.Packed(self, configuration: configuration)

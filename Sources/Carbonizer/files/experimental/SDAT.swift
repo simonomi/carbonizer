@@ -110,7 +110,6 @@ enum SDAT {
 // MARK: packed
 extension SDAT.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -127,7 +126,6 @@ extension SDAT.Packed: ProprietaryFileData {
 extension SDAT.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".sdat.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> SDAT.Packed {
 		SDAT.Packed(self, configuration: configuration)

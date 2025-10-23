@@ -8,7 +8,7 @@ extension RunLength {
 		let inputData = inputData.bytes[inputData.offset...]
 		var inputOffset = inputData.startIndex
 		
-		var outputData = [Byte]()
+		var outputData = [UInt8]()
 		outputData.reserveCapacity(Int(header.decompressedSize))
 		
 //		print("new file")

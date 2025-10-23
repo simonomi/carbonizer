@@ -18,7 +18,6 @@ enum FILETYPE {
 // MARK: packed
 extension FILETYPE.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -35,7 +34,6 @@ extension FILETYPE.Packed: ProprietaryFileData {
 extension FILETYPE.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".FILE_EXTENSION.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> FILETYPE.Packed {
 		FILETYPE.Packed(self, configuration: configuration)

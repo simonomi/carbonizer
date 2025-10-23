@@ -14,7 +14,6 @@ enum Match<Element: FixedWidthInteger & Codable> {
 extension Match.Packed: ProprietaryFileData {
 	static var fileExtension: String { "" }
 	static var magicBytes: String { "" }
-	static var packedStatus: PackedStatus { .packed }
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -44,7 +43,6 @@ extension Match.Packed: ProprietaryFileData {
 extension Match.Unpacked: ProprietaryFileData {
 	static var fileExtension: String { ".json" }
 	static var magicBytes: String { "" }
-	static var packedStatus: PackedStatus { .unpacked }
 	
 	func packed(configuration: Configuration) -> Match.Packed {
 		Match.Packed(self, configuration: configuration)

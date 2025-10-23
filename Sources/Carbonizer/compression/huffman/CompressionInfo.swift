@@ -4,7 +4,7 @@ enum Huffman {
 		var tree: Node
 		
 		indirect enum Node: Codable {
-			case symbol(Byte)
+			case symbol(UInt8)
 			case branch(left: Self, right: Self)
 			
 			enum BranchCodingKeys: CodingKey {
@@ -13,7 +13,7 @@ enum Huffman {
 			
 			init(from decoder: any Decoder) throws {
 				do {
-					let symbol = try decoder.singleValueContainer().decode(Byte.self)
+					let symbol = try decoder.singleValueContainer().decode(UInt8.self)
 					
 					self = .symbol(symbol)
 				} catch {
@@ -40,7 +40,7 @@ enum Huffman {
 			}
 			
 			init(
-				traversing data: ArraySlice<Byte>,
+				traversing data: ArraySlice<UInt8>,
 				at currentOffset: Int,
 				isData: Bool = false
 			) {

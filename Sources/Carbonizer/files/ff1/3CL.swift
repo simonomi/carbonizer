@@ -85,7 +85,6 @@ enum TCL { // 3CL
 // MARK: packed
 extension TCL.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -128,8 +127,6 @@ extension TCL.Packed.Vivosaur {
 }
 
 extension TCL.Packed.Vivosaur.Animation {
-	static let null = Self(nil)
-	
 	fileprivate init(_ unpacked: TCL.Unpacked.Vivosaur.Animation?) {
 		guard let unpacked else {
 			isValid = 0
@@ -175,7 +172,6 @@ extension TCL.Packed.Vivosaur.Animation {
 extension TCL.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".3cl.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> TCL.Packed {
 		TCL.Packed(self, configuration: configuration)

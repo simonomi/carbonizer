@@ -103,7 +103,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 						configuration: configuration
 					)
 				} else {
-					switch cliConfiguration.compressionMode {
+					switch compressionMode ?? cliConfiguration.compressionMode {
 						case .auto:
 							try Carbonizer.auto(
 								filePath,

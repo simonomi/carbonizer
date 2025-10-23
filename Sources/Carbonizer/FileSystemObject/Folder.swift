@@ -94,12 +94,6 @@ extension Folder: FileSystemObject {
 		try contents.forEach { try $0.write(into: path, with: configuration) }
 	}
 	
-	func packedStatus() -> PackedStatus {
-		contents
-			.map { $0.packedStatus() }
-			.reduce(.unknown) { $0.combined(with: $1) }
-	}
-	
 	func packed(configuration: Configuration) throws -> Self {
 		Folder(
 			name: name,

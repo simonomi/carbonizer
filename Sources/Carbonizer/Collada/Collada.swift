@@ -1,5 +1,3 @@
-import BinaryParser
-
 struct Collada {
 	var body: [XMLNode]
 	

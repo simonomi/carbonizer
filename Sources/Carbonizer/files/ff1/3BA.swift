@@ -22,7 +22,6 @@ enum TBA {
 // MARK: packed
 extension TBA.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -40,7 +39,6 @@ extension TBA.Packed: ProprietaryFileData {
 extension TBA.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".3ba.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> TBA.Packed {
 		TBA.Packed(self, configuration: configuration)

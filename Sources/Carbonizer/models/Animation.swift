@@ -88,7 +88,6 @@ enum Animation {
 extension Animation.Packed: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -134,7 +133,6 @@ extension Animation.Packed.Keyframes {
 extension Animation.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".modelAnimation.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> Animation.Packed {
 		Animation.Packed(self, configuration: configuration)

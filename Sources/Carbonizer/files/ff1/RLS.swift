@@ -106,7 +106,6 @@ enum RLS {
 // MARK: packed
 extension RLS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -199,7 +198,6 @@ extension RLS.Unpacked.Kaseki.FossilType {
 extension RLS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".rls.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> RLS.Packed {
 		RLS.Packed(self, configuration: configuration)

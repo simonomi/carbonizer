@@ -36,10 +36,6 @@ extension ProprietaryFile: FileSystemObject {
 		.write(into: folder, with: configuration)
 	}
 	
-	func packedStatus() -> PackedStatus {
-		type(of: data).packedStatus
-	}
-	
 	func packed(configuration: Configuration) -> Self {
 		ProprietaryFile(
 			name: name,

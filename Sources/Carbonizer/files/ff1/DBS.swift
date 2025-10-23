@@ -194,7 +194,6 @@ struct DBS {
 // MARK: packed
 extension DBS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -296,7 +295,6 @@ extension DBS.Packed.Unknown {
 extension DBS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dbs.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DBS.Packed {
 		DBS.Packed(self, configuration: configuration)

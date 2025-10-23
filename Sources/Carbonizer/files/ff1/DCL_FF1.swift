@@ -452,7 +452,6 @@ extension DCL_FF1.Packed.Vivosaur.Element?: BinaryConvertible {
 // MARK: packed
 extension DCL_FF1.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -648,7 +647,6 @@ extension DCL_FF1.Packed.Vivosaur.SupportEffects {
 extension DCL_FF1.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dcl.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DCL_FF1.Packed {
 		DCL_FF1.Packed(self, configuration: configuration)

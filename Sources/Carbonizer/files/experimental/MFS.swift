@@ -71,7 +71,6 @@ enum MFS {
 // MARK: packed
 extension MFS.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -88,7 +87,6 @@ extension MFS.Packed: ProprietaryFileData {
 extension MFS.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".mfs.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> MFS.Packed {
 		MFS.Packed(self, configuration: configuration)

@@ -36,7 +36,6 @@ enum DBT {
 // MARK: packed
 extension DBT.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -71,7 +70,6 @@ extension DBT.Packed.Thing {
 extension DBT.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".dbt.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> DBT.Packed {
 		DBT.Packed(self, configuration: configuration)

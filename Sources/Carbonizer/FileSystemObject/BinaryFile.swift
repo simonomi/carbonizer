@@ -62,8 +62,6 @@ extension BinaryFile: FileSystemObject {
 		}
 	}
 	
-	func packedStatus() -> PackedStatus { .unknown }
-	
 	func packed(configuration: Configuration) -> BinaryFile { self }
 	func unpacked(path: [String] = [], configuration: Configuration) throws -> BinaryFile { self }
 }

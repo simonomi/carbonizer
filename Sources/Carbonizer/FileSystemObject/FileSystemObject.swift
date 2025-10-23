@@ -7,8 +7,6 @@ protocol FileSystemObject {
 	func savePath(in folder: URL, with configuration: Configuration) -> URL
 	func write(into folder: URL, with configuration: Configuration) throws
 	
-	func packedStatus() -> PackedStatus
-	
 	associatedtype Packed: FileSystemObject
 	func packed(configuration: Configuration) throws -> Packed
 	

@@ -6,7 +6,7 @@ extension Huffman {
 		var frequency: Int
 		
 		indirect enum Kind: Equatable {
-			case symbol(Byte)
+			case symbol(UInt8)
 			case branch(left: CompressionNode, right: CompressionNode)
 		}
 		
@@ -17,7 +17,7 @@ extension Huffman {
 			}
 		}
 		
-		static func symbol(_ symbol: Byte, frequency: Int) -> Self {
+		static func symbol(_ symbol: UInt8, frequency: Int) -> Self {
 			Self(kind: .symbol(symbol), frequency: frequency)
 		}
 		
@@ -56,7 +56,7 @@ extension Huffman {
 			}
 		}
 		
-		func dictionary() -> [Byte: BitArray] {
+		func dictionary() -> [UInt8: BitArray] {
 			switch kind {
 				case .symbol(let byte):
 					[byte: BitArray()]
@@ -114,15 +114,6 @@ extension Huffman {
 			}
 		}
 		
-		// TODO: remove
-		func hasChild(_ other: Self) -> Bool {
-			switch kind {
-				case .symbol: false
-				case .branch(let left, let right):
-					left == other || right == other || left.hasChild(other) || right.hasChild(other)
-			}
-		}
-		
 		init(kind: Kind, frequency: Int) {
 			self.kind = kind
 			self.frequency = frequency
@@ -152,8 +143,8 @@ extension Huffman {
 			// rounded up to align to the nearest word
 			let nodeCount = (self.nodeCount() + 1).roundedUpToTheNearest(4) - 1
 			let branchNodeCount = (nodeCount - 1) / 2
-			precondition(branchNodeCount <= Byte.max)
-			output.write(Byte(branchNodeCount))
+			precondition(branchNodeCount <= UInt8.max)
+			output.write(UInt8(branchNodeCount))
 			
 			var nodeWritingQueue: ArraySlice = [self]
 			
@@ -162,7 +153,7 @@ extension Huffman {
 					case .symbol(let symbol):
 						output.write(symbol)
 					case .branch(left: let left, right: let right):
-						var nodeData = Byte(nodeWritingQueue.count / 2)
+						var nodeData = UInt8(nodeWritingQueue.count / 2)
 						
 						// children offset should fit in lower 6 bits
 						guard nodeData & 0b111111 == nodeData else {

@@ -58,7 +58,6 @@ enum HML {
 // MARK: packed
 extension HML.Packed: ProprietaryFileData {
 	static let fileExtension = ""
-	static let packedStatus: PackedStatus = .packed
 	
 	func packed(configuration: Configuration) -> Self { self }
 	
@@ -98,7 +97,6 @@ extension HML.Packed.Mask {
 extension HML.Unpacked: ProprietaryFileData {
 	static let fileExtension = ".hml.json"
 	static let magicBytes = ""
-	static let packedStatus: PackedStatus = .unpacked
 	
 	func packed(configuration: Configuration) -> HML.Packed {
 		HML.Packed(self, configuration: configuration)

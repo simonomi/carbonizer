@@ -1,8 +1,8 @@
 import Foundation
 
 final public class Datawriter {
-//	public private(set) var bytes: ArraySlice<Byte>
-	public var bytes: ArraySlice<Byte> // for inlinability
+//	public private(set) var bytes: ArraySlice<UInt8>
+	public var bytes: ArraySlice<UInt8> // for inlinability
 	
 //	public private(set) var offset: Int
 	public var offset: Int // for inlinability
@@ -10,13 +10,6 @@ final public class Datawriter {
 	@inlinable
 	public init() {
 		bytes = []
-		offset = bytes.endIndex
-	}
-	
-	@inlinable
-	public init(capacity: Int) {
-		bytes = []
-		bytes.reserveCapacity(capacity)
 		offset = bytes.endIndex
 	}
 	
@@ -57,7 +50,7 @@ extension Datawriter {
 // MARK: primitives
 extension Datawriter {
 	@inlinable
-	public func write(_ byte: Byte) {
+	public func write(_ byte: UInt8) {
 		if offset == bytes.endIndex {
 			bytes.insert(byte, at: offset)
 		} else {
@@ -74,7 +67,7 @@ extension Datawriter {
 		
 		let newBytes = (0..<byteWidth)
 			.map { data >> ($0 * 8) }
-			.map { Byte(truncatingIfNeeded: $0) }
+			.map { UInt8(truncatingIfNeeded: $0) }
 		
 		if offset == bytes.endIndex {
 			bytes.insert(contentsOf: newBytes, at: offset)
@@ -93,7 +86,7 @@ extension Datawriter {
 	
 	@inlinable
 	public func write(_ string: String) {
-		let data = string.utf8CString.map(Byte.init)
+		let data = string.utf8CString.map(UInt8.init)
 		if offset == bytes.endIndex {
 			bytes.insert(contentsOf: data, at: offset)
 		} else {
@@ -140,7 +133,7 @@ extension Datawriter {
 		if string.utf8CString.count < length {
 			string = string.padded(toLength: length, with: "\0", from: .trailing)
 		}
-		let data = string.utf8CString[..<length].map(Byte.init)
+		let data = string.utf8CString[..<length].map(UInt8.init)
 		
 		if offset == bytes.endIndex {
 			bytes.insert(contentsOf: data, at: offset)

@@ -1,7 +1,6 @@
 import Testing
 import Foundation
 
-import ANSICodes
 @testable import Carbonizer
 
 // things to round-trip
@@ -9,6 +8,11 @@ import ANSICodes
 // - individual files, packed and unpacked
 // - mar folders, nds unpacked, and standalone mars (metadata!)
 // - the repacked rom! this can be done without any compression
+
+enum PackedOrUnpacked {
+	case packed
+	case unpacked
+}
 
 #if !IN_CI
 @Suite
@@ -69,9 +73,9 @@ struct RoundTrips {
 			("btl_adjust_defs", .packed),
 			("ffc creature_defs", .packed),
 			("map c 0118", .packed), // MAR
-		] as [(String, PackedStatus)]
+		] as [(String, PackedOrUnpacked)]
 	)
-	func roundTrip(_ fileName: String, _ packedStatus: PackedStatus) throws {
+	func roundTrip(_ fileName: String, _ packedStatus: PackedOrUnpacked) throws {
 		let inputFilePath = filePath(for: fileName)
 		
 		let game: Configuration.Game = if fileName.contains("ffc") {
@@ -102,8 +106,6 @@ struct RoundTrips {
 				try file.unpacked(path: [], configuration: configurationWithFileTypes)
 			case .unpacked:
 				try file.packed(configuration: configurationWithFileTypes)
-			case .unknown, .contradictory:
-				try Issue.failure("packed status must be either packed or unpacked")
 		}
 		
 		let toggledSavePath = toggledFile.savePath(in: .temporaryDirectory, with: configurationWithFileTypes)
@@ -116,8 +118,6 @@ struct RoundTrips {
 				try rereadFile.packed(configuration: configurationWithFileTypes)
 			case .unpacked:
 				try rereadFile.unpacked(path: [], configuration: configurationWithFileTypes)
-			case .unknown, .contradictory:
-				try Issue.failure("packed status must be either packed or unpacked")
 		}
 		
 		let savePath = retoggledFile.savePath(in: .temporaryDirectory, with: configurationWithFileTypes)
