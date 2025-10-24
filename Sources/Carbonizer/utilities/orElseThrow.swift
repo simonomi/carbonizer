@@ -1,5 +1,5 @@
 extension Optional {
-	func orElseThrow(_ error: @autoclosure () -> some Error) throws -> Wrapped {
+	func orElseThrow<E: Error>(_ error: @autoclosure () -> E) throws(E) -> Wrapped {
 		if let self {
 			self
 		} else {

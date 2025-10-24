@@ -18,7 +18,7 @@ enum DEP {
 		struct Event {
 			var id: Int32
 			
-			var unknown1: Int32 // 0 for and, 1 for or!
+			var requires: Criteria
 			var unknown2: Int32
 			
 			var requirementCount: UInt32
@@ -28,6 +28,10 @@ enum DEP {
 			var requirementOffsets: [UInt32]
 			@Offsets(givenBy: \Self.requirementOffsets)
 			var requirements: [Requirement]
+			
+			enum Criteria: UInt32, RawRepresentable {
+				case all, any
+			}
 			
 			@BinaryConvertible
 			struct Requirement {
@@ -43,7 +47,7 @@ enum DEP {
 				@BinaryConvertible
 				struct Argument {
 					var unknown1: UInt16
-					@Padding(bytes: 1)
+					@Padding(bytes: 1) // or should this be a u8?
 					var unknown2: UInt8
 				}
 			}
@@ -124,10 +128,14 @@ enum DEP {
 		
 		struct Event {
 			var id: Int32
-			var unknown1: Int32
+			var requires: Criteria
 			var unknown2: Int32
 			var isComment: Bool
 			var requirements: [Requirement]
+			
+			enum Criteria: String {
+				case all, any
+			}
 			
 			enum Requirement {
 				case known(type: UInt32, definition: RequirementDefinition, arguments: [Argument])
@@ -176,7 +184,7 @@ extension DEP.Packed.Event {
 		guard !unpacked.isComment else { return nil }
 		
 		id = unpacked.id
-		unknown1 = unpacked.unknown1
+		requires = Criteria(unpacked.requires)
 		unknown2 = unpacked.unknown2
 		
 		requirements = unpacked.requirements.compactMap(Requirement.init)
@@ -189,6 +197,15 @@ extension DEP.Packed.Event {
 	
 	func size() -> UInt32 {
 		20 + requirementCount * 4 + requirements.map(\.size).sum()
+	}
+}
+
+extension DEP.Packed.Event.Criteria {
+	init(_ unpacked: DEP.Unpacked.Event.Criteria) {
+		self = switch unpacked {
+			case .all: .all
+			case .any: .any
+		}
 	}
 }
 
@@ -252,10 +269,19 @@ extension DEP.Unpacked: ProprietaryFileData {
 extension DEP.Unpacked.Event {
 	init(_ packed: DEP.Packed.Event) {
 		id = packed.id
-		unknown1 = packed.unknown1
+		requires = Criteria(packed.requires)
 		unknown2 = packed.unknown2
 		isComment = false
 		requirements = packed.requirements.map(Requirement.init)
+	}
+}
+
+extension DEP.Unpacked.Event.Criteria {
+	init(_ packed: DEP.Packed.Event.Criteria) {
+		self = switch packed {
+			case .all: .all
+			case .any: .any
+		}
 	}
 }
 
@@ -308,16 +334,16 @@ extension DEP.Unpacked.Event {
 			)
 		}
 		
-		let parsedEventArguments = try eventArguments.map { (argument) throws(DEP.Unpacked.ParseError) in
-			guard let number = Int32(argument) else {
-				throw .failedToParse(argument, in: text)
-			}
-			return number
-		}
+		typealias ParseError = DEP.Unpacked.ParseError
 		
-		id = parsedEventArguments[0]
-		unknown1 = parsedEventArguments[1]
-		unknown2 = parsedEventArguments[2]
+		id = try Int32(eventArguments[0])
+			.orElseThrow(ParseError.failedToParse(eventArguments[0], in: text))
+		
+		requires = try Criteria(rawValue: String(eventArguments[1]))
+			.orElseThrow(ParseError.failedToParse(eventArguments[1], in: text))
+		
+		unknown2 = try Int32(eventArguments[2])
+			.orElseThrow(ParseError.failedToParse(eventArguments[2], in: text))
 		
 		requirements = try lines
 			.dropFirst()
@@ -406,7 +432,7 @@ extension String {
 	init(_ event: DEP.Unpacked.Event) {
 		let commentPrefix = event.isComment ? "// " : ""
 		
-		let header = "\(commentPrefix)event <\(event.id)>, unknowns: <\(event.unknown1)>, <\(event.unknown2)>"
+		let header = "\(commentPrefix)event <\(event.id)>, requires: <\(event.requires)>, unknown: <\(event.unknown2)>"
 		
 		let requirements = event.requirements.map { String($0, isInComment: event.isComment) }
 		
