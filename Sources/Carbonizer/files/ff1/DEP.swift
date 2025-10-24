@@ -19,7 +19,7 @@ enum DEP {
 			var id: Int32
 			
 			var requires: Criteria
-			var unknown2: Int32
+			var unknown2: UInt32
 			
 			var requirementCount: UInt32
 			var requirementOffsetsOffset: UInt32 = 0x14
@@ -71,7 +71,7 @@ enum DEP {
 		// requirements with variadic arguments may only have that variadic argument, and NO OTHERS
 		// this is because of some kinda hacky code in DEP.Event.Requirement.init(_: Substring)
 		static let knownRequirements: [UInt32: RequirementDefinition] = [
-			1:  "unconditional/always",
+			1:  "always",
 			2:  "talked to \(0, .entity)",
 			3:  "collided with \(0, .region)",
 			5:  "caught by \(0, .entity)",
@@ -128,7 +128,7 @@ enum DEP {
 		struct Event {
 			var id: Int32
 			var requires: Criteria
-			var unknown2: Int32
+			var unknown2: Bool
 			var isComment: Bool
 			var requirements: [Requirement]
 			
@@ -184,7 +184,7 @@ extension DEP.Packed.Event {
 		
 		id = unpacked.id
 		requires = Criteria(unpacked.requires)
-		unknown2 = unpacked.unknown2
+		unknown2 = unpacked.unknown2 ? 1 : 0
 		
 		requirements = unpacked.requirements.compactMap(Requirement.init)
 		requirementCount = UInt32(requirements.count)
@@ -269,7 +269,7 @@ extension DEP.Unpacked.Event {
 	init(_ packed: DEP.Packed.Event) {
 		id = packed.id
 		requires = Criteria(packed.requires)
-		unknown2 = packed.unknown2
+		unknown2 = packed.unknown2 > 0
 		isComment = false
 		requirements = packed.requirements.map(Requirement.init)
 	}
@@ -341,7 +341,7 @@ extension DEP.Unpacked.Event {
 		requires = try Criteria(rawValue: String(eventArguments[1]))
 			.orElseThrow(ParseError.failedToParse(eventArguments[1], in: text))
 		
-		unknown2 = try Int32(eventArguments[2])
+		unknown2 = try Bool(String(eventArguments[2]))
 			.orElseThrow(ParseError.failedToParse(eventArguments[2], in: text))
 		
 		requirements = try lines
