@@ -96,3 +96,53 @@ extension DEX.Unpacked.ArgumentType {
 		}
 	}
 }
+
+@Test(
+//	.disabled("only enable when needed")
+)
+func exportDEPRequirements() throws {
+	struct Requirement: Encodable {
+		var id: UInt32
+		var requirement: String
+	}
+	
+	let ff1Result = DEP.Unpacked.knownRequirements
+		.sorted(by: \.key)
+		.map { Requirement(id: $0, requirement: $1.formatted()) }
+	
+	let ff1OutputPath = URL(filePath: "/tmp/ff1Requirements.json")
+	try JSONEncoder().encode(ff1Result).write(to: ff1OutputPath)
+	
+	print("\(.cyan)ff1 DEP requirements written to \(ff1OutputPath.path(percentEncoded: false))\(.normal)")
+}
+
+extension DEP.Unpacked.RequirementDefinition {
+	func formatted() -> String {
+		outputStringThingy
+			.map {
+				switch $0 {
+					case .text(let text):
+						text
+					case .argument(let index):
+						"<foreign-type>&lt;\(argumentTypes[index].name)&gt;</foreign-type>"
+					case .arguments(let range):
+						"<foreign-type>&lt;\(argumentTypes[range.lowerBound].name)&gt;...</foreign-type>"
+				}
+			}
+			.joined(separator: "")
+	}
+}
+
+extension DEP.Unpacked.ArgumentType {
+	var name: StaticString {
+		switch self {
+			case .event: "event"
+			case .entity: "entity"
+			case .flag: "flag"
+			case .region: "region"
+			case .firstNumberOnly: "integer"
+			case .unknown: "unknown"
+			case .vivosaur: "vivosaur"
+		}
+	}
+}

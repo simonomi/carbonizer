@@ -1,5 +1,4 @@
-// rename ot collision boxes or smthn
-let doorNames: [Int32: String] = [
+let regionNames: [Int32: String] = [
 	12:  "entering relic hotel",
 	41:  "entering fossil center",
 	44:  "leaving fossil center",
@@ -8,8 +7,8 @@ let doorNames: [Int32: String] = [
 	796: "bottom right elevator in hotel",
 ]
 
-let doorIDs: [String: Int32] = Dictionary(
-	uniqueKeysWithValues: doorNames
+let regionIDs: [String: Int32] = Dictionary(
+	uniqueKeysWithValues: regionNames
 		.mapValues { $0.lowercased() }
 		.map { ($1, $0) }
 )

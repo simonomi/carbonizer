@@ -58,7 +58,7 @@ enum DEP {
 		var events: [Event]
 		
 		enum ArgumentType {
-			case event, entity, flag, door, firstNumberOnly, unknown, vivosaur
+			case event, entity, flag, region, firstNumberOnly, unknown, vivosaur
 		}
 		
 		struct RequirementDefinition {
@@ -73,8 +73,7 @@ enum DEP {
 		static let knownRequirements: [UInt32: RequirementDefinition] = [
 			1:  "unconditional/always",
 			2:  "talked to \(0, .entity)",
-			3:  "went through \(0, .door)",
-			//  actually collided with??
+			3:  "collided with \(0, .region)",
 			5:  "caught by \(0, .entity)",
 			6:  "unknown 6 \(0, .vivosaur)",
 			// in unused code to give the chickens
@@ -606,7 +605,7 @@ extension DEP.Unpacked.ArgumentType {
 			case .event:           parseEvent(text)
 			case .entity:          parseLookupTable(entityIDs, text: text) ?? parsePrefix(text)
 			case .flag:            parseUnknown(text)
-			case .door:            parseLookupTable(doorIDs, text: text) ?? parsePrefix(text)
+			case .region:          parseLookupTable(regionIDs, text: text) ?? parsePrefix(text)
 			case .firstNumberOnly: parseFirstNumberOnly(text)
 			case .unknown:         parseUnknown(text)
 			case .vivosaur:        parseLookupTable(vivosaurIDs, text: text) ?? parsePrefix(text)
@@ -657,7 +656,7 @@ extension DEP.Unpacked.ArgumentType {
 			case .event:           "event \(argument.unknown1) \(argument.unknown2)"
 			case .entity:          "\(entityNames[Int32(argument.unknown1)] ?? "entity \(argument.unknown1)")"
 			case .flag:            "\(argument.unknown1) \(argument.unknown2)"
-			case .door:            "\(doorNames[Int32(argument.unknown1)] ?? "door \(argument.unknown1)")"
+			case .region:          "\(regionNames[Int32(argument.unknown1)] ?? "region \(argument.unknown1)")"
 			case .firstNumberOnly: "\(argument.unknown1)"
 			case .unknown:         "\(argument.unknown1) \(argument.unknown2)"
 			case .vivosaur:        "\(vivosaurNames[Int32(argument.unknown1)] ?? "vivosaur \(argument.unknown1)")"
@@ -666,7 +665,7 @@ extension DEP.Unpacked.ArgumentType {
 	
 	func validate(_ argument: DEP.Unpacked.Event.Requirement.Argument) {
 		switch self {
-			case .entity, .door, .firstNumberOnly, .vivosaur:
+			case .entity, .region, .firstNumberOnly, .vivosaur:
 				// TODO: this should fail better
 				precondition(argument.unknown2 == 0)
 			default: ()

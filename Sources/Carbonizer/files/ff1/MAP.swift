@@ -28,9 +28,8 @@ enum MAP {
 		var movementSpeed: FixedPoint2012
 		var bannerTextID: UInt32
 		
-		// TODO: rename to like 'collision zone' or smthn
-		var loadingZoneCount: UInt32
-		var loadingZonesOffset: UInt32
+		var regionCount: UInt32
+		var regionsOffset: UInt32
 		
 		// 0x40
 		var cameraPositionCount: UInt32
@@ -62,9 +61,9 @@ enum MAP {
 		@Offset(givenBy: \Self.topScreenImagesOffset)
 		var topScreenImages: [TopScreenImage]
 		
-		@Count(givenBy: \Self.loadingZoneCount)
-		@Offset(givenBy: \Self.loadingZonesOffset)
-		var loadingZones: [LoadingZone]
+		@Count(givenBy: \Self.regionCount)
+		@Offset(givenBy: \Self.regionsOffset)
+		var regions: [Region]
 		
 		@Count(givenBy: \Self.cameraPositionCount)
 		@Offset(givenBy: \Self.cameraPositionsOffset)
@@ -112,7 +111,7 @@ enum MAP {
 		}
 		
 		@BinaryConvertible
-		struct LoadingZone { // map/r
+		struct Region { // map/r
 			var id: Int32
 			
 			// what do x and y do??? what abt the grd file?
@@ -282,7 +281,7 @@ enum MAP {
 		
 		var topScreenImages: [TopScreenImage]
 		
-		var loadingZones: [LoadingZone]
+		var regions: [Region]
 		
 		var cameraPositions: [CameraPosition]
 		
@@ -301,7 +300,7 @@ enum MAP {
 			var enabledFlag: UInt32
 		}
 		
-		struct LoadingZone: Codable {
+		struct Region: Codable {
 			var id: Int32
 			var x: Int32
 			var y: Int32
@@ -417,11 +416,11 @@ extension MAP.Packed: ProprietaryFileData {
 		movementSpeed = FixedPoint2012(unpacked.movementSpeed)
 		bannerTextID = unpacked.bannerTextID
 		
-		loadingZoneCount = UInt32(unpacked.loadingZones.count)
-		loadingZonesOffset = topScreenImagesOffset + topScreenImageCount * 8
+		regionCount = UInt32(unpacked.regions.count)
+		regionsOffset = topScreenImagesOffset + topScreenImageCount * 8
 		
 		cameraPositionCount = UInt32(unpacked.cameraPositions.count)
-		cameraPositionsOffset = loadingZonesOffset + loadingZoneCount * 0x14
+		cameraPositionsOffset = regionsOffset + regionCount * 0x14
 		
 		thingDCount = UInt32(unpacked.thingD.count)
 		thingDOffsetsOffset = cameraPositionsOffset + cameraPositionCount * 0xC
@@ -464,7 +463,7 @@ extension MAP.Packed: ProprietaryFileData {
 		
 		topScreenImages = unpacked.topScreenImages.map(TopScreenImage.init)
 		
-		loadingZones = unpacked.loadingZones.map(LoadingZone.init)
+		regions = unpacked.regions.map(Region.init)
 		
 		cameraPositions = unpacked.cameraPositions.map(CameraPosition.init)
 		
@@ -481,8 +480,8 @@ extension MAP.Packed.TopScreenImage {
 	}
 }
 
-extension MAP.Packed.LoadingZone {
-	init(_ unpacked: MAP.Unpacked.LoadingZone) {
+extension MAP.Packed.Region {
+	init(_ unpacked: MAP.Unpacked.Region) {
 		id = unpacked.id
 		x = unpacked.x
 		y = unpacked.y
@@ -646,7 +645,7 @@ extension MAP.Unpacked: ProprietaryFileData {
 		
 		topScreenImages = packed.topScreenImages.map(TopScreenImage.init)
 		
-		loadingZones = packed.loadingZones.map(LoadingZone.init)
+		regions = packed.regions.map(Region.init)
 		
 		cameraPositions = packed.cameraPositions.map(CameraPosition.init)
 		
@@ -669,8 +668,8 @@ extension MAP.Unpacked.TopScreenImage {
 	}
 }
 
-extension MAP.Unpacked.LoadingZone {
-	init(_ packed: MAP.Packed.LoadingZone) {
+extension MAP.Unpacked.Region {
+	init(_ packed: MAP.Packed.Region) {
 		id = packed.id
 		x = packed.x
 		y = packed.y
