@@ -43,6 +43,15 @@ struct CLIConfiguration : Sendable {
 	enum CompressionMode: String, EnumerableFlag, Decodable {
 		case pack, unpack, auto
 		
+		/// the original mode takes priority over the newly merged one
+		func merged(with other: Self) -> Self {
+			if self == .auto {
+				other
+			} else {
+				self
+			}
+		}
+		
 		static func name(for value: Self) -> NameSpecification {
 			switch value {
 				case .pack: .shortAndLong
@@ -67,8 +76,10 @@ struct CLIConfiguration : Sendable {
 	// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns?
 	static let defaultConfigurationString: String = """
 		{
+			// this option can be overridden by a command-line flag
 			"compressionMode": "auto", // auto, pack, unpack
 			
+			// any files passed as command-line argumentsline are run first
 			"inputFiles": [],
 			
 			// where any output files will be placed

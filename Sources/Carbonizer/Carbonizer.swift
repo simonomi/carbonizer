@@ -7,7 +7,7 @@ import Foundation
 
 public enum Carbonizer {
 	// if run manually, CI will check for the string "main", so here you go :)
-	static let version = "v2.19"
+	public static let version = "v2.19"
 	
 	public static func auto(
 		_ filePath: URL,

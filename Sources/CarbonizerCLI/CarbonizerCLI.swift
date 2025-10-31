@@ -16,8 +16,11 @@ struct CarbonizerCLI: AsyncParsableCommand {
 		discussion: "By default, carbonizer automatically determines whether to pack or unpack each input. It does this by looking at file extensions, magic bytes, and metadata"
 	)
 	
-	@Flag(help: "Manually specify compression mode (default: --auto)")
-	var compressionMode: CLIConfiguration.CompressionMode?
+	@Flag(help: "Manually specify compression mode")
+	var compressionMode: CLIConfiguration.CompressionMode = .auto
+	
+	@Flag(name: [.long, .customShort("V")], help: "Print version information and exit")
+	var version = false
 	
 	@Argument(
 		help: "The files to pack/unpack",
@@ -27,6 +30,11 @@ struct CarbonizerCLI: AsyncParsableCommand {
 	var inputFilePaths = [URL]()
 	
 	func run() async throws {
+		if version {
+			print("carbonizer", Carbonizer.version.dropFirst())
+			return
+		}
+		
 #if !IN_CI
 		let start = Date.now
 #endif
@@ -103,7 +111,7 @@ struct CarbonizerCLI: AsyncParsableCommand {
 						configuration: configuration
 					)
 				} else {
-					switch compressionMode ?? cliConfiguration.compressionMode {
+					switch compressionMode.merged(with: cliConfiguration.compressionMode) {
 						case .auto:
 							try Carbonizer.auto(
 								filePath,
