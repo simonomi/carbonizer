@@ -29,12 +29,21 @@ jobs:
         -Xswiftc -DIN_CI
     - name: Codesign
       run: |
-        mkdir $HOME/secrets
-        echo $CERTIFICATE_BASE64 | base64 --decode > "$HOME/secrets/certificate.cer"
-        security unlock-keychain -p "" ~/Library/Keychains/login.keychain
-        security add-certificates -k ~/Library/Keychains/login.keychain "$HOME/secrets/certificate.cer"
+        CERTIFICATE_PATH=$RUNNER_TEMP/certificate.cer
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        
+        echo -n "$CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+        
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        # security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        
+        security add-certificates -k "$KEYCHAIN_PATH" "$CERTIFICATE_PATH"
+        security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security list-keychain -d user -s "$KEYCHAIN_PATH"
+        
         security find-identity
-        codesign --sign "$IDENTITY_HASH" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
+        codesign --sign "$IDENTITY_HASH" --keychain "$KEYCHAIN_PATH" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
       env:
         CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
         IDENTITY_HASH: ${{ secrets.IDENTITY_HASH }}
