@@ -33,16 +33,12 @@ jobs:
         
         echo -n $CERTIFICATE_BASE64 | base64 --decode -o "$HOME/secrets/certificate.p12"
         
-        # security create-keychain -p "keychainPassword" "$RUNNER_TEMP/signing.keychain-db"
-        # security unlock-keychain -p "keychainPassword" "$RUNNER_TEMP/signing.keychain-db"
-        # security add-certificates -k "$RUNNER_TEMP/signing.keychain-db" "$HOME/secrets/certificate.cer"
-        # security find-identity -k "$RUNNER_TEMP/signing.keychain-db"
-        
+        security unlock-keychain -u
         security import "$HOME/secrets/certificate.p12" -P "$CERTIFICATE_PASSWORD" -t cert -f pkcs12
         
         security find-identity
         
-        codesign --sign "$IDENTITY_HASH" --keychain "$RUNNER_TEMP/signing.keychain-db" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
+        codesign --sign "$IDENTITY_HASH" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
       env:
         CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
         CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
