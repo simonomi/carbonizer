@@ -27,8 +27,26 @@ jobs:
       run: >
         swift build -c release
         -Xswiftc -DIN_CI
+    - name: Codesign
+      run: |
+        mkdir $HOME/secrets
+        echo $CERTIFICATE_BASE64 base64 --decode > "$HOME/secrets/certificate.cer"
+        codesign --sign "$IDENTITY_HASH" --keychain "$HOME/secrets/certificate.cer" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
+      env:
+        CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
+        IDENTITY_HASH: ${{ secrets.IDENTITY_HASH }}
     - name: Package
       run: tar -acf carbonizer-macOS.zip -C "$(swift build -c release --show-bin-path)" carbonizer
+    - name: Notarize
+      run: |
+        xcrun notarytool store-credentials "notarytool-password" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$APP_SPECIFIC_PASSWORD"
+        xcrun notarytool submit carbonizer-macOS.zip --keychain-profile "notarytool-password" --wait -f json > notaryStatus.json
+        xcrun notarytool log $(jq ".id" notaryStatus.json) --keychain-profile "notarytool-password" notaryLog.json
+        test $(jq ".status" notaryLog.json) = "\"Accepted\""
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        TEAM_ID: ${{ secrets.TEAM_ID }}
+        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
