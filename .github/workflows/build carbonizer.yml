@@ -31,14 +31,16 @@ jobs:
       run: |
         mkdir $HOME/secrets
         
-        echo -n $CERTIFICATE_BASE64 | base64 --decode -o "$HOME/secrets/certificate.cer"
-        curl "https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer" -o "AppleWWDRCAG6.cer"
+        echo -n $CERTIFICATE_BASE64 | base64 --decode -o "$HOME/secrets/certificate.p12"
         
-        security create-keychain -p "keychainPassword" "$RUNNER_TEMP/signing.keychain-db"
-        security unlock-keychain -p "keychainPassword" "$RUNNER_TEMP/signing.keychain-db"
-        security add-trusted-cert -d -r unspecified -k "$RUNNER_TEMP/signing.keychain-db" "AppleWWDRCAG6.cer"
-        security add-certificates -k "$RUNNER_TEMP/signing.keychain-db" "$HOME/secrets/certificate.cer"
-        security find-identity -k "$RUNNER_TEMP/signing.keychain-db"
+        # security create-keychain -p "keychainPassword" "$RUNNER_TEMP/signing.keychain-db"
+        # security unlock-keychain -p "keychainPassword" "$RUNNER_TEMP/signing.keychain-db"
+        # security add-certificates -k "$RUNNER_TEMP/signing.keychain-db" "$HOME/secrets/certificate.cer"
+        # security find-identity -k "$RUNNER_TEMP/signing.keychain-db"
+        
+        security import "$HOME/secrets/certificate.p12" -t cert -f pkcs12
+        
+        security find-identity
         
         codesign --sign "$IDENTITY_HASH" --keychain "$RUNNER_TEMP/signing.keychain-db" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
       env:
