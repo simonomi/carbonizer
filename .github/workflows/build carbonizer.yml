@@ -30,7 +30,7 @@ jobs:
     - name: Codesign
       run: |
         mkdir $HOME/secrets
-        echo $CERTIFICATE_BASE64 base64 --decode > "$HOME/secrets/certificate.cer"
+        echo $CERTIFICATE_BASE64 | base64 --decode > "$HOME/secrets/certificate.cer"
         security import "$HOME/secrets/certificate.cer"
         codesign --sign "$IDENTITY_HASH" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
       env:
