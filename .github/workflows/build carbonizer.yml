@@ -32,6 +32,7 @@ jobs:
         mkdir $HOME/secrets
         echo -n $CERTIFICATE_BASE64 | base64 --decode -o "$HOME/secrets/certificate.cer"
         curl "https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer" -o "AppleWWDRCAG6.cer"
+        security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db
         security add-trusted-cert -d -r unspecified -k ~/Library/Keychains/login.keychain-db "AppleWWDRCAG6.cer"
         security add-certificates -k ~/Library/Keychains/login.keychain-db "$HOME/secrets/certificate.cer"
         security find-identity
