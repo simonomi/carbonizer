@@ -27,34 +27,8 @@ jobs:
       run: >
         swift build -c release
         -Xswiftc -DIN_CI
-    - name: Codesign
-      run: |
-        mkdir $HOME/secrets
-        
-        echo -n $CERTIFICATE_BASE64 | base64 --decode -o "$HOME/secrets/certificate.p12"
-        
-        security create-keychain -p "keychainPassword" "$RUNNER_TEMP/signing.keychain-db"
-        security import "$HOME/secrets/certificate.p12" -P "$CERTIFICATE_PASSWORD" -t cert -f pkcs12 -k "$RUNNER_TEMP/signing.keychain-db"
-        
-        security find-identity "$RUNNER_TEMP/signing.keychain-db"
-        
-        codesign --sign "$IDENTITY_HASH" --keychain "$RUNNER_TEMP/signing.keychain-db" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
-      env:
-        CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
-        CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
-        IDENTITY_HASH: ${{ secrets.IDENTITY_HASH }}
     - name: Package
       run: tar -acf carbonizer-macOS.zip -C "$(swift build -c release --show-bin-path)" carbonizer
-    - name: Notarize
-      run: |
-        xcrun notarytool store-credentials "notarytool-password" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$APP_SPECIFIC_PASSWORD"
-        xcrun notarytool submit carbonizer-macOS.zip --keychain-profile "notarytool-password" --wait -f json > notaryStatus.json
-        xcrun notarytool log $(jq ".id" notaryStatus.json) --keychain-profile "notarytool-password" notaryLog.json
-        test $(jq ".status" notaryLog.json) = "\"Accepted\""
-      env:
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        TEAM_ID: ${{ secrets.TEAM_ID }}
-        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
