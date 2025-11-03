@@ -33,7 +33,7 @@ jobs:
         
         echo -n $CERTIFICATE_BASE64 | base64 --decode -o "$HOME/secrets/certificate.p12"
         
-        security create-keychain "$RUNNER_TEMP/signing.keychain-db"
+        security create-keychain -p "keychainPassword" "$RUNNER_TEMP/signing.keychain-db"
         security import "$HOME/secrets/certificate.p12" -P "$CERTIFICATE_PASSWORD" -t cert -f pkcs12 -k "$RUNNER_TEMP/signing.keychain-db"
         
         security find-identity "$RUNNER_TEMP/signing.keychain-db"
