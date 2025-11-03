@@ -31,7 +31,8 @@ jobs:
       run: |
         mkdir $HOME/secrets
         echo $CERTIFICATE_BASE64 base64 --decode > "$HOME/secrets/certificate.cer"
-        codesign --sign "$IDENTITY_HASH" --keychain "$HOME/secrets/certificate.cer" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
+        security import "$HOME/secrets/certificate.cer"
+        codesign --sign "$IDENTITY_HASH" --identifier "dev.simonomi.carbonizer" --timestamp --options runtime --verbose "$(swift build -c release --show-bin-path)/carbonizer"
       env:
         CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
         IDENTITY_HASH: ${{ secrets.IDENTITY_HASH }}
