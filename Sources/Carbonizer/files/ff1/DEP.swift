@@ -259,7 +259,7 @@ extension DEP.Unpacked: ProprietaryFileData {
 	func write(to data: Datawriter) {
 		let string = events
 			.map(String.init)
-			.joined(separator: "\n\n")
+			.joined(separator: "\n\n") + "\n"
 		
 		data.write(string, length: string.lengthOfBytes(using: .utf8))
 	}

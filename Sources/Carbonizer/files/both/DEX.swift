@@ -372,7 +372,7 @@ extension DEX.Unpacked: ProprietaryFileData {
 		let string = commands
 			.recursiveMap(String.init)
 			.map { $0.joined(separator: "\n") }
-			.joined(separator: "\n\n")
+			.joined(separator: "\n\n") + "\n"
 		
 		data.write(string, length: string.lengthOfBytes(using: .utf8))
 	}
