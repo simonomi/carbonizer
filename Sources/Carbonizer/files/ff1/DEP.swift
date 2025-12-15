@@ -128,7 +128,7 @@ enum DEP {
 		struct Event {
 			var id: Int32
 			var requires: Criteria
-			var unknown2: Bool
+			var unknown2: Bool // is true and false for diggins dialogue responses after cleaning tutorial
 			var isComment: Bool
 			var requirements: [Requirement]
 			
@@ -252,6 +252,7 @@ extension DEP.Unpacked: ProprietaryFileData {
 		let string = try data.read(String.self, exactLength: fileLength)
 		
 		events = try string
+			.trimmingCharacters(in: .whitespacesAndNewlines)
 			.split(separator: "\n\n")
 			.map(DEP.Unpacked.Event.init)
 	}

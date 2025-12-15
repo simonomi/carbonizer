@@ -28,6 +28,7 @@ enum KIL {
 			var nameIndex: UInt16
 			var descriptionIndex: UInt16
 			
+			var _index: Int?
 			var _name: String?
 			var _description: String?
 		}
@@ -69,16 +70,18 @@ extension KIL.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: KIL.Packed, configuration: Configuration) {
-		keyItems = packed.keyItems.map(KeyItem.init)
+		keyItems = packed.keyItems.enumerated().map(KeyItem.init)
 	}
 }
 
 extension KIL.Unpacked.KeyItem {
-	init?(_ packed: KIL.Packed.KeyItem) {
+	init?(_ index: Int, _ packed: KIL.Packed.KeyItem) {
 		guard packed.nameIndex != 0, packed.descriptionIndex != 0 else { return nil }
 		
 		nameIndex = packed.nameIndex
 		descriptionIndex = packed.descriptionIndex
+		
+		_index = index
 	}
 }
 

@@ -67,18 +67,34 @@ enum DEX {
 			//     player stats/settings (money, mask, dp, sonar upgrades)
 			//   - 10: flag5 flag6
 			//     dep: flag19 flag21 <>   SDf
+			// ---
+			// <59 0> is used to save a dialogue choice, read at 8
 			// <12202 0> is used for battle results (read with 5)
 			// <274 0/8> is used for dialogue
+			// ---
+			// <211 5> is set to true when wendy says "welcome to the fossil center"
+			// - "told to check in"?
+			// - "visited fossil center"?
+			// - "opening cutscene played"?
+			// <207 5> - "checked in at hotel" (when dropped off in room, not when leaving)
+			// <212 5> - set during diggins' cleaning tutorial
+			// <223 5> - set when battling travers (set to false if you lose)
+			// <260 5> - is asking diggins questions (end of cleaning tut or if u come back)
+			// --- 6 is keyitems
 			// <218-223 6> may have smthn to do with case size
+			// <248-253 6> are idol fragments
+			// --- 7 is masks
 			// <15 7> being set with flag5 gives digadig mask
 			// <16 7> being set with flag5 gives chieftain mask
 			// <2 7> being set with flag5 gives hip-shaker mask
-			// - 7 is masks
+			// ---
 			// <56 8> is probably chapter number
 			// <59 8> might be mask shop result? or maybe previous mask?
+			// <59 8> is used to read a dialogue choice (temp variable?)
 			// <62 8> number of sonar upgrades left
 			// <67 8> number of cleaning upgrades left
 			// <68 8> number of case upgrades (1:8, 2:16, 3:24, 4:32, 5:48)
+			// --- 9 seems to be player stats
 			// <2 9> == 1 means your case is size 8
 			// <3 9> is money
 			// <4 9> is current mask
@@ -89,7 +105,6 @@ enum DEX {
 			// <30 9> is sonar monitor upgrades (2 is 800 G, 3 is 3500 G)
 			// <31 9> is sonar fossil chips (2 is 10000 G, 3 is 35000 G)
 			// <32 9> is sonar fossil filters (2 is 5000 G, 3 is 8000 G)
-			// - 9 seems to be player stats
 		}
 		
 		struct CommandDefinition {
@@ -127,7 +142,9 @@ enum DEX {
 			//     set false?
 			//     memory types 5, 6, 10
 			7:   "spawn \(0, .entity) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
-			// 8:   (entity??, #)
+			// 8:   (entity, #)
+			// spawn slot thing?
+			// TODO: 8: "spawn \(0, .entity) in slot \(1, .integer)",?
 			9:   "spawn \(0, .entity) in slot \(1, .integer) facing \(2, .degrees)",
 			10:  "teleport \(0, .entity) to \(1, .entity)",
 			14:  "despawn \(0, .entity)",
@@ -168,12 +185,15 @@ enum DEX {
 			57:  "battle \(1, .integer), storing result at \(0, .flag)", // TODO: create battle id type?
 			58:  "clean1 \(1, .fossil), unknown: \(0, .unknown)",
 			59:  "clean2 \(1, .fossil), unknown: \(0, .unknown)",
+			// unknown is which flag to save the result in (type 5)
+			// "storing result at"
 			60:  "clean3 \(1, .fossil), unknown: \(0, .unknown)", // (used in fighter test in e0090)
 			61:  "angle camera from \(1, 2, .vector) at distance \(3, .fixedPoint) with fov: \(0, .fixedPoint) over \(4, .frames), unknown: \(5, .unknown)",
 			62:  "unknown 62",
 			//    often after diologue choices
 			//    often after battles
 			//    after sue asks where to go, removing memory but keeping 62 makes camera low, but without 62 camera resets properly
+			//    return? is it only used when dep event's unknown2 (i bet yes)
 			63:  "unknown 63",
 			70:  "set flag \(0, .flag) to \(1, .integer)",
 			71:  "add \(1, .integer) to flag \(0, .flag)",
@@ -181,7 +201,7 @@ enum DEX {
 			75:  "set flag \(0, .flag) to flag \(1, .flag)",
 			80:  "make \(0, .entity) follow \(1, .entity)",
 			82:  "make \(0, .entity) wander randomly, waiting between \(1, .frames) and \(2, .frames), walking speed \(3, .fixedPoint), distance up to \(4, .fixedPoint)",
-			86: "make \(0, .entity) chase player, detection range \(1, .fixedPoint), run distance \(2, .fixedPoint), chasing speed \(3, .fixedPoint), returning speed \(4, .fixedPoint), cooldown \(5, .frames)",
+			86:  "make \(0, .entity) chase player, detection range \(1, .fixedPoint), run distance \(2, .fixedPoint), chasing speed \(3, .fixedPoint), returning speed \(4, .fixedPoint), cooldown \(5, .frames)",
 			90:  "set fighter level to \(0, .integer)",
 			91:  "set case page count to \(0, .integer)",
 			97:  "set \(0, .vivosaur) fossil scores to \(1, .integer) \(2, .integer) \(3, .integer) \(4, .integer)",
@@ -361,6 +381,7 @@ extension DEX.Unpacked: ProprietaryFileData {
 		let string = try data.read(String.self, exactLength: fileLength)
 		
 		commands = try string
+			.trimmingCharacters(in: .whitespacesAndNewlines)
 			.split(separator: "\n\n")
 			.map {
 				try $0.split(separator: "\n")
