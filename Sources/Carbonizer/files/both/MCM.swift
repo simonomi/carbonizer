@@ -59,7 +59,7 @@ extension MCM.Packed {
 		let data = Datawriter()
 		unpacked.content.packed(configuration: configuration).write(to: data)
 		
-		decompressedSize = UInt32(data.offset)
+		decompressedSize = UInt32(data.bytes.endIndex)
 		
 		let chunkedData = data
 			.intoDatastream()

@@ -55,7 +55,7 @@ func animationRoundTrip(_ fileName: String) throws {
 	try expectUnchanged(from: inputData.bytes, to: outputData.bytes, name: fileName)
 }
 
-@Test(arguments: ["fieldchar 0027", "fieldchar 0667", "fieldchar 1493"])
+@Test(arguments: ["fieldchar 0027", "fieldmap 0103", "fieldchar 0667", "fieldchar 1493"])
 func textureRoundTrip(_ fileName: String) throws {
 	let inputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
 	

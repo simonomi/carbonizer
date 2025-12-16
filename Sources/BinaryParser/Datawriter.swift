@@ -184,6 +184,8 @@ extension Datawriter {
 	) {
 		let offsets = offsets.map { Int($0) + baseOffset.offest }
 		
+		assert(data.count == offsets.count)
+		
 		for (offset, item) in zip(offsets, data) {
 			jump(to: Offset(offset), fillerByte: fillerByte)
 			write(item)

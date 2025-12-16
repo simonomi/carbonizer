@@ -190,7 +190,7 @@ extension GPUCommands: BinaryConvertible {
 				throw InvalidGPUCommand.fourNOPs
 			}
 			
-			// TODO: why
+			// see page 172
 			if lastCommand.argumentCount == 0 {
 				data.jump(bytes: 4)
 			}

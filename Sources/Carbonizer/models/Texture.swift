@@ -130,33 +130,28 @@ extension Texture.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: Texture.Unpacked, configuration: Configuration) {
-		todo()
+		imageCount = UInt32(unpacked.images.count)
 		
-		// this runs successfully, but doesnt output identical bytes
+		var bitmapOffset: UInt32 = 0
+
+		imageHeaders = unpacked.images.map {
+			ImageHeader($0, bitmapOffset: &bitmapOffset)
+		}
 		
-//		imageCount = UInt32(unpacked.images.count)
-//		
-//		var bitmapOffset: UInt32 = 0
-//
-//		imageHeaders = unpacked.images.map {
-//			ImageHeader($0, bitmapOffset: &bitmapOffset)
-//		}
-//		
-//		bitmaps = unpacked.images.map(\.bitmap)
-//		
-//		palettes = unpacked.images
-//			.map {
-//				let writer = Datawriter()
-//				for color in $0.palette {
-//					writer.write(RGB555Color(color))
-//				}
-//				return writer.intoDatastream()
-//			}
-//		
-//		
-//		bitmapsLength = UInt32(bitmaps.map(\.bytes.count).sum())
-//		
-//		palettesLength = UInt32(palettes.map(\.bytes.count).sum())
+		bitmaps = unpacked.images.map(\.bitmap)
+		
+		palettes = unpacked.images
+			.map {
+				let writer = Datawriter()
+				for color in $0.palette {
+					writer.write(Color555(color))
+				}
+				return writer.intoDatastream()
+			}
+		
+		bitmapsLength = UInt32(bitmaps.map(\.bytes.count).sum())
+		
+		palettesLength = UInt32(palettes.map(\.bytes.count).sum())
 	}
 }
 
