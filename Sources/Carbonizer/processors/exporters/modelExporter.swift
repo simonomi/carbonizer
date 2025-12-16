@@ -33,7 +33,23 @@ func modelExporterF(
 				let textureName = String(modelIndices.textureIndex)
 					.padded(toLength: 4, with: "0")
 				
-				let collada = try Collada(
+//				let collada = try Collada(
+//					mesh: mesh,
+//					animationData: animation,
+//					modelName: modelIndices.modelName,
+//					texturePath: "assets/\(mar.name)/\(textureName)",
+//					textureNames: try texture?.textureNames()
+//				)
+//				
+//				let colladaFile = BinaryFile(
+//					name: modelIndices.modelName + ".dae",
+//					metadata: .skipFile,
+//					data: Datastream(collada.string().data(using: .utf8)!)
+//				)
+//				
+//				folder.contents.append(colladaFile)
+				
+				let usd = try USD(
 					mesh: mesh,
 					animationData: animation,
 					modelName: modelIndices.modelName,
@@ -41,13 +57,13 @@ func modelExporterF(
 					textureNames: try texture?.textureNames()
 				)
 				
-				let colladaFile = BinaryFile(
-					name: modelIndices.modelName + ".dae",
+				let usdFile = BinaryFile(
+					name: modelIndices.modelName + ".usda",
 					metadata: .skipFile,
-					data: Datastream(collada.asString().data(using: .utf8)!)
+					data: Datastream(usd.string().data(using: .utf8)!)
 				)
 				
-				folder.contents.append(colladaFile)
+				folder.contents.append(usdFile)
 			} catch {
 				let location = (path + [modelIndices.modelName]).joined(separator: "/") + ":"
 				configuration.log(.warning, location, error)

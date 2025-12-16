@@ -85,7 +85,7 @@ struct XMLNode {
 			.joined(separator: " ")
 	}
 	
-	func asString(indentation indentationLevel: Int = 0) -> String {
+	func string(indentation indentationLevel: Int = 0) -> String {
 		let indentation = String(repeating: "\t", count: indentationLevel)
 		
 		let attributes = if attributes.isEmpty {
@@ -113,7 +113,7 @@ struct XMLNode {
 
 extension [XMLNode] {
 	fileprivate func asString(indentation: Int) -> String {
-		map { $0.asString(indentation: indentation) }
+		map { $0.string(indentation: indentation) }
 			.joined(separator: "\n")
 	}
 }

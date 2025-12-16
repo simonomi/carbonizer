@@ -1,11 +1,11 @@
 struct Collada {
 	var body: [XMLNode]
 	
-	func asString() -> String {
+	func string() -> String {
 		let xmlHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 		let collada: XMLNode = .collada(body)
 		
-		return xmlHeader + "\n" + collada.asString()
+		return xmlHeader + "\n" + collada.string()
 	}
 }
 
