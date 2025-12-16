@@ -24,6 +24,10 @@ extension String {
 			self = String(number)
 		}
 	}
+	
+	consuming func indented(by levels: Int) -> Self {
+		replacingOccurrences(of: "\n", with: "\n" + String(repeating: "\t", count: levels))
+	}
 }
 
 extension DefaultStringInterpolation {

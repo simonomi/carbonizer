@@ -2,18 +2,15 @@
 import BinaryParser
 
 struct USD {
-	let data: String
+	var meshes: [USDMesh]
 	
 	init(
 		mesh: Mesh.Unpacked,
 		animationData: Animation.Unpacked,
-		modelName: String,
+		modelName: String, // TODO: never used
 		texturePath: String,
 		textureNames: [UInt32: String]?
 	) throws {
-		let modelNameWithSpaces = modelName
-		let modelName = modelName.replacing(" ", with: "-")
-		
 		let matrices = mesh.bones.map(\.matrix)
 		
 		let parsingResult = try parseCommands(
@@ -22,91 +19,59 @@ struct USD {
 			matrices: matrices
 		)
 		
-		let points = parsingResult.vertices
-			.map(\.0)
-			.map { "(\($0.x), \($0.y), \($0.z))" }
-			.joined(separator: ", ")
-		
-		let vertexIndices = parsingResult.polygons
-			.flatMap(\.value)
-			.flatMap {
-				$0.map(\.vertexIndex)
-			}
-			.map(String.init)
-			.joined(separator: ", ")
-		
-		let vertexCounts = parsingResult.polygons
-			.flatMap(\.value)
-			.map(\.count)
-			.map(String.init)
-			.joined(separator: ", ")
-		
-		let textureVertices = parsingResult.polygons
-			.flatMap(\.value)
-			.flatMap {
-				$0.map {
-					$0.textureInfo.map {
-						parsingResult.textureVertices[$0.textureVertexIndex]
-					} ?? SIMD2(-1, -1)
-				}
-			}
-			.map { "(\($0.x), \($0.y))" }
-			.joined(separator: ", ")
-		
-		// per material:
-		// - mesh
-		//   - vertices
-		//   - texcoords (st)
-		//   - faces vertex indices
-		//   - face vertex counts
-		//   - TODO: normals
-		//   - joint indices
-		//   - joint weights
-		//   - material binding
-		//   - skeleton binding
-		//   - material
-		//     - shader 1
-		//     - shader 2
-		//     - shader 3
-		//   - skeleton
-		//     - joints
-		//     - bindTransforms
-		//     - restTransforms?
-		//     - animationSource
-		//     - animation
-		//       - joints
-		//       - transforms timesamples
-		
-		data = """
-			#usda 1.0
+		meshes = parsingResult.polygons.enumerated().map { (index, materialAndPolygons) in
+			let (materialName, polygons) = materialAndPolygons
 			
-			def Xform "root" {
-				def Mesh "mesh2" {
-					rel material:binding = </root/_materials/Material>
-					
-					point3f[] points = [
-						\(points)
-					]
-					
-					texCoord2f[] primvar:st = [
-						\(textureVertices)
-					] (
-						interpolation = "faceVarying"
+			let meshName = materialName ?? "mesh\(index)"
+			
+			return USDMesh(
+				name: meshName,
+				vertices: parsingResult.vertices.map(\.0),
+				textureVertices: polygons
+					.flatMap {
+						$0.map {
+							$0.textureInfo.map {
+								parsingResult.textureVertices[$0.textureVertexIndex]
+							} ?? SIMD2(-1, -1)
+						}
+					},
+				faceVertexIndices: polygons.recursiveMap(\.vertexIndex),
+				faceVertexCounts: polygons.map(\.count),
+				jointIndices: polygons.flatMap { $0 }.map { // TODO: is this right?
+					parsingResult.vertices[$0.vertexIndex].bone
+				},
+				jointWeights: Array(repeating: 1, count: polygons.count),
+				material: materialName.map {
+					USDMaterial(
+						name: $0,
+						meshName: meshName,
+						texturePath: texturePath
 					)
-					
-					int[] faceVertexCounts = [
-						\(vertexCounts)
-					]
-					
-					int[] faceVertexIndices = [
-						\(vertexIndices)
-					]
-				}
-			}
-			"""
+				},
+				skeleton: USDSkeleton(
+					meshName: meshName,
+					boneNames: mesh.bones.map(\.name),
+					restTransforms: mesh.bones.map(\.matrix),
+					animation: USDAnimation(
+						boneNames: mesh.bones.map(\.name)
+					)
+				)
+			)
+		}
 	}
 	
 	func string() -> String {
-		data
+		"""
+		#usda 1.0
+		(
+			defaultPrim = "root"
+			metersPerUnit = 1
+			upAxis = "Y"
+		)
+		
+		def SkelRoot "root" {
+			\(meshes.map { $0.string().indented(by: 1) }.joined(separator: "\n\t\n\t"))
+		}
+		"""
 	}
 }
