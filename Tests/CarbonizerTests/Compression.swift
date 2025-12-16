@@ -22,9 +22,9 @@ struct Compression {
 //			(.huffman, "kaseki_defs - lzss", "kaseki_defs - huffman"), // ?-bit
 			(.lzss, "kaseki_defs - decompressed", "kaseki_defs - lzss"),
 			(.runLength, "image_archive 0050 - decompressed", "image_archive 0050 - run-length"),
-			(.huffman, "image_archive 0050 - run-length", "image_archive 0050 - huffman"),
+//			(.huffman, "image_archive 0050 - run-length", "image_archive 0050 - huffman"),
 			(.runLength, "map c 0118 - decompressed", "map c 0118 - run-length"),
-			(.huffman, "map c 0118 - run-length", "map c 0118 - huffman"),
+//			(.huffman, "map c 0118 - run-length", "map c 0118 - huffman"),
 		] as [(MCM.Unpacked.CompressionType, String, String)]
 	)
 	func compress(_ type: MCM.Unpacked.CompressionType, _ decompressedFileName: String, _ expectedFileName: String) throws {

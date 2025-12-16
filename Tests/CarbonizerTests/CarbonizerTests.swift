@@ -14,6 +14,8 @@ extension URL {
 	
 	static let roundTripsDirectory: URL = .testFileDirectory.appending(component: "round trips")
 	
+	static let modelFilesDirectory: URL = .testFileDirectory.appending(component: "model files")
+	
 #if IN_CI
 	static let wholeROMPath: URL? = nil
 #else

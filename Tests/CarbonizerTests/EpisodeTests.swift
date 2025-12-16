@@ -4,6 +4,13 @@ import Foundation
 import ANSICodes
 @testable import Carbonizer
 
+// to reduce the output when printing test arguments
+extension DEX.Unpacked.CommandDefinition: CustomDebugStringConvertible {
+	public var debugDescription: String {
+		""
+	}
+}
+
 @Test(arguments: [DEX.Unpacked.ff1Commands, DEX.Unpacked.ffcCommands])
 func knownCommandsAreValid(commandList: [UInt32: DEX.Unpacked.CommandDefinition]) throws {
 	var allCommandsWithoutArguments = Set<[String]>()
