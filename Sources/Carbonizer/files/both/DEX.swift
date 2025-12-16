@@ -50,9 +50,10 @@ enum DEX {
 			//   - 0: used for flag4s, dialogue with choice (both kinds) result
 			//     dep: never (read with 8? maybe 9?)
 			//   - 2: never
-			//     dep: has played, has not played (events)
+			//     dep: has played, has not played (events) (22-15132) event, not flag?
 			//   - 3: never
-			//     dep: has played, has not played (events)
+			//     dep: has played, has not played (events) (4-1241) episode file?? not event???
+			//       has (not) played, NOT "at least one"/"none of"
 			//   - 5: used for flag5 and flag6
 			//     dep: 19 20 21 22 (boolean)
 			//   - 6: used for flag5 and flag6
@@ -67,44 +68,58 @@ enum DEX {
 			//     player stats/settings (money, mask, dp, sonar upgrades)
 			//   - 10: flag5 flag6
 			//     dep: flag19 flag21 <>   SDf
-			// ---
+			// --- 0 (9-15957) event, not flag?
 			// <59 0> is used to save a dialogue choice, read at 8
 			// <12202 0> is used for battle results (read with 5)
 			// <274 0/8> is used for dialogue
-			// ---
+			// --- 5 (2-12461)
 			// <211 5> is set to true when wendy says "welcome to the fossil center"
 			// - "told to check in"?
 			// - "visited fossil center"?
 			// - "opening cutscene played"?
+			// <206 5>
 			// <207 5> - "checked in at hotel" (when dropped off in room, not when leaving)
+			// <211 5>
 			// <212 5> - set during diggins' cleaning tutorial
+			// <213 5>
 			// <223 5> - set when battling travers (set to false if you lose)
 			// <260 5> - is asking diggins questions (end of cleaning tut or if u come back)
-			// --- 6 is keyitems
+			// --- 6 is keyitems (1-264)
+			// TODO: add processor to label all keyitems
 			// <218-223 6> may have smthn to do with case size
 			// <248-253 6> are idol fragments
-			// --- 7 is masks
+			// --- 7 is masks (1-19)
 			// <15 7> being set with flag5 gives digadig mask
 			// <16 7> being set with flag5 gives chieftain mask
 			// <2 7> being set with flag5 gives hip-shaker mask
-			// ---
+			// --- 8 (1-364)
+			// <51 8>
 			// <56 8> is probably chapter number
 			// <59 8> might be mask shop result? or maybe previous mask?
 			// <59 8> is used to read a dialogue choice (temp variable?)
 			// <62 8> number of sonar upgrades left
+			// - or bitmask or smthn
+			// - 1/2/10/20/100/200
 			// <67 8> number of cleaning upgrades left
+			// - or maybe like a bitmask or smthn? buying the drill subtracts 2
 			// <68 8> number of case upgrades (1:8, 2:16, 3:24, 4:32, 5:48)
-			// --- 9 seems to be player stats
+			// --- 9 seems to be player stats (2-42)
 			// <2 9> == 1 means your case is size 8
 			// <3 9> is money
 			// <4 9> is current mask
 			// <7 9> is player pfp (hunter variant??)
 			// <9 9> may be number of fossil rocks
 			// <19 9> is donation points
+			// <25 9> is probably number of fossils cleaned
 			// <26 9> may be number of oasis seeds? no probably not
 			// <30 9> is sonar monitor upgrades (2 is 800 G, 3 is 3500 G)
 			// <31 9> is sonar fossil chips (2 is 10000 G, 3 is 35000 G)
 			// <32 9> is sonar fossil filters (2 is 5000 G, 3 is 8000 G)
+			// --- 10 1-47
+			// <23 10> used in 0001 (debug mode?)
+			// <30 10> multiplayer unlocked
+			// <33 10> drill unlocked
+			// <34 10> hammer unlocked
 		}
 		
 		struct CommandDefinition {
@@ -143,18 +158,19 @@ enum DEX {
 			//     memory types 5, 6, 10
 			7:   "spawn \(0, .entity) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
 			// 8:   (entity, #)
-			// spawn slot thing?
-			// TODO: 8: "spawn \(0, .entity) in slot \(1, .integer)",?
-			9:   "spawn \(0, .entity) in slot \(1, .integer) facing \(2, .degrees)",
+			// spawn region thing?
+			8:   "spawn \(0, .entity) at region \(1, .integer)",
+			9:   "spawn \(0, .entity) at region \(1, .integer) facing \(2, .degrees)",
 			10:  "teleport \(0, .entity) to \(1, .entity)",
 			14:  "despawn \(0, .entity)",
 			// 16: (#, #)
+			// 17: (#, #)
 			20:  "fade out \(0, .frames)",
 			21:  "fade in \(0, .frames)",
 			22:  "fade out to white \(0, .frames)",
 			23:  "fade in from white \(0, .frames)",
-			// 26: (#)
-			// 27: (#) 44 makes the hotel person intercept you (which occurs in e0044) but doenst seem to just activate an episode
+			26:  "disable episode file \(0, .integer)",
+			27:  "enable episode file \(0, .integer)",
 			32:  "unowned dialogue \(0, .dialogue)",
 			33:  "dialogue with choice \(1, .dialogue), storing result at \(0, .flag)",
 			34:  "turn \(0, .entity) to \(1, .degrees)",

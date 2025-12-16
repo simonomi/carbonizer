@@ -2,11 +2,16 @@ let soundEffectNames: [Int32: String] = [
 	105: "aquiring/dododododo!",
 	132: "level up",
 	210: "haha blinking",
+	211: "ugh clank",
+	213: "question mark appear",
+	228: "fall through hole",
 	269: "museum startup",
+	271: "button click",
 	301: "dino medal clink", // from handing over dino medals in chapter 1
 	307: "starting chime (dum dum dum dum!)",
 	915: "spinning whoosh", // kl33n spinning around
 	953: "museum login",
+	1084: "hole appear",
 	1257: "Dropping Mask walking",
 	1258: "Hip-shaker Mask walking",
 	1259: "Stone Mask walking",

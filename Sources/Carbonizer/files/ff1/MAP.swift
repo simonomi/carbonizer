@@ -1,5 +1,11 @@
 import BinaryParser
 
+// c - camera
+// e - excavate
+// g - breakable rocks and stuff
+// m - maps
+// r - regions
+
 enum MAP {
 	@BinaryConvertible
 	struct Packed {

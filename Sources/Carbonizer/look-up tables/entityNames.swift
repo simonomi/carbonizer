@@ -1,8 +1,8 @@
 let entityNames: [Int32: String] = [
 	1:   "Hunter",
-//	2:   "Fake Dr. Diggins", // only ever despawned?? (in e0004:60)
-//	3:   "Fake Dr. Diggins",
-//	4:   "Fake Dr. Diggins",
+//	2:   "", // used as test entities in (e)0004
+//	3:   "", // used as test entities in (e)0004
+//	4:   "", // used as test entities in (e)0004
 	5:   "BB Girl 1",
 	6:   "BB Girl 2",
 	7:   "Mole 1",
@@ -28,7 +28,7 @@ let entityNames: [Int32: String] = [
 //	49:  "", // 28 - uhh guild shopkeep guy and others
 //	50:  "", // 28 - uhh guild shopkeep guy and others
 //	51:  "", // 28 - uhh guild shopkeep guy and others
-	52:  "Sub-Idolcomp 1", // o09haniwa1 // idolcomps??
+	52:  "Sub-Idolcomp 1", // o09haniwa1
 	53:  "Sub-Idolcomp 2", // o09haniwa2
 	54:  "Sub-Idolcomp 3", // o09haniwa3
 	55:  "Sub-Idolcomp 4", // o09haniwa4
@@ -39,19 +39,19 @@ let entityNames: [Int32: String] = [
 	60:  "Snivels",
 	61:  "Vivian",
 	62:  "BB Boss",
-//	63:  "",
-//	64:  "",
+	63:  "Info Clerk",
+	64:  "Shopkeeper",
 	65:  "Mask Lady",
 //	66:  "",
-//	66:  "",
+//	67:  "",
 //	68:  "",
 	69:  "McJunker", // cha07 head07
 	70:  "Medal-Dealer Joe", // cha24 head24
-//	71:  "", // cha44c head44c
-//	72:  "", // cha44d head44d
-//	73:  "", // cha44e head44e
-//	74:  "", // cha52d head48a
-//	75:  "", // cha37d head37d
+	71:  "Fossil Fighter - Greenhorn scam site top", // cha44c head44c
+	72:  "Fossil Fighter - Greenhorn scam site left", // cha44d head44d
+	73:  "Fossil Fighter - Greenhorn scam site right", // cha44e head44e
+	74:  "P.B. Jay", // cha52d head48a
+	75:  "Medal-Dealer Joe as Staff", // cha37d head37d
 	76:  "Denture Shark Red?", // cha13b []
 	77:  "Woolbeard", // [cha25, cha25, cha25] [head25a, head25b, head25c]
 	78:  "Nick Nack", // cha26 head26
@@ -62,8 +62,8 @@ let entityNames: [Int32: String] = [
 	83:  "Triconodonta", // cha11a []
 	84:  "Triconodonta Rosie", // cha11b []
 	85:  "Saurhead", // cha15 head15
-//	86:  "", // cha38c head38c
-//	87:  "", // cha40d head40d
+	86:  "Fanboy", // cha38c head38c
+	87:  "Fighting Fan", // cha40d head40d
 	88:  "Dinaurian 1", // cha33 head33
 	89:  "Dinaurian 2", // cha33 head33
 	90:  "Dinaurian 3", // cha33 head33
@@ -75,10 +75,10 @@ let entityNames: [Int32: String] = [
 	96:  "Dinaurian 9", // cha33 head33
 	97:  "Dynal", // [cha29, cha20] [head29, head20]
 	98:  "Attendant", // cha37a head37a //オソロシの森通行禁止係員→一般職員
-//	99:  "", // saku [] //オソロシの柵
-//	100: "", // saku [] //オソロシの柵
-//	101: "", // saku [] //オソロシの柵
-//	102: "", // saku [] //オソロシの柵
+//	99:  "Knotwood Forest fence", // saku [] //オソロシの柵
+//	100: "Knotwood Forest fence", // saku [] //オソロシの柵
+//	101: "Knotwood Forest fence", // saku [] //オソロシの柵
+//	102: "Knotwood Forest fence", // saku [] //オソロシの柵
 //	103: "", // o02mono []
 //	104: "", // o02mono []
 	105: "Digadig 1", // cha30 head30 //ディグディグ人の男
@@ -94,8 +94,8 @@ let entityNames: [Int32: String] = [
 	115: "Fred", // cha40d head40d
 	116: "Pat", // cha37b head37b
 	117: "Dennis", // cha40e head40e
-//	118: "", // cha42b head42b
-//	119: "", // cha12d head12d
+//	118: "", // cha42b head42b // unused
+//	119: "", // cha12d head12d // unused
 	120: "Trent", // cha38d head38d
 	121: "Zoe", // cha45a head45a
 	122: "Guy", // cha38b head38b
@@ -116,7 +116,7 @@ let entityNames: [Int32: String] = [
 	137: "Richmond Guard 2", // cha36c head36c
 	138: "Richmond Guard 3", // cha36c head36c
 	139: "Holt 1", // cha31 head31
-//	140: "", // cha28e head28e
+	140: "Ty Tull", // cha28e head28e
 	141: "Sam Inaro", // cha28c head28c
 	142: "Samurai", // cha16 head16
 	143: "Officer 3", // cha36a head36a
@@ -141,8 +141,8 @@ let entityNames: [Int32: String] = [
 	162: "Hunter/Duna Rock", // cha0108_rock []
 	163: "Dr. Diggins Rock", // cha03_rock []
 	164: "Duna Rock", // cha08_rock []
-//	165: "", // cha37a head37a
-//	166: "", // [] []
+	165: "Museum Attendant", // cha37a head37a
+	166: "Museum Control Panel Trigger", // [] []
 //	167: "", // cha37b head37b
 //	168: "", // cha28b head28b
 //	169: "", // cha28b head28b
@@ -182,7 +182,7 @@ let entityNames: [Int32: String] = [
 	207: "Knotwood Forest junk pile", // o02mono []
 //	208: "", // otosiana1 []
 //	209: "", // otosiana2 []
-//	210: "", // hasigo []
+	210: "ladder 1", // hasigo []
 	211: "Rivet Ravine rock without G", // o03iwa2 []
 	212: "unbreakable Rivet Ravine rock", // o03iwa1 []
 	213: "Rivet Ravine tunnel rock without G", // o03iwa4 []
@@ -247,11 +247,11 @@ let entityNames: [Int32: String] = [
 //	278: "", // takara []
 //	279: "", // takara []
 //	280: "", // takara []
-//	281: "Greenhorn Plains Idol Fragment dig trigger", // [] []
-//	282: "Knotwood Forest Idol Fragment dig trigger", // [] []
-//	283: "Rivet Ravine Idol Fragment dig trigger", // [] []
-//	284: "Bottomsup Bay Idol Fragment dig trigger", // [] []
-//	285: "Mt. Lavaflow Idol Fragment dig trigger", // [] []
+	281: "Greenhorn Plains Idol Fragment dig trigger", // [] []
+	282: "Knotwood Forest Idol Fragment dig trigger", // [] []
+	283: "Rivet Ravine Idol Fragment dig trigger", // [] []
+	284: "Bottomsup Bay Idol Fragment dig trigger", // [] []
+	285: "Mt. Lavaflow Idol Fragment dig trigger", // [] []
 //	286: "", // cha36b head36b
 //	287: "", // o08iwa2 []
 //	288: "", // otosiana1 []
@@ -261,7 +261,7 @@ let entityNames: [Int32: String] = [
 //	292: "", // r01door []
 //	293: "", // r01door []
 //	294: "", // cha44c head44c
-//	295: "", // cha45c head45c
+	295: "Tipper", // cha45c head45c
 //	296: "", // cha40e head40e
 //	297: "", // r01door []
 //	298: "", // r03door []
@@ -334,8 +334,8 @@ let entityNames: [Int32: String] = [
 //	365: "", // r50tree []
 //	366: "", // otosiana1 []
 //	367: "", // otosiana1 []
-//	368: "", // [saku, //オソロシの柵] []
-//	369: "", // [saku, //オソロシの柵] []
+//	368: "Knotwood Forest fence", // [saku, //オソロシの柵] []
+//	369: "Knotwood Forest fence", // [saku, //オソロシの柵] []
 //	370: "", // o02door1 []
 //	371: "", // o08iwa3_2 []
 //	372: "", // cha44a head44a
@@ -556,7 +556,7 @@ let entityNames: [Int32: String] = [
 	587: "orange VMM 41", // t02atm_2 []
 	588: "orange VMM 42", // t02atm_2 []
 //	589: "", // otosiana2 []
-//	590: "", // hasigo []
+	590: "ladder 2", // hasigo []
 	591: "Mole 2", // cha18 head18
 	592: "Mole 3", // cha18 head18
 //	593: "", // o03mg_iwa []

@@ -42,7 +42,7 @@ func exportDEXCommands() throws {
 		.map { Command(id: $0, command: $1.formatted()) }
 	
 	let ff1OutputPath = URL(filePath: "/tmp/ff1Commands.json")
-	try JSONEncoder().encode(ff1Result).write(to: ff1OutputPath)
+	try JSONEncoder(.sortedKeys).encode(ff1Result).write(to: ff1OutputPath)
 	
 	print("\(.cyan)ff1 DEX commands written to \(ff1OutputPath.path(percentEncoded: false))\(.normal)")
 	
@@ -51,7 +51,7 @@ func exportDEXCommands() throws {
 		.map { Command(id: $0, command: $1.formatted()) }
 	
 	let ffcOutputPath = URL(filePath: "/tmp/ffcCommands.json")
-	try JSONEncoder().encode(ffcResult).write(to: ffcOutputPath)
+	try JSONEncoder(.sortedKeys).encode(ffcResult).write(to: ffcOutputPath)
 	
 	print("\(.cyan)ffc DEX commands written to \(ffcOutputPath.path(percentEncoded: false))\(.normal)")
 }
@@ -98,7 +98,7 @@ extension DEX.Unpacked.ArgumentType {
 }
 
 @Test(
-//	.disabled("only enable when needed")
+	.disabled("only enable when needed")
 )
 func exportDEPRequirements() throws {
 	struct Requirement: Encodable {
@@ -111,7 +111,7 @@ func exportDEPRequirements() throws {
 		.map { Requirement(id: $0, requirement: $1.formatted()) }
 	
 	let ff1OutputPath = URL(filePath: "/tmp/ff1Requirements.json")
-	try JSONEncoder().encode(ff1Result).write(to: ff1OutputPath)
+	try JSONEncoder(.sortedKeys).encode(ff1Result).write(to: ff1OutputPath)
 	
 	print("\(.cyan)ff1 DEP requirements written to \(ff1OutputPath.path(percentEncoded: false))\(.normal)")
 }
