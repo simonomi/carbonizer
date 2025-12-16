@@ -56,10 +56,12 @@ public struct Configuration: Sendable {
 					fileType.unpackedAndPacked()
 				}
 			
-			let alwaysEnabledFileTypes: [any ProprietaryFileData.Type] = [
-				Mesh.Unpacked.self,
+			let alwaysEnabledFileTypes = [
+				Mesh.Unpacked.self as any ProprietaryFileData.Type,
 				Texture.Unpacked.self,
+				Animation.Unpacked.self
 			]
+			.flatMap { $0.unpackedAndPacked() }
 			
 			let fileTypes = enabledFileTypes + alwaysEnabledFileTypes
 			

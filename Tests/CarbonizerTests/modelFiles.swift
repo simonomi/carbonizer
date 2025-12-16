@@ -20,7 +20,10 @@ fileprivate let configuration = try! Configuration(
 	logHandler: nil
 )
 
-@Test(.disabled(), arguments: ["fieldchar 0025"])
+@Test(
+	.disabled("writing GPUCommands not implemented"),
+	arguments: ["fieldchar 0025", "fieldchar 0067"]
+)
 func meshRoundTrip(_ fileName: String) throws {
 	let inputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
 	
@@ -52,7 +55,7 @@ func animationRoundTrip(_ fileName: String) throws {
 	try expectUnchanged(from: inputData.bytes, to: outputData.bytes, name: fileName)
 }
 
-@Test(arguments: ["fieldchar 0027"])
+@Test(arguments: ["fieldchar 0027", "fieldchar 0667", "fieldchar 1493"])
 func textureRoundTrip(_ fileName: String) throws {
 	let inputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
 	

@@ -41,7 +41,7 @@ extension MCM.Packed {
 		var compressionInfoCount: Int
 		
 		var description: String {
-			"compression info is missing (expected \(.green)\(chunkCount)\(.normal) chunk\(sIfPlural(chunkCount)), got \(.red)\(compressionInfoCount)\(.normal))"
+			"compression info is missing (expected \(.green)\(chunkCount)\(.normal) chunk\(sIfPlural(chunkCount)), got \(.red)\(compressionInfoCount)\(.normal)), did you enable external metadata?"
 		}
 	}
 	
