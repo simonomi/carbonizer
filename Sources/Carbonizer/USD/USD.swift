@@ -1,16 +1,17 @@
-//import OpenUSD
 import BinaryParser
 
 struct USD {
-	var meshes: [USDMesh]
+	var mesh: USDMesh
 	
 	init(
 		mesh: Mesh.Unpacked,
 		animationData: Animation.Unpacked,
-		modelName: String, // TODO: never used
+		modelName: String,
 		texturePath: String,
 		textureNames: [UInt32: String]?
 	) throws {
+		let meshName = modelName.replacing(" ", with: "-")
+		
 		let matrices = mesh.bones.map(\.matrix)
 		
 		let parsingResult = try parseCommands(
@@ -19,43 +20,66 @@ struct USD {
 			matrices: matrices
 		)
 		
-		meshes = parsingResult.polygons.enumerated().map { (index, materialAndPolygons) in
-			let (materialName, polygons) = materialAndPolygons
-			
-			let meshName = materialName ?? "mesh\(index)"
-			
-			return USDMesh(
-				name: meshName,
-				vertices: parsingResult.vertices.map(\.0),
-				textureVertices: polygons
-					.flatMap {
-						$0.map {
-							$0.textureInfo.map {
-								parsingResult.textureVertices[$0.textureVertexIndex]
-							} ?? SIMD2(-1, -1)
-						}
-					},
-				faceVertexIndices: polygons.recursiveMap(\.vertexIndex),
-				faceVertexCounts: polygons.map(\.count),
-				jointIndices: parsingResult.vertices.map(\.bone),
-				jointWeights: Array(repeating: 1, count: parsingResult.vertices.count),
-				material: materialName.map {
-					USDMaterial(
-						name: $0,
-						meshName: meshName,
-						texturePath: texturePath
-					)
-				},
-				skeleton: USDSkeleton(
-					meshName: meshName,
-					boneNames: mesh.bones.map(\.name),
-					restTransforms: mesh.bones.map(\.matrix),
-					animation: USDAnimation(
-						boneNames: mesh.bones.map(\.name)
+		// so that it's consistently in the same order
+		let polygons = Array(parsingResult.polygons)
+		
+		// this is messy but i can't think of a more elegant way
+		let faceIndices = polygons.map(\.value.count)
+			.reduce(into: []) { partialResult, count in
+				partialResult.append(
+					Range(
+						start: partialResult.last?.upperBound ?? 0,
+						count: count
 					)
 				)
+			}
+		
+		self.mesh = USDMesh(
+			name: meshName,
+			vertices: parsingResult.vertices.map(\.0),
+			textureVertices: polygons
+				.flatMap(\.value)
+				.flatMap {
+					$0.map {
+						$0.textureInfo.map {
+							parsingResult.textureVertices[$0.textureVertexIndex]
+						} ?? SIMD2(-1, -1)
+					}
+				},
+			faceVertexIndices: polygons
+				.flatMap(\.value)
+				.recursiveMap(\.vertexIndex),
+			jointIndices: parsingResult.vertices.map(\.bone),
+			subsets: zip(
+				0...,
+				polygons.map(\.key),
+				faceIndices
+			).map { (index, materialName, faceIndices) in
+				let subsetName = materialName ?? "subset\(index)"
+				
+				return USDSubset(
+					name: subsetName,
+					meshName: meshName,
+					faceIndices: Array(faceIndices),
+					material: materialName.map {
+						USDMaterial(
+							name: $0,
+							meshName: meshName,
+							subsetName: subsetName,
+							texturePath: texturePath
+						)
+					}
+				)
+			},
+			skeleton: USDSkeleton(
+				meshName: meshName,
+				boneNames: mesh.bones.map(\.name),
+				restTransforms: matrices,
+				animation: USDAnimation(
+					boneNames: mesh.bones.map(\.name)
+				)
 			)
-		}
+		)
 	}
 	
 	func string() -> String {
@@ -68,7 +92,7 @@ struct USD {
 		)
 		
 		def SkelRoot "root" {
-			\(meshes.map { $0.string().indented(by: 1) }.joined(separator: "\n\t\n\t"))
+			\(mesh.string().indented(by: 1))
 		}
 		"""
 	}
