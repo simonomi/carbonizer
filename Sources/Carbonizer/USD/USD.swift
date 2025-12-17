@@ -1,6 +1,7 @@
 import BinaryParser
 
 struct USD {
+	var animationLength: Int
 	var mesh: USDMesh
 	
 	init(
@@ -33,6 +34,8 @@ struct USD {
 					)
 				)
 			}
+		
+		animationLength = Int(animationData.animationLength)
 		
 		self.mesh = USDMesh(
 			name: meshName,
@@ -76,7 +79,8 @@ struct USD {
 				boneNames: mesh.bones.map(\.name),
 				restTransforms: matrices,
 				animation: USDAnimation(
-					boneNames: mesh.bones.map(\.name)
+					boneNames: mesh.bones.map(\.name),
+					transforms: animationData.keyframes
 				)
 			)
 		)
@@ -89,6 +93,9 @@ struct USD {
 			defaultPrim = "root"
 			metersPerUnit = 1
 			upAxis = "Y"
+			startTimeCode = 0
+			endTimeCode = \(animationLength)
+			timeCodesPerSecond = 60
 		)
 		
 		def SkelRoot "root" {
