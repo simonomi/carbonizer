@@ -2,7 +2,7 @@ struct Matrix4x3<Scalar: SIMDScalar>: Codable {
 	var x: SIMD3<Scalar>
 	var y: SIMD3<Scalar>
 	var z: SIMD3<Scalar>
-	var transform: SIMD3<Scalar>
+	var translation: SIMD3<Scalar> // TODO: rename to translation
 }
 
 extension Matrix4x3<Double> {
@@ -10,7 +10,7 @@ extension Matrix4x3<Double> {
 		x = SIMD3(matrix4x3_2012.x)
 		y = SIMD3(matrix4x3_2012.y)
 		z = SIMD3(matrix4x3_2012.z)
-		transform = SIMD3(matrix4x3_2012.transform)
+		translation = SIMD3(matrix4x3_2012.translation)
 	}
 }
 
@@ -20,15 +20,15 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 			x: SIMD3(1, 0, 0),
 			y: SIMD3(0, 1, 0),
 			z: SIMD3(0, 0, 1),
-			transform: .zero
+			translation: .zero
 		)
 	}
 	
 	func as4x4Array() -> [Scalar] {
 		[
-			x.x, y.x, z.x, transform.x,
-			x.y, y.y, z.y, transform.y,
-			x.z, y.z, z.z, transform.z,
+			x.x, y.x, z.x, translation.x,
+			x.y, y.y, z.y, translation.y,
+			x.z, y.z, z.z, translation.z,
 			0, 0, 0, 1
 		]
 	}
@@ -38,7 +38,7 @@ extension Matrix4x3 where Scalar: FloatingPoint & ExpressibleByFloatLiteral {
 			x: SIMD3(1, 0, 0),
 			y: SIMD3(0, 1, 0),
 			z: SIMD3(0, 0, 1),
-			transform: -transform
+			translation: -translation
 		)
 	}
 }
@@ -172,7 +172,7 @@ extension Matrix4x3<Double> {
 			x: SIMD3(x: inv[0], y: inv[4], z: inv[8]),
 			y: SIMD3(x: inv[1], y: inv[5], z: inv[9]),
 			z: SIMD3(x: inv[2], y: inv[6], z: inv[10]),
-			transform: SIMD3(x: inv[3], y: inv[7], z: inv[11])
+			translation: SIMD3(x: inv[3], y: inv[7], z: inv[11])
 		)
 	}
 }

@@ -173,7 +173,7 @@ extension Mesh.Unpacked.Bone {
 
 extension SIMD3 where Scalar: FloatingPoint {
 	consuming func transformed(by matrix: Matrix4x3<Scalar>) -> Self {
-		x * matrix.x + y * matrix.y + z * matrix.z + matrix.transform
+		x * matrix.x + y * matrix.y + z * matrix.z + matrix.translation
 	}
 }
 
