@@ -40,11 +40,13 @@ struct USDMesh {
 				
 				int[] faceVertexCounts = \(faceVertexCounts)
 				
-				int[] primvars:skel:jointIndices = \(jointIndices)
-				// TODO: interpolation?
+				int[] primvars:skel:jointIndices = \(jointIndices) (
+					interpolation = "vertex"
+				)
 				
-				float[] primvars:skel:jointWeights = \(jointWeights)
-				// TODO: interpolation?
+				float[] primvars:skel:jointWeights = \(jointWeights) (
+					interpolation = "vertex"
+				)
 				
 				\(materialBinding)
 				rel skel:skeleton = </root/\(name)/skeleton>

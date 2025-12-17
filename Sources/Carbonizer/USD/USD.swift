@@ -37,10 +37,8 @@ struct USD {
 					},
 				faceVertexIndices: polygons.recursiveMap(\.vertexIndex),
 				faceVertexCounts: polygons.map(\.count),
-				jointIndices: polygons.flatMap { $0 }.map { // TODO: is this right?
-					parsingResult.vertices[$0.vertexIndex].bone
-				},
-				jointWeights: Array(repeating: 1, count: polygons.count),
+				jointIndices: parsingResult.vertices.map(\.bone),
+				jointWeights: Array(repeating: 1, count: parsingResult.vertices.count),
 				material: materialName.map {
 					USDMaterial(
 						name: $0,
