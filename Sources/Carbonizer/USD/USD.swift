@@ -1,6 +1,7 @@
 import BinaryParser
 
 struct USD {
+	var meshName: String
 	var animationLength: Int
 	var mesh: USDMesh
 	
@@ -11,7 +12,7 @@ struct USD {
 		texturePath: String,
 		textureNames: [UInt32: String]?
 	) throws {
-		let meshName = modelName.replacing(" ", with: "-")
+		meshName = modelName.replacing(" ", with: "-")
 		
 		let matrices = mesh.bones.map(\.matrix)
 		
@@ -57,7 +58,7 @@ struct USD {
 				0...,
 				polygons.map(\.key),
 				faceIndices
-			).map { (index, materialName, faceIndices) in
+			).map { [meshName] (index, materialName, faceIndices) in
 				let subsetName = materialName ?? "subset\(index)"
 				
 				return USDSubset(
@@ -90,7 +91,7 @@ struct USD {
 		"""
 		#usda 1.0
 		(
-			defaultPrim = "root"
+			defaultPrim = "\(meshName)"
 			metersPerUnit = 1
 			upAxis = "Y"
 			startTimeCode = 0
@@ -98,7 +99,7 @@ struct USD {
 			timeCodesPerSecond = 60
 		)
 		
-		def SkelRoot "root" {
+		def SkelRoot "\(meshName)" {
 			\(mesh.string().indented(by: 1))
 		}
 		"""

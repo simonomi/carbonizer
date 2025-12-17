@@ -12,7 +12,7 @@ struct USDMesh {
 	
 	func string() -> String {
 		"""
-		def Mesh "\(name)" (
+		def Mesh "\(name)_mesh" (
 			prepend apiSchemas = ["MaterialBindingAPI", "SkelBindingAPI"]
 		) {
 			point3f[] points = \(vertices.map { ($0.x, $0.y, $0.z) })
@@ -37,7 +37,7 @@ struct USDMesh {
 				interpolation = "vertex"
 			)
 			
-			rel skel:skeleton = </root/\(name)/skeleton>
+			rel skel:skeleton = </\(name)/\(name)_mesh/\(name)_skeleton>
 			
 			uniform token subsetFamily:materialBind:familyType = "nonOverlapping"
 			

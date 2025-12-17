@@ -6,19 +6,19 @@ struct USDMaterial {
 	
 	func string() -> String {
 		"""
-		def Material "material" {
-			token outputs:surface.connect = </root/\(meshName)/\(subsetName)/material/surface.outputs:surface>
+		def Material "\(subsetName)" {
+			token outputs:surface.connect = </\(meshName)/\(meshName)_mesh/\(subsetName)/\(subsetName)/surface.outputs:surface>
 			
 			def Shader "surface" {
 				uniform token info:id = "UsdPreviewSurface"
-				color3f inputs:diffuseColor.connect = </root/\(meshName)/\(subsetName)/material/texture.outputs:rgb>
+				color3f inputs:diffuseColor.connect = </\(meshName)/\(meshName)_mesh/\(subsetName)/\(subsetName)/texture.outputs:rgb>
 				token outputs:surface
 			}
 			
 			def Shader "texture" {
 				uniform token info:id = "UsdUVTexture"
 				asset inputs:file = @\(texturePath)/\(name).bmp@
-				float2 inputs:st.connect = </root/\(meshName)/\(subsetName)/material/uvMap.outputs:result>
+				float2 inputs:st.connect = </\(meshName)/\(meshName)_mesh/\(subsetName)/\(subsetName)/uvMap.outputs:result>
 				float3 outputs:rgb
 			}
 			

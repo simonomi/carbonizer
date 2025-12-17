@@ -7,7 +7,7 @@ struct USDSubset {
 	
 	func string() -> String {
 		let materialBinding = if material != nil {
-				"rel material:binding = </root/\(meshName)/\(name)/material>"
+				"rel material:binding = </\(meshName)/\(meshName)_mesh/\(name)/\(name)>"
 			} else {
 				""
 			}

@@ -15,7 +15,7 @@ struct USDSkeleton {
 		}
 		
 		return """
-			def Skeleton "skeleton" (
+			def Skeleton "\(meshName)_skeleton" (
 				prepend apiSchemas = ["SkelBindingAPI"]
 			) {
 				uniform token[] joints = \(boneNames)
@@ -24,7 +24,7 @@ struct USDSkeleton {
 				
 				uniform matrix4d[] restTransforms = \(tupleTransforms)
 				
-				rel skel:animationSource = </root/\(meshName)/skeleton/animation>
+				rel skel:animationSource = </\(meshName)/\(meshName)_mesh/\(meshName)_skeleton/animation>
 				
 				\(animation.string().indented(by: 1))
 			}
