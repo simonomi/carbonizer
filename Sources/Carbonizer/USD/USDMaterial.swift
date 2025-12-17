@@ -12,6 +12,7 @@ struct USDMaterial {
 			def Shader "surface" {
 				uniform token info:id = "UsdPreviewSurface"
 				color3f inputs:diffuseColor.connect = </\(meshName)/\(meshName)_mesh/\(subsetName)/\(subsetName)/texture.outputs:rgb>
+				float inputs:opacity.connect = </\(meshName)/\(meshName)_mesh/\(subsetName)/\(subsetName)/texture.outputs:a>
 				token outputs:surface
 			}
 			
@@ -20,6 +21,7 @@ struct USDMaterial {
 				asset inputs:file = @\(texturePath)/\(name).bmp@
 				float2 inputs:st.connect = </\(meshName)/\(meshName)_mesh/\(subsetName)/\(subsetName)/uvMap.outputs:result>
 				float3 outputs:rgb
+				float outputs:a
 			}
 			
 			def Shader "uvMap" {
