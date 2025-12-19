@@ -179,7 +179,7 @@ enum DCL_FF1 {
 					// TODO: custom description
 				}
 				
-				init(_ data: Datastream) throws {
+				init(_ data: inout Datastream) throws {
 					let type = try data.read(UInt8.self)
 					let argument = try data.read(UInt8.self)
 					
@@ -429,7 +429,7 @@ enum DCL_FF1 {
 }
 
 extension DCL_FF1.Packed.Vivosaur.Element?: BinaryConvertible {
-	public init(_ data: Datastream) throws {
+	public init(_ data: inout Datastream) throws {
 		let rawByte = try data.read(UInt8.self)
 		
 		guard rawByte != 0 else {

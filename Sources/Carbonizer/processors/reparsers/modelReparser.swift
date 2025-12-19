@@ -16,12 +16,11 @@ func modelReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "mesh")
 				}
 				
-				guard let data = mar.files[fileIndex].content as? Datastream else {
+				guard var data = mar.files[fileIndex].content as? Datastream else {
 					throw ReparserError.invalidType(fileIndex, for: "mesh")
 				}
 				
-				// copy to not modify the original
-				let packed = try Datastream(data).read(Mesh.Packed.self)
+				let packed = try data.read(Mesh.Packed.self)
 				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
 			} catch {
 				let location = "\(path + [String(fileIndex)]):"
@@ -38,12 +37,11 @@ func modelReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "texture")
 				}
 				
-				guard let data = mar.files[fileIndex].content as? Datastream else {
+				guard var data = mar.files[fileIndex].content as? Datastream else {
 					throw ReparserError.invalidType(fileIndex, for: "texture")
 				}
 				
-				// copy to not modify the original
-				let packed = try Datastream(data).read(Texture.Packed.self)
+				let packed = try data.read(Texture.Packed.self)
 				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
 			} catch {
 				let location = "\(path + [String(fileIndex)]):"
@@ -60,12 +58,11 @@ func modelReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "model animation")
 				}
 				
-				guard let data = mar.files[fileIndex].content as? Datastream else {
+				guard var data = mar.files[fileIndex].content as? Datastream else {
 					throw ReparserError.invalidType(fileIndex, for: "model animation")
 				}
 				
-				// copy to not modify the original
-				let packed = try Datastream(data).read(Animation.Packed.self)
+				let packed = try data.read(Animation.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
 				let location = "\(path + [String(fileIndex)]):"

@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol BinaryConvertible {
-	init(_ data: Datastream) throws
+	init(_ data: inout Datastream) throws
 	func write(to data: Datawriter)
 }
 

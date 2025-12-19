@@ -45,7 +45,7 @@ extension BMP.Color {
 }
 
 extension BMP: BinaryConvertible {
-	init(_ data: Datastream) throws {
+	init(_ data: inout Datastream) throws {
 		fatalError("cannot read bmp file")
 	}
 	

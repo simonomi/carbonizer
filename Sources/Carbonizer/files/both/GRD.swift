@@ -92,7 +92,7 @@ extension GRD.Unpacked: ProprietaryFileData {
 		}
 	}
 	
-	init(_ data: Datastream, configuration: Configuration) throws {
+	init(_ data: inout Datastream, configuration: Configuration) throws {
 		let dataCount = data.bytes[data.offset...].indices.count
 		let raw = try data.read(String.self, exactLength: dataCount)
 		

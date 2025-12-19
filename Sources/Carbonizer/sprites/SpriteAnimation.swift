@@ -4,7 +4,7 @@ enum SpriteAnimation {
 	struct Packed: BinaryConvertible {
 		var commands: [Command]
 		
-		init(_ data: Datastream) throws {
+		init(_ data: inout Datastream) throws {
 			commands = [Command]()
 			repeat {
 				commands.append(try data.read(Command.self))
@@ -54,7 +54,7 @@ enum SpriteAnimation {
 				}
 			}
 			
-			init(_ data: Datastream) throws {
+			init(_ data: inout Datastream) throws {
 				let command = try data.read(UInt8.self)
 				let argument = try data.read(UInt8.self)
 				

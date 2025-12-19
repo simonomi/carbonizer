@@ -5,7 +5,7 @@ struct Matrix4x3_2012 {
 	var x: Vector3_2012
 	var y: Vector3_2012
 	var z: Vector3_2012
-	var translation: Vector3_2012 // TODO: rename to translation
+	var translation: Vector3_2012
 }
 
 extension Matrix4x3_2012 {

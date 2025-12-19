@@ -2,7 +2,7 @@ struct Matrix4x3<Scalar: SIMDScalar>: Codable {
 	var x: SIMD3<Scalar>
 	var y: SIMD3<Scalar>
 	var z: SIMD3<Scalar>
-	var translation: SIMD3<Scalar> // TODO: rename to translation
+	var translation: SIMD3<Scalar>
 }
 
 extension Matrix4x3<Double> {

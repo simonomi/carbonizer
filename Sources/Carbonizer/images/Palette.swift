@@ -4,7 +4,7 @@ enum Palette {
 	struct Packed: BinaryConvertible {
 		var colors: [Color555]
 		
-		init(_ data: Datastream) throws {
+		init(_ data: inout Datastream) throws {
 			do {
 				colors = try data.read([Color555].self, count: data.bytes.count / 2)
 			} catch {

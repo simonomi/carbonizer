@@ -18,12 +18,12 @@ func spriteReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "sprite animation")
 				}
 				
-				guard let data = mar.files[fileIndex].content as? Datastream else {
+				guard var data = mar.files[fileIndex].content as? Datastream else {
 					throw ReparserError.invalidType(fileIndex, for: "sprite animation")
 				}
 				
 				// copy to not modify the original
-				let packed = try Datastream(data).read(SpriteAnimation.Packed.self)
+				let packed = try data.read(SpriteAnimation.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
 				let location = (path + [String(fileIndex)]).joined(separator: "/") + ":"
@@ -40,12 +40,12 @@ func spriteReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "sprite palette")
 				}
 				
-				guard let data = mar.files[fileIndex].content as? Datastream else {
+				guard var data = mar.files[fileIndex].content as? Datastream else {
 					throw ReparserError.invalidType(fileIndex, for: "sprite palette")
 				}
 				
 				// copy to not modify the original
-				let packed = try Datastream(data).read(SpritePalette.Packed.self)
+				let packed = try data.read(SpritePalette.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
 				let location = (path + [String(fileIndex)]).joined(separator: "/") + ":"
@@ -62,12 +62,12 @@ func spriteReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "sprite bitmap")
 				}
 				
-				guard let data = mar.files[fileIndex].content as? Datastream else {
+				guard var data = mar.files[fileIndex].content as? Datastream else {
 					throw ReparserError.invalidType(fileIndex, for: "sprite bitmap")
 				}
 				
 				// copy to not modify the original
-				let packed = try Datastream(data).read(SpriteBitmap.Packed.self)
+				let packed = try data.read(SpriteBitmap.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
 				let location = (path + [String(fileIndex)]).joined(separator: "/") + ":"

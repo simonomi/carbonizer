@@ -25,7 +25,7 @@ extension Match.Packed: ProprietaryFileData {
 		data = unpacked.data
 	}
 	
-	init(_ data: Datastream, configuration: Configuration) throws {
+	init(_ data: inout Datastream, configuration: Configuration) throws {
 		do {
 			let dataCount = data.bytes[data.offset...].count / (Element.bitWidth / 8)
 			self.data = try data.read([Element].self, count: dataCount)

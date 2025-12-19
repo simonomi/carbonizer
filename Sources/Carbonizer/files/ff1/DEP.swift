@@ -247,7 +247,7 @@ extension DEP.Unpacked: ProprietaryFileData {
 		events = packed.events.map(Event.init)
 	}
 	
-	init(_ data: Datastream, configuration: Configuration) throws {
+	init(_ data: inout Datastream, configuration: Configuration) throws {
 		let fileLength = data.bytes.endIndex - data.offset
 		let string = try data.read(String.self, exactLength: fileLength)
 		

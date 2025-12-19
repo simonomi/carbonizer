@@ -57,7 +57,7 @@ enum Texture {
 }
 
 extension Texture.Packed: BinaryConvertible {
-	init(_ data: Datastream) throws {
+	init(_ data: inout Datastream) throws {
 		imageCount = try data.read(UInt32.self)
 		bitmapsLength = try data.read(UInt32.self)
 		palettesLength = try data.read(UInt32.self)
@@ -236,8 +236,8 @@ extension Texture.Unpacked: ProprietaryFileData {
 extension Texture.Unpacked.Image {
 	fileprivate init(
 		header: Texture.Packed.ImageHeader,
-		bitmap bitmapData: Datastream,
-		palette paletteData: Datastream
+		bitmap bitmapData: consuming Datastream,
+		palette paletteData: consuming Datastream
 	) throws {
 		name = header.name
 		unknown = Double(header.unknown)

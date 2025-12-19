@@ -14,8 +14,7 @@ extension Mesh.Packed {
 			.map(Matrix4x3.init)
 		
 		// copy so theres no side effects
-		let commandData = Datastream(self.commands)
-		
+		var commandData = self.commands
 		let commands = try commandData.read(GPUCommands.self).commands
 		
 		var textureScale: SIMD2<Double> = SIMD2(1, 1)

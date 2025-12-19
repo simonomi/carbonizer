@@ -74,7 +74,7 @@ enum InvalidGPUCommand: Error {
 }
 
 extension GPUCommands: BinaryConvertible {
-	init(_ data: Datastream) throws {
+	init(_ data: inout Datastream) throws {
 		commands = []
 		
 	mainloop:
@@ -203,7 +203,7 @@ extension GPUCommands: BinaryConvertible {
 }
 
 extension Datastream {
-	fileprivate func readSigned6() throws -> Int8 {
+	fileprivate mutating func readSigned6() throws -> Int8 {
 		let raw = try read(UInt32.self)
 		guard raw < (1 << 7) else {
 			throw InvalidGPUCommand.invalidSigned6(raw: raw)
@@ -219,7 +219,7 @@ extension Datastream {
 		}
 	}
 	
-	fileprivate func readUnsigned5() throws -> UInt8 {
+	fileprivate mutating func readUnsigned5() throws -> UInt8 {
 		let raw = try read(UInt32.self)
 		guard raw < (1 << 6) else {
 			throw InvalidGPUCommand.invalidUnsigned5(raw: raw)
@@ -249,7 +249,7 @@ extension GPUCommands.Command.MatrixMode: BinaryConvertible {
 		}
 	}
 	
-	init(_ data: Datastream) throws {
+	init(_ data: inout Datastream) throws {
 		let raw = try data.read(UInt32.self)
 		guard let possiblySelf = Self(raw: raw) else {
 			throw InvalidGPUCommand.invalidMatrixMode(raw)
@@ -282,7 +282,7 @@ extension GPUCommands.Command.VertexMode: BinaryConvertible {
 		}
 	}
 	
-	init(_ data: Datastream) throws {
+	init(_ data: inout Datastream) throws {
 		let raw = try data.read(UInt32.self)
 		guard let possiblySelf = Self(raw: raw) else {
 			throw InvalidGPUCommand.invalidVertexMode(raw)

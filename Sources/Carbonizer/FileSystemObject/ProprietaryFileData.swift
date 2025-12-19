@@ -15,18 +15,18 @@ protocol ProprietaryFileData: SendableMetatype {
 	associatedtype Unpacked: ProprietaryFileData
 	func unpacked(configuration: Configuration) throws -> Unpacked
 	
-	init(_ data: Datastream, configuration: Configuration) throws
+	init(_ data: inout Datastream, configuration: Configuration) throws
 	func write(to data: Datawriter)
 }
 
 extension ProprietaryFileData where Self: BinaryConvertible {
-	init(_ data: Datastream, configuration: Configuration) throws {
+	init(_ data: inout Datastream, configuration: Configuration) throws {
 		self = try data.read(Self.self)
 	}
 }
 
 extension ProprietaryFileData where Self: Codable {
-	init(_ data: Datastream, configuration: Configuration) throws {
+	init(_ data: inout Datastream, configuration: Configuration) throws {
 		assert(data.offset == 0) // should only read full files as json (?)
 		self = try JSONDecoder(allowsJSON5: true).decode(Self.self, from: Data(data.bytes))
 	}
@@ -46,7 +46,7 @@ extension Datastream: ProprietaryFileData {
 	func packed(configuration: Configuration) -> Datastream { self }
 	func unpacked(configuration: Configuration) -> Datastream { self }
 	
-	convenience init(_ data: Datastream, configuration: Configuration) {
-		self.init(data)
+	init(_ data: inout Datastream, configuration: Configuration) {
+		self.init(&data)
 	}
 }

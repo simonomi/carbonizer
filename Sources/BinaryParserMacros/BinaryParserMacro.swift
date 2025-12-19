@@ -62,7 +62,7 @@ struct BinaryConvertibleMacro: ExtensionMacro {
 		return [try ExtensionDeclSyntax(
 			"""
 			extension \(type): BinaryConvertible {
-				public init(_ data: Datastream) throws {
+				public init(_ data: inout Datastream) throws {
 					\(raw: markerDefinition)\(raw: initialization)
 				}
 				

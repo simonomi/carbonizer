@@ -20,7 +20,7 @@ struct CompressionHeader: BinaryConvertible {
 		self.decompressedSize = decompressedSize
 	}
 	
-	init(_ data: Datastream) throws {
+	init(_ data: inout Datastream) throws {
 		let word = try data.read(UInt32.self)
 		
 		dataSize = UInt8(word & 0b1111)

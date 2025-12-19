@@ -53,7 +53,7 @@ struct ExtraneousMetadataError: Error, CustomStringConvertible {
 func makeFile(
 	name: String,
 	metadata: Metadata?,
-	data: Datastream,
+	data: consuming Datastream,
 	configuration: Configuration
 ) throws -> any FileSystemObject {
 	if name.hasSuffix(NDS.Packed.fileExtension) {
@@ -64,9 +64,8 @@ func makeFile(
 	}
 	
 	if configuration.fileTypes.contains("MAR") {
-		let marker = data.placeMarker()
-		let magicBytes = try? data.read(String.self, exactLength: 3)
-		data.jump(to: marker)
+		var dataCopy = copy data
+		let magicBytes = try? dataCopy.read(String.self, exactLength: 3)
 		
 		if magicBytes == MAR.Packed.Binary.magicBytes {
 			return MAR.Packed(
@@ -78,7 +77,7 @@ func makeFile(
 	
 	let fileData = try makeFileData(
 		name: name,
-		data: data,
+		data: copy data,
 		configuration: configuration
 	)
 	

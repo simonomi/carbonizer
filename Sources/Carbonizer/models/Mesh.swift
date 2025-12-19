@@ -156,7 +156,8 @@ extension Mesh.Unpacked: ProprietaryFileData {
 		unknown5 = packed.unknown5
 		unknown6 = packed.unknown6
 		
-		commands = try packed.commands.read(GPUCommands.self).commands
+		var packedCommands = packed.commands
+		commands = try packedCommands.read(GPUCommands.self).commands
 		
 		bones = packed.boneTable.bones.map(Bone.init)
 		

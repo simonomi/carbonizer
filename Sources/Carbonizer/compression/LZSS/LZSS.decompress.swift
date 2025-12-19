@@ -1,7 +1,7 @@
 import BinaryParser
 
 extension LZSS {
-	static func decompress(_ inputData: Datastream) throws -> Datastream {
+	static func decompress(_ inputData: consuming Datastream) throws -> Datastream {
 		let header = try inputData.read(CompressionHeader.self)
 		precondition(header.type == .lzss)
 		precondition(header.decompressedSize > 0)

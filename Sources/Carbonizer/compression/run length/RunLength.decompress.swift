@@ -1,7 +1,7 @@
 import BinaryParser
 
 extension RunLength {
-	static func decompress(_ inputData: Datastream) throws -> Datastream {
+	static func decompress(_ inputData: consuming Datastream) throws -> Datastream {
 		let header = try inputData.read(CompressionHeader.self)
 		precondition(header.type == .runLength)
 		

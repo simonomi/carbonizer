@@ -2,7 +2,7 @@ import BinaryParser
 
 // https://mgba-emu.github.io/gbatek/#huffuncompreadbycallback---swi-13h-ndsdsi
 extension Huffman {
-	static func decompress(_ inputData: Datastream) throws -> (Datastream, CompressionInfo) {
+	static func decompress(_ inputData: consuming Datastream) throws -> (Datastream, CompressionInfo) {
 		let base = inputData.offset
 		
 		let header = try inputData.read(CompressionHeader.self)

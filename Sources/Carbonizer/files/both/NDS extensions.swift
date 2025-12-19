@@ -2,7 +2,7 @@ import BinaryParser
 import Foundation
 
 extension [NDS.Packed.Binary.FileNameTable.FolderContent]: BinaryConvertible {
-	public init(_ data: Datastream) throws {
+	public init(_ data: inout Datastream) throws {
 		self = []
 		while last?.typeAndNameLength != 0 {
 			append(try data.read(NDS.Packed.Binary.FileNameTable.FolderContent.self))

@@ -16,12 +16,12 @@ func imageReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "image palette")
 				}
 				
-				guard let data = mar.files[fileIndex].content as? Datastream else {
+				guard var data = mar.files[fileIndex].content as? Datastream else {
 					throw ReparserError.invalidType(fileIndex, for: "image palette")
 				}
 				
 				// copy to not modify the original
-				let packed = try Datastream(data).read(Palette.Packed.self)
+				let packed = try data.read(Palette.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
 				let location = (path + [String(fileIndex)]).joined(separator: "/") + ":"
