@@ -38,22 +38,7 @@ extension BinaryFile: FileSystemObject {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
 		
-		if let metadata {
-			do {
-				if configuration.externalMetadata {
-					let metadataPath = path
-						.appendingPathExtension("metadata")
-					
-					try JSONEncoder(.prettyPrinted, .sortedKeys)
-						.encode(metadata)
-						.write(to: metadataPath)
-				} else {
-					try path.setCreationDate(to: metadata.asDate)
-				}
-			} catch {
-				throw BinaryParserError.whileWriting(Metadata.self, error)
-			}
-		}
+		try metadata?.write(on: path, configuration: configuration)
 	}
 	
 	func packed(configuration: Configuration) -> BinaryFile { self }

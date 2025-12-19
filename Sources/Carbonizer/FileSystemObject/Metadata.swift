@@ -1,4 +1,5 @@
 import Foundation
+import BinaryParser
 
 struct Metadata {
 	var skipFile: Bool // 1 bit
@@ -85,6 +86,23 @@ struct Metadata {
 	}
 	
 	static let skipFile: Self = Metadata(skipFile: true, standalone: false, compression: (.none, .none), maxChunkSize: 0, index: 0, huffmanCompressionInfo: [])
+	
+	func write(on path: URL, configuration: Configuration) throws {
+		do {
+			if configuration.externalMetadata {
+				let metadataPath = path
+					.appendingPathExtension("metadata")
+				
+				try JSONEncoder(.prettyPrinted, .sortedKeys)
+					.encode(self)
+					.write(to: metadataPath)
+			} else {
+				try path.setCreationDate(to: self.asDate)
+			}
+		} catch {
+			throw BinaryParserError.whileWriting(Metadata.self, error)
+		}
+	}
 }
 
 extension Metadata: Codable {

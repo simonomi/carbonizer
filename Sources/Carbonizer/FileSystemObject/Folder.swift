@@ -72,22 +72,7 @@ extension Folder: FileSystemObject {
 		configuration.log(.transient, "writing", path.path(percentEncoded: false))
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
 		
-		if let metadata {
-			do {
-				if configuration.externalMetadata {
-					let metadataPath = path
-						.appendingPathExtension("metadata")
-					
-					try JSONEncoder(.prettyPrinted, .sortedKeys)
-						.encode(metadata)
-						.write(to: metadataPath)
-				} else {
-					try path.setCreationDate(to: metadata.asDate)
-				}
-			} catch {
-				throw BinaryParserError.whileWriting(Metadata.self, error)
-			}
-		}
+		try metadata?.write(on: path, configuration: configuration)
 		
 		try contents.forEach {
 			try $0.write(into: path, with: configuration)
