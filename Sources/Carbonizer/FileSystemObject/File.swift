@@ -5,6 +5,13 @@ func makeFile(
 	contentsOf path: URL,
 	configuration: Configuration
 ) throws -> (any FileSystemObject)? {
+	guard path.pathExtension != "metadata" else {
+		if !configuration.externalMetadata {
+			configuration.log(.warning, "the external metadata setting is not enabled, but an external metadata file was found")
+		}
+		return nil
+	}
+	
 	let metadata = try Metadata(forItemAt: path)
 	if metadata?.skipFile == true { return nil }
 	

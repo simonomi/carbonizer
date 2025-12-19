@@ -20,7 +20,6 @@ func makeFolder(
 	
 	let contents = try contentPaths
 		.filter { !$0.lastPathComponent.starts(with: ".") }
-		.filter { $0.pathExtension != "metadata" }
 		.compactMap { try fileSystemObject(contentsOf: $0, configuration: configuration) }
 		.sorted(by: \.name)
 	
