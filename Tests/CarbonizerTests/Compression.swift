@@ -34,7 +34,20 @@ struct Compression {
 			.appending(component: decompressedFileName)
 			.appendingPathExtension("bin")
 		
-		let compressionInfo = try Metadata(forItemAt: inputFilePath)?.huffmanCompressionInfo.first?.0
+		let compressionInfo = try Metadata(
+			forItemAt: inputFilePath,
+			configuration: Configuration(
+				overwriteOutput: false,
+				game: .ff1,
+				externalMetadata: true,
+				fileTypes: [],
+				onlyUnpack: [],
+				skipUnpacking: [],
+				compression: false,
+				processors: [],
+				logHandler: nil
+			)
+		)?.huffmanCompressionInfo.first?.0
 		
 //		let start = Date.now
 

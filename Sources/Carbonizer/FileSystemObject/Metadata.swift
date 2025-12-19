@@ -25,25 +25,22 @@ struct Metadata {
 		self.huffmanCompressionInfo = huffmanCompressionInfo
 	}
 	
-	init?(forItemAt path: URL) throws {
-		// TODO: use config option instead of getting both
-		if let metadata = try path
-			.getCreationDate()
-			.flatMap(Self.init)
-		{
-			self = metadata
-			return
-		}
-		
-		let metadataPath = path.appendingPathExtension("metadata")
-		
-		if metadataPath.exists() {
+	init?(forItemAt path: URL, configuration: Configuration) throws {
+		if configuration.externalMetadata {
+			let metadataPath = path.appendingPathExtension("metadata")
+			
+			guard metadataPath.exists() else { return nil }
+			
 			let rawMetadata = try Data(contentsOf: metadataPath)
 			self = try JSONDecoder().decode(Self.self, from: rawMetadata)
-			return
+		} else {
+			guard let metadata = try path
+				.getCreationDate()
+				.flatMap(Self.init)
+			else { return nil }
+			
+			self = metadata
 		}
-		
-		return nil
 	}
 	
 	init?(_ date: Date) {

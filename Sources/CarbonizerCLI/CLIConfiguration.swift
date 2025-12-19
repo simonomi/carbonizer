@@ -97,7 +97,7 @@ struct CLIConfiguration : Sendable {
 			
 			// stores metadata for MAR files in a separate file, rather than the creation
 			// date. this can avoid some problems, but creates a bunch of annoying extra files.
-			// required to make MAR packing work on linux
+			// it's also a lot slower, but is required to make MAR packing work on linux
 			"externalMetadata": false,
 			
 			// ff1 and ffc have different formats for the "same" files (DEX, DCL, etc),

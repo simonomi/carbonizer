@@ -11,7 +11,7 @@ func makeFolder(
 	contentsOf path: URL,
 	configuration: Configuration
 ) throws -> (any FileSystemObject)? {
-	let metadata = try Metadata(forItemAt: path)
+	let metadata = try Metadata(forItemAt: path, configuration: configuration)
 	if metadata?.skipFile == true { return nil }
 	
 	configuration.log(.transient, "reading", path.path(percentEncoded: false))

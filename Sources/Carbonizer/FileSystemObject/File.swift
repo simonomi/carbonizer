@@ -12,7 +12,7 @@ func makeFile(
 		return nil
 	}
 	
-	let metadata = try Metadata(forItemAt: path)
+	let metadata = try Metadata(forItemAt: path, configuration: configuration)
 	if metadata?.skipFile == true { return nil }
 	
 	configuration.log(.transient, "reading", path.path(percentEncoded: false))
