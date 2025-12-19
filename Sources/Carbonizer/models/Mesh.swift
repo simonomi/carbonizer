@@ -23,7 +23,7 @@ enum Mesh {
 		
 		@Offset(givenBy: \Self.commandsOffset)
 		@Length(givenBy: \Self.commandsLength)
-		var commands: Datastream
+		var commands: ByteSlice
 		
 		@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength))
 		var boneTable: BoneTable
@@ -102,8 +102,8 @@ extension Mesh.Packed: ProprietaryFileData {
 		
 		let writer = Datawriter()
 		writer.write(GPUCommands(commands: unpacked.commands))
-		commands = writer.intoDatastream()
-		commandsLength = UInt32(commands.bytes.count)
+		commands = writer.bytes
+		commandsLength = UInt32(commands.count)
 		
 		boneTable = BoneTable(
 			boneCount: UInt32(unpacked.bones.count),
@@ -156,7 +156,7 @@ extension Mesh.Unpacked: ProprietaryFileData {
 		unknown5 = packed.unknown5
 		unknown6 = packed.unknown6
 		
-		var packedCommands = packed.commands
+		var packedCommands = Datastream(packed.commands)
 		commands = try packedCommands.read(GPUCommands.self).commands
 		
 		bones = packed.boneTable.bones.map(Bone.init)

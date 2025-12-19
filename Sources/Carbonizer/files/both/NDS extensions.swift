@@ -66,7 +66,7 @@ extension NDS.Packed.Binary.FileNameTable.FolderContent {
 	}
 	
 	func fileSystemObject(
-		files: [Datastream],
+		files: [ByteSlice],
 		fileNameTable: CompleteFNT,
 		configuration: Configuration
 	) throws -> any FileSystemObject {
@@ -75,7 +75,7 @@ extension NDS.Packed.Binary.FileNameTable.FolderContent {
 				try makeFile(
 					name: name,
 					metadata: nil,
-					data: files[Int(id!)],
+					data: Datastream(files[Int(id!)]),
 					configuration: configuration
 				)
 			case .folder:

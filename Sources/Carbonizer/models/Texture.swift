@@ -1,3 +1,4 @@
+import Foundation
 import BinaryParser
 
 enum Texture {
@@ -8,9 +9,9 @@ enum Texture {
 		
 		var imageHeaders: [ImageHeader]
 		
-		var bitmaps: [Datastream]
+		var bitmaps: [ByteSlice]
 		
-		var palettes: [Datastream]
+		var palettes: [ByteSlice]
 		
 		@BinaryConvertible
 		struct ImageHeader {
@@ -36,7 +37,7 @@ enum Texture {
 			
 			var paletteOffset: UInt32 // need this because it needs to match mesh's
 			
-			var bitmap: Datastream
+			var bitmap: Data
 			var palette: [Color]
 			
 			struct Info: Codable {
@@ -70,7 +71,7 @@ extension Texture.Packed: BinaryConvertible {
 		
 		let bitmapsStart = data.placeMarker()
 		bitmaps = try data.read(
-			[Datastream].self,
+			[ByteSlice].self,
 			offsets: bitmapOffsets,
 			endOffset: bitmapsLength,
 			relativeTo: bitmapsStart // this is why this can't use macros
@@ -82,7 +83,7 @@ extension Texture.Packed: BinaryConvertible {
 		
 		let palettesStart = data.placeMarker()
 		palettes = try data.read(
-			[Datastream].self,
+			[ByteSlice].self,
 			offsets: paletteOffsets,
 			endOffset: palettesLength,
 			relativeTo: palettesStart // this is why this can't use macros
@@ -138,7 +139,8 @@ extension Texture.Packed: ProprietaryFileData {
 			ImageHeader($0, bitmapOffset: &bitmapOffset)
 		}
 		
-		bitmaps = unpacked.images.map(\.bitmap)
+		bitmaps = unpacked.images
+			.map { Array($0.bitmap)[...] }
 		
 		palettes = unpacked.images
 			.map {
@@ -146,12 +148,12 @@ extension Texture.Packed: ProprietaryFileData {
 				for color in $0.palette {
 					writer.write(Color555(color))
 				}
-				return writer.intoDatastream()
+				return writer.bytes
 			}
 		
-		bitmapsLength = UInt32(bitmaps.map(\.bytes.count).sum())
+		bitmapsLength = UInt32(bitmaps.map(\.count).sum())
 		
-		palettesLength = UInt32(palettes.map(\.bytes.count).sum())
+		palettesLength = UInt32(palettes.map(\.count).sum())
 	}
 }
 
@@ -162,11 +164,11 @@ extension Texture.Packed.ImageHeader {
 	) {
 		name = unpacked.name
 		
-		if unpacked.bitmap.bytes.count == 0 {
+		if unpacked.bitmap.count == 0 {
 			self.bitmapOffset = 0
 		} else {
 			self.bitmapOffset = bitmapOffset
-			bitmapOffset += UInt32(unpacked.bitmap.bytes.count)
+			bitmapOffset += UInt32(unpacked.bitmap.count)
 		}
 		
 		paletteOffset = unpacked.paletteOffset
@@ -236,8 +238,8 @@ extension Texture.Unpacked: ProprietaryFileData {
 extension Texture.Unpacked.Image {
 	fileprivate init(
 		header: Texture.Packed.ImageHeader,
-		bitmap bitmapData: consuming Datastream,
-		palette paletteData: consuming Datastream
+		bitmap bitmapData: ByteSlice,
+		palette inputPaletteData: ByteSlice
 	) throws {
 		name = header.name
 		unknown = Double(header.unknown)
@@ -245,11 +247,12 @@ extension Texture.Unpacked.Image {
 		
 		paletteOffset = header.paletteOffset
 		
-		bitmap = bitmapData
+		bitmap = Data(bitmapData)
 		
+		var paletteData = Datastream(inputPaletteData)
 		palette = try paletteData.read(
 			[Color555].self,
-			count: paletteData.bytes.count / 2
+			count: inputPaletteData.count / 2
 		)
 		.map(Color.init)
 	}
@@ -333,7 +336,7 @@ extension Texture.Unpacked.Image {
 			palette[0].alpha = 0
 		}
 		
-		let pixelData = bitmap.bytes
+		let pixelData = bitmap
 		let pixels: [BMP.Color]
 		switch info.textureFormat {
 			case .a3i5:

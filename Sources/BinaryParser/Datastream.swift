@@ -1,10 +1,14 @@
 import Foundation
 
-public struct Datastream: BinaryConvertible, Codable, Sendable {
-	public let bytes: ArraySlice<UInt8>
+public struct Datastream: Codable, Sendable {
+	public let bytes: ByteSlice
 	
 // cant be @usableFromInline for some reason (because public private(set)), so public for inlinability
 	public var offset: Int
+	
+	public var bytesInRange: ByteSlice {
+		bytes[offset...]
+	}
 	
 	@inlinable
 	public init() {
@@ -12,7 +16,7 @@ public struct Datastream: BinaryConvertible, Codable, Sendable {
 	}
 	
 	@inlinable
-	public init(_ data: Data) {
+	public init(_ data: some Collection<UInt8>) {
 		self.init([UInt8](data))
 	}
 	
@@ -22,15 +26,9 @@ public struct Datastream: BinaryConvertible, Codable, Sendable {
 	}
 	
 	@inlinable
-	public init(_ bytes: ArraySlice<UInt8>) {
+	public init(_ bytes: ByteSlice) {
 		self.bytes = bytes
 		offset = bytes.startIndex
-	}
-	
-	// for conformance to BinaryConvertible
-	@inlinable
-	public init(_ datastream: inout Datastream) {
-		self.init(datastream.bytes[datastream.offset...])
 	}
 	
 	@inlinable
@@ -179,7 +177,7 @@ extension Datastream {
 				whileReading: String.self
 			)
 		}
-		guard let endIndex = bytes[offset...].firstIndex(of: 0) else {
+		guard let endIndex = bytesInRange.firstIndex(of: 0) else {
 			throw StringParsingError.unterminated
 		}
 		guard canRead(until: endIndex) else {
@@ -253,7 +251,7 @@ extension Datastream {
 		
 		let inputEndOffset = offset + Int(inputLength)
 		
-		let nullByteOffset = bytes[offset...].firstIndex(of: 0) ?? .max
+		let nullByteOffset = bytesInRange.firstIndex(of: 0) ?? .max
 		let endOffset = min(inputEndOffset, nullByteOffset)
 		
 		guard canRead(until: endOffset) else {
@@ -291,45 +289,75 @@ extension Datastream {
 	}
 	
 	@inlinable
-	public mutating func read(
-		_: Datastream.Type, endOffset: some BinaryInteger, relativeTo baseOffset: Offset
-	) throws -> Datastream {
-		let endOffset = Int(endOffset) + baseOffset.offset
-		
-		guard canRead(until: endOffset) else {
-			throw BinaryParserError.indexOutOfBounds(
-				index: endOffset,
-				expected: bytes.indices,
-				whileReading: Datastream.self
-			)
-		}
-		
-		defer { offset = endOffset }
-		return Datastream(bytes[offset..<endOffset])
+	public mutating func read(_: Data.Type) -> Data {
+		defer { offset = bytes.endIndex }
+		return Data(bytesInRange)
+	}
+	
+	@inlinable
+	public mutating func read(_: ByteSlice.Type) -> ByteSlice {
+		defer { offset = bytes.endIndex }
+		return bytesInRange
 	}
 	
 	@inlinable
 	public mutating func read(
-		_: Datastream.Type, length: some BinaryInteger
-	) throws -> Datastream {
+		_: ByteSlice.Type, length: some BinaryInteger
+	) throws -> ByteSlice {
 		let length = Int(length)
 		
 		guard canRead(bytes: length) else {
 			throw BinaryParserError.indexOutOfBounds(
 				index: offset + length,
 				expected: bytes.indices,
-				whileReading: Datastream.self
+				whileReading: ByteSlice.self
 			)
 		}
 		
 		defer { offset += length }
-		return Datastream(bytes[offset..<(offset + length)])
+		return bytes[offset..<(offset + length)]
+	}
+	
+	@inlinable
+	public mutating func read(
+		_: Data.Type, length: some BinaryInteger
+	) throws -> Data {
+		let length = Int(length)
+		
+		guard canRead(bytes: length) else {
+			throw BinaryParserError.indexOutOfBounds(
+				index: offset + length,
+				expected: bytes.indices,
+				whileReading: Data.self
+			)
+		}
+		
+		defer { offset += length }
+		return Data(bytes[offset..<(offset + length)])
+	}
+	
+	@inlinable
+	public mutating func read(
+		_: ByteSlice.Type, endOffset: some BinaryInteger, relativeTo baseOffset: Offset
+	) throws -> ByteSlice {
+		let endOffset = Int(endOffset) + baseOffset.offset
+		
+		guard canRead(until: endOffset) else {
+			throw BinaryParserError.indexOutOfBounds(
+				index: endOffset,
+				expected: bytes.indices,
+				whileReading: ByteSlice.self
+			)
+		}
+		
+		defer { offset = endOffset }
+		return bytes[offset..<endOffset]
 	}
 	
 	@inlinable
 	public mutating func read<T: BinaryInteger>(
-		_: [Datastream].Type, offsets: [T], endOffset: T, relativeTo baseOffset: Offset
-	) throws -> [Datastream] {
+		_: [ByteSlice].Type, offsets: [T], endOffset: T, relativeTo baseOffset: Offset
+	) throws -> [ByteSlice] {
 		let offsets = offsets.map { Int($0) + baseOffset.offset }
 		let endOffset = Int(endOffset) + baseOffset.offset
 		
@@ -337,7 +365,7 @@ extension Datastream {
 			throw BinaryParserError.indexOutOfBounds(
 				index: endOffset,
 				expected: bytes.indices,
-				whileReading: [Datastream].self
+				whileReading: [ByteSlice].self
 			)
 		}
 		
@@ -348,14 +376,14 @@ extension Datastream {
 				throw BinaryParserError.indexOutOfBounds(index: end, expected: start..<endOffset)
 			}
 			
-			return Datastream(bytes[start..<end])
+			return bytes[start..<end]
 		}
 	}
 	
 	@inlinable
 	public mutating func read<T: BinaryInteger>(
-		_: [Datastream].Type, startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
-	) throws -> [Datastream] {
+		_: [ByteSlice].Type, startOffsets: [T], endOffsets: [T], relativeTo baseOffset: Offset
+	) throws -> [ByteSlice] {
 		assert(startOffsets.count == endOffsets.count)
 		
 		let startOffsets = startOffsets.map { Int($0) + baseOffset.offset }
@@ -366,14 +394,14 @@ extension Datastream {
 			throw BinaryParserError.indexOutOfBounds(
 				index: endOffset,
 				expected: bytes.indices,
-				whileReading: [Datastream].self
+				whileReading: [ByteSlice].self
 			)
 		}
 		
 		let ranges = zip(startOffsets, endOffsets)
 		defer { offset = endOffset }
 		return ranges.map { start, end in
-			Datastream(bytes[start..<end])
+			bytes[start..<end]
 		}
 	}
 	
@@ -442,14 +470,6 @@ extension Datastream {
 	@inlinable
 	public mutating func jump(to offset: Offset) {
 		self.offset = offset.offset
-	}
-}
-
-// MARK: joined
-extension [Datastream] {
-	@inlinable
-	public func joined() -> Datastream {
-		Datastream(ArraySlice(map(\.bytes).joined()))
 	}
 }
 

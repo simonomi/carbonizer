@@ -91,7 +91,7 @@ func makeFile(
 		return BinaryFile(
 			name: name,
 			metadata: metadata,
-			data: data
+			data: data.read(Data.self)
 		)
 	}
 }

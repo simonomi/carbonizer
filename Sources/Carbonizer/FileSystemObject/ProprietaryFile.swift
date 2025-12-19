@@ -16,7 +16,7 @@ extension ProprietaryFile: FileSystemObject {
 		BinaryFile(
 			name: name + fileExtension,
 			metadata: metadata,
-			data: Datastream()
+			data: Data()
 		)
 		.savePath(in: directory, with: configuration)
 	}
@@ -31,7 +31,7 @@ extension ProprietaryFile: FileSystemObject {
 		try BinaryFile(
 			name: name + fileExtension,
 			metadata: metadata,
-			data: writer.intoDatastream()
+			data: Data(writer.bytes)
 		)
 		.write(at: path, with: configuration)
 	}

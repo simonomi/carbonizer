@@ -1,8 +1,7 @@
 import BinaryParser
 
 extension RunLength {
-	static func compress(_ inputData: Datastream) -> Datastream {
-		let inputData = inputData.bytes[inputData.offset...]
+	static func compress(_ inputData: ByteSlice) -> ByteSlice {
 		let outputData = Datawriter()
 		
 		let header = CompressionHeader(
@@ -48,6 +47,6 @@ extension RunLength {
 		
 		outputData.fourByteAlign()
 		
-		return outputData.intoDatastream()
+		return outputData.bytes
 	}
 }

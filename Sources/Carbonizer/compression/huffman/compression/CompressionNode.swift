@@ -186,7 +186,7 @@ extension Huffman {
 			}
 		}
 		
-		func write(_ inputData: ArraySlice<UInt8>, to output: Datawriter) throws {
+		func write(_ inputData: ByteSlice, to output: Datawriter) throws {
 			let dictionary = dictionary()
 			
 			var currentWord: BitArray? = nil

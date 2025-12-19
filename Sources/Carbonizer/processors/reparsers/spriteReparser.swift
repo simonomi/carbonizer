@@ -18,11 +18,11 @@ func spriteReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "sprite animation")
 				}
 				
-				guard var data = mar.files[fileIndex].content as? Datastream else {
+				guard let bytes = mar.files[fileIndex].content as? ByteSlice else {
 					throw ReparserError.invalidType(fileIndex, for: "sprite animation")
 				}
 				
-				// copy to not modify the original
+				var data = Datastream(bytes)
 				let packed = try data.read(SpriteAnimation.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
@@ -40,11 +40,11 @@ func spriteReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "sprite palette")
 				}
 				
-				guard var data = mar.files[fileIndex].content as? Datastream else {
+				guard let bytes = mar.files[fileIndex].content as? ByteSlice else {
 					throw ReparserError.invalidType(fileIndex, for: "sprite palette")
 				}
 				
-				// copy to not modify the original
+				var data = Datastream(bytes)
 				let packed = try data.read(SpritePalette.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
@@ -62,11 +62,11 @@ func spriteReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "sprite bitmap")
 				}
 				
-				guard var data = mar.files[fileIndex].content as? Datastream else {
+				guard let bytes = mar.files[fileIndex].content as? ByteSlice else {
 					throw ReparserError.invalidType(fileIndex, for: "sprite bitmap")
 				}
 				
-				// copy to not modify the original
+				var data = Datastream(bytes)
 				let packed = try data.read(SpriteBitmap.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {

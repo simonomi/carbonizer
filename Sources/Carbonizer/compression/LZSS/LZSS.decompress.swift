@@ -1,13 +1,13 @@
 import BinaryParser
 
 extension LZSS {
-	static func decompress(_ inputData: consuming Datastream) throws -> Datastream {
-		let header = try inputData.read(CompressionHeader.self)
+	static func decompress(_ inputData: consuming ByteSlice) throws -> ByteSlice {
+		var data = Datastream(copy inputData)
+		let header = try data.read(CompressionHeader.self)
 		precondition(header.type == .lzss)
 		precondition(header.decompressedSize > 0)
 		
-		let inputData = inputData.bytes[inputData.offset...]
-		var inputOffset = inputData.startIndex
+		var inputOffset = inputData.startIndex + 4
 		
 		var outputData = [UInt8]()
 		outputData.reserveCapacity(Int(header.decompressedSize))
@@ -41,6 +41,6 @@ extension LZSS {
 			}
 		}
 		
-		return Datastream(outputData)
+		return outputData[...]
 	}
 }

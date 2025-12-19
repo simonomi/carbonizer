@@ -39,6 +39,6 @@ func showInvalidUTF8(in bytes: some Sequence<UInt8>) -> String {
 
 extension Data {
 	public init(_ datastream: Datastream) {
-		self.init(datastream.bytes[datastream.offset...])
+		self.init(datastream.bytesInRange)
 	}
 }

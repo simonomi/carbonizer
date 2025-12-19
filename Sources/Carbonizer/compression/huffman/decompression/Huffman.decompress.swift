@@ -2,15 +2,14 @@ import BinaryParser
 
 // https://mgba-emu.github.io/gbatek/#huffuncompreadbycallback---swi-13h-ndsdsi
 extension Huffman {
-	static func decompress(_ inputData: consuming Datastream) throws -> (Datastream, CompressionInfo) {
-		let base = inputData.offset
-		
-		let header = try inputData.read(CompressionHeader.self)
+	static func decompress(_ inputData: consuming ByteSlice) throws -> (ByteSlice, CompressionInfo) {
+		var data = Datastream(copy inputData)
+		let header = try data.read(CompressionHeader.self)
 		precondition(header.type == .huffman) // TODO: better error
 		precondition(header.decompressedSize > 0)
 		precondition(header.dataSize == 4 || header.dataSize == 8)
 		
-		let inputData = inputData.bytes[inputData.offset...]
+		let inputData = inputData.dropFirst(4)
 		
 		var outputData = [UInt8]()
 		outputData.reserveCapacity(Int(header.decompressedSize))
@@ -18,7 +17,7 @@ extension Huffman {
 		let branchNodeCount = Int(inputData.first!)
 		let treeLength = 2 * branchNodeCount + 1
 		
-		let rootNodeOffset = base + 5
+		let rootNodeOffset = inputData.startIndex + 1
 		var currentNodeOffset = rootNodeOffset
 		
 		var halfWritten: UInt8?
@@ -80,6 +79,6 @@ extension Huffman {
 		
 		let compressionInfo = CompressionInfo(dataSize: header.dataSize, tree: tree)
 		
-		return (Datastream(outputData), compressionInfo)
+		return (outputData[...], compressionInfo)
 	}
 }

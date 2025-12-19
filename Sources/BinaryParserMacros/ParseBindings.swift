@@ -57,7 +57,7 @@ func parseBinding(_ binding: PatternBindingSyntax, with attributes: Attributes) 
 		}
 	}
 	
-	if attributes.length != nil && !["String", "Datastream"].contains(type) {
+	if attributes.length != nil && !["String", "Data", "ArraySlice<UInt8>", "ByteSlice"].contains(type) {
 		throw PropertyParsingError.lengthOnNonString(for: name, type)
 	}
 	

@@ -35,7 +35,7 @@ extension MAR.Packed: FileSystemObject {
 	func savePath(in directory: URL, with configuration: Configuration) -> URL {
 		BinaryFile(
 			name: name,
-			data: Datastream()
+			data: Data()
 		)
 		.savePath(in: directory, with: configuration)
 	}
@@ -50,7 +50,7 @@ extension MAR.Packed: FileSystemObject {
 		do {
 			try BinaryFile(
 				name: name,
-				data: writer.intoDatastream()
+				data: Data(writer.bytes)
 			)
 			.write(at: path, with: configuration)
 		} catch {

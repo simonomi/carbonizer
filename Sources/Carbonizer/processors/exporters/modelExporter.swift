@@ -44,7 +44,7 @@ func modelExporterF(
 				let usdFile = BinaryFile(
 					name: modelIndices.modelName + ".usda",
 					metadata: .skipFile,
-					data: Datastream(usd.string().data(using: .utf8)!)
+					data: usd.string().data(using: .utf8)!
 				)
 				
 				folder.contents.append(usdFile)

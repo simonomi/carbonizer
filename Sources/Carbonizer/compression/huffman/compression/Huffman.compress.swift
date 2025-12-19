@@ -7,12 +7,11 @@ extension Huffman {
 		}
 	}
 	
-	static func compress(_ inputData: Datastream, info: CompressionInfo?) throws -> Datastream {
+	static func compress(_ originalInputData: ByteSlice, info: CompressionInfo?) throws -> ByteSlice {
 		guard let info else {
 			throw CompressionNeedsExternalMetadata()
 		}
 		
-		let originalInputData = inputData.bytes[inputData.offset...]
 		let outputData = Datawriter()
 		
 		let header = CompressionHeader(
@@ -22,7 +21,7 @@ extension Huffman {
 		)
 		header.write(to: outputData)
 		
-		guard originalInputData.isNotEmpty else { return outputData.intoDatastream() }
+		guard originalInputData.isNotEmpty else { return outputData.bytes }
 		
 		let inputData = if header.dataSize == 4 {
 			originalInputData.flatMap { [$0 & 0b1111, $0 >> 4] }[...]
@@ -55,6 +54,6 @@ extension Huffman {
 		
 		try tree.write(inputData, to: outputData)
 		
-		return outputData.intoDatastream()
+		return outputData.bytes
 	}
 }

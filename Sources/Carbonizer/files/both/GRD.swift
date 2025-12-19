@@ -19,7 +19,7 @@ enum GRD {
 		
 		@Offset(givenBy: \Self.offset)
 		@Length(givenBy: \Self.byteCount)
-		var gridData: Datastream
+		var gridData: ByteSlice
 		
 		@FourByteAlign
 		var fourByteAlign: ()
@@ -46,7 +46,7 @@ extension GRD.Packed: ProprietaryFileData {
 		
 		byteCount = width * height
 		
-		gridData = Datastream(unpacked.data.flatMap { $0 })
+		gridData = unpacked.data.flatMap { $0 }[...]
 	}
 }
 
@@ -62,7 +62,7 @@ extension GRD.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: GRD.Packed, configuration: Configuration) {
-		data = packed.gridData.bytes[packed.gridData.offset...]
+		data = packed.gridData
 			.chunked(maxSize: Int(packed.width))
 			.map(Array.init)
 	}
@@ -93,7 +93,7 @@ extension GRD.Unpacked: ProprietaryFileData {
 	}
 	
 	init(_ data: inout Datastream, configuration: Configuration) throws {
-		let dataCount = data.bytes[data.offset...].indices.count
+		let dataCount = data.bytesInRange.indices.count
 		let raw = try data.read(String.self, exactLength: dataCount)
 		
 		self.data = [[]]

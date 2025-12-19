@@ -39,12 +39,12 @@ extension ProprietaryFileData where Self: Codable {
 }
 
 // used in MARs/MCMs for unknown file type
-extension Datastream: ProprietaryFileData {
+extension ByteSlice: ProprietaryFileData {
 	static let fileExtension = ""
 	static let magicBytes = ""
 	
-	func packed(configuration: Configuration) -> Datastream { self }
-	func unpacked(configuration: Configuration) -> Datastream { self }
+	func packed(configuration: Configuration) -> Self { self }
+	func unpacked(configuration: Configuration) -> Self { self }
 	
 	init(_ data: inout Datastream, configuration: Configuration) {
 		self.init(&data)

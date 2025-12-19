@@ -1,8 +1,8 @@
 import Foundation
 
 final public class Datawriter {
-//	public private(set) var bytes: ArraySlice<UInt8>
-	public var bytes: ArraySlice<UInt8> // for inlinability
+//	public private(set) var bytes: ByteSlice
+	public var bytes: ByteSlice // for inlinability
 	
 //	public private(set) var offset: Int
 	public var offset: Int // for inlinability
@@ -11,11 +11,6 @@ final public class Datawriter {
 	public init() {
 		bytes = []
 		offset = bytes.endIndex
-	}
-	
-	@inlinable
-	public func intoDatastream() -> Datastream {
-		Datastream(bytes)
 	}
 }
 
@@ -27,6 +22,7 @@ extension Datawriter {
 	}
 	
 	@inlinable
+	@_disfavoredOverload
 	public func write(_ data: some Sequence<some BinaryConvertible>) {
 		data.forEach(write)
 	}
@@ -82,6 +78,37 @@ extension Datawriter {
 	@inlinable
 	public func write(_ data: some Sequence<some FixedWidthInteger>) {
 		data.forEach(write)
+	}
+	
+	@inlinable
+	func writeAsCollection(_ data: some Collection<UInt8>) {
+		if offset == bytes.endIndex {
+			bytes.insert(contentsOf: data, at: offset)
+		} else {
+			let endIndex = offset + data.count
+			assert(bytes[offset..<endIndex].allSatisfy(\.isFillerByte))
+			bytes.replaceSubrange(offset..<endIndex, with: data)
+		}
+		offset += data.count
+	}
+	
+	@inlinable
+	public func write(_ data: Data) {
+		writeAsCollection(data)
+	}
+	
+	@inlinable
+	public func write(_ data: ByteSlice) {
+		writeAsCollection(data)
+	}
+	
+	@inlinable
+	public func write(
+		_ data: some Collection<UInt8>,
+		length: some BinaryInteger
+	) {
+		assert(data.count >= length)
+		write(data.prefix(Int(length)))
 	}
 	
 	@inlinable
@@ -145,52 +172,22 @@ extension Datawriter {
 		offset += length
 	}
 	
-	@inlinable
-	public func write(_ data: Datastream) {
-		if offset == bytes.endIndex {
-			bytes.insert(contentsOf: data.bytes[data.offset...], at: offset)
-		} else {
-			let endIndex = offset + data.bytes[data.offset...].count
-			assert(bytes[offset..<endIndex].allSatisfy(\.isFillerByte))
-			bytes.replaceSubrange(offset..<endIndex, with: data.bytes[data.offset...])
-		}
-		offset += data.bytes.count
-	}
-	
-	@inlinable
-	public func write(
-		_ data: Datastream, length: some BinaryInteger
-	) {
-		let length = Int(length)
-		
-		let endIndex = data.offset + length
-		assert(data.canRead(until: endIndex))
-		if offset == bytes.endIndex {
-			bytes.insert(contentsOf: data.bytes[data.offset..<endIndex], at: offset)
-		} else {
-			let endIndex = offset + data.bytes[data.offset..<endIndex].count
-			assert(bytes[offset..<endIndex].allSatisfy(\.isFillerByte))
-			bytes.replaceSubrange(offset..<endIndex, with: data.bytes[data.offset..<endIndex])
-		}
-		offset += length
-	}
-	
-	@inlinable
-	public func write(
-		_ data: [Datastream],
-		offsets: [some BinaryInteger],
-		relativeTo baseOffset: Offset,
-		fillerByte: UInt8 = 0
-	) {
-		let offsets = offsets.map { Int($0) + baseOffset.offest }
-		
-		assert(data.count == offsets.count)
-		
-		for (offset, item) in zip(offsets, data) {
-			jump(to: Offset(offset), fillerByte: fillerByte)
-			write(item)
-		}
-	}
+//	@inlinable
+//	public func write(
+//		_ data: [Datastream],
+//		offsets: [some BinaryInteger],
+//		relativeTo baseOffset: Offset,
+//		fillerByte: UInt8 = 0
+//	) {
+//		let offsets = offsets.map { Int($0) + baseOffset.offest }
+//		
+//		assert(data.count == offsets.count)
+//		
+//		for (offset, item) in zip(offsets, data) {
+//			jump(to: Offset(offset), fillerByte: fillerByte)
+//			write(item)
+//		}
+//	}
 	
 	@inlinable
 	public func write(_: ()) {}

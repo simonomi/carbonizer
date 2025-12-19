@@ -16,11 +16,11 @@ func imageReparserF(
 					throw ReparserError.invalidIndex(fileIndex, for: "image palette")
 				}
 				
-				guard var data = mar.files[fileIndex].content as? Datastream else {
+				guard let bytes = mar.files[fileIndex].content as? ByteSlice else {
 					throw ReparserError.invalidType(fileIndex, for: "image palette")
 				}
 				
-				// copy to not modify the original
+				var data = Datastream(bytes)
 				let packed = try data.read(Palette.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
@@ -43,11 +43,11 @@ func imageReparserF(
 //					throw ReparserError.invalidIndex(fileIndex, for: "bg map")
 //				}
 //
-//				guard let data = mar.files[fileIndex].content as? Datastream else {
+//				guard let bytes = mar.files[fileIndex].content as? ByteSlice else {
 //					throw ReparserError.invalidType(fileIndex, for: "bg map")
 //				}
-//
-//				// copy to not modify the original
+//				
+//				var data = Datastream(bytes)
 //				let packed = try Datastream(data).read(BGMap.Packed.self)
 //				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 //			} catch {

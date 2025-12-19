@@ -1,8 +1,10 @@
+import BinaryParser
+
 extension Huffman {
 	// what the actual fucking algorithm did they use to make this tree
 	// this *works* but only matches for 16-symbol trees (i think?)
 	static func makeTree(
-		inputData: ArraySlice<UInt8>,
+		inputData: ByteSlice,
 		dataSize: UInt8
 	) -> CompressionNode {
 		if dataSize == 4 {

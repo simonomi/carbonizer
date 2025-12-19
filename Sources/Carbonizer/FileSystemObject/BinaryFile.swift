@@ -4,7 +4,7 @@ import BinaryParser
 struct BinaryFile {
 	var name: String
 	var metadata: Metadata?
-	var data: Datastream
+	var data: Data
 }
 
 extension BinaryFile: FileSystemObject {
@@ -33,7 +33,7 @@ extension BinaryFile: FileSystemObject {
 		configuration.log(.transient, "writing", path.path(percentEncoded: false))
 		
 		do {
-			try Data(data.bytes).write(to: path)
+			try data.write(to: path)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}

@@ -1,3 +1,5 @@
+import BinaryParser
+
 enum Huffman {
 	struct CompressionInfo: Codable {
 		var dataSize: UInt8
@@ -40,7 +42,7 @@ enum Huffman {
 			}
 			
 			init(
-				traversing data: ArraySlice<UInt8>,
+				traversing data: ByteSlice,
 				at currentOffset: Int,
 				isData: Bool = false
 			) {

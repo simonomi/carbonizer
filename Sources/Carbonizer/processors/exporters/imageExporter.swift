@@ -20,7 +20,7 @@ func imageExporterF(
 					throw MissingImageComponent.palette(imageIndices.paletteIndex)
 				}
 				
-				guard let bitmap = mar.files[imageIndices.bitmapIndex].content as? Datastream else {
+				guard let bitmap = mar.files[imageIndices.bitmapIndex].content as? ByteSlice else {
 					throw MissingImageComponent.bitmap(imageIndices.bitmapIndex)
 				}
 				
@@ -34,11 +34,11 @@ func imageExporterF(
 				
 				// 16-color bitmaps use 4-bit indices, everything else is 8-bit
 				let bitmapIndices = if palette.colors.count == 16 {
-					bitmap.bytes[bitmap.offset...].flatMap {
+					bitmap.flatMap {
 						[$0 >> 4, $0 & 0b1111]
 					}
 				} else {
-					Array(bitmap.bytes[bitmap.offset...])
+					Array(bitmap)
 				}
 				
 				let bmp = BMP(

@@ -13,8 +13,7 @@ extension Mesh.Packed {
 		let matrices = (matrices ?? self.boneTable.bones.map(\.matrix))
 			.map(Matrix4x3.init)
 		
-		// copy so theres no side effects
-		var commandData = self.commands
+		var commandData = Datastream(self.commands)
 		let commands = try commandData.read(GPUCommands.self).commands
 		
 		var textureScale: SIMD2<Double> = SIMD2(1, 1)

@@ -17,7 +17,7 @@ enum MCM {
 		var endOfFileOffset: UInt32
 		@Offsets(givenBy: \Self.chunkOffsets)
 		@EndOffset(givenBy: \Self.endOfFileOffset)
-		var chunks: [Datastream]
+		var chunks: [ByteSlice]
 	}
 	
 	struct Unpacked {
@@ -61,9 +61,7 @@ extension MCM.Packed {
 		
 		decompressedSize = UInt32(data.bytes.endIndex)
 		
-		let chunkedData = data
-			.intoDatastream()
-			.chunked(maxSize: Int(maxChunkSize))
+		let chunkedData = data.bytes.chunked(maxSize: Int(maxChunkSize))
 		
 		if configuration.compression {
 			guard unpacked.huffmanCompressionInfo.count == chunkedData.count else {
@@ -86,11 +84,11 @@ extension MCM.Packed {
 		
 		chunkOffsets = makeOffsets(
 			start: 24 + chunkCount * 4,
-			sizes: chunks.map(\.bytes.count).map(UInt32.init)
+			sizes: chunks.map(\.count).map(UInt32.init)
 		)
 		
 		if let lastChunkOffset = chunkOffsets.last,
-		   let lastChunkSize = (chunks.last?.bytes.count).map(UInt32.init) {
+		   let lastChunkSize = (chunks.last?.count).map(UInt32.init) {
 			endOfFileOffset = lastChunkOffset + lastChunkSize
 		} else {
 			endOfFileOffset = 24
@@ -139,9 +137,9 @@ extension MCM.Unpacked {
 			
 			content = try makeFileData(
 				name: marName,
-				data: data,
+				data: Datastream(data),
 				configuration: configuration
-			)?.unpacked(configuration: configuration) ?? data
+			)?.unpacked(configuration: configuration) ?? Array(data)[...]
 		} catch {
 			throw DecompressionError(compression: compression, wrapped: error)
 		}
@@ -158,7 +156,7 @@ extension MCM.Unpacked {
 				content = proprietaryFile.data
 				metadata = proprietaryFile.metadata
 			case let binaryFile as BinaryFile:
-				content = binaryFile.data
+				content = Array(binaryFile.data)[...]
 				metadata = binaryFile.metadata
 			default:
 				return nil
@@ -203,7 +201,7 @@ extension ProprietaryFile {
 }
 
 extension MCM.Unpacked.CompressionType: Codable {
-	func compress(_ data: Datastream, compressionInfo: Huffman.CompressionInfo?) throws -> Datastream {
+	func compress(_ data: ByteSlice, compressionInfo: Huffman.CompressionInfo?) throws -> ByteSlice {
 		switch self {
 			case .none:                         data
 			case .runLength: RunLength.compress(data)
@@ -212,7 +210,7 @@ extension MCM.Unpacked.CompressionType: Codable {
 		}
 	}
 	
-	func decompress(_ data: Datastream) throws -> (Datastream, Huffman.CompressionInfo?) {
+	func decompress(_ data: ByteSlice) throws -> (ByteSlice, Huffman.CompressionInfo?) {
 		switch self {
 			case .none:                               (data,  nil)
 			case .runLength: (try RunLength.decompress(data), nil)

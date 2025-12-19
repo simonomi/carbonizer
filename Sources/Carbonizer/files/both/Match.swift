@@ -27,7 +27,7 @@ extension Match.Packed: ProprietaryFileData {
 	
 	init(_ data: inout Datastream, configuration: Configuration) throws {
 		do {
-			let dataCount = data.bytes[data.offset...].count / (Element.bitWidth / 8)
+			let dataCount = data.bytesInRange.count / (Element.bitWidth / 8)
 			self.data = try data.read([Element].self, count: dataCount)
 		} catch {
 			throw BinaryParserError.whileReading(Match.Packed.self, error)

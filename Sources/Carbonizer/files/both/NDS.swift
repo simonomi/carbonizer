@@ -14,25 +14,25 @@ enum NDS {
 			
 			// the header is padded with 00s, but the rest of the ROM uses FFs
 			@EndOffset(givenBy: \Self.header.headerSize)
-			var headerPadding: Datastream
+			var headerPadding: ByteSlice
 			
 			@Offset(givenBy: \Self.header.arm9Offset)
 			@Length(givenBy: \Self.header.arm9Size)
-			var arm9: Datastream
+			var arm9: Data
 			@Count(givenBy: \Self.header.arm9OverlaySize, .dividedBy(32))
 			@Offset(givenBy: \Self.header.arm9OverlayOffset)
 			var arm9OverlayTable: [OverlayTableEntry]
 			
 			@Offset(givenBy: \Self.header.arm7Offset)
 			@Length(givenBy: \Self.header.arm7Size)
-			var arm7: Datastream
+			var arm7: Data
 			@Count(givenBy: \Self.header.arm7OverlaySize, .dividedBy(32))
 			@Offset(givenBy: \Self.header.arm7OverlayOffset)
 			var arm7OverlayTable: [OverlayTableEntry]
 			
 			@Offset(givenBy: \Self.header.iconBannerOffset)
 			@Length(iconBannerSize)
-			var iconBanner: Datastream
+			var iconBanner: Data
 			
 			@Offset(givenBy: \Self.header.fileNameTableOffset)
 			var fileNameTable: FileNameTable
@@ -42,7 +42,7 @@ enum NDS {
 			var fileAllocationTable: [FileAllocationTableEntry]
 			
 			@Offsets(givenBy: \Self.fileAllocationTable, from: \.startAddress, to: \.endAddress)
-			var files: [Datastream]
+			var files: [ByteSlice]
 			
 			@BinaryConvertible
 			struct Header {
@@ -57,7 +57,7 @@ enum NDS {
 				var encryptionSeedSelect: UInt8
 				var deviceCapacity: UInt8
 				@Length(7)
-				var reserved1: Datastream
+				var reserved1: Data
 				var ndsRegion: UInt16
 				var romVersion: UInt8
 				var internalFlags: UInt8
@@ -95,13 +95,13 @@ enum NDS {
 				var totalROMSize: UInt32
 				var headerSize: UInt32
 				@Length(56)
-				var reserved2: Datastream
+				var reserved2: Data
 				@Length(156)
-				var nintendoLogo: Datastream
+				var nintendoLogo: Data
 				var nintendoLogoCRC: UInt16
 				var headerCRC: UInt16
 				@Length(32)
-				var reserved3: Datastream
+				var reserved3: Data
 			}
 			
 			@BinaryConvertible
@@ -166,15 +166,15 @@ enum NDS {
 		var name: String
 		var header: Header
 		
-		var arm9: Datastream
+		var arm9: Data
 		var arm9OverlayTable: [NDS.Packed.Binary.OverlayTableEntry]
 		var arm9Overlays: [BinaryFile]
 		
-		var arm7: Datastream
+		var arm7: Data
 		var arm7OverlayTable: [NDS.Packed.Binary.OverlayTableEntry]
 		var arm7Overlays: [BinaryFile]
 		
-		var iconBanner: Datastream
+		var iconBanner: Data
 		
 		var fileTables: FileTables
 		
@@ -236,7 +236,7 @@ extension NDS.Packed: FileSystemObject {
 	func savePath(in directory: URL, with configuration: Configuration) -> URL {
 		BinaryFile(
 			name: name + Self.fileExtension,
-			data: Datastream()
+			data: Data()
 		).savePath(in: directory, with: configuration)
 	}
 	
@@ -250,7 +250,7 @@ extension NDS.Packed: FileSystemObject {
 		do {
 			try BinaryFile(
 				name: name + Self.fileExtension,
-				data: writer.intoDatastream()
+				data: Data(writer.bytes)
 			)
 			.write(at: path, with: configuration)
 		} catch {
@@ -272,7 +272,7 @@ extension NDS.Packed.Binary {
 		header = Header(unpacked.header)
 		
 		let paddingSize = Int(header.headerSize - 0x180)
-		headerPadding = Datastream(Array(repeatElement(0, count: paddingSize)))
+		headerPadding = Array(repeatElement(0, count: paddingSize))[...]
 		
 		arm9 = unpacked.arm9
 		arm9OverlayTable = unpacked.arm9OverlayTable
@@ -305,15 +305,15 @@ extension NDS.Packed.Binary {
 				default:
 					fatalError("unexpected FileSystemObject type: \(type(of: $0))")
 			}
-			return writer.intoDatastream()
+			return writer.bytes
 		}
 		
 		// TODO: allow adding/removing files
 		precondition(files.count == header.fileAllocationTableSize / 8, "error: file(s) added while packing")
 		
 		// TODO: fnt and fat sizes should be able to change
-		guard header.arm9Size == arm9.bytes.count,
-			  header.arm7Size == arm7.bytes.count,
+		guard header.arm9Size == arm9.count,
+			  header.arm7Size == arm7.count,
 			  header.fileNameTableSize == fileNameTable.size(),
 			  header.fileAllocationTableSize == files.count * 8,
 			  header.arm9OverlaySize == arm9OverlayTable.count * 32,
@@ -342,7 +342,7 @@ extension NDS.Packed.Binary {
 		let completeTable = fileNameTable.completeTable()
 		let originalOffsets = try unpacked.fileTables.existingOffsets(for: completeTable)
 		
-		let fileSizes = files.map(\.bytes.count).map(UInt32.init)
+		let fileSizes = files.map(\.count).map(UInt32.init)
 		
 		fileAllocationTable = fileSizes
 			.enumerated()
@@ -375,7 +375,7 @@ extension NDS.Packed.Binary.Header {
 		unitcode = unpacked.unitcode
 		encryptionSeedSelect = unpacked.encryptionSeedSelect
 		deviceCapacity = unpacked.deviceCapacity
-		reserved1 = Datastream(unpacked.reserved1)
+		reserved1 = unpacked.reserved1
 		ndsRegion = unpacked.ndsRegion
 		romVersion = unpacked.romVersion
 		internalFlags = unpacked.internalFlags
@@ -405,11 +405,11 @@ extension NDS.Packed.Binary.Header {
 		secureDisable = unpacked.secureDisable
 		totalROMSize = unpacked.totalROMSize
 		headerSize = unpacked.headerSize
-		reserved2 = Datastream(unpacked.reserved2)
-		nintendoLogo = Datastream(unpacked.nintendoLogo)
+		reserved2 = unpacked.reserved2
+		nintendoLogo = unpacked.nintendoLogo
 		nintendoLogoCRC = unpacked.nintendoLogoCRC
 		headerCRC = unpacked.headerCRC
-		reserved3 = Datastream(unpacked.reserved3)
+		reserved3 = unpacked.reserved3
 	}
 }
 
@@ -427,10 +427,10 @@ extension NDS.Unpacked: FileSystemObject {
 		let encoder = JSONEncoder(.prettyPrinted, .sortedKeys)
 		
 		
-		let header           = Datastream(try encoder.encode(header))
-		let fileTablesData   = Datastream(try encoder.encode(fileTables))
-		let arm9OverlayTable = Datastream(try encoder.encode(arm9OverlayTable))
-		let arm7OverlayTable = Datastream(try encoder.encode(arm7OverlayTable))
+		let header           = try encoder.encode(header)
+		let fileTablesData   = try encoder.encode(fileTables)
+		let arm9OverlayTable = try encoder.encode(arm9OverlayTable)
+		let arm7OverlayTable = try encoder.encode(arm7OverlayTable)
 		
 		let contents: [any FileSystemObject] = [
 			Folder(name: "_arm9 overlays", contents: arm9Overlays),
@@ -472,7 +472,7 @@ extension NDS.Unpacked: FileSystemObject {
 		arm9Overlays = arm9OverlayTable.map {
 			BinaryFile(
 				name: "overlay \($0.fileId, digits: 2).bin",
-				data: binary.files[Int($0.fileId)]
+				data: Data(binary.files[Int($0.fileId)])
 			)
 		}
 		
@@ -481,7 +481,7 @@ extension NDS.Unpacked: FileSystemObject {
 		arm7Overlays = arm7OverlayTable.map {
 			BinaryFile(
 				name: "overlay \($0.fileId, digits: 2).bin",
-				data: binary.files[Int($0.fileId)]
+				data: Data(binary.files[Int($0.fileId)])
 			)
 		}
 		
@@ -620,10 +620,10 @@ extension NDS.Unpacked {
 			throw UnpackingError.invalidFolderStructure(contents.map(\.name))
 		}
 		
-		let headerData = Data(headerFile.data.bytes)
-		let fileTablesData = Data(fileTablesFile.data.bytes)
-		let arm9OverlayTableData = Data(arm9OverlayTableFile.data.bytes)
-		let arm7OverlayTableData = Data(arm7OverlayTableFile.data.bytes)
+		let headerData = Data(headerFile.data)
+		let fileTablesData = Data(fileTablesFile.data)
+		let arm9OverlayTableData = Data(arm9OverlayTableFile.data)
+		let arm7OverlayTableData = Data(arm7OverlayTableFile.data)
 		
 		header = try JSONDecoder().decode(Header.self, from: headerData)
 		
