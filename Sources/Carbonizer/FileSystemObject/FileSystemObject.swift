@@ -5,7 +5,7 @@ protocol FileSystemObject {
 	var name: String { get }
 	
 	func savePath(in folder: URL, with configuration: Configuration) -> URL
-	func write(into folder: URL, with configuration: Configuration) throws
+	func write(at path: URL, with configuration: Configuration) throws
 	
 	associatedtype Packed: FileSystemObject
 	func packed(configuration: Configuration) throws -> Packed
@@ -22,6 +22,15 @@ protocol FileSystemObject {
 	) throws
 	
 	mutating func setFile(at path: ArraySlice<String>, to content: any FileSystemObject)
+}
+
+extension FileSystemObject {
+	func write(into path: URL, with configuration: Configuration) throws {
+		try write(
+			at: savePath(in: path, with: configuration),
+			with: configuration
+		)
+	}
 }
 
 func fileSystemObject(

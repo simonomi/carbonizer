@@ -27,18 +27,12 @@ extension BinaryFile: FileSystemObject {
 	}
 	
 	func write(
-		into folder: URL,
+		at path: URL,
 		with configuration: Configuration
 	) throws {
-		let path = savePath(in: folder, with: configuration)
 		configuration.log(.transient, "writing", path.path(percentEncoded: false))
 		
 		do {
-			// TODO: can this be removed?
-			if !folder.exists() {
-				try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-			}
-			
 			try Data(data.bytes).write(to: path)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)

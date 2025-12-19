@@ -66,10 +66,9 @@ extension Folder: FileSystemObject {
 	}
 	
 	func write(
-		into folder: URL,
+		at path: URL,
 		with configuration: Configuration
 	) throws {
-		let path = savePath(in: folder, with: configuration)
 		configuration.log(.transient, "writing", path.path(percentEncoded: false))
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
 		
@@ -90,7 +89,9 @@ extension Folder: FileSystemObject {
 			}
 		}
 		
-		try contents.forEach { try $0.write(into: path, with: configuration) }
+		try contents.forEach {
+			try $0.write(into: path, with: configuration)
+		}
 	}
 	
 	func packed(configuration: Configuration) throws -> Self {

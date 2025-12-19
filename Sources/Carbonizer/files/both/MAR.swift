@@ -41,7 +41,7 @@ extension MAR.Packed: FileSystemObject {
 	}
 	
 	func write(
-		into path: URL,
+		at path: URL,
 		with configuration: Configuration
 	) throws {
 		let writer = Datawriter()
@@ -52,7 +52,7 @@ extension MAR.Packed: FileSystemObject {
 				name: name,
 				data: writer.intoDatastream()
 			)
-			.write(into: path, with: configuration)
+			.write(at: path, with: configuration)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
@@ -115,17 +115,17 @@ extension MAR.Unpacked: FileSystemObject {
 	}
 	
 	func write(
-		into folder: URL,
+		at path: URL,
 		with configuration: Configuration
 	) throws {
 		if files.count == 1 {
 			try ProprietaryFile(name: name, standaloneMCM: files.first!)
-				.write(into: folder, with: configuration)
+				.write(at: path, with: configuration)
 		} else {
 			try Folder(
 				name: name + Self.fileExtension,
 				contents: files.enumerated().map(ProprietaryFile.init)
-			).write(into: folder, with: configuration)
+			).write(at: path, with: configuration)
 		}
 	}
 	

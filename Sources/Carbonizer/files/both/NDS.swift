@@ -241,7 +241,7 @@ extension NDS.Packed: FileSystemObject {
 	}
 	
 	func write(
-		into path: URL,
+		at path: URL,
 		with configuration: Configuration
 	) throws {
 		let writer = Datawriter()
@@ -252,7 +252,7 @@ extension NDS.Packed: FileSystemObject {
 				name: name + Self.fileExtension,
 				data: writer.intoDatastream()
 			)
-			.write(into: path, with: configuration)
+			.write(at: path, with: configuration)
 		} catch {
 			throw BinaryParserError.whileWriting(Self.self, error)
 		}
@@ -421,7 +421,7 @@ extension NDS.Unpacked: FileSystemObject {
 	}
 	
 	func write(
-		into path: URL,
+		at path: URL,
 		with configuration: Configuration
 	) throws {
 		let encoder = JSONEncoder(.prettyPrinted, .sortedKeys)
@@ -445,7 +445,7 @@ extension NDS.Unpacked: FileSystemObject {
 		] + contents
 		
 		try Folder(name: name, contents: contents)
-			.write(into: path, with: configuration)
+			.write(at: path, with: configuration)
 	}
 	
 	

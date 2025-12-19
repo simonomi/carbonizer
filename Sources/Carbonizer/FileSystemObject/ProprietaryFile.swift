@@ -22,7 +22,7 @@ extension ProprietaryFile: FileSystemObject {
 	}
 	
 	func write(
-		into folder: URL,
+		at path: URL,
 		with configuration: Configuration
 	) throws {
 		let writer = Datawriter()
@@ -33,7 +33,7 @@ extension ProprietaryFile: FileSystemObject {
 			metadata: metadata,
 			data: writer.intoDatastream()
 		)
-		.write(into: folder, with: configuration)
+		.write(at: path, with: configuration)
 	}
 	
 	func packed(configuration: Configuration) -> Self {
