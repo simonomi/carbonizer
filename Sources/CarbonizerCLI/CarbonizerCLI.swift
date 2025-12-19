@@ -113,19 +113,19 @@ struct CarbonizerCLI: AsyncParsableCommand {
 				} else {
 					switch compressionMode.merged(with: cliConfiguration.compressionMode) {
 						case .auto:
-							try Carbonizer.auto(
+							try await Carbonizer.auto(
 								filePath,
 								into: outputFolder,
 								configuration: configuration
 							)
 						case .pack:
-							try Carbonizer.pack(
+							try await Carbonizer.pack(
 								filePath,
 								into: outputFolder,
 								configuration: configuration
 							)
 						case .unpack:
-							try Carbonizer.unpack(
+							try await Carbonizer.unpack(
 								filePath,
 								into: outputFolder,
 								configuration: configuration

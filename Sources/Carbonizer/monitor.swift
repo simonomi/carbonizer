@@ -12,7 +12,10 @@ public extension Carbonizer {
 			fatalError()
 		}
 		
-		guard var fileData = try fileSystemObject(contentsOf: filePath, configuration: configuration) else {
+		guard var fileData = try await fileSystemObject(
+			contentsOf: filePath,
+			configuration: configuration
+		) else {
 			throw InvalidInput()
 		}
 		
@@ -23,7 +26,10 @@ public extension Carbonizer {
 				.pathComponents
 				.dropFirst(5) // TODO: is this hardcoding `/Users/simonomi/ff1/output/Fossil Fighters`???
 			
-			guard let newFile = try makeFile(contentsOf: $0, configuration: configuration) else { return }
+			guard let newFile = try makeFile(
+				contentsOf: $0,
+				configuration: configuration
+			) else { return }
 			
 			fileData.setFile(at: components, to: newFile)
 			

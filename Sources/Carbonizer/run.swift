@@ -23,7 +23,7 @@ extension Carbonizer {
 		path filePath: URL,
 		into outputFolder: URL,
 		configuration: Configuration
-	) throws {
+	) async throws {
 		let action = try action.resolved(for: filePath)
 		
 #if !IN_CI
@@ -36,7 +36,7 @@ extension Carbonizer {
 		
 		configuration.log(.checkpoint, "reading", filePath.path(percentEncoded: false))
 		
-		guard var file = try fileSystemObject(contentsOf: filePath, configuration: configuration),
+		guard var file = try await fileSystemObject(contentsOf: filePath, configuration: configuration),
 		      (file is NDS.Unpacked || file is NDS.Packed)
 		else {
 			throw InvalidInput()
@@ -76,8 +76,6 @@ extension Carbonizer {
 		
 		configuration.log(.checkpoint, "writing to", savePath.path(percentEncoded: false))
 		
-		// TODO: instead of deleting then writing, write to temporary then swap ?
-		// if the swap fails, thats wasteful :/ (but should preserve data)
 		if configuration.overwriteOutput && savePath.exists() {
 			configuration.log(.checkpoint, "removing existing file")
 			

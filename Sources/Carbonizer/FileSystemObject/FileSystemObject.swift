@@ -36,10 +36,10 @@ extension FileSystemObject {
 func fileSystemObject(
 	contentsOf path: URL,
 	configuration: Configuration
-) throws -> (any FileSystemObject)? {
+) async throws -> (any FileSystemObject)? {
 	do {
 		return if try path.isDirectory() {
-			try makeFolder(contentsOf: path, configuration: configuration)
+			try await makeFolder(contentsOf: path, configuration: configuration)
 		} else {
 			try makeFile(contentsOf: path, configuration: configuration)
 		}

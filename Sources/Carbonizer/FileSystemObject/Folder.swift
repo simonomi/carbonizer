@@ -10,7 +10,7 @@ struct Folder {
 func makeFolder(
 	contentsOf path: URL,
 	configuration: Configuration
-) throws -> (any FileSystemObject)? {
+) async throws -> (any FileSystemObject)? {
 	let metadata = try Metadata(forItemAt: path, configuration: configuration)
 	if metadata?.skipFile == true { return nil }
 	
@@ -18,10 +18,22 @@ func makeFolder(
 	
 	let contentPaths = try path.contents()
 	
-	let contents = try contentPaths
-		.filter { !$0.lastPathComponent.starts(with: ".") }
-		.compactMap { try fileSystemObject(contentsOf: $0, configuration: configuration) }
-		.sorted(by: \.name)
+	let contents = try await withThrowingTaskGroup { group in
+		for itemPath in contentPaths where !itemPath.lastPathComponent.starts(with: ".") {
+			group.addTask {
+				try await fileSystemObject(contentsOf: itemPath, configuration: configuration)
+			}
+		}
+		
+		var contents: [any FileSystemObject] = []
+		for try await item in group {
+			guard let item else { continue }
+			
+			contents.append(item)
+		}
+		
+		return contents.sorted(by: \.name)
+	}
 	
 	if configuration.fileTypes.contains(MAR.Packed.Binary.magicBytes),
 	   path.lastPathComponent.hasSuffix(MAR.Unpacked.fileExtension)
