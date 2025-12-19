@@ -33,22 +33,6 @@ func modelExporterF(
 				let textureName = String(modelIndices.textureIndex)
 					.padded(toLength: 4, with: "0")
 				
-//				let collada = try Collada(
-//					mesh: mesh,
-//					animationData: animation,
-//					modelName: modelIndices.modelName,
-//					texturePath: "assets/\(mar.name)/\(textureName)",
-//					textureNames: try texture?.textureNames()
-//				)
-//				
-//				let colladaFile = BinaryFile(
-//					name: modelIndices.modelName + ".dae",
-//					metadata: .skipFile,
-//					data: Datastream(collada.string().data(using: .utf8)!)
-//				)
-//				
-//				folder.contents.append(colladaFile)
-				
 				let usd = try USD(
 					mesh: mesh,
 					animationData: animation,

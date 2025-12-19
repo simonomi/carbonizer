@@ -12,7 +12,7 @@ struct USD {
 		texturePath: String,
 		textureNames: [UInt32: String]?
 	) throws {
-		meshName = modelName.replacing(" ", with: "-")
+		meshName = modelName.replacing(" ", with: "_")
 		
 		let matrices = mesh.bones.map(\.matrix)
 		
