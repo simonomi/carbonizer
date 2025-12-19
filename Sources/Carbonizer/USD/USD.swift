@@ -4,6 +4,7 @@ struct USD {
 	var meshName: String
 	var animationLength: Int
 	var mesh: USDMesh
+	var skeleton: USDSkeleton
 	
 	init(
 		mesh: Mesh.Unpacked,
@@ -74,15 +75,16 @@ struct USD {
 						)
 					}
 				)
-			},
-			skeleton: USDSkeleton(
-				meshName: meshName,
+			}
+		)
+		
+		skeleton = USDSkeleton(
+			meshName: meshName,
+			boneNames: mesh.bones.map(\.name),
+			restTransforms: matrices,
+			animation: USDAnimation(
 				boneNames: mesh.bones.map(\.name),
-				restTransforms: matrices,
-				animation: USDAnimation(
-					boneNames: mesh.bones.map(\.name),
-					transforms: animationData.keyframes
-				)
+				transforms: animationData.keyframes
 			)
 		)
 	}
@@ -99,8 +101,12 @@ struct USD {
 			timeCodesPerSecond = 60
 		)
 		
-		def SkelRoot "\(meshName)" {
+		def SkelRoot "\(meshName)" (
+			purpose = "guide"
+		) {
 			\(mesh.string().indented(by: 1))
+			
+			\(skeleton.string().indented(by: 1))
 		}
 		"""
 	}

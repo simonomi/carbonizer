@@ -8,13 +8,13 @@ struct USDMesh {
 	
 	var subsets: [USDSubset]
 	
-	var skeleton: USDSkeleton
-	
 	func string() -> String {
 		"""
 		def Mesh "\(name)_mesh" (
 			prepend apiSchemas = ["MaterialBindingAPI", "SkelBindingAPI"]
 		) {
+			uniform token[] xformOpOrder = ["!resetXformStack!"]
+			
 			point3f[] points = \(vertices.map { ($0.x, $0.y, $0.z) })
 			
 		//	normal3f[] normals = TODO (
@@ -42,8 +42,6 @@ struct USDMesh {
 			uniform token subsetFamily:materialBind:familyType = "nonOverlapping"
 			
 			\(subsets.map { $0.string().indented(by: 1) }.joined(separator: "\n\t\n\t"))
-			
-			\(skeleton.string().indented(by: 1))
 		}
 		"""
 	}
