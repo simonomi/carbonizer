@@ -20,7 +20,7 @@ enum MCM {
 		var chunks: [ByteSlice]
 	}
 	
-	struct Unpacked {
+	struct Unpacked: Sendable {
 		var compression: (CompressionType, CompressionType)
 		var maxChunkSize: UInt32
 		

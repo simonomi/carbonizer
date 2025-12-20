@@ -1,6 +1,6 @@
 import BinaryParser
 
-enum Match<Element: FixedWidthInteger & Codable> {
+enum Match<Element: FixedWidthInteger & Codable & Sendable> {
 	struct Packed {
 		var data: [Element]
 	}

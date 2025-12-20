@@ -5,6 +5,8 @@ struct Matrix4x3<Scalar: SIMDScalar>: Codable {
 	var translation: SIMD3<Scalar>
 }
 
+extension Matrix4x3: Sendable where Scalar: Sendable, Scalar.SIMD4Storage: Sendable {}
+
 extension Matrix4x3<Double> {
 	init(_ matrix4x3_2012: Matrix4x3_2012) {
 		x = SIMD3(matrix4x3_2012.x)

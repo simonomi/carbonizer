@@ -1,7 +1,7 @@
 import BinaryParser
 import Foundation
 
-protocol FileSystemObject {
+protocol FileSystemObject: Sendable {
 	var name: String { get }
 	
 	func savePath(in folder: URL, with configuration: Configuration) -> URL

@@ -5,7 +5,7 @@ import Foundation
 protocol SendableMetatype {}
 #endif
 
-protocol ProprietaryFileData: SendableMetatype {
+protocol ProprietaryFileData: Sendable, SendableMetatype {
 	static var fileExtension: String { get }
 	static var magicBytes: String { get }
 	
