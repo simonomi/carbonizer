@@ -2,7 +2,7 @@ struct USDSkeleton {
 	var meshName: String
 	var boneNames: [String]
 	var restTransforms: [Matrix4x3<Double>]
-	var animation: USDAnimation
+	var animation: USDAnimation?
 	
 	func string() -> String {
 		let tupleTransforms = restTransforms.map {
@@ -26,7 +26,7 @@ struct USDSkeleton {
 				
 				rel skel:animationSource = </\(meshName)/\(meshName)_mesh/\(meshName)_skeleton/animation>
 				
-				\(animation.string().indented(by: 1))
+				\(animation?.string().indented(by: 1) ?? "")
 			}
 			"""
 	}

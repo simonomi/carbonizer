@@ -2,16 +2,17 @@ import BinaryParser
 
 struct USD {
 	var meshName: String
-	var animationLength: Int
+	var animationLength: Int?
 	var mesh: USDMesh
 	var skeleton: USDSkeleton
 	
 	init(
 		mesh: Mesh.Unpacked,
-		animationData: Animation.Unpacked,
+		animationData: Animation.Unpacked?,
 		modelName: String,
 		texturePath: String,
-		textureNames: [UInt32: String]?
+		textureNames: [UInt32: String]?,
+		texturesHaveTranslucency: [String: Bool]?
 	) throws {
 		meshName = modelName.replacing(" ", with: "_")
 		
@@ -37,7 +38,7 @@ struct USD {
 				)
 			}
 		
-		animationLength = Int(animationData.animationLength)
+		animationLength = (animationData?.animationLength).map { Int($0) }
 		
 		self.mesh = USDMesh(
 			name: meshName,
@@ -71,7 +72,11 @@ struct USD {
 							name: $0,
 							meshName: meshName,
 							subsetName: subsetName,
-							texturePath: texturePath
+							texturePath: texturePath,
+							// if we're unsure, default to no, because it's easier to notice
+							// if transparency is missing and add it than have to
+							// remove it from a bunch of extra places
+							hasTranslucency: texturesHaveTranslucency?[$0] ?? false
 						)
 					}
 				)
@@ -82,32 +87,40 @@ struct USD {
 			meshName: meshName,
 			boneNames: mesh.bones.map(\.name),
 			restTransforms: matrices,
-			animation: USDAnimation(
-				boneNames: mesh.bones.map(\.name),
-				transforms: animationData.keyframes
-			)
+			animation: animationData.map {
+				USDAnimation(
+					boneNames: mesh.bones.map(\.name),
+					transforms: $0.keyframes
+				)
+			}
 		)
 	}
 	
 	func string() -> String {
-		"""
-		#usda 1.0
-		(
-			defaultPrim = "\(meshName)"
-			metersPerUnit = 1
-			upAxis = "Y"
+		let timeCodes = animationLength.map {
+			"""
 			startTimeCode = 0
-			endTimeCode = \(animationLength)
+			endTimeCode = \($0)
 			timeCodesPerSecond = 60
-		)
+			"""
+		} ?? ""
 		
-		def SkelRoot "\(meshName)" (
-			purpose = "guide"
-		) {
-			\(mesh.string().indented(by: 1))
+		return """
+			#usda 1.0
+			(
+				defaultPrim = "\(meshName)"
+				metersPerUnit = 1
+				upAxis = "Y"
+				\(timeCodes.indented(by: 1))
+			)
 			
-			\(skeleton.string().indented(by: 1))
-		}
-		"""
+			def SkelRoot "\(meshName)" (
+				purpose = "guide"
+			) {
+				\(mesh.string().indented(by: 1))
+				
+				\(skeleton.string().indented(by: 1))
+			}
+			"""
 	}
 }

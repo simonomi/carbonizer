@@ -24,7 +24,7 @@ func modelReparserF(
 				let packed = try data.read(Mesh.Packed.self)
 				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
 			} catch {
-				let location = "\(path + [String(fileIndex)]):"
+				let location = (path + [String(fileIndex)]).joined(separator: "/") + ":"
 				configuration.log(.warning, location, error)
 			}
 		}
@@ -46,7 +46,7 @@ func modelReparserF(
 				let packed = try data.read(Texture.Packed.self)
 				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
 			} catch {
-				let location = "\(path + [String(fileIndex)]):"
+				let location = (path + [String(fileIndex)]).joined(separator: "/") + ":"
 				configuration.log(.warning, location, error)
 			}
 		}
@@ -68,7 +68,7 @@ func modelReparserF(
 				let packed = try data.read(Animation.Packed.self)
 				mar.files[fileIndex].content = packed.unpacked(configuration: configuration)
 			} catch {
-				let location = "\(path + [String(fileIndex)]):"
+				let location = (path + [String(fileIndex)]).joined(separator: "/") + ":"
 				configuration.log(.warning, location, error)
 			}
 		}

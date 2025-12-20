@@ -26,19 +26,32 @@ func modelExporterF(
 					configuration.log(.warning, "textures missing for \(modelIndices.modelName)")
 				}
 				
-				guard let animation = mar.files[modelIndices.animationIndex].content as? Animation.Unpacked else {
+				let animation = mar.files[modelIndices.animationIndex].content as? Animation.Unpacked
+				
+				if animation == nil {
 					throw MissingModelComponent.animation(modelIndices.animationIndex)
 				}
 				
 				let textureName = String(modelIndices.textureIndex)
 					.padded(toLength: 4, with: "0")
 				
+				var textureNames: [UInt32: String]? = nil
+				var texturesHaveTranslucency: [String: Bool]? = nil
+				do {
+					textureNames = try texture?.textureNames()
+					texturesHaveTranslucency = try texture?.texturesHaveTranslucency()
+				} catch {
+					let location = (path + [modelIndices.modelName]).joined(separator: "/") + ":"
+					configuration.log(.warning, location, "textures missing:", error)
+				}
+				
 				let usd = try USD(
 					mesh: mesh,
 					animationData: animation,
 					modelName: modelIndices.modelName,
 					texturePath: "assets/\(mar.name)/\(textureName)",
-					textureNames: try texture?.textureNames()
+					textureNames: textureNames,
+					texturesHaveTranslucency: texturesHaveTranslucency
 				)
 				
 				let usdFile = BinaryFile(

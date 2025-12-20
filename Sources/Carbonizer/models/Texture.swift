@@ -302,6 +302,14 @@ struct DuplicatePaletteOffsets: Error, CustomStringConvertible {
 	}
 }
 
+struct DuplicateTextureNames: Error, CustomStringConvertible {
+	var names: [String]
+	
+	var description: String {
+		"texture names contain a duplicate: \(names)"
+	}
+}
+
 extension Texture.Unpacked {
 	func textureNames() throws -> [UInt32: String] {
 		try Dictionary(
@@ -309,13 +317,21 @@ extension Texture.Unpacked {
 				// see http://problemkaputt.de/gbatek-ds-3d-texture-attributes.htm
 				switch $0.info.textureFormat {
 					case .twoBits:
-						($0.paletteOffset >> 3, "\($0.name)")
+						($0.paletteOffset >> 3, $0.name)
 					default:
-						($0.paletteOffset >> 4, "\($0.name)")
+						($0.paletteOffset >> 4, $0.name)
 				}
 			}
 		) {
 			throw DuplicatePaletteOffsets(firstName: $0, secondName: $1)
+		}
+	}
+	
+	func texturesHaveTranslucency() throws -> [String: Bool] {
+		try Dictionary(
+			images.map { ($0.name, $0.info.transparent || $0.hasTranslucency()) }
+		) { _, _ in
+			throw DuplicateTextureNames(names: images.map(\.name))
 		}
 	}
 	
@@ -329,6 +345,18 @@ extension Texture.Unpacked {
 }
 
 extension Texture.Unpacked.Image {
+	func hasTranslucency() -> Bool {
+		switch info.textureFormat {
+			case .a3i5, .a5i3:
+				true // strictly speaking, we don't know for sure that the
+					 // translucency is used, but it almost certainly is, right?
+			case .twoBits, .fourBits, .eightBits, .direct:
+				false
+			case .compressed:
+				todo("4x4 compressed texture format")
+		}
+	}
+	
 	fileprivate func file() throws -> ProprietaryFile {
 		var palette = palette.map { BMP.Color($0) }
 		
