@@ -172,23 +172,6 @@ extension Datawriter {
 		offset += length
 	}
 	
-//	@inlinable
-//	public func write(
-//		_ data: [Datastream],
-//		offsets: [some BinaryInteger],
-//		relativeTo baseOffset: Offset,
-//		fillerByte: UInt8 = 0
-//	) {
-//		let offsets = offsets.map { Int($0) + baseOffset.offest }
-//		
-//		assert(data.count == offsets.count)
-//		
-//		for (offset, item) in zip(offsets, data) {
-//			jump(to: Offset(offset), fillerByte: fillerByte)
-//			write(item)
-//		}
-//	}
-	
 	@inlinable
 	public func write(_: ()) {}
 	

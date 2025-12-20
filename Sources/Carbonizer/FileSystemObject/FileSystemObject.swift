@@ -5,7 +5,7 @@ protocol FileSystemObject: Sendable {
 	var name: String { get }
 	
 	func savePath(in folder: URL, with configuration: Configuration) -> URL
-	func write(at path: URL, with configuration: Configuration) throws
+	func write(at path: URL, with configuration: Configuration) async throws
 	
 	associatedtype Packed: FileSystemObject
 	func packed(configuration: Configuration) throws -> Packed
@@ -25,8 +25,8 @@ protocol FileSystemObject: Sendable {
 }
 
 extension FileSystemObject {
-	func write(into path: URL, with configuration: Configuration) throws {
-		try write(
+	func write(into path: URL, with configuration: Configuration) async throws {
+		try await write(
 			at: savePath(in: path, with: configuration),
 			with: configuration
 		)

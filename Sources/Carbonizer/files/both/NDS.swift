@@ -423,9 +423,8 @@ extension NDS.Unpacked: FileSystemObject {
 	func write(
 		at path: URL,
 		with configuration: Configuration
-	) throws {
+	) async throws {
 		let encoder = JSONEncoder(.prettyPrinted, .sortedKeys)
-		
 		
 		let header           = try encoder.encode(header)
 		let fileTablesData   = try encoder.encode(fileTables)
@@ -444,7 +443,7 @@ extension NDS.Unpacked: FileSystemObject {
 			BinaryFile(name: "icon banner",             data: iconBanner)
 		] + contents
 		
-		try Folder(name: name, contents: contents)
+		try await Folder(name: name, contents: contents)
 			.write(at: path, with: configuration)
 	}
 	

@@ -80,14 +80,20 @@ extension Folder: FileSystemObject {
 	func write(
 		at path: URL,
 		with configuration: Configuration
-	) throws {
+	) async throws {
 		configuration.log(.transient, "writing", path.path(percentEncoded: false))
 		try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
 		
 		try metadata?.write(on: path, configuration: configuration)
 		
-		try contents.forEach {
-			try $0.write(into: path, with: configuration)
+		try await withThrowingTaskGroup { group in
+			for item in contents {
+				group.addTask {
+					try await item.write(into: path, with: configuration)
+				}
+			}
+			
+			try await group.waitForAll()
 		}
 	}
 	

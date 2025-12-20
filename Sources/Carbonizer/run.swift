@@ -94,7 +94,7 @@ extension Carbonizer {
 		let writeStart = Date.now
 #endif
 		
-		try file.write(at: savePath, with: configuration)
+		try await file.write(at: savePath, with: configuration)
 		
 #if !IN_CI
 		print("\(.cyan)write", writeStart.timeElapsed, "\(.normal)\(.clearToEndOfLine)")

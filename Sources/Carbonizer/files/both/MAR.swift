@@ -117,12 +117,12 @@ extension MAR.Unpacked: FileSystemObject {
 	func write(
 		at path: URL,
 		with configuration: Configuration
-	) throws {
+	) async throws {
 		if files.count == 1 {
 			try ProprietaryFile(name: name, standaloneMCM: files.first!)
 				.write(at: path, with: configuration)
 		} else {
-			try Folder(
+			try await Folder(
 				name: name + Self.fileExtension,
 				contents: files.enumerated().map(ProprietaryFile.init)
 			).write(at: path, with: configuration)
