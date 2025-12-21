@@ -20,6 +20,8 @@ public extension Carbonizer {
 		}
 		
 		let monitor = try monitorFiles(in: filePath) {
+			guard !$0.pathExtension.starts(with: ".") else { return }
+			
 			let components = $0
 				.deletingPathExtension()
 				.deletingPathExtension()

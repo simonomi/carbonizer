@@ -256,6 +256,10 @@ extension Texture.Unpacked.Image {
 		)
 		.map(Color.init)
 	}
+	
+	var nameWithoutSpaces: String {
+		name.replacing(" ", with: "_")
+	}
 }
 
 extension Texture.Unpacked.Image.Info {
@@ -317,9 +321,9 @@ extension Texture.Unpacked {
 				// see http://problemkaputt.de/gbatek-ds-3d-texture-attributes.htm
 				switch $0.info.textureFormat {
 					case .twoBits:
-						($0.paletteOffset >> 3, $0.name)
+						($0.paletteOffset >> 3, $0.nameWithoutSpaces)
 					default:
-						($0.paletteOffset >> 4, $0.name)
+						($0.paletteOffset >> 4, $0.nameWithoutSpaces)
 				}
 			}
 		) {
