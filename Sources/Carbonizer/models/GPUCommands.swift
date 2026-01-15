@@ -198,7 +198,7 @@ extension GPUCommands: BinaryConvertible {
 	}
 	
 	func write(to data: Datawriter) {
-		todo()
+		todo() // TODO: skip this or give a better error
 	}
 }
 

@@ -265,7 +265,7 @@ enum DCL_FFC {
 				static let boney         = Self(rawValue: 1 << 21)
 				static let zombie        = Self(rawValue: 1 << 22)
 				static let poisonous     = Self(rawValue: 1 << 23)
-				static let group25       = Self(rawValue: 1 << 24)
+				static let rotate       = Self(rawValue: 1 << 24)
 				static let group26       = Self(rawValue: 1 << 25)
 				static let group27       = Self(rawValue: 1 << 26)
 				static let group28       = Self(rawValue: 1 << 27)
@@ -474,7 +474,7 @@ enum DCL_FFC {
 				case boney         = "boney (22)"
 				case zombie        = "zombie (23)"
 				case poisonous     = "poisonous (24)"
-				case group25       = "group25"
+				case rotate        = "rotate (25)"
 				case group26       = "group26"
 				case group27       = "group27"
 				case group28       = "group28"
@@ -844,7 +844,7 @@ extension DCL_FFC.Packed.Vivosaur.Teams {
 			case .boney: .boney
 			case .zombie: .zombie
 			case .poisonous: .poisonous
-			case .group25: .group25
+			case .rotate: .rotate
 			case .group26: .group26
 			case .group27: .group27
 			case .group28: .group28
