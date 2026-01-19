@@ -54,7 +54,15 @@ extension URL {
 	}
 	
 	public func exists() -> Bool {
-		FileManager.default.fileExists(atPath: path(percentEncoded: false))
+		var path = path(percentEncoded: false)
+		
+		// for some reason, fileExists doesn't work properly if the directory hint is wrong,
+		// and there's no API to remove one :/
+		if path.hasSuffix("/") {
+			path.removeLast()
+		}
+		
+		return FileManager.default.fileExists(atPath: path)
 	}
 	
 	func contents() throws -> [URL] {

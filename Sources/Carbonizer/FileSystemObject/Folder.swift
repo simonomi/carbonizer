@@ -123,14 +123,11 @@ extension Folder: FileSystemObject {
 	}
 }
 
-// technically this isnt correct, but its mostly probably good enough
-extension Folder: Hashable {
-	func hash(into hasher: inout Hasher) {
-		hasher.combine(name)
-		hasher.combine(contents.count)
-	}
-	
+// technically this isnt correct, but its hopefully good enough
+extension Folder: Equatable {
 	static func == (lhs: Folder, rhs: Folder) -> Bool {
-		lhs.name == rhs.name && lhs.contents.count == rhs.contents.count
+		lhs.name == rhs.name &&
+		lhs.contents.count == rhs.contents.count &&
+		zip(lhs.contents, rhs.contents).allSatisfy { $0.0.name == $0.1.name }
 	}
 }

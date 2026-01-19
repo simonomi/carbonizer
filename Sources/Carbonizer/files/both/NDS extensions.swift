@@ -156,19 +156,15 @@ extension NDS.Packed.Binary.OverlayTableEntry {
 extension NDS.Packed.Binary.FileNameTable {
 	init(_ files: [any FileSystemObject], firstFileId: UInt16) {
 		let allFolders = files.getAllFolders()
-		let folderIds = Dictionary(
-			uniqueKeysWithValues: allFolders
-				.enumerated()
-				.map { index, folder in
-					(folder, UInt16(index + 0xF001))
-				}
-		)
-		let foldersWithIds = folderIds
-			.sorted(by: \.value)
-			.map { folder, id in (folder: folder, id: id) }
+		let foldersWithIds = allFolders
+			.enumerated()
+			.map { index, folder in
+				(folder: folder, id: UInt16(index + 0xF001))
+			}
+			.sorted(by: \.id)
 		
 		var fileId = firstFileId
-		var contentsOffset = (folderIds.count + 1) * 8
+		var contentsOffset = (foldersWithIds.count + 1) * 8
 		
 		func makeFolderContents(_ fileSystemObject: any FileSystemObject) -> FolderContent {
 			switch fileSystemObject {
@@ -178,7 +174,11 @@ extension NDS.Packed.Binary.FileNameTable {
 					return FolderContent(.file, name: fileSystemObject.name)
 				case let folder as Folder:
 					contentsOffset += folder.name.utf8CString.count + 2
-					return FolderContent(.folder, name: folder.name, id: folderIds[folder]!)
+					return FolderContent(
+						.folder,
+						name: folder.name,
+						id: foldersWithIds.first { $0.folder == folder }!.id
+					)
 				default:
 					fatalError("unexpected FileSystemObject type: \(type(of: fileSystemObject))")
 			}
