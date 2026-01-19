@@ -22,10 +22,18 @@ fileprivate let configuration = try! Configuration(
 
 @Test(
 	.disabled("writing GPUCommands not implemented"),
-	arguments: ["fieldchar 0025", "fieldchar 0067"]
+	arguments: [
+		"fieldchar 0000",
+		"fieldchar 0003",
+		"fieldchar 0005",
+		"fieldchar 0007",
+		"fieldchar 0025",
+		"fieldchar 0067"
+	]
 )
 func meshRoundTrip(_ fileName: String) throws {
-	let inputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
+	let originalInputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
+	var inputData = originalInputData
 	
 	let packedMesh = try inputData.read(Mesh.Packed.self)
 	
@@ -36,12 +44,13 @@ func meshRoundTrip(_ fileName: String) throws {
 	let outputData = Datawriter()
 	repackedMesh.write(to: outputData)
 	
-	try expectUnchanged(from: inputData.bytes, to: outputData.bytes, name: fileName)
+	try expectUnchanged(from: originalInputData.bytes, to: outputData.bytes, name: fileName)
 }
 
 @Test(arguments: ["fieldchar 0026", "fieldmap 0216", "battle 0250"])
 func animationRoundTrip(_ fileName: String) throws {
-	let inputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
+	let originalInputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
+	var inputData = originalInputData
 	
 	let packedAnimation = try inputData.read(Animation.Packed.self)
 	
@@ -52,12 +61,13 @@ func animationRoundTrip(_ fileName: String) throws {
 	let outputData = Datawriter()
 	repackedAnimation.write(to: outputData)
 	
-	try expectUnchanged(from: inputData.bytes, to: outputData.bytes, name: fileName)
+	try expectUnchanged(from: originalInputData.bytes, to: outputData.bytes, name: fileName)
 }
 
 @Test(arguments: ["fieldchar 0027", "fieldmap 0103", "fieldchar 0667", "fieldchar 1493"])
 func textureRoundTrip(_ fileName: String) throws {
-	let inputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
+	let originalInputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
+	var inputData = originalInputData
 	
 	let packedTexture = try inputData.read(Texture.Packed.self)
 	
@@ -68,7 +78,7 @@ func textureRoundTrip(_ fileName: String) throws {
 	let outputData = Datawriter()
 	repackedTexture.write(to: outputData)
 	
-	try expectUnchanged(from: inputData.bytes, to: outputData.bytes, name: fileName)
+	try expectUnchanged(from: originalInputData.bytes, to: outputData.bytes, name: fileName)
 }
 
 fileprivate func filePath(for fileName: String) -> URL {

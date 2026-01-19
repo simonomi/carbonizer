@@ -75,7 +75,7 @@ struct RoundTrips {
 			("map c 0118", .packed), // MAR
 		] as [(String, PackedOrUnpacked)]
 	)
-	func roundTrip(_ fileName: String, _ packedStatus: PackedOrUnpacked) throws {
+	func roundTrip(_ fileName: String, _ packedStatus: PackedOrUnpacked) async throws {
 		let inputFilePath = filePath(for: fileName)
 		
 		let game: Configuration.Game = if fileName.contains("ffc") {
@@ -99,7 +99,7 @@ struct RoundTrips {
 		)
 		
 		// TODO: use the new library API
-		let file = try fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
+		let file = try await fileSystemObject(contentsOf: inputFilePath, configuration: configurationWithFileTypes)!
 		
 		let toggledFile: any FileSystemObject = switch packedStatus {
 			case .packed:
@@ -109,9 +109,9 @@ struct RoundTrips {
 		}
 		
 		let toggledSavePath = toggledFile.savePath(in: .temporaryDirectory, with: configurationWithFileTypes)
-		try toggledFile.write(into: .temporaryDirectory, with: configurationWithFileTypes)
+		try await toggledFile.write(into: .temporaryDirectory, with: configurationWithFileTypes)
 		
-		let rereadFile = try fileSystemObject(contentsOf: toggledSavePath, configuration: configurationWithFileTypes)!
+		let rereadFile = try await fileSystemObject(contentsOf: toggledSavePath, configuration: configurationWithFileTypes)!
 		
 		let retoggledFile: any FileSystemObject = switch packedStatus {
 			case .packed:
@@ -121,7 +121,7 @@ struct RoundTrips {
 		}
 		
 		let savePath = retoggledFile.savePath(in: .temporaryDirectory, with: configurationWithFileTypes)
-		try retoggledFile.write(into: .temporaryDirectory, with: configurationWithFileTypes)
+		try await retoggledFile.write(into: .temporaryDirectory, with: configurationWithFileTypes)
 		
 		let originalData = try Data(contentsOf: inputFilePath)
 		let savedData = try Data(contentsOf: savePath)
@@ -133,7 +133,7 @@ struct RoundTrips {
 	}
 	
 	@Test(.disabled())
-	func roundTripROM() throws {
+	func roundTripROM() async throws {
 		guard let wholeROMPath = URL.wholeROMPath else { return }
 		
 		let fileTypes = Set(Configuration.fileTypes(for: .ff1).keys)
@@ -150,26 +150,26 @@ struct RoundTrips {
 			logHandler: nil
 		)
 		
-		let wholeROM = try fileSystemObject(contentsOf: wholeROMPath, configuration: configuration)!
+		let wholeROM = try await fileSystemObject(contentsOf: wholeROMPath, configuration: configuration)!
 		
 		let unpackedROM = try wholeROM.unpacked(path: [], configuration: configuration)
 		let unpackedSavePath = unpackedROM.savePath(in: .temporaryDirectory, with: configuration)
-		try unpackedROM.write(into: .temporaryDirectory, with: configuration)
+		try await unpackedROM.write(into: .temporaryDirectory, with: configuration)
 		
-		let repackedROM = try fileSystemObject(contentsOf: unpackedSavePath, configuration: configuration)!
+		let repackedROM = try await fileSystemObject(contentsOf: unpackedSavePath, configuration: configuration)!
 			.packed(configuration: configuration)
 		let repackedSavePath = repackedROM.savePath(in: .temporaryDirectory, with: configuration)
-		try repackedROM.write(into: .temporaryDirectory, with: configuration)
+		try await repackedROM.write(into: .temporaryDirectory, with: configuration)
 		
-		let reunpackedROM = try fileSystemObject(contentsOf: repackedSavePath, configuration: configuration)!
+		let reunpackedROM = try await fileSystemObject(contentsOf: repackedSavePath, configuration: configuration)!
 			.unpacked(path: [], configuration: configuration)
 		let reunpackedSavePath = reunpackedROM.savePath(in: .temporaryDirectory, with: configuration)
-		try reunpackedROM.write(into: .temporaryDirectory, with: configuration)
+		try await reunpackedROM.write(into: .temporaryDirectory, with: configuration)
 		
-		let rerepackedROM = try fileSystemObject(contentsOf: reunpackedSavePath, configuration: configuration)!
+		let rerepackedROM = try await fileSystemObject(contentsOf: reunpackedSavePath, configuration: configuration)!
 			.packed(configuration: configuration)
 		let rerepackedSavePath = rerepackedROM.savePath(in: .temporaryDirectory, with: configuration)
-		try rerepackedROM.write(into: .temporaryDirectory, with: configuration)
+		try await rerepackedROM.write(into: .temporaryDirectory, with: configuration)
 		
 		func expectContents(
 			of firstPath: URL,

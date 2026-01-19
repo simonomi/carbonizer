@@ -62,7 +62,7 @@ struct Compression {
 			.appendingPathExtension("bin")
 		if !expectedURL.exists() {
 			print("\(.green)saving compressed file to '\(.cyan)\(expectedFileName).bin\(.green)'\(.normal)")
-			try Data(compressedInput.bytes).write(to: expectedURL)
+			try Data(compressedInput).write(to: expectedURL)
 		}
 		
 		let expectedOutput = try data(for: expectedFileName)
@@ -74,11 +74,11 @@ struct Compression {
 		let incorrectFilePath: URL = .compressionDirectory
 			.appending(component: "incorrect \(expectedFileName).bin")
 		
-		let areTheSame = compressedInput.bytes == expectedOutput.bytes
+		let areTheSame = compressedInput == expectedOutput
 		#expect(areTheSame, "nvim -d \"\(expectedFilePath.path(percentEncoded: false))\" \"\(incorrectFilePath.path(percentEncoded: false))\"")
 		
 		if !areTheSame {
-			try Data(compressedInput.bytes).write(to: incorrectFilePath)
+			try Data(compressedInput).write(to: incorrectFilePath)
 		}
 	}
 	
@@ -117,7 +117,7 @@ struct Compression {
 			.appendingPathExtension("bin")
 		if !expectedURL.exists() {
 			print("\(.green)saving decompression to '\(.cyan)\(expectedFileName).bin\(.green)'\(.normal)")
-			try Data(decompressedInput.bytes).write(to: expectedURL)
+			try Data(decompressedInput).write(to: expectedURL)
 			
 			if let compressionInfo {
 				let metadata = Metadata(
@@ -143,16 +143,16 @@ struct Compression {
 		
 		let expectedOutput = try data(for: expectedFileName)
 		
-		let areTheSame = decompressedInput.bytes == expectedOutput.bytes
+		let areTheSame = decompressedInput == expectedOutput
 		#expect(areTheSame)
 	}
 }
 
-fileprivate func data(for fileName: String) throws -> Datastream {
-	try Datastream(Data(
+fileprivate func data(for fileName: String) throws -> ByteSlice {
+	try Array(Data(
 		contentsOf: .compressionDirectory
 			.appending(component: fileName)
 			.appendingPathExtension("bin")
-	))
+	))[...]
 }
 #endif
