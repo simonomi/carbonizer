@@ -1,6 +1,6 @@
 import BinaryParser
 
-struct GPUCommands: Codable {
+struct GPUCommands {
 	var commands: [Command]
 	
 	enum Command: Codable {
@@ -12,12 +12,12 @@ struct GPUCommands: Codable {
 		case matrixRestore(UInt8) // 1w - u5
 		case matrixIdentity
 		// matrixLoad4x4
-		case matrixLoad4x3([UInt32]) // 12w // Matrix4x3?
+		case matrixLoad4x3([Double]) // 12w // Matrix4x3?
 		// matrixMultiply4x4
 		// matrixMultiply4x3
 		// matrixMultiply3x3
-		case matrixScale(Double, Double, Double) // 3w, 2012
-												 // matrixTranslate
+		case matrixScale(x: Double, y: Double, z: Double) // 3w, 2012
+														  // matrixTranslate
 		case color(Color) // 1w - 555
 		case normal(UInt32) // 1w
 		case textureCoordinate(SIMD2<Double>) // 1w
@@ -44,19 +44,36 @@ struct GPUCommands: Codable {
 		// testPosition
 		// testVector
 		
-		case unknown50(UInt32, [UInt8])
-		case unknown51(UInt32, [UInt8])
-		case commandsStart(UInt32) // this is the size of the commands
-		case unknown53(UInt32, UInt32, UInt32) // 3w
-		case commandsEnd // always followed by 0F 7F ?
-						 // but after commandsStart's length
-		
 		enum MatrixMode: String, Codable {
 			case projection, position, positionAndVector, texture
 		}
 		
 		enum VertexMode: String, Codable {
 			case triangle, quadrilateral, triangleStrip, quadrilateralStrip
+		}
+		
+		var type: GPUCommandType {
+			switch self {
+				case .noop: .noop
+				case .matrixMode: .matrixMode
+				case .matrixPop: .matrixPop
+				case .matrixRestore: .matrixRestore
+				case .matrixIdentity: .matrixIdentity
+				case .matrixLoad4x3: .matrixLoad4x3
+				case .matrixScale: .matrixScale
+				case .color: .color
+				case .normal: .normal
+				case .textureCoordinate: .textureCoordinate
+				case .vertex16: .vertex16
+				case .vertexXY: .vertexXY
+				case .vertexXZ: .vertexXZ
+				case .vertexYZ: .vertexYZ
+				case .polygonAttributes: .polygonAttributes
+				case .textureImageParameter: .textureImageParameter
+				case .texturePaletteBase: .texturePaletteBase
+				case .vertexBegin: .vertexBegin
+				case .vertexEnd: .vertexEnd
+			}
 		}
 	}
 }
@@ -77,8 +94,7 @@ extension GPUCommands: BinaryConvertible {
 	init(_ data: inout Datastream) throws {
 		commands = []
 		
-	mainloop:
-		while true {
+		while data.offset < data.bytes.endIndex {
 			let rawCommandTypes = try (0..<4).map { _ in try data.read(UInt8.self) }
 			
 			for rawCommandType in rawCommandTypes {
@@ -97,12 +113,15 @@ extension GPUCommands: BinaryConvertible {
 					case .matrixIdentity:
 							.matrixIdentity
 					case .matrixLoad4x3:
-							.matrixLoad4x3(try data.read([UInt32].self, count: 12))
+							.matrixLoad4x3(
+								try data.read([FixedPoint2012].self, count: 12)
+									.map(Double.init)
+							)
 					case .matrixScale:
 							.matrixScale(
-								Double(try data.read(FixedPoint2012.self)),
-								Double(try data.read(FixedPoint2012.self)),
-								Double(try data.read(FixedPoint2012.self))
+								x: Double(try data.read(FixedPoint2012.self)),
+								y: Double(try data.read(FixedPoint2012.self)),
+								z: Double(try data.read(FixedPoint2012.self))
 							)
 					case .color: try {
 						let color: Command = .color(
@@ -150,38 +169,12 @@ extension GPUCommands: BinaryConvertible {
 					case .vertexBegin:
 							.vertexBegin(try data.read(Command.VertexMode.self))
 					case .vertexEnd: .vertexEnd
-					case .unknown50: try {
-						let argumentLength = try data.read(UInt32.self)
-						return .unknown50(argumentLength, try data.read([UInt8].self, count: argumentLength))
-					}()
-					case .unknown51: try {
-						let argumentLength = try data.read(UInt32.self)
-						return .unknown51(argumentLength, try data.read([UInt8].self, count: argumentLength))
-					}()
-					case .commandsStart:
-							.commandsStart(try data.read(UInt32.self))
-					case .unknown53:
-							.unknown53(
-								try data.read(UInt32.self),
-								try data.read(UInt32.self),
-								try data.read(UInt32.self)
-							)
-					case .commandsEnd, .commandsEnd1, .commandsEnd2: .commandsEnd
 					default: throw InvalidGPUCommand.unsupportedCommand(commandType)
 				}
 				
 //				print(command)
 				
 				commands.append(command)
-				
-				switch command {
-					case .unknown50, .unknown51, .commandsStart, .unknown53:
-						continue mainloop // stop reading commands from this word
-										  // and skip the argument count check
-					case .commandsEnd:
-						return
-					default: ()
-				}
 			}
 			
 			guard let lastRawCommand = rawCommandTypes.filter({ $0 != 0 }).last,
@@ -190,7 +183,7 @@ extension GPUCommands: BinaryConvertible {
 				throw InvalidGPUCommand.fourNOPs
 			}
 			
-			// see page 172
+			// see page 172 (aka 190)
 			if lastCommand.argumentCount == 0 {
 				data.jump(bytes: 4)
 			}
@@ -198,7 +191,69 @@ extension GPUCommands: BinaryConvertible {
 	}
 	
 	func write(to data: Datawriter) {
-		todo() // TODO: skip this or give a better error
+		for commandQuartet in commands.chunked(maxSize: 4) {
+			let commandTypes = commandQuartet.map(\.type)
+			
+			for type in commandTypes {
+				data.write(type)
+			}
+			
+			for command in commandQuartet {
+				switch command {
+					case .noop, .matrixIdentity, .vertexEnd: ()
+					case .matrixMode(let mode):
+						data.write(mode)
+					case .matrixPop(let signed6):
+						data.writeSigned6(signed6)
+					case .matrixRestore(let unsigned5):
+						data.writeUnsigned5(unsigned5)
+					case .matrixLoad4x3(let transforms):
+						data.write(transforms.map { FixedPoint2012($0) })
+					case .matrixScale(x: let x, y: let y, z: let z):
+						data.write(FixedPoint2012(x))
+						data.write(FixedPoint2012(y))
+						data.write(FixedPoint2012(z))
+					case .color(let color):
+						data.write(Color555(color))
+						data.jump(bytes: 2)
+					case .normal(let normal):
+						data.write(normal)
+					case .textureCoordinate(let point):
+						data.write(FixedPoint124(point.x))
+						data.write(FixedPoint124(point.y))
+					case .vertex16(let vertex):
+						data.write(FixedPoint412(vertex.x))
+						data.write(FixedPoint412(vertex.y))
+						data.write(FixedPoint412(vertex.z))
+						data.jump(bytes: 2)
+					case .vertexXY(x: let x, y: let y):
+						data.write(FixedPoint412(x))
+						data.write(FixedPoint412(y))
+					case .vertexXZ(x: let x, z: let z):
+						data.write(FixedPoint412(x))
+						data.write(FixedPoint412(z))
+					case .vertexYZ(y: let y, z: let z):
+						data.write(FixedPoint412(y))
+						data.write(FixedPoint412(z))
+					case .polygonAttributes(let value):
+						data.write(value)
+					case .textureImageParameter(let value):
+						data.write(value)
+					case .texturePaletteBase(let value):
+						data.write(value)
+					case .vertexBegin(let vertexMode):
+						data.write(vertexMode)
+				}
+			}
+			
+			// see page 172 (aka 190)
+			if let lastCommand = commandTypes.last(where: { $0 != .noop }),
+			   lastCommand.argumentCount == 0 {
+				data.jump(bytes: 4)
+			}
+		}
+		
+		data.fourByteAlign()
 	}
 }
 
@@ -226,6 +281,20 @@ extension Datastream {
 		}
 		
 		return UInt8(raw)
+	}
+}
+
+extension Datawriter {
+	fileprivate func writeSigned6(_ signed6: Int8) {
+		if signed6 >= 0 {
+			write(signed6)
+		} else {
+			write((1 << 5) | signed6.magnitude)
+		}
+	}
+	
+	fileprivate func writeUnsigned5(_ unsigned5: UInt8) {
+		write(UInt32(unsigned5))
 	}
 }
 

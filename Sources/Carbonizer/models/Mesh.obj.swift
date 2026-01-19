@@ -167,11 +167,6 @@ extension Mesh.Packed {
 					currentVertexMode = vertexMode
 				case .vertexEnd:
 					commitVertices()
-				case .unknown50: () // ignore for now
-				case .unknown51: () // ignore for now
-				case .commandsStart: ()
-				case .unknown53: () // ignore for now
-				case .commandsEnd: ()
 			}
 		}
 		

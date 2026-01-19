@@ -21,14 +21,18 @@ fileprivate let configuration = try! Configuration(
 )
 
 @Test(
-	.disabled("writing GPUCommands not implemented"),
+//	.disabled("writing GPUCommands not implemented"),
 	arguments: [
 		"fieldchar 0000",
 		"fieldchar 0003",
 		"fieldchar 0005",
 		"fieldchar 0007",
 		"fieldchar 0025",
-		"fieldchar 0067"
+		"fieldchar 0067",
+		"arcdin 0021",
+		"arcdin 0045",
+		"battle 0028",
+		"fieldmap 0006",
 	]
 )
 func meshRoundTrip(_ fileName: String) throws {

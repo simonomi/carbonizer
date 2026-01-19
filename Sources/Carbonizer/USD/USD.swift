@@ -19,7 +19,8 @@ struct USD {
 		let matrices = mesh.bones.map(\.matrix)
 		
 		let parsingResult = try parseCommands(
-			mesh.commands,
+			mesh.gpuCommands(),
+			worldRootBoneCount: mesh.worldRootBoneCount(),
 			textureNames: textureNames,
 			matrices: matrices
 		)

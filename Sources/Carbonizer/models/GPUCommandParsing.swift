@@ -24,7 +24,7 @@ fileprivate struct CommandParsingState {
 	var vertexMode: GPUCommands.Command.VertexMode?
 	var bone: Int = -1
 	
-	var worldRootBoneCount: Int = 0
+	var worldRootBoneCount: Int
 	
 	var textureVertex: SIMD2<Double> = .zero // ?
 	var textureScale: SIMD2<Double> = .one
@@ -135,10 +135,15 @@ struct CommandParsingResult {
 
 func parseCommands(
 	_ commands: [GPUCommands.Command],
+	worldRootBoneCount: Int,
 	textureNames: [UInt32: String]?,
 	matrices: [Matrix4x3<Double>]
 ) throws -> CommandParsingResult {
-	let initialState = (state: CommandParsingState(), result: CommandParsingResult())
+	let initialState = (
+		state: CommandParsingState(worldRootBoneCount: worldRootBoneCount),
+		result: CommandParsingResult()
+	)
+	
 	return try commands
 		.reduce(into: initialState) { partialResult, command in
 			try parseCommand(
@@ -204,13 +209,6 @@ fileprivate func parseCommand(
 			state.vertexMode = vertexMode
 		case .vertexEnd:
 			state.commitVertices(to: &result)
-		case .unknown50(_, _): () // ignore for now
-		case .unknown51(_, let bytes):
-			state.worldRootBoneCount = Int(bytes[12]) // idk, this byte just seems to be the number of 'world_root' bones
-													  // theres more to do here probably
-		case .commandsStart(_): ()
-		case .unknown53(_, _, _): () // ignore for now
-		case .commandsEnd: ()
 	}
 }
 

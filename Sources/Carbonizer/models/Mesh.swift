@@ -69,7 +69,7 @@ enum Mesh {
 		
 		var unknown6: UInt32
 		
-		var commands: [GPUCommands.Command]
+		var commands: [MeshCommands.Command]
 		
 		var bones: [Bone]
 		
@@ -78,6 +78,40 @@ enum Mesh {
 		struct Bone: Codable {
 			var name: String
 			var matrix: Matrix4x3<Double>
+		}
+		
+		enum MissingCommand: Error, CustomStringConvertible {
+			case command51, command52
+			
+			var description: String {
+				switch self {
+					case .command51:
+						"mesh does not contain the unknown command 51"
+					case .command52:
+						"mesh does not contain GPU commands"
+				}
+			}
+		}
+		
+		func gpuCommands() throws -> [GPUCommands.Command] {
+			for command in commands {
+				if case .unknown52(let gpuCommands) = command {
+					return gpuCommands
+				}
+			}
+			
+			throw MissingCommand.command52
+		}
+		
+		func worldRootBoneCount() throws -> Int {
+			for command in commands {
+				if case .unknown51(let bytes) = command {
+					// idk, this byte just seems to be the number of 'world_root' bones
+					return Int(bytes[12])
+				}
+			}
+			
+			throw MissingCommand.command51
 		}
 	}
 }
@@ -101,7 +135,7 @@ extension Mesh.Packed: ProprietaryFileData {
 		unknown6 = unpacked.unknown6
 		
 		let writer = Datawriter()
-		writer.write(GPUCommands(commands: unpacked.commands))
+		writer.write(MeshCommands(commands: unpacked.commands))
 		commands = writer.bytes
 		commandsLength = UInt32(commands.count)
 		
@@ -157,7 +191,7 @@ extension Mesh.Unpacked: ProprietaryFileData {
 		unknown6 = packed.unknown6
 		
 		var packedCommands = Datastream(packed.commands)
-		commands = try packedCommands.read(GPUCommands.self).commands
+		commands = try packedCommands.read(MeshCommands.self).commands
 		
 		bones = packed.boneTable.bones.map(Bone.init)
 		

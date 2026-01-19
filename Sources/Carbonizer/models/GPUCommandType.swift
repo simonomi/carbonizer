@@ -39,16 +39,8 @@ enum GPUCommandType: UInt8, Equatable {
 	case testPosition = 0x71
 	case testVector = 0x72
 	
-	case unknown50 = 0x50 // in the original, swap buffers, but not here
-	case unknown51 = 0x51
-	case commandsStart = 0x52
-	case unknown53 = 0x53
-	case commandsEnd = 0xFF // always followed by 0F 7F ?
-	case commandsEnd1 = 0x0F
-	case commandsEnd2 = 0x7F
-	
 	/// number of 32-bit arguments
-	var argumentCount: Int? {
+	var argumentCount: Int {
 		switch self {
 			case .noop, .matrixPush, .matrixIdentity, .vertexEnd: 0
 			case .matrixMode, .matrixPop, .matrixStore, .matrixRestore, .color, .normal, .textureCoordinate, .vertex10, .vertexXY, .vertexXZ, .vertexYZ, .vertexDiff, .polygonAttributes, .textureImageParameter, .texturePaletteBase, .materialColor0, .materialColor1, .lightVector, .lightColor, .vertexBegin, .setViewport, .testVector: 1
@@ -58,7 +50,6 @@ enum GPUCommandType: UInt8, Equatable {
 			case .matrixLoad4x3, .matrixMultiply4x3: 12
 			case .matrixLoad4x4, .matrixMultiply4x4: 16
 			case .shininess: 32
-			case .unknown50, .unknown51, .commandsStart, .unknown53, .commandsEnd, .commandsEnd1, .commandsEnd2: nil
 		}
 	}
 }
