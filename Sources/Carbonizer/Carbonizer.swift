@@ -1,5 +1,7 @@
 import Foundation
 
+// TODO: warning if output file is too large (ffc)
+
 public enum Carbonizer {
 	// if run manually, CI will check for the string "main", so here you go :)
 	public static let version = "v2.21"

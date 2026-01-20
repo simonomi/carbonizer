@@ -73,6 +73,12 @@ struct CLIConfiguration : Sendable {
 		case ff1, ffc
 	}
 	
+#if os(Windows)
+	static let defaultUseColor = "false"
+#else
+	static let defaultUseColor = "true"
+#endif
+	
 	static let defaultConfigurationString: String = """
 		{
 			// this option can be overridden by a command-line flag
@@ -93,7 +99,7 @@ struct CLIConfiguration : Sendable {
 			
 			// enables pretty colorful output! not all terminals support colors though :(
 			// turn this off if you see weird stuff like "�[33;1mwarning:�[0m"
-			"useColor": true,
+			"useColor": \(defaultUseColor),
 			
 			"hotReloading": false, // macOS only
 			
