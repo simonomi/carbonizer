@@ -75,7 +75,7 @@ extension Glob {
 	consuming func matches(_ path: consuming [String]) -> Bool {
 		while true {
 			switch (components.first, path.first) {
-				case (nil, nil):
+				case (nil, nil), (.recursiveWildcard, nil):
 					return true
 				case (_?, nil), (nil, _?):
 					return false

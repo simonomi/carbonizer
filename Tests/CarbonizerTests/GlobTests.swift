@@ -5,7 +5,6 @@ import Foundation
 
 @Suite
 struct Globs {
-	// examples: "text/japanese", "episode/*", "model/**", "**/arc*"
 	@Test
 	func allLiterals() throws {
 		let glob = try Glob(raw: "text/japanese")
@@ -36,7 +35,7 @@ struct Globs {
 		#expect(glob.matches(["model", "battle"]))
 		#expect(glob.matches(["model", "fieldchar"]))
 		#expect(glob.matches(["model", "battle", "arc"]))
-		#expect(!glob.matches(["model"]))
+		#expect(glob.matches(["model"]))
 		#expect(!glob.matches(["notModel", "0001"]))
 	}
 	

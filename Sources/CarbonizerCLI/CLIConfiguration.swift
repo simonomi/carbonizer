@@ -73,13 +73,12 @@ struct CLIConfiguration : Sendable {
 		case ff1, ffc
 	}
 	
-	// TODO: document how globs are weird bc they need to match the parent paths but have to deal with **/whatever patterns?
 	static let defaultConfigurationString: String = """
 		{
 			// this option can be overridden by a command-line flag
 			"compressionMode": "auto", // auto, pack, unpack
 			
-			// any files passed as command-line argumentsline are run first
+			// any files passed as command-line arguments are run first
 			"inputFiles": [],
 			
 			// where any output files will be placed
@@ -93,12 +92,10 @@ struct CLIConfiguration : Sendable {
 			"keepWindowOpen": "onError", // always, never, onError
 			
 			// enables pretty colorful output! not all terminals support colors though :(
+			// turn this off if you see weird stuff like "�[33;1mwarning:�[0m"
 			"useColor": true,
 			
-			// stores metadata for MAR files in a separate file, rather than the creation
-			// date. this can avoid some problems, but creates a bunch of annoying extra files.
-			// it's also a lot slower, but is required to make MAR packing work on linux
-			"externalMetadata": false,
+			"hotReloading": false, // macOS only
 			
 			// ff1 and ffc have different formats for the "same" files (DEX, DCL, etc),
 			// so you need to select which game is being run on
@@ -106,27 +103,37 @@ struct CLIConfiguration : Sendable {
 			
 			// basically required for anything useful: MAR
 			//
-			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MPM, MMS, MPM 
+			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MMS, MPM 
 			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
-			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBA", "DBS", "DBT", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "RLS", "SHP"],
+			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBA", "DBS", "DBT", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "RLS", "SHP"], // ff1-compatible
 			// "fileTypes": ["_match", "DCL", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MMS", "MPM"], // ffc-compatible
 			
-			// limit the files carbonizer will unpack. any files included in this list will be skipped by carbonizer,
-			// which will make carbonizer run faster and decrease the size of the any output ROMs. just make sure not
-			// to accidentally skip a file you want to edit!
-			//
-			// these options accept globs within an nds' contents ("text/japanese", "episode/*", "model/**", "**/arc*")
-			// file names in globs may contain one wildcard "arc*", but not two "*arc*"
-			"onlyUnpack": [],
-			"skipUnpacking": [],
+			// stores metadata for MAR files in a separate file, rather than the creation
+			// date. this can avoid some problems, but creates a bunch of annoying extra files.
+			// it's also a lot slower, but is required to make MAR packing work on linux.
+			"externalMetadata": false,
 			
-			// not fully supported right now, requires externalMetadata to be enabled.
-			// turning on compression will make the output ROM much smaller, but will
-			// take a good amount of time to run. it's also good for creating patches,
-			// so that the modded ROM matches the original as much as possible
+			// requires externalMetadata to be enabled. turning on compression will
+			// make the output ROM much smaller, but will take a good amount of time
+			// to run. it's good when creating patches so the modded ROM matches the
+			// original as much as possible
 			"compression": false,
 			
-			"hotReloading": false, // macOS only
+			// limit the files carbonizer will unpack. any files included in this list will 
+			// be skipped by carbonizer when unpacking, which will make carbonizer run faster 
+			// and decrease the size of the any output ROMs. just make sure not to accidentally 
+			// skip a file you want to edit!
+			//
+			// make sure to include the parent folders of things you want to be unpacked.
+			// if you want to only unpack "model/fieldchar/**", you also need to unpack "model".
+			//
+			// these options accept globs within an nds' contents ("text/japanese", "episode/*", 
+			// "model/**", "**/arc*"). file names in globs may contain one wildcard ("arc*"), 
+			// but not two ("*arc*").
+			"onlyUnpack": [],
+			"skipUnpacking": [],
+			// "skipUnpacking": ["model"], // most of the largest files are in model, so if you're not editing model files, skipping it can save time
+			// "skipUnpacking": ["**/arc*", "**/*arc", "**/*archive"], // without compression, ffc needs to skip some large files, otherwise the output ROM is too big and doesn't work
 			
 			"processors": {
 				// extract vivosaur 3D model files
@@ -161,7 +168,7 @@ struct CLIConfiguration : Sendable {
 				
 				// adds labels for the names of fighters in DBS files (battle folder)
 				// required file types: MAR, DBS, DTX
-				"battleFighterNameLabeller": false,
+				"battleFighterNameLabeller": true,
 				
 				// adds labels for the names of vivosaurs in creature_defs
 				// required file types: MAR, DCL, DTX
