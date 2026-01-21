@@ -47,7 +47,7 @@ jobs:
       run: grep -q "${{ github.ref_name }}" Sources/Carbonizer/Carbonizer.swift
     - name: Set up Swift
       uses: compnerd/gha-setup-swift@main
-      with:
+      with: # when changing this, make sure to change the package step too
         swift-version: swift-6.2.3-release
         swift-build: 6.2.3-RELEASE
     - name: Build
@@ -62,7 +62,7 @@ jobs:
         LICENSE.txt
         -C "$(swift build -c release --show-bin-path)"
         carbonizer.exe
-        -C "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\6.2.0\\usr\\bin"
+        -C "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\6.2.3\\usr\\bin"
         swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll swiftCRT.dll Foundation.dll swift_RegexParser.dll dispatch.dll BlocksRuntime.dll swiftDispatch.dll FoundationEssentials.dll FoundationInternationalization.dll _FoundationICU.dll swiftSynchronization.dll
     - name: Release
       uses: softprops/action-gh-release@v2
