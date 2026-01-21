@@ -142,21 +142,21 @@ struct CLIConfiguration : Sendable {
 			// "skipUnpacking": ["**/arc*", "**/*arc", "**/*archive"], // without compression, ffc needs to skip some large files, otherwise the output ROM is too big and doesn't work
 			
 			"processors": {
-				// extract vivosaur 3D model files
-				// required file types: MAR, 3CL
-				"exportVivosaurModels": false,
-				
 				// extract non-vivosaur 3D model files
 				// required file types: MAR, MM3
 				"exportModels": false,
 				
-				// extract sprites (motion folder)
-				// required file types: MAR, MMS
-				"exportSprites": false,
+				// extract vivosaur 3D model files
+				// required file types: MAR, 3CL
+				"exportVivosaurModels": false,
 				
 				// extract images (image folder)
 				// required file types: MAR, MPM
 				"exportImages": false,
+				
+				// extract sprites (motion folder)
+				// required file types: MAR, MMS
+				"exportSprites": false,
 				
 				// adds comments to DEX files that show the dialogue used in a given command
 				// required file types: MAR, DEX, DMG

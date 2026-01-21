@@ -61,7 +61,7 @@ struct DBS {
 			var vivosaursOffset: UInt32 = 0x38
 			
 			var name: Int32 // index into dtx
-			var rank: Int32
+			var level: Int32
 			
 			var vivosaurCount2: UInt32
 			var aiSetsOffset: UInt32
@@ -154,7 +154,7 @@ struct DBS {
 		
 		struct Fighter: Codable {
 			var name: Name
-			var rank: Int32
+			var level: Int32
 			
 			var icon: Int32
 			var minimumVivosaurHealth: Int32
@@ -243,7 +243,7 @@ extension DBS.Packed: ProprietaryFileData {
 extension DBS.Packed.Fighter {
 	init(_ unpacked: DBS.Unpacked.Fighter) {
 		name = unpacked.name.id
-		rank = unpacked.rank
+		level = unpacked.level
 		
 		icon = unpacked.icon
 		minimumVivosaurHealth = unpacked.minimumVivosaurHealth
@@ -349,7 +349,7 @@ extension DBS.Unpacked.Fighter {
 	
 	init(_ packed: DBS.Packed.Fighter, configuration: Configuration) throws {
 		name = Name(id: packed.name)
-		rank = packed.rank
+		level = packed.level
 		
 		icon = packed.icon
 		minimumVivosaurHealth = packed.minimumVivosaurHealth

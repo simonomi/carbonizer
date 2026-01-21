@@ -18,9 +18,9 @@ enum KPS {
 			var level: UInt32
 			var startingFP: UInt32
 			var maxFP: UInt32
-			var playerRechargePerTurn: UInt32
+			var rechargePerTurn: UInt32
 			var vivosaurDeathFP: UInt32
-			var enemyRechargePerTurn: UInt32
+			var unknown: UInt32 // always the same as recharge per turn, except for level 9
 		}
 	}
 	
@@ -31,9 +31,9 @@ enum KPS {
 			var level: UInt32
 			var startingFP: UInt32
 			var maxFP: UInt32
-			var playerRechargePerTurn: UInt32
+			var rechargePerTurn: UInt32
 			var vivosaurDeathFP: UInt32
-			var enemyRechargePerTurn: UInt32
+			var unknown: UInt32
 		}
 	}
 }
@@ -59,9 +59,9 @@ extension KPS.Packed.Level {
 		level = unpacked.level
 		startingFP = unpacked.startingFP
 		maxFP = unpacked.maxFP
-		playerRechargePerTurn = unpacked.playerRechargePerTurn
+		rechargePerTurn = unpacked.rechargePerTurn
 		vivosaurDeathFP = unpacked.vivosaurDeathFP
-		enemyRechargePerTurn = unpacked.enemyRechargePerTurn
+		unknown = unpacked.unknown
 	}
 }
 
@@ -86,9 +86,9 @@ extension KPS.Unpacked.Level {
 		level = packed.level
 		startingFP = packed.startingFP
 		maxFP = packed.maxFP
-		playerRechargePerTurn = packed.playerRechargePerTurn
+		rechargePerTurn = packed.rechargePerTurn
 		vivosaurDeathFP = packed.vivosaurDeathFP
-		enemyRechargePerTurn = packed.enemyRechargePerTurn
+		unknown = packed.unknown
 	}
 }
 
