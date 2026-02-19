@@ -5,3 +5,10 @@ extension FileHandle: @retroactive TextOutputStream {
 		write(Data(string.utf8))
 	}
 }
+
+extension TextOutputStream where Self == FileHandle {
+	static var standardError: FileHandle {
+		get { .standardError }
+		set {}
+	}
+}

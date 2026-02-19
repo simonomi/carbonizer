@@ -9,6 +9,8 @@ extension BinaryInteger {
 		!isMultiple(of: 2)
 	}
 	
+	// TODO: rename to nextMultiple(of: )?
+	// - meh, kinda implies 4 -> 8
 	func roundedUpToTheNearest(_ value: Self) -> Self {
 		if isMultiple(of: value) {
 			self

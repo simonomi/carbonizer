@@ -152,12 +152,12 @@ enum ECS {
 		
 		@BinaryConvertible
 		struct ThingA {
-			var unknown1: Int32
-			var unknown2: Int32
-			var unknown3: Int32
-			var unknown4: Int32
-			var unknown5: Int32
-			var unknown6: Int32
+			var count: UInt32 = 4
+			var offset: UInt32 = 0x8
+			
+			@Count(givenBy: \Self.count)
+			@Offset(givenBy: \Self.offset)
+			var values: [Int32]
 		}
 		
 		@BinaryConvertible
@@ -271,20 +271,49 @@ enum ECS {
 		
 		@BinaryConvertible
 		struct ThingM {
-			@Count(24)
-			var unknowns: [Int32]
+			var count: UInt32 // 20
+			var offset: UInt32 = 0x10
+			
+			var unknown1: Int32 // 5
+			var unknown2: Int32 // 199
+			
+			@Count(givenBy: \Self.count)
+			@Offset(givenBy: \Self.offset)
+			var values: [Int32]
 		}
 		
+		// could be 20.12 ~0.06
+		// or just a i32 256
 		@BinaryConvertible
 		struct ThingN {
-			var unknown1: UInt16
-			var unknown2: UInt16
+			var unknown1: UInt16 // 256
+			var unknown2: UInt16 // 0
 		}
 		
 		@BinaryConvertible
 		struct ThingQ {
-			@Count(16)
-			var unknowns: [Int32]
+			var count: UInt32
+			var offset: UInt32 = 0x1C
+			
+			var count2: UInt32
+			var offset2: UInt32
+			
+			var count3: UInt32
+			var offset3: UInt32
+			
+			var unknown: Int32 = 2
+			
+			@Count(givenBy: \Self.count)
+			@Offset(givenBy: \Self.offset)
+			var values: [Int32]
+			
+			@Count(givenBy: \Self.count2)
+			@Offset(givenBy: \Self.offset2)
+			var values2: [Int32]
+			
+			@Count(givenBy: \Self.count3)
+			@Offset(givenBy: \Self.offset3)
+			var values3: [Int32]
 		}
 		
 		@BinaryConvertible
@@ -318,7 +347,7 @@ enum ECS {
 		
 		var thingAOffsets: [UInt32]
 		
-		var thingAs: [ThingA]
+		var thingAs: [[Int32]]
 		
 		var thingBs: [Int32]
 		
@@ -359,15 +388,6 @@ enum ECS {
 		var thingQ: ThingQ
 		
 		var donationPoints: [DonationPointForScore]
-		
-		struct ThingA: Codable {
-			var unknown1: Int32
-			var unknown2: Int32
-			var unknown3: Int32
-			var unknown4: Int32
-			var unknown5: Int32
-			var unknown6: Int32
-		}
 		
 		struct ThingC: Codable {
 			var things: [Int32]
@@ -433,7 +453,10 @@ enum ECS {
 		}
 		
 		struct ThingM: Codable {
-			var unknowns: [Int32]
+			var unknown1: Int32
+			var unknown2: Int32
+			
+			var values: [Int32]
 		}
 		
 		struct ThingN: Codable {
@@ -442,7 +465,11 @@ enum ECS {
 		}
 		
 		struct ThingQ: Codable {
-			var unknowns: [Int32]
+			var unknown: Int32
+			
+			var values: [Int32]
+			var values2: [Int32]
+			var values3: [Int32]
 		}
 		
 		struct DonationPointForScore: Codable {
@@ -547,13 +574,8 @@ extension ECS.Packed: ProprietaryFileData {
 }
 
 extension ECS.Packed.ThingA {
-	init(_ unpacked: ECS.Unpacked.ThingA) {
-		unknown1 = unpacked.unknown1
-		unknown2 = unpacked.unknown2
-		unknown3 = unpacked.unknown3
-		unknown4 = unpacked.unknown4
-		unknown5 = unpacked.unknown5
-		unknown6 = unpacked.unknown6
+	init(_ values: [Int32]) {
+		self.values = values
 	}
 }
 
@@ -642,7 +664,12 @@ extension ECS.Packed.Characters.Character {
 
 extension ECS.Packed.ThingM {
 	init(_ unpacked: ECS.Unpacked.ThingM) {
-		unknowns = unpacked.unknowns
+		count = UInt32(unpacked.values.count)
+		
+		unknown1 = unpacked.unknown1
+		unknown2 = unpacked.unknown2
+		
+		values = unpacked.values
 	}
 }
 
@@ -655,7 +682,18 @@ extension ECS.Packed.ThingN {
 
 extension ECS.Packed.ThingQ {
 	init(_ unpacked: ECS.Unpacked.ThingQ) {
-		unknowns = unpacked.unknowns
+		count = UInt32(unpacked.values.count)
+		count2 = UInt32(unpacked.values2.count)
+		count3 = UInt32(unpacked.values3.count)
+		
+		offset2 = offset + 4 * count
+		offset3 = offset2 + 4 * count2
+		
+		unknown = unpacked.unknown
+		
+		values = unpacked.values
+		values2 = unpacked.values2
+		values3 = unpacked.values3
 	}
 }
 
@@ -701,7 +739,7 @@ extension ECS.Unpacked: ProprietaryFileData {
 		
 		thingAOffsets = packed.thingAOffsets
 		
-		thingAs = packed.thingAs.map(ThingA.init)
+		thingAs = packed.thingAs.map(\.values)
 		
 		thingBs = packed.thingBs
 		
@@ -742,17 +780,6 @@ extension ECS.Unpacked: ProprietaryFileData {
 		thingQ = ThingQ(packed.thingQ)
 		
 		donationPoints = packed.donationPoints.map(DonationPointForScore.init)
-	}
-}
-
-extension ECS.Unpacked.ThingA {
-	init(_ packed: ECS.Packed.ThingA) {
-		unknown1 = packed.unknown1
-		unknown2 = packed.unknown2
-		unknown3 = packed.unknown3
-		unknown4 = packed.unknown4
-		unknown5 = packed.unknown5
-		unknown6 = packed.unknown6
 	}
 }
 
@@ -850,7 +877,10 @@ extension ECS.Unpacked.Characters.Character {
 
 extension ECS.Unpacked.ThingM {
 	init(_ packed: ECS.Packed.ThingM) {
-		unknowns = packed.unknowns
+		unknown1 = packed.unknown1
+		unknown2 = packed.unknown2
+		
+		values = packed.values
 	}
 }
 
@@ -863,7 +893,11 @@ extension ECS.Unpacked.ThingN {
 
 extension ECS.Unpacked.ThingQ {
 	init(_ packed: ECS.Packed.ThingQ) {
-		unknowns = packed.unknowns
+		unknown = packed.unknown
+		
+		values = packed.values
+		values2 = packed.values2
+		values3 = packed.values3
 	}
 }
 
