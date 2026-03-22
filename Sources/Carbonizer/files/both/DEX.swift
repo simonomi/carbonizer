@@ -552,8 +552,7 @@ extension DEX.Unpacked.Command {
 		
 		if let (commandType, knownCommand) = DEX.Unpacked.knownCommands(for: configuration).first(where: { $0.value.textWithoutArguments == textWithoutArguments }) {
 			guard knownCommand.argumentIndicesFromText.count == arguments.count else {
-				throw
-					.incorrectArgumentCount(
+				throw .incorrectArgumentCount(
 					command: text,
 					actual: arguments.count,
 					expected: knownCommand.argumentIndicesFromText.count

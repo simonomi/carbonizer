@@ -89,11 +89,6 @@ struct CarbonizerCLI: AsyncParsableCommand {
 		}
 		
 		do {
-			let configuration = try Configuration(
-				cliConfiguration,
-				logHandler: logHandler
-			)
-			
 			let filePaths = inputFilePaths + cliConfiguration.inputFiles.map(URL.fromFilePath)
 			
 			guard filePaths.isNotEmpty else {
@@ -101,6 +96,19 @@ struct CarbonizerCLI: AsyncParsableCommand {
 			}
 			
 			for filePath in filePaths {
+				let fileName = filePath.lastPathComponent.lowercased()
+				let autoDetectedGame: Configuration.Game = if fileName.contains("champions") {
+					.ffc
+				} else {
+					.ff1
+				}
+				
+				let configuration = try Configuration(
+					cliConfiguration,
+					logHandler: logHandler,
+					autoDetectedGame: autoDetectedGame
+				)
+				
 				let outputFolder = cliConfiguration.outputFolder.map(URL.fromFilePath) ?? filePath.deletingLastPathComponent()
 				
 				if cliConfiguration.hotReloading {

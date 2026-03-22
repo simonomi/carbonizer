@@ -3,11 +3,12 @@ import Carbonizer
 extension Configuration {
 	init(
 		_ cliConfiguration: CLIConfiguration,
-		logHandler: (@Sendable (Configuration.Log) -> Void)?
+		logHandler: (@Sendable (Configuration.Log) -> Void)?,
+		autoDetectedGame: Game
 	) throws {
 		try self.init(
 			overwriteOutput: cliConfiguration.overwriteOutput,
-			game: .init(cliConfiguration.game),
+			game: .init(cliConfiguration.game, autoDetectedGame: autoDetectedGame),
 			externalMetadata: cliConfiguration.externalMetadata,
 			fileTypes: cliConfiguration.fileTypes,
 			onlyUnpack: cliConfiguration.onlyUnpack,
@@ -20,10 +21,11 @@ extension Configuration {
 }
 
 extension Configuration.Game {
-	init(_ cli: CLIConfiguration.Game) {
+	init(_ cli: CLIConfiguration.Game, autoDetectedGame: Self) {
 		self = switch cli {
 			case .ff1: .ff1
 			case .ffc: .ffc
+			case .auto: autoDetectedGame
 		}
 	}
 }

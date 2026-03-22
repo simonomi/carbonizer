@@ -70,7 +70,7 @@ struct CLIConfiguration : Sendable {
 	}
 	
 	enum Game: String, Decodable {
-		case ff1, ffc
+		case ff1, ffc, auto
 	}
 	
 #if os(Windows)
@@ -103,9 +103,12 @@ struct CLIConfiguration : Sendable {
 			
 			"hotReloading": false, // macOS only
 			
-			// ff1 and ffc have different formats for the "same" files (DEX, DCL, etc),
-			// so you need to select which game is being run on
-			"game": "ff1", // ff1, ffc
+			// ff1 and ffc have different formats for the "same" files (DEX, DCL, etc).
+			// by default, carbonizer will try to guess which game you're running it on, 
+			// but you can manually override it with this option
+			// (if the auto-detect is getting it wrong, make sure the game's file name
+			//  has some variation of "Champions" or "champions" in it) 
+			"game": "auto", // ff1, ffc, auto
 			
 			// basically required for anything useful: MAR
 			//
