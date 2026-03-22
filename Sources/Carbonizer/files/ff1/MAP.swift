@@ -13,7 +13,7 @@ enum MAP {
 		static let magicBytes = "MAP"
 		
 		var mapNameOffset: UInt32 = 0x6C
-		var collisionMapNameOffset: UInt32
+		var mapNameForCollisionOffset: UInt32
 		
 		var unknown01: Int32 // 0-18 (skipping a bunch)
 		
@@ -60,8 +60,8 @@ enum MAP {
 		@Offset(givenBy: \Self.mapNameOffset)
 		var mapName: String
 		
-		@Offset(givenBy: \Self.collisionMapNameOffset)
-		var collisionMapName: String
+		@Offset(givenBy: \Self.mapNameForCollisionOffset)
+		var mapNameForCollision: String
 		
 		@Count(givenBy: \Self.topScreenImageCount)
 		@Offset(givenBy: \Self.topScreenImagesOffset)
@@ -282,8 +282,7 @@ enum MAP {
 		var unknown24: UInt32 // unknown
 		
 		var mapName: String
-		
-		var collisionMapName: String
+		var mapNameForCollision: String
 		
 		var topScreenImages: [TopScreenImage]
 		
@@ -404,7 +403,7 @@ extension MAP.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: MAP.Unpacked, configuration: Configuration) {
-		collisionMapNameOffset = mapNameOffset + UInt32(unpacked.mapName.utf8CString.count.roundedUpToTheNearest(4))
+		mapNameForCollisionOffset = mapNameOffset + UInt32(unpacked.mapName.utf8CString.count.roundedUpToTheNearest(4))
 		
 		unknown01 = unpacked.unknown01
 		
@@ -412,7 +411,7 @@ extension MAP.Packed: ProprietaryFileData {
 		unknown03 = unpacked.unknown03
 		
 		topScreenImageCount = UInt32(unpacked.topScreenImages.count)
-		topScreenImagesOffset = collisionMapNameOffset + UInt32(unpacked.collisionMapName.utf8CString.count.roundedUpToTheNearest(4))
+		topScreenImagesOffset = mapNameForCollisionOffset + UInt32(unpacked.mapNameForCollision.utf8CString.count.roundedUpToTheNearest(4))
 		
 		mapDotMoves = unpacked.mapDotMoves ? 1 : 0
 		mapDotX = unpacked.mapDotX
@@ -464,8 +463,7 @@ extension MAP.Packed: ProprietaryFileData {
 		unknown24 = unpacked.unknown24
 		
 		mapName = unpacked.mapName
-		
-		collisionMapName = unpacked.collisionMapName
+		mapNameForCollision = unpacked.mapNameForCollision
 		
 		topScreenImages = unpacked.topScreenImages.map(TopScreenImage.init)
 		
@@ -646,8 +644,7 @@ extension MAP.Unpacked: ProprietaryFileData {
 		unknown24 = packed.unknown24
 		
 		mapName = packed.mapName
-		
-		collisionMapName = packed.collisionMapName
+		mapNameForCollision = packed.mapNameForCollision
 		
 		topScreenImages = packed.topScreenImages.map(TopScreenImage.init)
 		
