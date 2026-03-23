@@ -112,10 +112,10 @@ struct CLIConfiguration : Sendable {
 			
 			// basically required for anything useful: MAR
 			//
-			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MMS, MPM 
-			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DEP, DML, DSL, ECS, HML, KPS, MAP, MM3, RLS, SHP
+			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MM3, MMS, MPM 
+			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DEP, DML, DSL, ECS, HML, KPS, MAP, RLS, SHP
 			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBA", "DBS", "DBT", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "RLS", "SHP"], // ff1-compatible
-			// "fileTypes": ["_match", "DCL", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MMS", "MPM"], // ffc-compatible
+			// "fileTypes": ["_match", "DCL", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MM3", "MMS", "MPM"], // ffc-compatible
 			
 			// stores metadata for MAR files in a separate file, rather than the creation
 			// date. this can avoid some problems, but creates a bunch of annoying extra files.

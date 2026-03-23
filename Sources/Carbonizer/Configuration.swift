@@ -161,7 +161,7 @@ public struct Configuration: Sendable {
 					"KPS": KPS.Unpacked.self,
 					"MAP": MAP.Unpacked.self,
 					"MFS": MFS.Unpacked.self,
-					"MM3": MM3.Unpacked.self,
+					"MM3": MM3_FF1.Unpacked.self,
 					"RLS": RLS.Unpacked.self,
 					"SDAT": SDAT.Unpacked.self,
 					"SHP": SHP.Unpacked.self,
@@ -169,6 +169,7 @@ public struct Configuration: Sendable {
 			case .ffc:
 				[
 					"DCL": DCL_FFC.Unpacked.self,
+					"MM3": MM3_FFC.Unpacked.self,
 				]
 		}
 		
