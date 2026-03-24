@@ -7,7 +7,9 @@ enum Mesh {
 		// for ffc, 64, 80, maybe more?
 		var unknown1: FixedPoint2012
 		
-		var commandsOffset: UInt32 = 0x28
+		// for ff1, always 0x28
+		// for ffc, always 0x2C
+		var commandsOffset: UInt32
 		var commandsLength: UInt32
 		
 		var boneTableLength: UInt32
@@ -23,6 +25,9 @@ enum Mesh {
 		
 		var unknown6: UInt32 // usually half of 0x8 (commandsLength)??
 		
+		@If(\Self.commandsOffset, is: .equalTo(0x2C))
+		var unknownALength: UInt32?
+		
 		@Offset(givenBy: \Self.commandsOffset)
 		@Length(givenBy: \Self.commandsLength)
 		var commands: ByteSlice
@@ -32,6 +37,11 @@ enum Mesh {
 		
 		@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength), .plus(\Self.boneTableLength))
 		var modelNames: ModelNames
+		
+		@If(\Self.unknownALength, is: .notEqualTo(nil))
+		@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength), .plus(\Self.boneTableLength), .plus(\Self.modelNamesLength))
+		@Length(givenBy: \Self.unknownALength!)
+		var unknownA: ByteSlice?
 		
 		@BinaryConvertible
 		struct BoneTable {
@@ -77,6 +87,8 @@ enum Mesh {
 		var bones: [Bone]
 		
 		var modelNames: [String]
+		
+		var unknownA: [UInt8]?
 		
 		struct Bone: Codable {
 			var name: String
@@ -138,6 +150,12 @@ extension Mesh.Packed: ProprietaryFileData {
 		unknown5 = unpacked.unknown5
 		unknown6 = unpacked.unknown6
 		
+		self.commandsOffset = if unpacked.unknownA == nil {
+			0x28
+		} else {
+			0x2C
+		}
+		
 		let writer = Datawriter()
 		writer.write(MeshCommands(commands: unpacked.commands))
 		commands = writer.bytes
@@ -154,6 +172,9 @@ extension Mesh.Packed: ProprietaryFileData {
 			names: unpacked.modelNames.map(ModelNames.FixedLengthString.init)
 		)
 		modelNamesLength = modelNames.byteCount
+		
+		unknownA = unpacked.unknownA.map { $0[...] }
+		unknownALength = unknownA.map { UInt32($0.count) }
 	}
 }
 
@@ -201,6 +222,8 @@ extension Mesh.Unpacked: ProprietaryFileData {
 		bones = packed.boneTable.bones.map(Bone.init)
 		
 		modelNames = packed.modelNames.names.map(\.string)
+		
+		unknownA = packed.unknownA.map(Array.init)
 	}
 }
 

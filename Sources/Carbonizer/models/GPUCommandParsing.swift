@@ -205,6 +205,8 @@ fileprivate func parseCommand(
 			if let textureNames {
 				state.material = textureNames[index]
 			}
+		case .materialColor0(_): () // ignore for now
+		case .materialColor1(_): () // ignore for now
 		case .vertexBegin(let vertexMode):
 			state.vertexMode = vertexMode
 		case .vertexEnd:

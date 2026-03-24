@@ -30,8 +30,8 @@ struct GPUCommands {
 		case polygonAttributes(UInt32) // 1w
 		case textureImageParameter(UInt32) // 1w
 		case texturePaletteBase(UInt32) // 1w
-		// materialColor0
-		// materialColor1
+		case materialColor0(UInt32) // 1w
+		case materialColor1(UInt32) // 1w
 		// lightVector
 		// lightColor
 		// shininess
@@ -71,6 +71,8 @@ struct GPUCommands {
 				case .polygonAttributes: .polygonAttributes
 				case .textureImageParameter: .textureImageParameter
 				case .texturePaletteBase: .texturePaletteBase
+				case .materialColor0: .materialColor0
+				case .materialColor1: .materialColor1
 				case .vertexBegin: .vertexBegin
 				case .vertexEnd: .vertexEnd
 			}
@@ -166,6 +168,10 @@ extension GPUCommands: BinaryConvertible {
 							.textureImageParameter(try data.read(UInt32.self))
 					case .texturePaletteBase:
 							.texturePaletteBase(try data.read(UInt32.self))
+					case .materialColor0:
+							.materialColor0(try data.read(UInt32.self))
+					case .materialColor1:
+							.materialColor1(try data.read(UInt32.self))
 					case .vertexBegin:
 							.vertexBegin(try data.read(Command.VertexMode.self))
 					case .vertexEnd: .vertexEnd
@@ -240,6 +246,10 @@ extension GPUCommands: BinaryConvertible {
 					case .textureImageParameter(let value):
 						data.write(value)
 					case .texturePaletteBase(let value):
+						data.write(value)
+					case .materialColor0(let value):
+						data.write(value)
+					case .materialColor1(let value):
 						data.write(value)
 					case .vertexBegin(let vertexMode):
 						data.write(vertexMode)

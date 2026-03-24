@@ -162,6 +162,8 @@ extension Mesh.Packed {
 					// if a texture isn't found, just use a blank one
 					let textureName = textureNames[value] ?? "none"
 					result.polygons.append(.useTexture(textureName))
+				case .materialColor0(_): () // ignore for now
+				case .materialColor1(_): () // ignore for now
 				case .vertexBegin(let vertexMode):
 					currentVertices = []
 					currentVertexMode = vertexMode

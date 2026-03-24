@@ -17,7 +17,7 @@ func modelExporterF(
 		for modelIndices in indices {
 			do {
 				guard let mesh = mar.files[modelIndices.meshIndex].content as? Mesh.Unpacked else {
-					throw MissingModelComponent.mesh(modelIndices.meshIndex)
+					throw MissingMesh(index: modelIndices.meshIndex)
 				}
 				
 				let texture = mar.files[modelIndices.textureIndex].content as? Texture.Unpacked
@@ -29,7 +29,7 @@ func modelExporterF(
 				let animation = mar.files[modelIndices.animationIndex].content as? Animation.Unpacked
 				
 				if animation == nil {
-					throw MissingModelComponent.animation(modelIndices.animationIndex)
+					configuration.log(.warning, "animation \(modelIndices.animationIndex) missing for \(modelIndices.modelName)")
 				}
 				
 				let textureName = String(modelIndices.textureIndex)
@@ -69,19 +69,10 @@ func modelExporterF(
 	}
 }
 
-enum MissingModelComponent: Error, CustomStringConvertible {
-	case mesh(Int)
-	case texture(Int)
-	case animation(Int)
+struct MissingMesh: Error, CustomStringConvertible {
+	var index: Int
 	
 	var description: String {
-		switch self {
-			case .mesh(let index):
-				"missing mesh \(index)"
-			case .texture(let index):
-				"missing texture \(index)"
-			case .animation(let index):
-				"missing animation \(index)"
-		}
+		"missing mesh \(index)"
 	}
 }
