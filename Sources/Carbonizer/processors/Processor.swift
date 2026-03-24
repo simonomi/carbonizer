@@ -26,7 +26,7 @@ public enum Processor: String, Hashable, Sendable {
 			case .episodeDialogueLabeller:   [.dialogueRipper, .dexDialogueLabeller]
 			case .episodeDialogueSaver:      [.dexDialogueRipper, .dexDialogueSaver]
 			case .exportVivosaurModels:      [.tclRipper, .modelReparser, .textureExporter, .modelExporter]
-			case .exportModels:              [.mm3Ripper, .modelReparser, .textureExporter, .modelExporter]
+			case .exportModels:              [.ff1MM3Ripper, .ffcMM3Ripper, .modelReparser, .textureExporter, .modelExporter]
 			case .exportSprites:             [.mmsRipper, .spriteReparser, .spriteExporter]
 			case .exportImages:              [.mpmRipper, .imageReparser, .imageExporter]
 			case .eventLabeller:             [.eventIDRipper, .eventLabeller]
@@ -44,9 +44,9 @@ public enum Processor: String, Hashable, Sendable {
 			case .episodeDialogueLabeller:   [.ff1]
 			case .episodeDialogueSaver:      [.ff1]
 			case .exportVivosaurModels:      [.ff1]
-			case .exportModels:              [.ff1] // TODO: ffc?
-			case .exportSprites:             [.ff1] // TODO: ffc?
-			case .exportImages:              [.ff1] // TODO: ffc?
+			case .exportModels:              [.ff1, .ffc]
+			case .exportSprites:             [.ff1]
+			case .exportImages:              [.ff1]
 			case .eventLabeller:             [.ff1]
 			case .battleFighterNameLabeller: [.ff1]
 			case .ffcCreatureLabeller:       [.ffc]
@@ -107,7 +107,7 @@ public enum Processor: String, Hashable, Sendable {
 	}
 	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, mm3Ripper, tclRipper, mpmRipper, mmsRipper
+		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ff1MM3Ripper, ffcMM3Ripper, tclRipper, mpmRipper, mmsRipper
 		case dbsNameLabeller, dexDialogueLabeller, dexDialogueSaver, eventLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 		case imageReparser, modelReparser, spriteReparser
 		case imageExporter, modelExporter, spriteExporter, textureExporter
@@ -150,9 +150,17 @@ public enum Processor: String, Hashable, Sendable {
 						at: [],
 						configuration: configuration
 					)
-				case .mm3Ripper:
+				case .ff1MM3Ripper:
 					try file.runProcessor(
-						mm3RipperF,
+						ff1MM3RipperF,
+						on: "model/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .ffcMM3Ripper:
+					try file.runProcessor(
+						ffcMM3RipperF,
 						on: "model/**",
 						in: &environment,
 						at: [],

@@ -364,7 +364,7 @@ extension Texture.Unpacked.Image {
 	fileprivate func file() throws -> ProprietaryFile {
 		var palette = palette.map { BMP.Color($0) }
 		
-		if info.transparent {
+		if info.transparent && palette.isNotEmpty {
 			palette[0].alpha = 0
 		}
 		

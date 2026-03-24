@@ -3,7 +3,9 @@ import BinaryParser
 enum Animation {
 	@BinaryConvertible
 	struct Packed {
-		var unknownA: FixedPoint2012 = 32
+		// for ff1, always 32
+		// for ffc, 64, 80, maybe more?
+		var unknownA: FixedPoint2012
 		
 		var unknown2Offset: UInt32 = 0x28
 		
@@ -74,6 +76,8 @@ enum Animation {
 	}
 	
 	struct Unpacked: Codable {
+		var unknownA: Double
+		
 		var animationLength: UInt32
 		
 		var unknown1: UInt32
@@ -104,6 +108,8 @@ extension Animation.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: Animation.Unpacked, configuration: Configuration) {
+		unknownA = FixedPoint2012(unpacked.unknownA)
+		
 		unknown1 = unpacked.unknown1
 		
 		unknown2 = unpacked.unknown2
@@ -145,6 +151,8 @@ extension Animation.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: Animation.Packed, configuration: Configuration) {
+		unknownA = Double(packed.unknownA)
+		
 		animationLength = packed.animationLength
 		
 		unknown1 = packed.unknown1

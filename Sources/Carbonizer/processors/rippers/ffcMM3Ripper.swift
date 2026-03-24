@@ -1,5 +1,5 @@
-func mm3RipperF(
-	_ mm3: inout MM3_FF1.Unpacked,
+func ffcMM3RipperF(
+	_ mm3: inout MM3_FFC.Unpacked,
 	at path: [String],
 	in environment: inout Processor.Environment,
 	configuration: Configuration

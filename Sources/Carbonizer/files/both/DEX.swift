@@ -107,6 +107,7 @@ enum DEX {
 			// <2 9> == 1 means your case is size 8
 			// <3 9> is money
 			// <4 9> is current mask
+			// <6 9> is profile background color (red/blue/yellow)
 			// <7 9> is player pfp (hunter variant??)
 			// <9 9> may be number of fossil rocks
 			// <19 9> is donation points

@@ -3,7 +3,9 @@ import BinaryParser
 enum Mesh {
 	@BinaryConvertible
 	struct Packed {
-		var unknown1: FixedPoint2012 = 32
+		// for ff1, always 32
+		// for ffc, 64, 80, maybe more?
+		var unknown1: FixedPoint2012
 		
 		var commandsOffset: UInt32 = 0x28
 		var commandsLength: UInt32
@@ -62,6 +64,7 @@ enum Mesh {
 	}
 	
 	struct Unpacked: Codable {
+		var unknown1: Double
 		var unknown2: UInt32
 		var unknown3: UInt32
 		var unknown4: UInt32
@@ -128,6 +131,7 @@ extension Mesh.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: Mesh.Unpacked, configuration: Configuration) {
+		unknown1 = FixedPoint2012(unpacked.unknown1)
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
 		unknown4 = unpacked.unknown4
@@ -184,6 +188,7 @@ extension Mesh.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: Mesh.Packed, configuration: Configuration) throws {
+		unknown1 = Double(packed.unknown1)
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3
 		unknown4 = packed.unknown4
