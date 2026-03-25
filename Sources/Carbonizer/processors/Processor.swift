@@ -25,7 +25,7 @@ public enum Processor: String, Hashable, Sendable {
 		switch self {
 			case .episodeDialogueLabeller:   [.dialogueRipper, .dexDialogueLabeller]
 			case .episodeDialogueSaver:      [.dexDialogueRipper, .dexDialogueSaver]
-			case .exportVivosaurModels:      [.tclRipper, .modelReparser, .textureExporter, .modelExporter]
+			case .exportVivosaurModels:      [.tclRipper, .tcmRipper, .modelReparser, .textureExporter, .modelExporter]
 			case .exportModels:              [.ff1MM3Ripper, .ffcMM3Ripper, .modelReparser, .textureExporter, .modelExporter]
 			case .exportSprites:             [.mmsRipper, .spriteReparser, .spriteExporter]
 			case .exportImages:              [.mpmRipper, .imageReparser, .imageExporter]
@@ -43,7 +43,7 @@ public enum Processor: String, Hashable, Sendable {
 		switch self {
 			case .episodeDialogueLabeller:   [.ff1]
 			case .episodeDialogueSaver:      [.ff1]
-			case .exportVivosaurModels:      [.ff1]
+			case .exportVivosaurModels:      [.ff1, .ffc]
 			case .exportModels:              [.ff1, .ffc]
 			case .exportSprites:             [.ff1]
 			case .exportImages:              [.ff1]
@@ -62,7 +62,7 @@ public enum Processor: String, Hashable, Sendable {
 		switch self {
 			case .episodeDialogueLabeller:   (warn: ["DMG"], dontWarn: ["MAR", "DEX"])
 			case .episodeDialogueSaver:      (warn: ["DMG"], dontWarn: ["MAR", "DEX"])
-			case .exportVivosaurModels:      (warn: ["3CL"], dontWarn: ["MAR"])
+			case .exportVivosaurModels:      (warn: ["3CL", "3CM"], dontWarn: ["MAR"])
 			case .exportModels:              (warn: ["MM3"], dontWarn: ["MAR"])
 			case .exportSprites:             (warn: ["MMS"], dontWarn: ["MAR"])
 			case .exportImages:              (warn: ["MPM"], dontWarn: ["MAR"])
@@ -79,9 +79,24 @@ public enum Processor: String, Hashable, Sendable {
 	// a warning is only shown if every type *except* warn are enabled, to prevent
 	// extra warnings when no file types are enabled
 	func shouldRun(with configuration: Configuration) -> Bool {
-		guard supportedGames.contains(configuration.game) else { return false }
+		guard supportedGames.contains(configuration.game) else {
+			let supportedGameList = supportedGames
+				.map { "\(.green)\($0.name)\(.normal)" }
+				.joined(separator: " and ")
+			
+			configuration.log(.warning, "\(.cyan)\(name)\(.normal) is only supported for \(supportedGames), skipping...")
+			
+			return false
+		}
 		
-		let (warn, dontWarn) = requiredFileTypes
+		let (allWarn, allDontWarn) = requiredFileTypes
+		
+		let thisGamesFileTypes = Configuration.fileTypes(for: configuration.game)
+		
+		let (warn, dontWarn) = (
+			allWarn.filter(thisGamesFileTypes.keys.contains),
+			allDontWarn.filter(thisGamesFileTypes.keys.contains)
+		)
 		
 		if !dontWarn.isSubset(of: configuration.fileTypes) {
 			return false
@@ -107,7 +122,7 @@ public enum Processor: String, Hashable, Sendable {
 	}
 	
 	enum Stage: Equatable {
-		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ff1MM3Ripper, ffcMM3Ripper, tclRipper, mpmRipper, mmsRipper
+		case dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ff1MM3Ripper, ffcMM3Ripper, tclRipper, tcmRipper, mpmRipper, mmsRipper
 		case dbsNameLabeller, dexDialogueLabeller, dexDialogueSaver, eventLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 		case imageReparser, modelReparser, spriteReparser
 		case imageExporter, modelExporter, spriteExporter, textureExporter
@@ -169,6 +184,14 @@ public enum Processor: String, Hashable, Sendable {
 				case .tclRipper:
 					try file.runProcessor(
 						tclRipperF,
+						on: "model/battle/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .tcmRipper:
+					try file.runProcessor(
+						tcmRipperF,
 						on: "model/battle/**",
 						in: &environment,
 						at: [],

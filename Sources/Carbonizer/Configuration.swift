@@ -20,6 +20,13 @@ public struct Configuration: Sendable {
 	
 	public enum Game: Sendable {
 		case ff1, ffc
+		
+		var name: String {
+			switch self {
+				case .ff1: "FF1"
+				case .ffc: "FFC"
+			}
+		}
 	}
 	
 	public struct Log {

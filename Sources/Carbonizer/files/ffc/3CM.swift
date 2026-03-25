@@ -48,6 +48,9 @@ enum TCM {
 			@If(\Self.isEntry, is: .equalTo(1))
 			@Offset(givenBy: \Self.unknownTableNameOffset)
 			var unknownTableName: String?
+			
+			@FourByteAlign
+			var fourByteAlign: ()
 		}
 	}
 	
