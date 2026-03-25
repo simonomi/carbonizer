@@ -171,6 +171,7 @@ public struct Configuration: Sendable {
 				[
 					"DCL": DCL_FFC.Unpacked.self,
 					"MM3": MM3_FFC.Unpacked.self,
+					"3CN": TCN.Unpacked.self,
 				]
 		}
 		
