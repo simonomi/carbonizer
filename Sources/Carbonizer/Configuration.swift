@@ -125,9 +125,9 @@ public struct Configuration: Sendable {
 	// when adding a new stable filetype:
 	// - add to this list
 	// - add round trip tests
-	// - test entire rom ff1 round trip
-	// - test entire rom ffc round trip
-	// - add to config (test both ff1/ffc)
+	// - test entire ff1 rom round trip
+	// - test entire ffc rom round trip
+	// - add to config
 	// - add to fftechwiki
 	static func fileTypes(for game: Game) -> [String: any ProprietaryFileData.Type] {
 		let bothGameFileTypes: [String: any ProprietaryFileData.Type] = [
@@ -171,6 +171,7 @@ public struct Configuration: Sendable {
 				[
 					"DCL": DCL_FFC.Unpacked.self,
 					"MM3": MM3_FFC.Unpacked.self,
+					"3CM": TCM.Unpacked.self,
 					"3CN": TCN.Unpacked.self,
 				]
 		}
