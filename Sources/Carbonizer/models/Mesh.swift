@@ -32,11 +32,13 @@ enum Mesh {
 		@Length(givenBy: \Self.commandsLength)
 		var commands: ByteSlice
 		
+		@If(\Self.boneTableLength, is: .notEqualTo(0))
 		@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength))
-		var boneTable: BoneTable
+		var boneTable: BoneTable?
 		
+		@If(\Self.modelNamesLength, is: .notEqualTo(0))
 		@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength), .plus(\Self.boneTableLength))
-		var modelNames: ModelNames
+		var modelNames: ModelNames?
 		
 		@If(\Self.unknownALength, is: .notEqualTo(nil))
 		@Offset(givenBy: \Self.commandsOffset, .plus(\Self.commandsLength), .plus(\Self.boneTableLength), .plus(\Self.modelNamesLength))
@@ -84,9 +86,9 @@ enum Mesh {
 		
 		var commands: [MeshCommands.Command]
 		
-		var bones: [Bone]
+		var bones: [Bone]?
 		
-		var modelNames: [String]
+		var modelNames: [String]?
 		
 		var unknownA: [UInt8]?
 		
@@ -161,17 +163,21 @@ extension Mesh.Packed: ProprietaryFileData {
 		commands = writer.bytes
 		commandsLength = UInt32(commands.count)
 		
-		boneTable = BoneTable(
-			boneCount: UInt32(unpacked.bones.count),
-			bones: unpacked.bones.map(BoneTable.Bone.init)
-		)
-		boneTableLength = boneTable.byteCount
+		boneTable = unpacked.bones.map {
+			BoneTable(
+				boneCount: UInt32($0.count),
+				bones: $0.map(BoneTable.Bone.init)
+			)
+		}
+		boneTableLength = boneTable.map(\.byteCount) ?? 0
 		
-		modelNames = ModelNames(
-			nameCount: UInt32(unpacked.modelNames.count),
-			names: unpacked.modelNames.map(ModelNames.FixedLengthString.init)
-		)
-		modelNamesLength = modelNames.byteCount
+		modelNames = unpacked.modelNames.map {
+			ModelNames(
+				nameCount: UInt32($0.count),
+				names: $0.map(ModelNames.FixedLengthString.init)
+			)
+		}
+		modelNamesLength = modelNames.map(\.byteCount) ?? 0
 		
 		unknownA = unpacked.unknownA.map { $0[...] }
 		unknownALength = unknownA.map { UInt32($0.count) }
@@ -216,12 +222,20 @@ extension Mesh.Unpacked: ProprietaryFileData {
 		unknown5 = packed.unknown5
 		unknown6 = packed.unknown6
 		
-		var packedCommands = Datastream(packed.commands)
-		commands = try packedCommands.read(MeshCommands.self).commands
+		if packed.commandsLength == 0 {
+			commands = []
+		} else {
+			var packedCommands = Datastream(packed.commands)
+			commands = try packedCommands.read(MeshCommands.self).commands
+		}
 		
-		bones = packed.boneTable.bones.map(Bone.init)
+		bones = packed.boneTable.map {
+			$0.bones.map(Bone.init)
+		}
 		
-		modelNames = packed.modelNames.names.map(\.string)
+		modelNames = packed.modelNames.map {
+			$0.names.map(\.string)
+		}
 		
 		unknownA = packed.unknownA.map(Array.init)
 	}

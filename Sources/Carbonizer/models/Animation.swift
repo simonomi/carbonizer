@@ -7,7 +7,9 @@ enum Animation {
 		// for ffc, 64, 80, maybe more?
 		var unknownA: FixedPoint2012
 		
-		var unknown2Offset: UInt32 = 0x28
+		// for ff1, always 0x28
+		// for ffc, always 0x2C
+		var unknown2Offset: UInt32
 		
 		var unknown2Size: UInt32
 		
@@ -29,7 +31,11 @@ enum Animation {
 							 // swing0 - 104
 							 // testman - 361
 		
+		// includedModelsCount?
 		var unknown5: UInt32 // usually includedModelsSize / 4
+		
+		@If(\Self.unknown2Offset, is: .equalTo(0x2C))
+		var unknown6: UInt32?
 		
 		@Offset(givenBy: \Self.unknown2Offset)
 		@Count(givenBy: \Self.unknown2Size, .dividedBy(4))
@@ -57,13 +63,14 @@ enum Animation {
 		// unknown word
 		// consecutive transform matrices
 		
+		@If(\Self.keyframesSize, is: .greaterThan(0))
 		@Offset(
 			givenBy: \Self.unknown2Offset,
 			.plus(\Self.unknown2Size),
 			.plus(\Self.includedModelsSize),
 			.plus(\Self.unknown3Size)
 		)
-		var keyframes: Keyframes
+		var keyframes: Keyframes?
 		
 		@BinaryConvertible
 		struct Keyframes {
@@ -92,7 +99,9 @@ enum Animation {
 		
 		var unknown5: UInt32
 		
-		var keyframes: [[Matrix4x3<Double>]]
+		var unknown6: UInt32?
+		
+		var keyframes: [[Matrix4x3<Double>]]?
 	}
 }
 
@@ -110,6 +119,12 @@ extension Animation.Packed: ProprietaryFileData {
 	fileprivate init(_ unpacked: Animation.Unpacked, configuration: Configuration) {
 		unknownA = FixedPoint2012(unpacked.unknownA)
 		
+		unknown2Offset = if unpacked.unknown6 == nil {
+			0x28
+		} else {
+			0x2C
+		}
+		
 		unknown1 = unpacked.unknown1
 		
 		unknown2 = unpacked.unknown2
@@ -123,9 +138,13 @@ extension Animation.Packed: ProprietaryFileData {
 		unknown3 = unpacked.unknown3
 		unknown3Size = UInt32(unknown3.count)
 		
-		keyframes = Keyframes(unpacked.keyframes)
+		keyframes = unpacked.keyframes.map(Keyframes.init)
 		animationLength = unpacked.animationLength
-		keyframesSize = 8 + keyframes.boneCount * keyframes.frameCount * 4 * 3 * 4
+		keyframesSize = keyframes.map {
+			8 + $0.boneCount * $0.frameCount * 4 * 3 * 4
+		} ?? 0
+		
+		unknown6 = unpacked.unknown6
 	}
 }
 
@@ -165,9 +184,12 @@ extension Animation.Unpacked: ProprietaryFileData {
 		
 		unknown4 = packed.unknown4
 		unknown5 = packed.unknown5
+		unknown6 = packed.unknown6
 		
-		keyframes = packed.keyframes.transforms
-			.chunked(exactSize: Int(packed.keyframes.boneCount))
-			.recursiveMap(Matrix4x3.init)
+		keyframes = packed.keyframes.map {
+			$0.transforms
+				.chunked(exactSize: Int($0.boneCount))
+				.recursiveMap(Matrix4x3.init)
+		}
 	}
 }

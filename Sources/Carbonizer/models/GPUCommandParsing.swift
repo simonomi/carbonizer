@@ -219,3 +219,9 @@ extension SIMD2 where Scalar: FloatingPoint {
 		Self(x: x, y: 1 - y)
 	}
 }
+
+func textureSize(for scale: UInt32) -> Double {
+	// inverse bc obj and collada texture coords are normalized
+	// and ig usd too?
+	1 / Double(8 << scale)
+}

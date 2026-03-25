@@ -4,7 +4,7 @@ struct USD {
 	var meshName: String
 	var animationLength: Int?
 	var mesh: USDMesh
-	var skeleton: USDSkeleton
+	var skeleton: USDSkeleton?
 	
 	init(
 		mesh: Mesh.Unpacked,
@@ -16,7 +16,8 @@ struct USD {
 	) throws {
 		meshName = modelName.replacing(" ", with: "_")
 		
-		let matrices = mesh.bones.map(\.matrix)
+		// TOOD: is empty the right choice here? should it be one identity or smthn?
+		let matrices = mesh.bones.map { $0.map(\.matrix) } ?? []
 		
 		let parsingResult = try parseCommands(
 			mesh.gpuCommands(),
@@ -84,17 +85,19 @@ struct USD {
 			}
 		)
 		
-		skeleton = USDSkeleton(
-			meshName: meshName,
-			boneNames: mesh.bones.map(\.name),
-			restTransforms: matrices,
-			animation: animationData.map {
-				USDAnimation(
-					boneNames: mesh.bones.map(\.name),
-					transforms: $0.keyframes
-				)
-			}
-		)
+		skeleton = mesh.bones.map { bones in
+			USDSkeleton(
+				meshName: meshName,
+				boneNames: bones.map(\.name),
+				restTransforms: matrices,
+				animation: animationData?.keyframes.map {
+					USDAnimation(
+						boneNames: bones.map(\.name),
+						transforms: $0
+					)
+				}
+			)
+		}
 	}
 	
 	func string() -> String {
@@ -106,6 +109,18 @@ struct USD {
 			"""
 		} ?? ""
 		
+		let mesh = skeleton.map {
+			"""
+			def SkelRoot "\(meshName)" (
+				purpose = "guide"
+			) {
+				\(self.mesh.string().indented(by: 1))
+				
+				\($0.string().indented(by: 1))
+			}
+			"""
+		} ?? mesh.string()
+		
 		return """
 			#usda 1.0
 			(
@@ -115,13 +130,7 @@ struct USD {
 				\(timeCodes.indented(by: 1))
 			)
 			
-			def SkelRoot "\(meshName)" (
-				purpose = "guide"
-			) {
-				\(mesh.string().indented(by: 1))
-				
-				\(skeleton.string().indented(by: 1))
-			}
+			\(mesh)
 			"""
 	}
 }
