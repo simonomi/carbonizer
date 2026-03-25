@@ -1,7 +1,7 @@
 import Foundation
 import BinaryParser
 
-struct Metadata {
+struct Metadata: Sendable {
 	var skipFile: Bool // 1 bit
 	var standalone: Bool // 1 bit
 	var compression: (MCM.Unpacked.CompressionType, MCM.Unpacked.CompressionType) // 2 bits, 2 bits

@@ -8,6 +8,16 @@ struct PolygonPoint {
 	}
 }
 
+extension PolygonPoint: Hashable {
+	func hash(into hasher: inout Hasher) {
+		hasher.combine(vertexIndex)
+	}
+	
+	static func == (left: Self, right: Self) -> Bool {
+		left.vertexIndex == right.vertexIndex
+	}
+}
+
 enum ModelParsingError: Error, CustomStringConvertible {
 	case negativeOneBone
 	
@@ -92,7 +102,19 @@ fileprivate struct CommandParsingState {
 					.map { [$0[rel: 0], $0[rel: 1], $0[rel: 3], $0[rel: 2]] }
 		}
 		
-		result.polygons[material, default: []].append(contentsOf: newPolygons.map(Array.init))
+		result.polygons[material, default: []]
+			.append(contentsOf:
+				newPolygons.map { polygon in
+					// not the fastest way to ensure each vertex is unique, but it works
+					// some models contain line segments like p201, which in usd should be
+					// simply two vertices
+					polygon.reduce(into: []) {
+						if !$0.contains($1) {
+							$0.append($1)
+						}
+					}
+				}
+			)
 		vertices = []
 	}
 }

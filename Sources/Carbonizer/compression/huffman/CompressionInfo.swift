@@ -1,11 +1,11 @@
 import BinaryParser
 
 enum Huffman {
-	struct CompressionInfo: Codable {
+	struct CompressionInfo: Codable, Sendable {
 		var dataSize: UInt8
 		var tree: Node
 		
-		indirect enum Node: Codable {
+		indirect enum Node: Codable, Sendable {
 			case symbol(UInt8)
 			case branch(left: Self, right: Self)
 			
