@@ -57,7 +57,8 @@ public struct Configuration: Sendable {
 				}
 			
 			let alwaysEnabledFileTypes = [
-				Mesh.Unpacked.self as any ProprietaryFileData.Type,
+				Mesh_FF1.Unpacked.self as any ProprietaryFileData.Type,
+				Mesh_FFC.Unpacked.self as any ProprietaryFileData.Type,
 				Texture.Unpacked.self,
 				Animation.Unpacked.self
 			]

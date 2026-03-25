@@ -21,8 +21,15 @@ func modelReparserF(
 				}
 				
 				var data = Datastream(bytes)
-				let packed = try data.read(Mesh.Packed.self)
-				mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
+				
+				switch configuration.game {
+					case .ff1:
+						let packed = try data.read(Mesh_FF1.Packed.self)
+						mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
+					case .ffc:
+						let packed = try data.read(Mesh_FFC.Packed.self)
+						mar.files[fileIndex].content = try packed.unpacked(configuration: configuration)
+				}
 			} catch {
 				let location = (path + [String(fileIndex)]).joined(separator: "/") + ":"
 				configuration.log(.warning, location, error)

@@ -37,7 +37,7 @@ struct USDMesh {
 				interpolation = "vertex"
 			)
 			
-			rel skel:skeleton = </\(name)/\(name)_mesh/\(name)_skeleton>
+			rel skel:skeleton = </\(name)/\(name)_skeleton>
 			
 			uniform token subsetFamily:materialBind:familyType = "nonOverlapping"
 			

@@ -14,6 +14,12 @@ struct USDSkeleton {
 			)
 		}
 		
+		let animationSource = if animation == nil {
+			""
+		} else {
+			"rel skel:animationSource = </\(meshName)/\(meshName)_skeleton/animation>"
+		}
+		
 		return """
 			def Skeleton "\(meshName)_skeleton" (
 				prepend apiSchemas = ["SkelBindingAPI"]
@@ -24,7 +30,7 @@ struct USDSkeleton {
 				
 				uniform matrix4d[] restTransforms = \(tupleTransforms)
 				
-				rel skel:animationSource = </\(meshName)/\(meshName)_mesh/\(meshName)_skeleton/animation>
+				\(animationSource)
 				
 				\(animation?.string().indented(by: 1) ?? "")
 			}

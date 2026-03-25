@@ -16,7 +16,15 @@ func modelExporterF(
 		
 		for modelIndices in indices {
 			do {
-				guard let mesh = mar.files[modelIndices.meshIndex].content as? Mesh.Unpacked else {
+				var mesh: (any Mesh)?
+				switch configuration.game {
+					case .ff1:
+						mesh = mar.files[modelIndices.meshIndex].content as? Mesh_FF1.Unpacked
+					case .ffc:
+						mesh = mar.files[modelIndices.meshIndex].content as? Mesh_FFC.Unpacked
+				}
+				
+				guard let mesh else {
 					throw MissingMesh(index: modelIndices.meshIndex)
 				}
 				

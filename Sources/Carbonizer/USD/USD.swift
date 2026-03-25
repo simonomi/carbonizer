@@ -7,7 +7,7 @@ struct USD {
 	var skeleton: USDSkeleton?
 	
 	init(
-		mesh: Mesh.Unpacked,
+		mesh: some Mesh,
 		animationData: Animation.Unpacked?,
 		modelName: String,
 		texturePath: String,
@@ -22,7 +22,15 @@ struct USD {
 		let parsingResult = try parseCommands(
 			mesh.gpuCommands(),
 			worldRootBoneCount: mesh.worldRootBoneCount(),
-			textureNames: textureNames,
+			textureNames: textureNames?
+				.mapValues { $0.replacingOccurrences(of: ".", with: "_") }
+				.mapValues {
+					if $0.starts(with: /[0-9]/) {
+						"_" + $0
+					} else {
+						$0
+					}
+				},
 			matrices: matrices
 		)
 		
@@ -109,17 +117,9 @@ struct USD {
 			"""
 		} ?? ""
 		
-		let mesh = skeleton.map {
-			"""
-			def SkelRoot "\(meshName)" (
-				purpose = "guide"
-			) {
-				\(self.mesh.string().indented(by: 1))
-				
-				\($0.string().indented(by: 1))
-			}
-			"""
-		} ?? mesh.string()
+		let skeleton = skeleton.map {
+			$0.string()
+		} ?? ""
 		
 		return """
 			#usda 1.0
@@ -130,7 +130,13 @@ struct USD {
 				\(timeCodes.indented(by: 1))
 			)
 			
-			\(mesh)
+			def SkelRoot "\(meshName)" (
+				purpose = "guide"
+			) {
+				\(self.mesh.string().indented(by: 1))
+				
+				\(skeleton.indented(by: 1))
+			}
 			"""
 	}
 }

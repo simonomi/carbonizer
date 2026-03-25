@@ -39,7 +39,7 @@ func meshRoundTrip(_ fileName: String) throws {
 	let originalInputData = try Datastream(Data(contentsOf: filePath(for: fileName)))
 	var inputData = originalInputData
 	
-	let packedMesh = try inputData.read(Mesh.Packed.self)
+	let packedMesh = try inputData.read(Mesh_FF1.Packed.self)
 	
 	let unpackedMesh = try packedMesh.unpacked(configuration: configuration)
 	
