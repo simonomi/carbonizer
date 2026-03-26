@@ -84,7 +84,7 @@ public enum Processor: String, Hashable, Sendable {
 				.map { "\(.green)\($0.name)\(.normal)" }
 				.joined(separator: " and ")
 			
-			configuration.log(.warning, "\(.cyan)\(name)\(.normal) is only supported for \(supportedGames), skipping...")
+			configuration.log(.warning, "\(.cyan)\(name)\(.normal) is only supported for \(supportedGameList), skipping...")
 			
 			return false
 		}
