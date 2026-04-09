@@ -8,7 +8,7 @@ an all-in-one Fossil Fighters ROM-hacking tool
 ### drag-and-drop (Windows only)
 drag the `.nds` ROM file onto `carbonizer.exe`. a terminal window should appear while carbonizer runs, then close once it finishes. a folder will be created next to the input file that contains the unpacked ROM files.
 
-carbonizer's output files can be edited using a regular text editor (I recommend [Notepad++](https://notepad-plus-plus.org)). To repack the edited files back into a `.nds` ROM, drag the folder onto carbonizer.
+carbonizer's output files can be edited using a regular text editor (I recommend [Visual Studio Code](https://code.visualstudio.com/download) or [Notepad++](https://notepad-plus-plus.org/downloads)). To repack the edited files back into a `.nds` ROM, drag the folder onto carbonizer.
 
 ### command-line
 ```
