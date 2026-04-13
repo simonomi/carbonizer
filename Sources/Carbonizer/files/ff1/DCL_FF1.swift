@@ -7,18 +7,18 @@ enum DCL_FF1 {
 		@Include
 		static let magicBytes = "DCL"
 		
-		var unknown1: UInt32 // start of dinosaur names in text
-		var unknown2: UInt32 // start of vivosaur names in text
-		var unknown3: UInt32 // attack descriptions (but +3??)
-		var unknown4: UInt32 // enemy names
+		var dinosaurNamesOffset: UInt32
+		var vivosaurNamesOffset: UInt32
+		var battleSkillDescriptionsOffsetMinus2: UInt32
+		var enemyNamesOffset: UInt32
 		
 		var vivosaurCount: UInt32
 		var indicesOffset: UInt32 = 0x2C
 		
-		var unknown5: UInt32 // like.. attack descriptions in text
-		var unknown6: UInt32 // vmm descriptions
-		var unknown7: UInt32 // size/category or whatever
-		var unknown8: UInt32 // uhh room names???
+		var vmmSkillDescriptionsOffset: UInt32
+		var vivosaurDescriptionsOffset: UInt32
+		var vivosaurSizeClassesOffset: UInt32
+		var roomNamesOffset: UInt32
 		
 		@Count(givenBy: \Self.vivosaurCount)
 		@Offset(givenBy: \Self.indicesOffset)
@@ -307,16 +307,20 @@ enum DCL_FF1 {
 	}
 	
 	struct Unpacked: Codable {
-		var unknown1: UInt32
-		var unknown2: UInt32
-		var unknown3: UInt32
-		var unknown4: UInt32
-		var unknown5: UInt32
-		var unknown6: UInt32
-		var unknown7: UInt32
-		var unknown8: UInt32
+		var textOffsets: TextOffsets
 		
 		var vivosaurs: [Vivosaur?]
+		
+		struct TextOffsets: Codable {
+			var dinosaurNames: UInt32
+			var vivosaurNames: UInt32
+			var battleSkillDescriptionsMinus2: UInt32
+			var enemyNames: UInt32
+			var vmmSkillDescriptions: UInt32
+			var vivosaurDescriptions: UInt32
+			var vivosaurSizeClasses: UInt32
+			var roomNames: UInt32
+		}
 		
 		struct Vivosaur: Codable {
 			var _label: String?
@@ -460,14 +464,14 @@ extension DCL_FF1.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: DCL_FF1.Unpacked, configuration: Configuration) {
-		unknown1 = unpacked.unknown1
-		unknown2 = unpacked.unknown2
-		unknown3 = unpacked.unknown3
-		unknown4 = unpacked.unknown4
-		unknown5 = unpacked.unknown5
-		unknown6 = unpacked.unknown6
-		unknown7 = unpacked.unknown7
-		unknown8 = unpacked.unknown8
+		dinosaurNamesOffset                 = unpacked.textOffsets.dinosaurNames
+		vivosaurNamesOffset                 = unpacked.textOffsets.vivosaurNames
+		battleSkillDescriptionsOffsetMinus2 = unpacked.textOffsets.battleSkillDescriptionsMinus2
+		enemyNamesOffset                    = unpacked.textOffsets.enemyNames
+		vmmSkillDescriptionsOffset          = unpacked.textOffsets.vmmSkillDescriptions
+		vivosaurDescriptionsOffset          = unpacked.textOffsets.vivosaurDescriptions
+		vivosaurSizeClassesOffset           = unpacked.textOffsets.vivosaurSizeClasses
+		roomNamesOffset                     = unpacked.textOffsets.roomNames
 		
 		vivosaurCount = UInt32(unpacked.vivosaurs.count)
 		
@@ -655,16 +659,21 @@ extension DCL_FF1.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: DCL_FF1.Packed, configuration: Configuration) {
-		unknown1 = packed.unknown1
-		unknown2 = packed.unknown2
-		unknown3 = packed.unknown3
-		unknown4 = packed.unknown4
-		unknown5 = packed.unknown5
-		unknown6 = packed.unknown6
-		unknown7 = packed.unknown7
-		unknown8 = packed.unknown8
-		
+		textOffsets = TextOffsets(packed)
 		vivosaurs = packed.vivosaurs.map(Vivosaur.init)
+	}
+}
+
+extension DCL_FF1.Unpacked.TextOffsets {
+	init(_ packed: DCL_FF1.Packed) {
+		dinosaurNames                 = packed.dinosaurNamesOffset
+		vivosaurNames                 = packed.vivosaurNamesOffset
+		battleSkillDescriptionsMinus2 = packed.battleSkillDescriptionsOffsetMinus2
+		enemyNames                    = packed.enemyNamesOffset
+		vmmSkillDescriptions          = packed.vmmSkillDescriptionsOffset
+		vivosaurDescriptions          = packed.vivosaurDescriptionsOffset
+		vivosaurSizeClasses           = packed.vivosaurSizeClassesOffset
+		roomNames                     = packed.roomNamesOffset
 	}
 }
 

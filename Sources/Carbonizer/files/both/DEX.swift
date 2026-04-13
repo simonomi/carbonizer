@@ -89,6 +89,7 @@ enum DEX {
 			// <218-223 6> may have smthn to do with case size
 			// <248-253 6> are idol fragments
 			// --- 7 is masks (1-19)
+			// TODO: add processor to label all masks
 			// <15 7> being set with flag5 gives digadig mask
 			// <16 7> being set with flag5 gives chieftain mask
 			// <2 7> being set with flag5 gives hip-shaker mask
@@ -100,6 +101,7 @@ enum DEX {
 			// <62 8> number of sonar upgrades left
 			// - or bitmask or smthn
 			// - 1/2/10/20/100/200
+			// - a base 10 bitmask lmao??
 			// <67 8> number of cleaning upgrades left
 			// - or maybe like a bitmask or smthn? buying the drill subtracts 2
 			// <68 8> number of case upgrades (1:8, 2:16, 3:24, 4:32, 5:48)

@@ -173,7 +173,7 @@ enum MAP {
 		struct FossilSpawn { // map/e
 			var unknown1: Int32
 			var zone: Int32
-			var sonarUpgrades: Int32 // idk the type for this
+			var sonarUpgrades: Int32 // idk the type for this, maybe a flag?
 			var maxSpawns: Int32
 			
 			var unknown2: Int32
