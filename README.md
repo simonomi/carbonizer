@@ -1,4 +1,4 @@
-# carbonizer
+# <img height=40 align=top src="https://github.com/simonomi/carbonizer/blob/main/icon/icon-large.png?raw=true"> carbonizer
 an all-in-one Fossil Fighters ROM-hacking tool
 
 ## download
