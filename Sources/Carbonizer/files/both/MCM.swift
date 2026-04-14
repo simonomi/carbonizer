@@ -57,7 +57,7 @@ extension MCM.Packed {
 		}
 		
 		let data = Datawriter()
-		unpacked.content.packed(configuration: configuration).write(to: data)
+		unpacked.content.packed(configuration: configuration).write(to: data, configuration: configuration)
 		
 		decompressedSize = UInt32(data.bytes.endIndex)
 		

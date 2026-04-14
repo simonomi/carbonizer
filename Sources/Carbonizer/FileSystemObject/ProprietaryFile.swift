@@ -26,7 +26,7 @@ extension ProprietaryFile: FileSystemObject {
 		with configuration: Configuration
 	) throws {
 		let writer = Datawriter()
-		data.write(to: writer)
+		data.write(to: writer, configuration: configuration)
 		
 		try BinaryFile(
 			name: name + fileExtension,

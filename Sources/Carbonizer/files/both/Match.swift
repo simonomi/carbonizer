@@ -34,7 +34,7 @@ extension Match.Packed: ProprietaryFileData {
 		}
 	}
 	
-	func write(to data: Datawriter) {
+	func write(to data: Datawriter, configuration: Configuration) {
 		data.write(self.data)
 	}
 }

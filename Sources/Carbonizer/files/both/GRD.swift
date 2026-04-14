@@ -118,7 +118,7 @@ extension GRD.Unpacked: ProprietaryFileData {
 		}
 	}
 	
-	func write(to data: Datawriter) {
+	func write(to data: Datawriter, configuration: Configuration) {
 		for row in self.data {
 			for byte in row {
 				data.write(String(Self.letterLookup[Int(byte)]), length: 1)

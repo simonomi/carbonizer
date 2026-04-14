@@ -16,12 +16,16 @@ protocol ProprietaryFileData: Sendable, SendableMetatype {
 	func unpacked(configuration: Configuration) throws -> Unpacked
 	
 	init(_ data: inout Datastream, configuration: Configuration) throws
-	func write(to data: Datawriter)
+	func write(to data: Datawriter, configuration: Configuration)
 }
 
 extension ProprietaryFileData where Self: BinaryConvertible {
 	init(_ data: inout Datastream, configuration: Configuration) throws {
 		self = try data.read(Self.self)
+	}
+	
+	func write(to data: Datawriter, configuration: Configuration) {
+		write(to: data)
 	}
 }
 
@@ -31,9 +35,14 @@ extension ProprietaryFileData where Self: Codable {
 		self = try JSONDecoder(allowsJSON5: true).decode(Self.self, from: Data(data.bytes))
 	}
 	
-	func write(to data: Datawriter) {
+	func write(to data: Datawriter, configuration: Configuration) {
 		// TODO: is it possible to panic here?
-		let jsonData = try! JSONEncoder(.prettyPrinted, .sortedKeys).encode(self)
+		var jsonData = try! JSONEncoder(.prettyPrinted, .sortedKeys).encode(self)
+		
+		if jsonData.last != Character("\n").asciiValue! {
+			jsonData.append(Character("\n").asciiValue!)
+		}
+		
 		data.write(jsonData)
 	}
 }
@@ -48,5 +57,9 @@ extension ByteSlice: ProprietaryFileData {
 	
 	init(_ data: inout Datastream, configuration: Configuration) {
 		self.init(&data)
+	}
+	
+	func write(to data: Datawriter, configuration: Configuration) {
+		write(to: data)
 	}
 }

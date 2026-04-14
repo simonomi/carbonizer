@@ -257,7 +257,7 @@ extension DEP.Unpacked: ProprietaryFileData {
 			.map(DEP.Unpacked.Event.init)
 	}
 	
-	func write(to data: Datawriter) {
+	func write(to data: Datawriter, configuration: Configuration) {
 		let string = events
 			.map(String.init)
 			.joined(separator: "\n\n") + "\n"
@@ -605,10 +605,10 @@ extension DEP.Unpacked.ArgumentType {
 		switch self {
 			case .event:           parseEvent(text)
 			case .entity:          parseLookupTable(entityIDs, text: text) ?? parsePrefix(text)
-			case .flag:            parseUnknown(text)
+			case .flag:            parseFlag(text)
 			case .region:          parseLookupTable(regionIDs, text: text) ?? parsePrefix(text)
 			case .firstNumberOnly: parseFirstNumberOnly(text)
-			case .unknown:         parseUnknown(text)
+			case .unknown:         parseFlag(text)
 			case .vivosaur:        parseLookupTable(vivosaurIDs, text: text) ?? parsePrefix(text)
 		}
 	}
@@ -629,9 +629,9 @@ extension DEP.Unpacked.ArgumentType {
 	
 	private func parseEvent(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
 		if text.hasPrefix("event ") {
-			parseUnknown(text.dropFirst(6))
+			parseFlag(text.dropFirst(6))
 		} else {
-			parseUnknown(text)
+			parseFlag(text)
 		}
 	}
 	
@@ -640,7 +640,7 @@ extension DEP.Unpacked.ArgumentType {
 			.map { DEP.Unpacked.Event.Requirement.Argument(unknown1: $0, unknown2: 0) }
 	}
 	
-	private func parseUnknown(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
+	private func parseFlag(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
 		let unknowns = text.split(separator: " ")
 		
 		guard unknowns.count == 2,

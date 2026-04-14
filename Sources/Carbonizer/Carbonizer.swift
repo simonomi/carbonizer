@@ -1,7 +1,6 @@
 import Foundation
 
 // TODO: warning if output file is too large (ffc)
-// TODO: auto file types
 
 public enum Carbonizer {
 	// if run manually, CI will check for the string "main", so here you go :)

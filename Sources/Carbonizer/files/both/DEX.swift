@@ -42,9 +42,8 @@ enum DEX {
 		enum ArgumentType {
 			case boolean, entity, degrees, dialogue, effect, fixedPoint, flag, fossil, frames, image, integer, map, movement, music, soundEffect, unknown, vivosaur
 			// notes on flags:
-			// - two numbers, a u16 and u8 (is the u8 actually a u16?)
-			// - u16 is lower bits, u8 is upper (>> 24)
-			// - i list them u16 u8, should i swap that?
+			// - two numbers, a u24 and u8
+			// - i list them u24 u8, should i swap that?
 			// - 2nd number seems to be a type maybe?
 			// - all 2nd numbers: 0, 2, 5, 6, 7, 8, 9, 10
 			//   - 0: used for flag4s, dialogue with choice (both kinds) result
@@ -68,11 +67,11 @@ enum DEX {
 			//     player stats/settings (money, mask, dp, sonar upgrades)
 			//   - 10: flag5 flag6
 			//     dep: flag19 flag21 <>   SDf
-			// --- 0 (9-15957) event, not flag?
+			// --- 0 (9-15,957) event, not flag? (event_maxid 16,001)
 			// <59 0> is used to save a dialogue choice, read at 8
 			// <12202 0> is used for battle results (read with 5)
 			// <274 0/8> is used for dialogue
-			// --- 5 (2-12461)
+			// --- 5 (2-12,461) (flag_maxid 14,000)
 			// <211 5> is set to true when wendy says "welcome to the fossil center"
 			// - "told to check in"?
 			// - "visited fossil center"?
@@ -84,16 +83,16 @@ enum DEX {
 			// <213 5>
 			// <223 5> - set when battling travers (set to false if you lose)
 			// <260 5> - is asking diggins questions (end of cleaning tut or if u come back)
-			// --- 6 is keyitems (1-264)
+			// --- 6 is keyitems (1-264) (keyitem_maxid 300)
 			// TODO: add processor to label all keyitems
 			// <218-223 6> may have smthn to do with case size
 			// <248-253 6> are idol fragments
-			// --- 7 is masks (1-19)
+			// --- 7 is masks (1-19) (headmask_maxid 20)
 			// TODO: add processor to label all masks
 			// <15 7> being set with flag5 gives digadig mask
 			// <16 7> being set with flag5 gives chieftain mask
 			// <2 7> being set with flag5 gives hip-shaker mask
-			// --- 8 (1-364)
+			// --- 8 (1-364) (var_maxid 400)
 			// <51 8>
 			// <56 8> is probably chapter number
 			// <59 8> might be mask shop result? or maybe previous mask?
@@ -123,6 +122,7 @@ enum DEX {
 			// <30 10> multiplayer unlocked
 			// <33 10> drill unlocked
 			// <34 10> hammer unlocked
+			// TODO: custom parsing/formatting for flags
 		}
 		
 		struct CommandDefinition {
@@ -165,6 +165,8 @@ enum DEX {
 			8:   "spawn \(0, .entity) at region \(1, .integer)",
 			9:   "spawn \(0, .entity) at region \(1, .integer) facing \(2, .degrees)",
 			10:  "teleport \(0, .entity) to \(1, .entity)",
+			// 11: (#, #, fp, fp, #)
+			//   - (#, #, vector, #)
 			14:  "despawn \(0, .entity)",
 			// 16: (#, #)
 			// 17: (#, #)
@@ -192,7 +194,8 @@ enum DEX {
 			43:  "move \(0, .entity) to position \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
 			44:  "unknown 44: \(0, .entity) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",
 			45:  "move \(0, .entity) by \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
-			// 46: (#, #, fp, #, #)
+			// 46: (#, fp, fp, #, #)
+			//   - (#, vector, frames, #)
 			47:  "turn \(0, .entity) by \(1, .degrees), then move by \(2, .fixedPoint) over \(3, .frames). unknown: \(4, .unknown)",
 			// 4 seems to add a delay before they actually start moving? like theyre slow and then fast
 			// its basically a smoothing (ease in/out) effect
@@ -218,6 +221,10 @@ enum DEX {
 			71:  "add \(1, .integer) to flag \(0, .flag)",
 			72:  "subtract \(1, .integer) from flag \(0, .flag)",
 			75:  "set flag \(0, .flag) to flag \(1, .flag)",
+			// 76: (flag, flag)
+			// - types are always 8 9
+			// 77: (flag, flag)
+			// - types are always 8 8
 			80:  "make \(0, .entity) follow \(1, .entity)",
 			82:  "make \(0, .entity) wander randomly, waiting between \(1, .frames) and \(2, .frames), walking speed \(3, .fixedPoint), distance up to \(4, .fixedPoint)",
 			86:  "make \(0, .entity) chase player, detection range \(1, .fixedPoint), run distance \(2, .fixedPoint), chasing speed \(3, .fixedPoint), returning speed \(4, .fixedPoint), cooldown \(5, .frames)",
@@ -259,6 +266,7 @@ enum DEX {
 			143: "set player name",
 			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .flag)",
 			145: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .flag), unknown: \(3, .unknown)",
+//			148: (flag)
 			150: "level-up animation",
 			153: "fade in image \(0, .image) over \(1, .frames) on bottom screen, unknown: \(2, .unknown)", // TODO: is this actually top?
 			154: "fade out image over \(0, .frames), unknown: \(1, .unknown)",
@@ -408,9 +416,9 @@ extension DEX.Unpacked: ProprietaryFileData {
 			}
 	}
 	
-	func write(to data: Datawriter) {
+	func write(to data: Datawriter, configuration: Configuration) {
 		let string = commands
-			.recursiveMap(String.init)
+			.recursiveMap { String($0, configuration: configuration) }
 			.map { $0.joined(separator: "\n") }
 			.joined(separator: "\n\n") + "\n"
 		
@@ -569,7 +577,10 @@ extension DEX.Unpacked.Command {
 				definition: knownCommand,
 				arguments: try zip(reorderedArguments, knownCommand.argumentTypes)
 					.map { (argument, argumentType) throws(DEX.Unpacked.Command.ParseError) in
-						guard let number = argumentType.parse(argument) else {
+						guard let number = argumentType.parse(
+							argument,
+							for: configuration.game
+						) else {
 							throw .failedToParse(argument, in: text)
 						}
 						return number
@@ -581,7 +592,10 @@ extension DEX.Unpacked.Command {
 			}
 			
 			let parsedArguments = try arguments.map { (argument) throws(DEX.Unpacked.Command.ParseError) in
-				guard let value = DEX.Unpacked.ArgumentType.unknown.parse(argument) else {
+				guard let value = DEX.Unpacked.ArgumentType.unknown.parse(
+					argument,
+					for: configuration.game
+				) else {
 					throw .failedToParse(argument, in: text)
 				}
 				return value
@@ -625,7 +639,7 @@ extension DEX.Unpacked.Command.ParseError: CustomStringConvertible {
 }
 
 extension String {
-	init(_ command: DEX.Unpacked.Command) {
+	init(_ command: DEX.Unpacked.Command, configuration: Configuration) {
 		self = switch command {
 			case .known(_, let definition, let arguments):
 				definition.outputStringThingy.reduce(into: "") { partialResult, chunk in
@@ -634,13 +648,22 @@ extension String {
 							partialResult += text
 						case .argument(let index):
 							partialResult += "<"
-							partialResult += definition.argumentTypes[index].format(arguments[index])
+							partialResult += definition.argumentTypes[index].format(
+								arguments[index],
+								for: configuration.game
+							)
 							partialResult += ">"
 						case .vector(let index1, let index2):
 							partialResult += "<"
-							partialResult += definition.argumentTypes[index1].format(arguments[index1])
+							partialResult += definition.argumentTypes[index1].format(
+								arguments[index1],
+								for: configuration.game
+							)
 							partialResult += ", "
-							partialResult += definition.argumentTypes[index2].format(arguments[index2])
+							partialResult += definition.argumentTypes[index2].format(
+								arguments[index2],
+								for: configuration.game
+							)
 							partialResult += ">"
 					}
 				}
@@ -648,9 +671,8 @@ extension String {
 				"unknown <\(type)>"
 			case .unknown(let type, let arguments):
 				{
-					// TODO: make this good
 					let formattedArguments = arguments
-						.map(DEX.Unpacked.ArgumentType.unknown.format)
+						.map(formatUnknown)
 						.map { "<\($0)>" }
 						.joined(separator: " ")
 					
@@ -671,12 +693,12 @@ extension String {
 }
 
 extension DEX.Unpacked.ArgumentType {
-	func parse(_ text: Substring) -> Int32? {
+	func parse(_ text: Substring, for game: Configuration.Game) -> Int32? {
 		switch self {
 			case .boolean:         parseBoolean(text)
 			case .entity:          entityIDs[text.lowercased()] ?? parsePrefix(text)
 			case .degrees:         parseSuffix(text)
-			case .flag:            parseFlag(text)
+			case .flag:            parseFlag(text, for: game)
 			case .dialogue:        parsePrefix(text)
 			case .effect:          effectIDs[text.lowercased()] ?? parsePrefix(text)
 			case .fixedPoint:      parseFixedPoint(text)
@@ -693,58 +715,12 @@ extension DEX.Unpacked.ArgumentType {
 		}
 	}
 	
-	private func parsePrefix(_ text: Substring) -> Int32? {
-		text
-			.split(whereSeparator: \.isWhitespace)
-			.last
-			.flatMap { Int32($0) }
-	}
-	
-	private func parseSuffix(_ text: Substring) -> Int32? {
-		text
-			.split(whereSeparator: \.isWhitespace)
-			.first
-			.flatMap { Int32($0) }
-	}
-	
-	private func parseBoolean(_ text: Substring) -> Int32? {
-		switch text {
-			case "false": 0
-			case "true": 1
-			default: nil
-		}
-	}
-	
-	private func parseFlag(_ text: Substring) -> Int32? {
-		let components = text.split(separator: " ")
-		guard components.count == 2,
-			  let unknown1 = Int32(components[0]),
-			  let unknown2 = Int32(components[1])
-		else { return nil }
-		
-		return unknown1 | unknown2 << 24
-	}
-	
-	private func parseFixedPoint(_ text: Substring) -> Int32? {
-		Double(text)
-			.map { $0 * Double(1 << 12) }
-			.map { Int32($0) }
-	}
-	
-	private func parseUnknown(_ text: Substring) -> Int32? {
-		if text.contains("0x") {
-			Int32(text.replacingOccurrences(of: "0x", with: ""), radix: 16)
-		} else {
-			Int32(text)
-		}
-	}
-	
-	func format(_ number: Int32) -> String {
+	func format(_ number: Int32, for game: Configuration.Game) -> String {
 		switch self {
 			case .boolean:     formatBoolean(number)
 			case .entity:      entityNames[number] ?? "entity \(number)"
 			case .degrees:     "\(number) degrees"
-			case .flag:        formatFlag(number)
+			case .flag:        formatFlag(number, for: game)
 			case .dialogue:    "dialogue \(number)"
 			case .effect:      effectNames[number] ?? "effect \(number)"
 			case .fixedPoint:  formatFixedPoint(number)
@@ -760,42 +736,111 @@ extension DEX.Unpacked.ArgumentType {
 			case .vivosaur:    vivosaurNames[number] ?? "vivosaur \(number)"
 		}
 	}
-	
-	private func formatBoolean(_ number: Int32) -> String {
-		switch number {
-			case 0: return "false"
-			case 1: return "true"
-			default:
-				print("invalid boolean in DEX file: \(.red)\(number)\(.normal), expected \(.green)0\(.normal) or \(.green)1\(.normal)")
-				waitForInput()
-				fatalError()
-		}
+}
+
+fileprivate func parsePrefix(_ text: Substring) -> Int32? {
+	text
+		.split(whereSeparator: \.isWhitespace)
+		.last
+		.flatMap { Int32($0) }
+}
+
+fileprivate func parseSuffix(_ text: Substring) -> Int32? {
+	text
+		.split(whereSeparator: \.isWhitespace)
+		.first
+		.flatMap { Int32($0) }
+}
+
+fileprivate func parseBoolean(_ text: Substring) -> Int32? {
+	switch text {
+		case "false": 0
+		case "true": 1
+		default: nil
 	}
-	
-	private func formatFlag(_ number: Int32) -> String {
-		let unknown1 = UInt16(truncatingIfNeeded: number)
-		let unknown2 = UInt8(truncatingIfNeeded: number >> 24)
+}
+
+fileprivate func parseFlag(_ text: Substring, for game: Configuration.Game) -> Int32? {
+	if text.starts(with: "key item ") {
+		return Int32(text.dropFirst(8)).map { $0 | (6 << 24) }
+	} else if text.starts(with: "mask ") {
+		return Int32(text.dropFirst(5)).map { $0 | (7 << 24) }
+	} else {
+		let id = switch game {
+			case .ff1: ff1FlagIDs[text.lowercased()]
+			case .ffc: ffcFlagIDs[text.lowercased()]
+		}
 		
-		return "\(unknown1) \(unknown2)"
+		return id ?? parseRawFlag(text)
 	}
+}
+
+fileprivate func parseRawFlag(_ text: Substring) -> Int32? {
+	let components = text.split(separator: " ")
+	guard components.count == 2,
+		  let id = UInt8(components[0]),
+		  let type = UInt32(components[1])
+	else { return nil }
 	
-	private func formatFixedPoint(_ number: Int32) -> String {
-		let doubleApprox = Double(number) / Double(1 << 12)
-//		let rescaled = doubleApprox * Double(1 << 12)
-//		assert(Int32(rescaled) == number) // floating point should be a superset of 20.12 fixed point
-		
-		if let exactNumber = Int(exactly: doubleApprox) {
-			return String(exactNumber)
-		} else {
-			return String(doubleApprox)
-		}
+	return Int32(id) | Int32(type) << 24
+}
+
+fileprivate func parseFixedPoint(_ text: Substring) -> Int32? {
+	Double(text)
+		.map { $0 * Double(1 << 12) }
+		.map { Int32($0) }
+}
+
+fileprivate func parseUnknown(_ text: Substring) -> Int32? {
+	if text.contains("0x") {
+		Int32(text.replacingOccurrences(of: "0x", with: ""), radix: 16)
+	} else {
+		Int32(text)
 	}
+}
+
+fileprivate func formatBoolean(_ number: Int32) -> String {
+	switch number {
+		case 0: return "false"
+		case 1: return "true"
+		default:
+			print("invalid boolean in DEX file: \(.red)\(number)\(.normal), expected \(.green)0\(.normal) or \(.green)1\(.normal)")
+			waitForInput()
+			fatalError()
+	}
+}
+
+fileprivate func formatFlag(_ number: Int32, for game: Configuration.Game) -> String {
+	let id = UInt32(truncatingIfNeeded: number & 0xFF_FF_FF)
+	let type = UInt8(truncatingIfNeeded: number >> 24)
 	
-	private func formatUnknown(_ number: Int32) -> String {
-		if number.magnitude >= UInt16.max {
-			hex(number)
-		} else {
-			String(number)
-		}
+	return switch type {
+		case 6: "key item \(id)"
+		case 7: "mask \(id)"
+		default:
+			switch game {
+				case .ff1: ff1FlagNames[type]?[id] ?? "\(type) \(id)"
+				case .ffc: ffcFlagNames[type]?[id] ?? "\(type) \(id)"
+			}
+	}
+}
+
+fileprivate func formatFixedPoint(_ number: Int32) -> String {
+	let doubleApprox = Double(number) / Double(1 << 12)
+//	let rescaled = doubleApprox * Double(1 << 12)
+//	assert(Int32(rescaled) == number) // floating point should be a superset of 20.12 fixed point
+	
+	if let exactNumber = Int(exactly: doubleApprox) {
+		return String(exactNumber)
+	} else {
+		return String(doubleApprox)
+	}
+}
+
+fileprivate func formatUnknown(_ number: Int32) -> String {
+	if number.magnitude >= UInt16.max {
+		hex(number)
+	} else {
+		String(number)
 	}
 }
