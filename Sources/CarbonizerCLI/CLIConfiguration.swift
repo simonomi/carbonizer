@@ -13,7 +13,7 @@ struct CLIConfiguration : Sendable {
 	var game: Game
 	var externalMetadata: Bool
 	
-	var fileTypes: Set<String>
+	var fileTypes: Set<String>?
 	
 	var onlyUnpack: [Glob]
 	var skipUnpacking: [Glob]
@@ -81,48 +81,12 @@ struct CLIConfiguration : Sendable {
 	
 	static let defaultConfigurationString: String = """
 		{
-			// this option can be overridden by a command-line flag
-			"compressionMode": "auto", // auto, pack, unpack
-			
-			// any files passed as command-line arguments are run first
-			"inputFiles": [],
-			
-			// where any output files will be placed
-			"outputFolder": null,
-			
-			// whether to overwrite any already-existing output files
-			"overwriteOutput": false,
-			
-			"showProgress": true,
-			
-			"keepWindowOpen": "onError", // always, never, onError
-			
-			// enables pretty colorful output! not all terminals support colors though :(
-			// turn this off if you see weird stuff like "�[33;1mwarning:�[0m"
-			"useColor": \(defaultUseColor),
-			
-			"hotReloading": false, // macOS only
-			
-			// ff1 and ffc have different formats for the "same" files (DEX, DCL, etc).
-			// by default, carbonizer will try to guess which game you're running it on, 
-			// but you can manually override it with this option
-			// (if the auto-detect is getting it wrong, make sure the game's file name
-			//  has some variation of "Champions" or "champions" in it) 
-			"game": "auto", // ff1, ffc, auto
-			
-			// basically required for anything useful: MAR
-			//
-			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MM3, MMS, MPM 
-			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DEP, DML, DSL, ECS, HML, KPS, MAP, RLS, SHP
-			"fileTypes": ["_match", "3BA", "3CL", "BBG", "BCO", "CHR", "DAL", "DBA", "DBS", "DBT", "DCL", "DEP", "DEX", "DMG", "DML", "DMS", "DSL", "DTX", "ECS", "GRD", "HML", "KIL", "KPS", "MAP", "MAR", "MM3", "MMS", "MPM", "RLS", "SHP"], // ff1-compatible
-			// "fileTypes": ["_match", "3CM", "3CN", "DCL", "DEX", "DMG", "DMS", "DTX", "GRD", "KIL", "MAR", "MM3", "MMS", "MPM"], // ffc-compatible
-			
 			// stores metadata for MAR files in a separate file, rather than the creation
 			// date. this can avoid some problems, but creates a bunch of annoying extra files.
 			// it's also a lot slower, but is required to make MAR packing work on linux.
 			"externalMetadata": false,
 			
-			// requires externalMetadata to be enabled. turning on compression will
+			// requires and overrides externalMetadata. turning on compression will
 			// make the output ROM much smaller, but will take a good amount of time
 			// to run. it's good when creating patches so the modded ROM matches the
 			// original as much as possible
@@ -147,19 +111,19 @@ struct CLIConfiguration : Sendable {
 			"processors": {
 				// extract non-vivosaur 3D model files
 				// required file types: MAR, MM3
-				"exportModels": false,
+				"exportModels": true,
 				
 				// extract vivosaur 3D model files
 				// required file types: MAR, 3CL
-				"exportVivosaurModels": false,
+				"exportVivosaurModels": true,
 				
 				// extract images (image folder)
 				// required file types: MAR, MPM
-				"exportImages": false,
+				"exportImages": true,
 				
 				// extract sprites (motion folder)
 				// required file types: MAR, MMS
-				"exportSprites": false,
+				"exportSprites": true,
 				
 				// adds comments to DEX files that show the dialogue used in a given command
 				// required file types: MAR, DEX, DMG
@@ -198,12 +162,48 @@ struct CLIConfiguration : Sendable {
 				// adds labels for the descriptions in `etc/museum_defs`
 				// required file types: MAR, DML, DTX
 				"museumLabeller": true
-			}
+			},
+			
+			// this option can be overridden by a command-line flag
+			"compressionMode": "auto", // auto, pack, unpack
+			
+			// any files passed as command-line arguments are run first
+			"inputFiles": [],
+			
+			// where any output files will be placed
+			"outputFolder": null,
+			
+			// whether to overwrite any already-existing output files
+			"overwriteOutput": false,
+			
+			"showProgress": true,
+			
+			"keepWindowOpen": "onError", // always, never, onError
+			
+			// enables pretty colorful output! not all terminals support colors though :(
+			// turn this off if you see weird stuff like "�[33;1mwarning:�[0m"
+			"useColor": \(defaultUseColor),
+			
+			"hotReloading": false, // macOS only
+			
+			// ff1 and ffc have different formats for the "same" files (DEX, DCL, etc).
+			// by default, carbonizer will try to guess which game you're running it on, 
+			// but you can manually override it with this option
+			// (if the auto-detect is getting it wrong, make sure the game's file name
+			//  has some variation of "Champions" or "champions" in it) 
+			"game": "auto", // ff1, ffc, auto
+			
+			// the file types to pack/unpack. if null, all file types for selected game are enabled
+			//
+			// basically required for anything useful: MAR
+			//
+			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MM3, MMS, MPM
+			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DEP, DML, DSL, ECS, HML, KPS, MAP, RLS, SHP
+			// ffc-only: 3CM, 3CN
+			"fileTypes": null,
+			// "fileTypes": ["MAR", "DMG", "DTX"], // only dialogue/text
 		}
 		"""
-#if os(Windows)
-		.replacing("useColor\": true", with: "useColor\": false")
-#endif
 	
 	static let defaultConfiguration = try! Self(decoding: defaultConfigurationString)
 }
@@ -237,8 +237,8 @@ extension CLIConfiguration: Decodable {
 			fallback.game
 		externalMetadata = try container.decodeIfPresent(Bool.self,            forKey: .externalMetadata) ??
 			fallback.externalMetadata
-		fileTypes =        try container.decodeIfPresent(Set<String>.self,     forKey: .fileTypes) ??
-			fallback.fileTypes
+		// since fileTypes is nil, having a fallback crashes
+		fileTypes =        try container.decodeIfPresent(Set<String>.self,    forKey: .fileTypes)
 		onlyUnpack =       try container.decodeIfPresent([Glob].self,          forKey: .onlyUnpack) ??
 			fallback.onlyUnpack
 		skipUnpacking =    try container.decodeIfPresent([Glob].self,          forKey: .skipUnpacking) ??

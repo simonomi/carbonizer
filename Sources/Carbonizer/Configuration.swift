@@ -95,28 +95,30 @@ public struct Configuration: Sendable {
 		}
 	}
 	
-	public init(overwriteOutput: Bool, game: Game, externalMetadata: Bool, fileTypes: Set<String>, onlyUnpack: [Glob], skipUnpacking: [Glob], compression: Bool, processors: Set<Processor>, logHandler: (@Sendable (Log) -> Void)?) throws {
+	public init(overwriteOutput: Bool, game: Game, externalMetadata: Bool, fileTypes: Set<String>?, onlyUnpack: [Glob], skipUnpacking: [Glob], compression: Bool, processors: Set<Processor>, logHandler: (@Sendable (Log) -> Void)?) throws {
 		self.overwriteOutput = overwriteOutput
 		self.game = game
-		self.externalMetadata = externalMetadata
-		self.fileTypes = fileTypes
+		// compression overrides external metadata
+		self.externalMetadata = externalMetadata || compression
 		self.onlyUnpack = onlyUnpack
 		self.skipUnpacking = skipUnpacking
 		self.compression = compression
 		self.processors = processors
 		self.logHandler = logHandler
 		
-		let allowedInputFileTypes = Self.fileTypes(for: game).keys + ["MAR", "_match"]
+		let allFileTypes = Set(Self.fileTypes(for: game).keys + ["MAR", "_match"])
 		
-		guard fileTypes.allSatisfy(allowedInputFileTypes.contains) else {
+		self.fileTypes = fileTypes ?? allFileTypes
+		
+		guard self.fileTypes.allSatisfy(allFileTypes.contains) else {
 			throw UnsupportedFileTypes(
-				fileTypes: fileTypes
-					.filter { !allowedInputFileTypes.contains($0) }
+				fileTypes: self.fileTypes
+					.filter { !allFileTypes.contains($0) }
 					.sorted()
 			)
 		}
 		
-		cache = Cache(inputFileTypes: fileTypes, game: game)
+		cache = Cache(inputFileTypes: self.fileTypes, game: game)
 	}
 	
 	func log(_ kind: Log.Kind, _ items: Any...) {
@@ -168,18 +170,18 @@ public struct Configuration: Sendable {
 					"HML": HML.Unpacked.self,
 					"KPS": KPS.Unpacked.self,
 					"MAP": MAP.Unpacked.self,
-					"MFS": MFS.Unpacked.self,
+//					"MFS": MFS.Unpacked.self,
 					"MM3": MM3_FF1.Unpacked.self,
 					"RLS": RLS.Unpacked.self,
-					"SDAT": SDAT.Unpacked.self,
+//					"SDAT": SDAT.Unpacked.self,
 					"SHP": SHP.Unpacked.self,
 				]
 			case .ffc:
 				[
-					"DCL": DCL_FFC.Unpacked.self,
-					"MM3": MM3_FFC.Unpacked.self,
 					"3CM": TCM.Unpacked.self,
 					"3CN": TCN.Unpacked.self,
+					"DCL": DCL_FFC.Unpacked.self,
+					"MM3": MM3_FFC.Unpacked.self,
 				]
 		}
 		
