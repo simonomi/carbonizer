@@ -129,6 +129,7 @@ enum DEP {
 			var id: Int32
 			var requires: Criteria
 			var unknown2: Bool // is true and false for diggins dialogue responses after cleaning tutorial
+							   // mark as played or smthn ?
 			var isComment: Bool
 			var requirements: [Requirement]
 			

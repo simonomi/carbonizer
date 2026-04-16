@@ -4,6 +4,7 @@ let regionNames: [Int32: String] = [
 	44:  "leaving fossil center",
 	388: "entering main mine room",
 	421: "greenhorn plains above gate area",
+	688: "greenhorn plains gate entrance",
 	796: "bottom right elevator in hotel",
 ]
 

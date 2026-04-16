@@ -1,6 +1,14 @@
 let ff1FlagNames: [UInt8: [UInt32: String]] = [
+	5: [
+		1008: "has given Nick Nack the sandal fossil",
+		4031: "pay-to-dig area purchased",
+		5503: "talking to Greenhorn Plains pay-to-dig attendent",
+		9037: "talking to Rivet Ravine pay-to-dig attendent",
+	],
 	8: [
 		68: "case upgrade level",
+		256: "Greenhorn Plains pay-to-dig dialogue result",
+		257: "Rivet Ravine pay-to-dig dialogue result",
 	],
 	9: [
 		3: "money",

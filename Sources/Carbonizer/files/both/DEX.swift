@@ -41,6 +41,12 @@ enum DEX {
 		
 		enum ArgumentType {
 			case boolean, entity, degrees, dialogue, effect, fixedPoint, flag, fossil, frames, image, integer, map, movement, music, soundEffect, unknown, vivosaur
+			
+			// TODO: region type (regionNames)
+			// - processor to label map if no name
+			// TODO: battle type
+			// - processor 'level # So-and-So with V1, V2, and V3'
+			
 			// notes on flags:
 			// - two numbers, a u24 and u8
 			// - i list them u24 u8, should i swap that?
@@ -122,7 +128,6 @@ enum DEX {
 			// <30 10> multiplayer unlocked
 			// <33 10> drill unlocked
 			// <34 10> hammer unlocked
-			// TODO: custom parsing/formatting for flags
 		}
 		
 		struct CommandDefinition {
@@ -204,7 +209,7 @@ enum DEX {
 			// 52: (#, #)
 			55:  "dialogue \(2, .dialogue) with choice, storing result at \(1, .flag), unknown: \(0, .unknown)",
 			56:  "delay \(0, .frames)",
-			57:  "battle \(1, .integer), storing result at \(0, .flag)", // TODO: create battle id type?
+			57:  "battle \(1, .integer), storing result at \(0, .flag)",
 			58:  "clean1 \(1, .fossil), unknown: \(0, .unknown)",
 			59:  "clean2 \(1, .fossil), unknown: \(0, .unknown)",
 			// unknown is which flag to save the result in (type 5)

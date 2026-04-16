@@ -163,7 +163,7 @@ let entityNames: [Int32: String] = [
 	188: "Fossil Center Staff", // cha37a head37a // pre-tutorial
 //	189: "", // [] []
 //	190: "", // [] []
-//	191: "", // cha36b head36b
+	191: "Rivet Ravine pay-to-dig attendant", // cha36b head36b
 //	192: "", // cha199 []
 //	193: "", // cha199 []
 //	194: "", // [] []
@@ -252,7 +252,7 @@ let entityNames: [Int32: String] = [
 	283: "Rivet Ravine Idol Fragment dig trigger", // [] []
 	284: "Bottomsup Bay Idol Fragment dig trigger", // [] []
 	285: "Mt. Lavaflow Idol Fragment dig trigger", // [] []
-//	286: "", // cha36b head36b
+	286: "Greenhorn Plains pay-to-dig attendant", // cha36b head36b
 //	287: "", // o08iwa2 []
 //	288: "", // otosiana1 []
 //	289: "", // o04oasisu []
