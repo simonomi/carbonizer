@@ -762,7 +762,7 @@ fileprivate func parseBoolean(_ text: Substring) -> Int32? {
 
 fileprivate func parseFlag(_ text: Substring, for game: Configuration.Game) -> Int32? {
 	if text.starts(with: "key item ") {
-		return Int32(text.dropFirst(8)).map { $0 | (6 << 24) }
+		return Int32(text.dropFirst(9)).map { $0 | (6 << 24) }
 	} else if text.starts(with: "mask ") {
 		return Int32(text.dropFirst(5)).map { $0 | (7 << 24) }
 	} else {
@@ -778,8 +778,8 @@ fileprivate func parseFlag(_ text: Substring, for game: Configuration.Game) -> I
 fileprivate func parseRawFlag(_ text: Substring) -> Int32? {
 	let components = text.split(separator: " ")
 	guard components.count == 2,
-		  let id = UInt8(components[0]),
-		  let type = UInt32(components[1])
+		  let id = UInt32(components[0]),
+		  let type = UInt8(components[1])
 	else { return nil }
 	
 	return Int32(id) | Int32(type) << 24
@@ -819,8 +819,8 @@ fileprivate func formatFlag(_ number: Int32, for game: Configuration.Game) -> St
 		case 7: "mask \(id)"
 		default:
 			switch game {
-				case .ff1: ff1FlagNames[type]?[id] ?? "\(type) \(id)"
-				case .ffc: ffcFlagNames[type]?[id] ?? "\(type) \(id)"
+				case .ff1: ff1FlagNames[type]?[id] ?? "\(id) \(type)"
+				case .ffc: ffcFlagNames[type]?[id] ?? "\(id) \(type)"
 			}
 	}
 }

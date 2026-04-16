@@ -147,7 +147,7 @@ extension DEP.Unpacked.ArgumentType {
 			case .entity: "entity"
 			case .flag: "flag"
 			case .region: "region"
-			case .firstNumberOnly: "integer"
+			case .idOnly: "integer"
 			case .unknown: "unknown"
 			case .vivosaur: "vivosaur"
 		}

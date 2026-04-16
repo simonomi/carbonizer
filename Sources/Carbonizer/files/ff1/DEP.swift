@@ -46,9 +46,9 @@ enum DEP {
 				// wait, is this backwards from DEX's dep?? how strange
 				@BinaryConvertible
 				struct Argument {
-					var unknown1: UInt16
+					var id: UInt16
 					@Padding(bytes: 1) // or should this be a u8?
-					var unknown2: UInt8
+					var type: UInt8
 				}
 			}
 		}
@@ -58,7 +58,7 @@ enum DEP {
 		var events: [Event]
 		
 		enum ArgumentType {
-			case event, entity, flag, region, firstNumberOnly, unknown, vivosaur
+			case event, entity, flag, region, idOnly, unknown, vivosaur
 		}
 		
 		struct RequirementDefinition {
@@ -84,21 +84,21 @@ enum DEP {
 			// 10 (flag, flag) yes for nil nil, not for 8 7 or 7 7 or 6 7 or 0 0
 			11: "flag \(0, .flag) is greater than flag \(1, .flag)",
 			// 12 is never used, but i bet its >=
-			13: "flag \(0, .flag) is \(1, .firstNumberOnly)",
+			13: "flag \(0, .flag) is \(1, .idOnly)",
 //			<56 8> <# 0>    requires being fighter level #
 //			<90 8> <# 0>    used to alternate hotel manager between dialogues
-			14: "flag \(0, .flag) is not \(1, .firstNumberOnly)",
-			15: "flag \(0, .flag) is less than \(1, .firstNumberOnly)",
+			14: "flag \(0, .flag) is not \(1, .idOnly)",
+			15: "flag \(0, .flag) is less than \(1, .idOnly)",
 			// 15 // yes for nil 7, no for 7 7 and 6 7 and 8 7, pretty sure this is <, but not sure why weird
 			// changing unknown2 affects this???
-			16: "flag \(0, .flag) is less than or equal to \(1, .firstNumberOnly)",
+			16: "flag \(0, .flag) is less than or equal to \(1, .idOnly)",
 			// wait, < or <=? probably <= right???
 			// same test results as 9 and 15: triggers for nil but not once set??
 //			<56 8> <5 0>    used to determine whether to spawn bullwort in his office
 			// 13/16 memory types are 8 and 9
-			17: "flag \(0, .flag) is greater than \(1, .firstNumberOnly)",
+			17: "flag \(0, .flag) is greater than \(1, .idOnly)",
 			// 17 (flag, number)? >?
-			18: "flag \(0, .flag) is greater than or equal to \(1, .firstNumberOnly)",
+			18: "flag \(0, .flag) is greater than or equal to \(1, .idOnly)",
 			// 18 (flag, number)? this also seems like >=??
 			19: "all flags true \(0..., .flag)",
 //			requires an unknown 5 (&&, right?)
@@ -142,8 +142,8 @@ enum DEP {
 				case comment(String)
 				
 				struct Argument {
-					var unknown1: UInt16
-					var unknown2: UInt8
+					var id: UInt16
+					var type: UInt8
 				}
 			}
 		}
@@ -227,8 +227,8 @@ extension DEP.Packed.Event.Requirement {
 
 extension DEP.Packed.Event.Requirement.Argument {
 	init(_ unpacked: DEP.Unpacked.Event.Requirement.Argument) {
-		unknown1 = unpacked.unknown1
-		unknown2 = unpacked.unknown2
+		id = unpacked.id
+		type = unpacked.type
 	}
 }
 
@@ -254,12 +254,12 @@ extension DEP.Unpacked: ProprietaryFileData {
 		events = try string
 			.trimmingCharacters(in: .whitespacesAndNewlines)
 			.split(separator: "\n\n")
-			.map(DEP.Unpacked.Event.init)
+			.map { try DEP.Unpacked.Event($0, configuration: configuration) }
 	}
 	
 	func write(to data: Datawriter, configuration: Configuration) {
 		let string = events
-			.map(String.init)
+			.map { String($0, configuration: configuration) }
 			.joined(separator: "\n\n") + "\n"
 		
 		data.write(string, length: string.lengthOfBytes(using: .utf8))
@@ -304,13 +304,13 @@ extension DEP.Unpacked.Event.Requirement {
 
 extension DEP.Unpacked.Event.Requirement.Argument {
 	init(_ binaryArgument: DEP.Packed.Event.Requirement.Argument) {
-		unknown1 = binaryArgument.unknown1
-		unknown2 = binaryArgument.unknown2
+		id = binaryArgument.id
+		type = binaryArgument.type
 	}
 }
 
 extension DEP.Unpacked.Event {
-	init(_ text: Substring) throws(DEP.Unpacked.ParseError) {
+	init(_ text: Substring, configuration: Configuration) throws(DEP.Unpacked.ParseError) {
 		let lines = text.split(separator: "\n")
 		let firstLine = lines.first!
 		
@@ -347,12 +347,14 @@ extension DEP.Unpacked.Event {
 		
 		requirements = try lines
 			.dropFirst()
-			.map(DEP.Unpacked.Event.Requirement.init)
+			.map { (line) throws(ParseError) -> Requirement in
+				try Requirement(line, configuration: configuration)
+			}
 	}
 }
 
 extension DEP.Unpacked.Event.Requirement {
-	init(_ text: Substring) throws(DEP.Unpacked.ParseError) {
+	init(_ text: Substring, configuration: Configuration) throws(DEP.Unpacked.ParseError) {
 		if text.hasPrefix("// ") {
 			self = .comment(String(text.dropFirst(3)))
 			return
@@ -392,7 +394,10 @@ extension DEP.Unpacked.Event.Requirement {
 				definition: knownRequirement,
 				arguments: try zip(reorderedArguments, argumentTypes)
 					.map { (argument, argumentType) throws(DEP.Unpacked.ParseError) in
-						guard let number = argumentType.parse(argument) else {
+						guard let number = argumentType.parse(
+							argument,
+							for: configuration.game
+						) else {
 							throw .failedToParse(argument, in: text)
 						}
 						return number
@@ -414,7 +419,10 @@ extension DEP.Unpacked.Event.Requirement {
 			let parsedArguments = try arguments
 				.dropFirst()
 				.map { (argument) throws(DEP.Unpacked.ParseError) in
-					guard let value = DEP.Unpacked.ArgumentType.unknown.parse(argument) else {
+					guard let value = DEP.Unpacked.ArgumentType.unknown.parse(
+						argument,
+						for: configuration.game
+					) else {
 						throw .failedToParse(argument, in: text)
 					}
 					return value
@@ -429,21 +437,27 @@ extension DEP.Unpacked.Event.Requirement {
 }
 
 extension String {
-	init(_ event: DEP.Unpacked.Event) {
+	init(_ event: DEP.Unpacked.Event, configuration: Configuration) {
 		let commentPrefix = event.isComment ? "// " : ""
 		
 		let header = "\(commentPrefix)event <\(event.id)>, requires: <\(event.requires)>, unknown: <\(event.unknown2)>"
 		
-		let requirements = event.requirements.map { String($0, isInComment: event.isComment) }
+		let requirements = event.requirements.map {
+			String($0, configuration: configuration, isInComment: event.isComment)
+		}
 		
 		self = ([header] + requirements).joined(separator: "\n")
 	}
 	
-	init(_ requirement: DEP.Unpacked.Event.Requirement, isInComment: Bool) {
+	init(
+		_ requirement: DEP.Unpacked.Event.Requirement,
+		configuration: Configuration,
+		isInComment: Bool
+	) {
 		guard !isInComment else {
-			let originalText = String(requirement, isInComment: false)
+			let originalText = String(requirement, configuration: configuration, isInComment: false)
 			let comment: DEP.Unpacked.Event.Requirement = .comment(originalText)
-			self = String(comment, isInComment: false)
+			self = String(comment, configuration: configuration, isInComment: false)
 			return
 		}
 		
@@ -461,12 +475,15 @@ extension String {
 							partialResult += text
 						case .argument(let index):
 							partialResult += "<"
-							partialResult += definition.argumentTypes[index].format(arguments[index])
+							partialResult += definition.argumentTypes[index].format(
+								arguments[index],
+								for: configuration.game
+							)
 							partialResult += ">"
 						case .arguments(let indices):
 							let argumentType = definition.argumentTypes[indices.lowerBound]
 							partialResult += arguments[indices]
-								.map(argumentType.format)
+								.map { argumentType.format($0, for: configuration.game) }
 								.map { "<\($0)>" }
 								.joined(separator: " ")
 					}
@@ -477,7 +494,7 @@ extension String {
 				{
 					// TODO: make this good
 					let formattedArguments = arguments
-						.map(DEP.Unpacked.ArgumentType.unknown.format)
+						.map { DEP.Unpacked.ArgumentType.unknown.format($0, for: configuration.game) }
 						.map { "<\($0)>" }
 						.joined(separator: " ")
 					
@@ -601,75 +618,135 @@ extension DEP.Unpacked.RequirementDefinition: ExpressibleByStringInterpolation {
 }
 
 extension DEP.Unpacked.ArgumentType {
-	func parse(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
+	func parse(
+		_ text: Substring,
+		for game: Configuration.Game
+	) -> DEP.Unpacked.Event.Requirement.Argument? {
 		switch self {
-			case .event:           parseEvent(text)
+			case .event:           parseEvent(text, for: game)
 			case .entity:          parseLookupTable(entityIDs, text: text) ?? parsePrefix(text)
-			case .flag:            parseFlag(text)
+			case .flag:            parseFlag(text, for: game)
 			case .region:          parseLookupTable(regionIDs, text: text) ?? parsePrefix(text)
-			case .firstNumberOnly: parseFirstNumberOnly(text)
-			case .unknown:         parseFlag(text)
+			case .idOnly:          parseIDOnly(text)
+			case .unknown:         parseFlag(text, for: game)
 			case .vivosaur:        parseLookupTable(vivosaurIDs, text: text) ?? parsePrefix(text)
 		}
 	}
 	
-	private func parsePrefix(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
-		text
-			.split(whereSeparator: \.isWhitespace)
-			.last
-			.flatMap { UInt16($0) }
-			.map { DEP.Unpacked.Event.Requirement.Argument(unknown1: $0, unknown2: 0) }
-	}
-	
-	private func parseLookupTable(_ table: [String: Int32], text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
-		table[text.lowercased()]
-			.map(UInt16.init)
-			.map { DEP.Unpacked.Event.Requirement.Argument(unknown1: $0, unknown2: 0) }
-	}
-	
-	private func parseEvent(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
-		if text.hasPrefix("event ") {
-			parseFlag(text.dropFirst(6))
-		} else {
-			parseFlag(text)
-		}
-	}
-	
-	private func parseFirstNumberOnly(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
-		UInt16(text)
-			.map { DEP.Unpacked.Event.Requirement.Argument(unknown1: $0, unknown2: 0) }
-	}
-	
-	private func parseFlag(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
-		let unknowns = text.split(separator: " ")
-		
-		guard unknowns.count == 2,
-			  let unknown1 = UInt16(unknowns[0]),
-			  let unknown2 = UInt8(unknowns[1])
-		else { return nil }
-		
-		return DEP.Unpacked.Event.Requirement.Argument(unknown1: unknown1, unknown2: unknown2)
-	}
-	
-	func format(_ argument: DEP.Unpacked.Event.Requirement.Argument) -> String {
+	func format(
+		_ argument: DEP.Unpacked.Event.Requirement.Argument,
+		for game: Configuration.Game
+	) -> String {
 		validate(argument)
 		return switch self {
-			case .event:           "event \(argument.unknown1) \(argument.unknown2)"
-			case .entity:          "\(entityNames[Int32(argument.unknown1)] ?? "entity \(argument.unknown1)")"
-			case .flag:            "\(argument.unknown1) \(argument.unknown2)"
-			case .region:          "\(regionNames[Int32(argument.unknown1)] ?? "region \(argument.unknown1)")"
-			case .firstNumberOnly: "\(argument.unknown1)"
-			case .unknown:         "\(argument.unknown1) \(argument.unknown2)"
-			case .vivosaur:        "\(vivosaurNames[Int32(argument.unknown1)] ?? "vivosaur \(argument.unknown1)")"
+			case .event:           "event \(formatFlag(argument, for: game))"
+			case .entity:          "\(entityNames[Int32(argument.id)] ?? "entity \(argument.id)")"
+			case .flag:            formatFlag(argument, for: game)
+			case .region:          "\(regionNames[Int32(argument.id)] ?? "region \(argument.id)")"
+			case .idOnly:          "\(argument.id)"
+			case .unknown:         "\(argument.id) \(argument.type)"
+			case .vivosaur:        "\(vivosaurNames[Int32(argument.id)] ?? "vivosaur \(argument.id)")"
 		}
 	}
 	
 	func validate(_ argument: DEP.Unpacked.Event.Requirement.Argument) {
 		switch self {
-			case .entity, .region, .firstNumberOnly, .vivosaur:
+			case .entity, .region, .idOnly, .vivosaur:
 				// TODO: this should fail better
-				precondition(argument.unknown2 == 0)
+				precondition(argument.type == 0)
 			default: ()
 		}
+	}
+}
+
+fileprivate func parsePrefix(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
+	text
+		.split(whereSeparator: \.isWhitespace)
+		.last
+		.flatMap { UInt16($0) }
+		.map { DEP.Unpacked.Event.Requirement.Argument(id: $0, type: 0) }
+}
+
+fileprivate func parseLookupTable(_ table: [String: Int32], text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
+	table[text.lowercased()]
+		.map(UInt16.init)
+		.map { DEP.Unpacked.Event.Requirement.Argument(id: $0, type: 0) }
+}
+
+fileprivate func parseEvent(
+	_ text: Substring,
+	for game: Configuration.Game
+) -> DEP.Unpacked.Event.Requirement.Argument? {
+	if text.hasPrefix("event ") {
+		parseFlag(text.dropFirst(6), for: game)
+	} else {
+		parseFlag(text, for: game)
+	}
+}
+
+fileprivate func parseIDOnly(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
+	UInt16(text).map { DEP.Unpacked.Event.Requirement.Argument(id: $0, type: 0) }
+}
+
+fileprivate func parseFlag(
+	_ text: Substring,
+	for game: Configuration.Game
+) -> DEP.Unpacked.Event.Requirement.Argument? {
+	if text.starts(with: "key item ") {
+		return UInt16(text.dropFirst(9)).map {
+			DEP.Unpacked.Event.Requirement.Argument(
+				id: $0,
+				type: 6
+			)
+		}
+	} else if text.starts(with: "mask ") {
+		return UInt16(text.dropFirst(5)).map {
+			DEP.Unpacked.Event.Requirement.Argument(
+				id: $0,
+				type: 7
+			)
+		}
+	} else {
+		let id = switch game {
+			case .ff1: ff1FlagIDs[text.lowercased()]
+			case .ffc: ffcFlagIDs[text.lowercased()]
+		}
+		
+		return id.map { DEP.Unpacked.Event.Requirement.Argument($0) }
+			?? parseRawFlag(text)
+	}
+}
+
+extension DEP.Unpacked.Event.Requirement.Argument {
+	init(_ raw: Int32) {
+		id = UInt16(truncatingIfNeeded: raw)
+		type = UInt8(truncatingIfNeeded: raw >> 24)
+	}
+}
+
+fileprivate func parseRawFlag(
+	_ text: Substring
+) -> DEP.Unpacked.Event.Requirement.Argument? {
+	let components = text.split(separator: " ")
+	guard components.count == 2,
+		  let id = UInt16(components[0]),
+		  let type = UInt8(components[1])
+	else { return nil }
+	
+	return DEP.Unpacked.Event.Requirement.Argument(id: id, type: type)
+}
+
+fileprivate func formatFlag(
+	_ argument: DEP.Unpacked.Event.Requirement.Argument,
+	for game: Configuration.Game
+) -> String {
+	return switch argument.type {
+		case 6: "key item \(argument.id)"
+		case 7: "mask \(argument.id)"
+		default:
+			switch game {
+				case .ff1: ff1FlagNames[argument.type]?[UInt32(argument.id)] ?? "\(argument.id) \(argument.type)"
+				case .ffc: ffcFlagNames[argument.type]?[UInt32(argument.id)] ?? "\(argument.id) \(argument.type)"
+			}
 	}
 }
