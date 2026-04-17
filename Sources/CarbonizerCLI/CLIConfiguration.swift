@@ -31,6 +31,7 @@ struct CLIConfiguration : Sendable {
 		var exportImages: Bool
 		var episodeDialogueLabeller: Bool
 		var episodeDialogueSaver: Bool
+		var episodeRegionLabeller: Bool
 		var eventLabeller: Bool
 		var battleFighterNameLabeller: Bool
 		var ffcCreatureLabeller: Bool
@@ -133,6 +134,10 @@ struct CLIConfiguration : Sendable {
 				// saved to the correct MSG file. new lines of dialogue cannot be added
 				// required file types: MAR, DEX, DMG 
 				"episodeDialogueSaver": false,
+				
+				// adds comments to DEX files that describes the regions used in a given command
+				// required file types: MAR, _match, and either DEX or DEP 
+				"episodeRegionLabeller": true,
 				
 				// labels the events of commands in DEX files with their event number. this number
 				// is used by DEP files to control when an event triggers
@@ -271,7 +276,7 @@ struct UnknownOptions: Error, CustomStringConvertible {
 
 extension CLIConfiguration.Processors: Decodable {
 	enum CodingKeys: CodingKey, CaseIterable {
-		case exportVivosaurModels, exportModels, exportSprites, exportImages, episodeDialogueLabeller, episodeDialogueSaver, eventLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case exportVivosaurModels, exportModels, exportSprites, exportImages, episodeDialogueLabeller, episodeDialogueSaver, episodeRegionLabeller, eventLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -300,6 +305,8 @@ extension CLIConfiguration.Processors: Decodable {
 			fallback.episodeDialogueLabeller
 		episodeDialogueSaver =      try container.decodeIfPresent(Bool.self, forKey: .episodeDialogueSaver) ??
 			fallback.episodeDialogueSaver
+		episodeRegionLabeller =     try container.decodeIfPresent(Bool.self, forKey: .episodeRegionLabeller) ??
+			fallback.episodeRegionLabeller
 		eventLabeller =             try container.decodeIfPresent(Bool.self, forKey: .eventLabeller) ??
 			fallback.eventLabeller
 		battleFighterNameLabeller = try container.decodeIfPresent(Bool.self, forKey: .battleFighterNameLabeller) ??

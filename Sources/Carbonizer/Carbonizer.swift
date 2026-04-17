@@ -1,7 +1,6 @@
 import Foundation
 
 // TODO: warning if output file is too large (ffc)
-// TODO: processor to label map if no name
 // TODO: processor 'level # So-and-So with V1, V2, and V3'
 
 public enum Carbonizer {

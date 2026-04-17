@@ -301,6 +301,17 @@ extension DEP.Unpacked.Event.Requirement {
 			)
 		}
 	}
+	
+	func regions() -> [Int32] {
+		guard case .known(_, let definition, let arguments) = self else { return [] }
+		
+		return definition.argumentTypes
+			.indices { $0 == .region }
+			.ranges
+			.map(\.lowerBound)
+			.map { arguments[$0] }
+			.map { Int32($0.id) }
+	}
 }
 
 extension DEP.Unpacked.Event.Requirement.Argument {

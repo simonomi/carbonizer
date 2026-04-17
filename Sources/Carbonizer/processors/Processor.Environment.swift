@@ -3,6 +3,7 @@ extension Processor {
 		var text: [String: [String]]?
 		var dialogue: [UInt32: String]?
 		var eventIDs: [String: [Int32]]?
+		var regionMaps: [Int32: UInt16]?
 		
 		// dialogue ripped from DEX files
 		var conflictedDexDialogue: [UInt32: WithPossibleMergeConflict<String>]?
