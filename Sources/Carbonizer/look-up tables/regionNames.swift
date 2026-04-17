@@ -1,4 +1,5 @@
 let regionNames: [Int32: String] = [
+	1:   "Vivosaur Island dock",
 	12:  "entering relic hotel",
 	41:  "entering fossil center",
 	44:  "leaving fossil center",

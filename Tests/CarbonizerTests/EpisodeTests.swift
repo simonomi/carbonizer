@@ -36,7 +36,7 @@ func checkKnownRequirements() throws {
 }
 
 @Test(
-	.disabled("only enable when needed")
+//	.disabled("only enable when needed")
 )
 func exportDEXCommands() throws {
 	struct Command: Encodable {
@@ -149,7 +149,7 @@ extension DEP.Unpacked.ArgumentType {
 			case .entity: "entity"
 			case .flag: "flag"
 			case .region: "region"
-			case .idOnly: "integer"
+			case .integer: "integer"
 			case .unknown: "unknown"
 			case .vivosaur: "vivosaur"
 		}

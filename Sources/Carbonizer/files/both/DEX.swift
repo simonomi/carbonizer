@@ -68,60 +68,14 @@ enum DEX {
 			//   - 10: flag5 flag6
 			//     dep: flag19 flag21 <>   SDf
 			// --- 0 (9-15,957) event, not flag? (event_maxid 16,001)
-			// <59 0> is used to save a dialogue choice, read at 8
-			// <12202 0> is used for battle results (read with 5)
-			// <274 0/8> is used for dialogue
 			// --- 5 (2-12,461) (flag_maxid 14,000)
-			// <211 5> is set to true when wendy says "welcome to the fossil center"
-			// - "told to check in"?
-			// - "visited fossil center"?
-			// - "opening cutscene played"?
-			// <206 5>
-			// <207 5> - "checked in at hotel" (when dropped off in room, not when leaving)
-			// <211 5>
-			// <212 5> - set during diggins' cleaning tutorial
-			// <213 5>
-			// <223 5> - set when battling travers (set to false if you lose)
-			// <260 5> - is asking diggins questions (end of cleaning tut or if u come back)
 			// --- 6 is keyitems (1-264) (keyitem_maxid 300)
 			// TODO: add processor to label all keyitems
-			// <218-223 6> may have smthn to do with case size
-			// <248-253 6> are idol fragments
 			// --- 7 is masks (1-19) (headmask_maxid 20)
 			// TODO: add processor to label all masks
-			// <15 7> being set with flag5 gives digadig mask
-			// <16 7> being set with flag5 gives chieftain mask
-			// <2 7> being set with flag5 gives hip-shaker mask
 			// --- 8 (1-364) (var_maxid 400)
-			// <51 8>
-			// <56 8> is probably chapter number
-			// <59 8> might be mask shop result? or maybe previous mask?
-			// <59 8> is used to read a dialogue choice (temp variable?)
-			// <62 8> number of sonar upgrades left
-			// - or bitmask or smthn
-			// - 1/2/10/20/100/200
-			// - a base 10 bitmask lmao??
-			// <67 8> number of cleaning upgrades left
-			// - or maybe like a bitmask or smthn? buying the drill subtracts 2
-			// <68 8> number of case upgrades (1:8, 2:16, 3:24, 4:32, 5:48)
 			// --- 9 seems to be player stats (2-42)
-			// <2 9> == 1 means your case is size 8
-			// <3 9> is money
-			// <4 9> is current mask
-			// <6 9> is profile background color (red/blue/yellow)
-			// <7 9> is player pfp (hunter variant??)
-			// <9 9> may be number of fossil rocks
-			// <19 9> is donation points
-			// <25 9> is probably number of fossils cleaned
-			// <26 9> may be number of oasis seeds? no probably not
-			// <30 9> is sonar monitor upgrades (2 is 800 G, 3 is 3500 G)
-			// <31 9> is sonar fossil chips (2 is 10000 G, 3 is 35000 G)
-			// <32 9> is sonar fossil filters (2 is 5000 G, 3 is 8000 G)
 			// --- 10 1-47
-			// <23 10> used in 0001 (debug mode?)
-			// <30 10> multiplayer unlocked
-			// <33 10> drill unlocked
-			// <34 10> hammer unlocked
 		}
 		
 		struct CommandDefinition {
@@ -162,11 +116,10 @@ enum DEX {
 			8:   "spawn \(0, .entity) at \(1, .region)",
 			9:   "spawn \(0, .entity) at \(1, .region) facing \(2, .degrees)",
 			10:  "teleport \(0, .entity) to \(1, .entity)",
-			// 11: (#, #, fp, fp, #)
-			//   - (#, #, vector, #)
+			11:  "spawn \(0, .entity) in \(1, .map) at \(2, 3, .vector) facing towards \(4, .entity)",
 			14:  "despawn \(0, .entity)",
-			// 16: (#, #)
-			// 17: (#, #)
+			16:  "make portal between \(0, .region) and \(1, .region)",
+			17:  "make portal from \(0, .region) to \(1, .region)",
 			20:  "fade out \(0, .frames)",
 			21:  "fade in \(0, .frames)",
 			22:  "fade out to white \(0, .frames)",
@@ -181,18 +134,16 @@ enum DEX {
 			37:  "turn2 \(0, .entity) to \(1, .degrees) over \(2, .frames), unknown: \(3, .unknown)",
 			38:  "turn \(0, .entity) towards \(1, .entity) over \(3, .frames), unknowns: \(2, .unknown) \(4, .unknown)",
 			39:  "move \(0, .entity) to \(1, .entity) over \(2, .frames), unknown: \(3, .unknown)",
-			40:  "unknown 40: \(0, .entity), \(1, .entity), \(2, .frames), \(3, .unknown)",
-			// ?
+			40:  "unknown 40 \(0, .entity) \(1, .entity) \(2, .frames) \(3, .unknown)",
 			// probably another move
+			// how is it different form 39?
 			// last # is smoothing
-			41:  "unknown 41: \(0, .entity), \(1, .unknown), \(2, .frames), \(3, .unknown)",
-			// another move-to?
+			41:  "move \(0, .entity) to region \(1, .region) over \(2, .frames), unknown: \(3, .unknown)",
 			// last # is probably smoothing
 			43:  "move \(0, .entity) to position \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
-			44:  "unknown 44: \(0, .entity) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",
+			44:  "unknown 44 \(0, .entity) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",
 			45:  "move \(0, .entity) by \(1, 2, .vector) over \(3, .frames), unknown: \(4, .unknown)",
-			// 46: (#, fp, fp, #, #)
-			//   - (#, vector, frames, #)
+			46:  "unknown 46 \(0, .entity) \(1, 2, .vector) \(3, .frames) \(4, .unknown)",
 			47:  "turn \(0, .entity) by \(1, .degrees), then move by \(2, .fixedPoint) over \(3, .frames). unknown: \(4, .unknown)",
 			// 4 seems to add a delay before they actually start moving? like theyre slow and then fast
 			// its basically a smoothing (ease in/out) effect
@@ -214,19 +165,25 @@ enum DEX {
 			//    after sue asks where to go, removing memory but keeping 62 makes camera low, but without 62 camera resets properly
 			//    return? is it only used when dep event's unknown2 (i bet yes)
 			63:  "unknown 63",
+			
 			70:  "set flag \(0, .flag) to \(1, .integer)",
 			71:  "add \(1, .integer) to flag \(0, .flag)",
 			72:  "subtract \(1, .integer) from flag \(0, .flag)",
+			73:  "multiply flag \(0, .flag) by \(1, .integer)",
+			74:  "divide flag \(0, .flag) by \(1, .integer)",
+			
 			75:  "set flag \(0, .flag) to flag \(1, .flag)",
-			// 76: (flag, flag)
-			// - types are always 8 9
-			// 77: (flag, flag)
-			// - types are always 8 8
+			76:  "add flag \(1, .flag) to \(0, .flag)",
+			77:  "subtract flag \(1, .flag) from \(0, .flag)",
+			78:  "multiply flag \(0, .flag) by \(1, .flag)",
+			79:  "divide flag \(0, .flag) by \(1, .flag)",
+			
 			80:  "make \(0, .entity) follow \(1, .entity)",
 			82:  "make \(0, .entity) wander randomly, waiting between \(1, .frames) and \(2, .frames), walking speed \(3, .fixedPoint), distance up to \(4, .fixedPoint)",
 			86:  "make \(0, .entity) chase player, detection range \(1, .fixedPoint), run distance \(2, .fixedPoint), chasing speed \(3, .fixedPoint), returning speed \(4, .fixedPoint), cooldown \(5, .frames)",
 			90:  "set fighter level to \(0, .integer)",
 			91:  "set case page count to \(0, .integer)",
+			96:  "unknown 96 \(0, .vivosaur) \(1, .frames) \(2, .unknown) \(3, .unknown) \(4, .unknown)",
 			97:  "set \(0, .vivosaur) fossil scores to \(1, .integer) \(2, .integer) \(3, .integer) \(4, .integer)",
 			99:  "disable dino medals",
 			100: "enable dino medals",
@@ -263,7 +220,9 @@ enum DEX {
 			143: "set player name",
 			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .flag)",
 			145: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .flag), unknown: \(3, .unknown)",
-//			148: (flag)
+			147: "remove all dropping fossils from player",
+			148: "unknown 148 \(0, .flag)",
+			// - something to do with dropping fossils and nick nack
 			150: "level-up animation",
 			153: "fade in image \(0, .image) over \(1, .frames) on bottom screen, unknown: \(2, .unknown)", // TODO: is this actually top?
 			154: "fade out image over \(0, .frames), unknown: \(1, .unknown)",
@@ -615,8 +574,7 @@ extension DEX.Unpacked.Command {
 		return definition.argumentTypes
 			.indices { $0 == .dialogue }
 			.ranges
-			.map(\.lowerBound)
-			.map { UInt32(arguments[$0]) }
+			.flatMap { $0.map { UInt32(arguments[$0]) } }
 	}
 	
 	func regions() -> [Int32] {
@@ -625,8 +583,7 @@ extension DEX.Unpacked.Command {
 		return definition.argumentTypes
 			.indices { $0 == .region }
 			.ranges
-			.map(\.lowerBound)
-			.map { arguments[$0] }
+			.flatMap { $0.map { arguments[$0] } }
 	}
 	
 	func battles() -> [UInt32] {
@@ -635,8 +592,7 @@ extension DEX.Unpacked.Command {
 		return definition.argumentTypes
 			.indices { $0 == .battle }
 			.ranges
-			.map(\.lowerBound)
-			.map { UInt32(arguments[$0]) }
+			.flatMap { $0.map { UInt32(arguments[$0]) } }
 	}
 }
 

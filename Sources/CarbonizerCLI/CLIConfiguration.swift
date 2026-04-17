@@ -77,17 +77,14 @@ struct CLIConfiguration : Sendable {
 	
 #if os(Windows)
 	static let defaultUseColor = "false"
+	static let defaultExternalMetadata = "true"
 #else
 	static let defaultUseColor = "true"
+	static let defaultExternalMetadata = "false"
 #endif
 	
 	static let defaultConfigurationString: String = """
 		{
-			// stores metadata for MAR files in a separate file, rather than the creation
-			// date. this can avoid some problems, but creates a bunch of annoying extra files.
-			// it's also a lot slower, but is required to make MAR packing work on linux.
-			externalMetadata: false,
-			
 			// requires and overrides externalMetadata. turning on compression will
 			// make the output ROM much smaller, but will take a good amount of time
 			// to run. it's good when creating patches so the modded ROM matches the
@@ -193,6 +190,11 @@ struct CLIConfiguration : Sendable {
 			// enables pretty colorful output! not all terminals support colors though :(
 			// turn this off if you see weird stuff like "�[33;1mwarning:�[0m"
 			useColor: \(defaultUseColor),
+			
+			// stores metadata for MAR files in a separate file, rather than the creation
+			// date. this can avoid some problems, but creates a bunch of annoying extra files.
+			// it's also a lot slower, but is required to make MAR packing work on linux.
+			externalMetadata: \(defaultExternalMetadata),
 			
 			hotReloading: false, // macOS only
 			

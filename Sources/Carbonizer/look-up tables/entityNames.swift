@@ -222,7 +222,7 @@ let entityNames: [Int32: String] = [
 //	253: "", // t02fan []
 //	254: "", // r50tree []
 //	255: "", // o03ita []
-//	256: "", // o04oasisu []
+	256: "oasis 1", // o04oasisu []
 //	257: "", // o09warp1 []
 //	258: "", // o09warp2 []
 //	259: "", // o10sleep1 []
@@ -255,9 +255,9 @@ let entityNames: [Int32: String] = [
 	286: "Greenhorn Plains pay-to-dig attendant", // cha36b head36b
 //	287: "", // o08iwa2 []
 //	288: "", // otosiana1 []
-//	289: "", // o04oasisu []
-//	290: "", // o04oasisu []
-//	291: "", // o04oasisu []
+	289: "oasis 2", // o04oasisu []
+	290: "oasis 3", // o04oasisu []
+	291: "oasis 4", // o04oasisu []
 //	292: "", // r01door []
 //	293: "", // r01door []
 //	294: "", // cha44c head44c

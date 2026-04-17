@@ -58,7 +58,7 @@ enum DEP {
 		var events: [Event]
 		
 		enum ArgumentType {
-			case event, entity, flag, region, idOnly, unknown, vivosaur
+			case event, entity, flag, region, integer, unknown, vivosaur
 		}
 		
 		struct RequirementDefinition {
@@ -84,21 +84,21 @@ enum DEP {
 			// 10 (flag, flag) yes for nil nil, not for 8 7 or 7 7 or 6 7 or 0 0
 			11: "flag \(0, .flag) is greater than flag \(1, .flag)",
 			// 12 is never used, but i bet its >=
-			13: "flag \(0, .flag) is \(1, .idOnly)",
+			13: "flag \(0, .flag) is \(1, .integer)",
 //			<56 8> <# 0>    requires being fighter level #
 //			<90 8> <# 0>    used to alternate hotel manager between dialogues
-			14: "flag \(0, .flag) is not \(1, .idOnly)",
-			15: "flag \(0, .flag) is less than \(1, .idOnly)",
+			14: "flag \(0, .flag) is not \(1, .integer)",
+			15: "flag \(0, .flag) is less than \(1, .integer)",
 			// 15 // yes for nil 7, no for 7 7 and 6 7 and 8 7, pretty sure this is <, but not sure why weird
 			// changing unknown2 affects this???
-			16: "flag \(0, .flag) is less than or equal to \(1, .idOnly)",
+			16: "flag \(0, .flag) is less than or equal to \(1, .integer)",
 			// wait, < or <=? probably <= right???
 			// same test results as 9 and 15: triggers for nil but not once set??
 //			<56 8> <5 0>    used to determine whether to spawn bullwort in his office
 			// 13/16 memory types are 8 and 9
-			17: "flag \(0, .flag) is greater than \(1, .idOnly)",
+			17: "flag \(0, .flag) is greater than \(1, .integer)",
 			// 17 (flag, number)? >?
-			18: "flag \(0, .flag) is greater than or equal to \(1, .idOnly)",
+			18: "flag \(0, .flag) is greater than or equal to \(1, .integer)",
 			// 18 (flag, number)? this also seems like >=??
 			19: "all flags true \(0..., .flag)",
 //			requires an unknown 5 (&&, right?)
@@ -639,7 +639,7 @@ extension DEP.Unpacked.ArgumentType {
 			case .entity:          parseLookupTable(entityIDs, text: text) ?? parsePrefix(text)
 			case .flag:            parseFlag(text, for: game)
 			case .region:          parseLookupTable(regionIDs, text: text) ?? parsePrefix(text)
-			case .idOnly:          parseIDOnly(text)
+			case .integer:         parseInteger(text)
 			case .unknown:         parseFlag(text, for: game)
 			case .vivosaur:        parseLookupTable(vivosaurIDs, text: text) ?? parsePrefix(text)
 		}
@@ -655,7 +655,7 @@ extension DEP.Unpacked.ArgumentType {
 			case .entity:          "\(entityNames[Int32(argument.id)] ?? "entity \(argument.id)")"
 			case .flag:            formatFlag(argument, for: game)
 			case .region:          "\(regionNames[Int32(argument.id)] ?? "region \(argument.id)")"
-			case .idOnly:          "\(argument.id)"
+			case .integer:         "\(argument.id)"
 			case .unknown:         "\(argument.id) \(argument.type)"
 			case .vivosaur:        "\(vivosaurNames[Int32(argument.id)] ?? "vivosaur \(argument.id)")"
 		}
@@ -663,7 +663,7 @@ extension DEP.Unpacked.ArgumentType {
 	
 	func validate(_ argument: DEP.Unpacked.Event.Requirement.Argument) {
 		switch self {
-			case .entity, .region, .idOnly, .vivosaur:
+			case .entity, .region, .integer, .vivosaur:
 				// TODO: this should fail better
 				precondition(argument.type == 0)
 			default: ()
@@ -696,7 +696,7 @@ fileprivate func parseEvent(
 	}
 }
 
-fileprivate func parseIDOnly(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
+fileprivate func parseInteger(_ text: Substring) -> DEP.Unpacked.Event.Requirement.Argument? {
 	UInt16(text).map { DEP.Unpacked.Event.Requirement.Argument(id: $0, type: 0) }
 }
 
