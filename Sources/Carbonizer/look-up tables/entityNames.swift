@@ -917,7 +917,8 @@ let entityNames: [Int32: String] = [
 //	948: "", // o01iwa2 []
 //	949: "", // o01iwa1 []
 //	950: "", // cha37a head37a
-//	951: "", // cha28d head28b
+//	951: "Shopkeeper pre-opening", // cha28d head28b
+	// - maybe chapter 1? idk abt chapter 0 or early chapter 2
 //	952: "", // ana02 []
 //	953: "", // dai []
 //	954: "", // cha199 []

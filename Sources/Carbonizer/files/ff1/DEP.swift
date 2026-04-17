@@ -19,7 +19,7 @@ enum DEP {
 			var id: UInt32
 			
 			var requires: Criteria
-			var unknown2: UInt32
+			var canRunMultipleTimes: UInt32
 			
 			var requirementCount: UInt32
 			var requirementOffsetsOffset: UInt32 = 0x14
@@ -128,8 +128,7 @@ enum DEP {
 		struct Event {
 			var id: UInt32
 			var requires: Criteria
-			var unknown2: Bool // is true and false for diggins dialogue responses after cleaning tutorial
-							   // mark as played or smthn ?
+			var canRunMultipleTimes: Bool
 			var isComment: Bool
 			var requirements: [Requirement]
 			
@@ -185,7 +184,7 @@ extension DEP.Packed.Event {
 		
 		id = unpacked.id
 		requires = Criteria(unpacked.requires)
-		unknown2 = unpacked.unknown2 ? 1 : 0
+		canRunMultipleTimes = unpacked.canRunMultipleTimes ? 1 : 0
 		
 		requirements = unpacked.requirements.compactMap(Requirement.init)
 		requirementCount = UInt32(requirements.count)
@@ -271,7 +270,7 @@ extension DEP.Unpacked.Event {
 	init(_ packed: DEP.Packed.Event) {
 		id = packed.id
 		requires = Criteria(packed.requires)
-		unknown2 = packed.unknown2 > 0
+		canRunMultipleTimes = packed.canRunMultipleTimes > 0
 		isComment = false
 		requirements = packed.requirements.map(Requirement.init)
 	}
@@ -305,23 +304,29 @@ extension DEP.Unpacked.Event.Requirement {
 	func regions() -> [Int32] {
 		guard case .known(_, let definition, let arguments) = self else { return [] }
 		
+		// no requirements with regions are variadic, but if one is added, this will be wrong
 		return definition.argumentTypes
 			.indices { $0 == .region }
 			.ranges
-			.map(\.lowerBound)
-			.map { arguments[$0] }
-			.map { Int32($0.id) }
+			.flatMap { $0.map { Int32(arguments[$0].id) } }
 	}
 	
 	func events() -> [UInt32] {
 		guard case .known(_, let definition, let arguments) = self else { return [] }
 		
-		return definition.argumentTypes
-			.indices { $0 == .event }
-			.ranges
-			.map(\.lowerBound)
-			.map { arguments[$0] }
-			.map { UInt32($0.id) }
+		return if definition.argumentTypes.count == 1,
+				  definition.outputStringThingy.contains(where: \.isVariadic),
+				  definition.argumentTypes[0] == .event
+		{
+			arguments
+				.map(\.id)
+				.map { UInt32($0) }
+		} else {
+			definition.argumentTypes
+				.indices { $0 == .event }
+				.ranges
+				.flatMap { $0.map { UInt32(arguments[$0].id) } }
+		}
 	}
 }
 
@@ -376,7 +381,7 @@ extension DEP.Unpacked.Event {
 		requires = try Criteria(rawValue: String(eventArguments[1]))
 			.orElseThrow(ParseError.failedToParse(eventArguments[1], in: text))
 		
-		unknown2 = try Bool(String(eventArguments[2]))
+		canRunMultipleTimes = try Bool(String(eventArguments[2]))
 			.orElseThrow(ParseError.failedToParse(eventArguments[2], in: text))
 		
 		requirements = try lines
@@ -475,7 +480,7 @@ extension String {
 		
 		let commentPrefix = event.isComment ? "// " : ""
 		
-		let header = "\(labelPrefix)\(commentPrefix)event <\(event.id)>, requires: <\(event.requires)>, unknown: <\(event.unknown2)>"
+		let header = "\(labelPrefix)\(commentPrefix)event <\(event.id)>, requires: <\(event.requires)>, can run multiple times: <\(event.canRunMultipleTimes)>"
 		
 		let requirements = event.requirements.map {
 			String($0, configuration: configuration, isInComment: event.isComment)

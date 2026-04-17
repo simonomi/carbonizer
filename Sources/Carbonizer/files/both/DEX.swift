@@ -150,7 +150,7 @@ enum DEX {
 			50:  "smoothes out movement or something for \(0, .entity)",
 			51:  "control \(0, .entity)",
 			// 52: (#, #)
-			55:  "dialogue \(2, .dialogue) with choice, storing result at \(1, .flag), unknown: \(0, .unknown)",
+			55:  "dialogue \(2, .dialogue) with choice, storing result at \(0, .flag), unknown: \(1, .flag)",
 			56:  "delay \(0, .frames)",
 			57:  "start \(1, .battle), storing result at \(0, .flag)",
 			58:  "clean1 \(1, .fossil), unknown: \(0, .unknown)",
