@@ -1,5 +1,5 @@
 public enum Processor: String, Hashable, Sendable {
-	case episodeDialogueLabeller, episodeDialogueSaver, episodeBattleLabeller, episodeRegionLabeller, exportVivosaurModels, exportModels, exportSprites, exportImages, eventLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+	case episodeDialogueLabeller, episodeDialogueSaver, episodeBattleLabeller, episodeRegionLabeller, exportVivosaurModels, exportModels, exportSprites, exportImages, eventLabeller, depEventLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	
 	var name: String { rawValue }
 	
@@ -14,6 +14,7 @@ public enum Processor: String, Hashable, Sendable {
 			case .exportSprites:             .unpack
 			case .exportImages:              .unpack
 			case .eventLabeller:             .unpack
+			case .depEventLabeller:          .unpack
 			case .battleFighterNameLabeller: .unpack
 			case .ffcCreatureLabeller:       .unpack
 			case .maskNameLabeller:          .unpack
@@ -34,6 +35,7 @@ public enum Processor: String, Hashable, Sendable {
 			case .exportSprites:             [.mmsRipper, .spriteReparser, .spriteExporter]
 			case .exportImages:              [.mpmRipper, .imageReparser, .imageExporter]
 			case .eventLabeller:             [.eventIDRipper, .eventLabeller]
+			case .depEventLabeller:          [.depEventLabeller]
 			case .battleFighterNameLabeller: [.textRipper, .dbsNameLabeller]
 			case .ffcCreatureLabeller:       [.textRipper, .ffcCreatureLabeller]
 			case .maskNameLabeller:          [.textRipper, .hmlNameLabeller]
@@ -54,6 +56,7 @@ public enum Processor: String, Hashable, Sendable {
 			case .exportSprites:             [.ff1]
 			case .exportImages:              [.ff1]
 			case .eventLabeller:             [.ff1]
+			case .depEventLabeller:          [.ff1]
 			case .battleFighterNameLabeller: [.ff1]
 			case .ffcCreatureLabeller:       [.ffc]
 			case .maskNameLabeller:          [.ff1]
@@ -75,6 +78,7 @@ public enum Processor: String, Hashable, Sendable {
 			case .exportSprites:             (warn: ["MMS"], dontWarn: ["MAR"])
 			case .exportImages:              (warn: ["MPM"], dontWarn: ["MAR"])
 			case .eventLabeller:             (warn: ["DEP"], dontWarn: ["MAR", "DEX"])
+			case .depEventLabeller:          (warn: ["DEP"], dontWarn: ["MAR"])
 			case .battleFighterNameLabeller: (warn: ["DTX"], dontWarn: ["MAR", "DBS"])
 			case .ffcCreatureLabeller:       (warn: ["DTX"], dontWarn: ["MAR", "DCL"])
 			case .maskNameLabeller:          (warn: ["DTX"], dontWarn: ["MAR", "HML"])
@@ -131,7 +135,7 @@ public enum Processor: String, Hashable, Sendable {
 	
 	enum Stage: Equatable {
 		case battleRipper, dexDialogueRipper, dialogueRipper, textRipper, eventIDRipper, ff1MM3Ripper, ffcMM3Ripper, tclRipper, tcmRipper, mpmRipper, mmsRipper, regionMapRipper
-		case dbsNameLabeller, depRegionLabeller, dexDialogueLabeller, dexDialogueSaver, dexBattleLabeller, dexRegionLabeller, eventLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case dbsNameLabeller, depEventLabeller, depRegionLabeller, dexDialogueLabeller, dexDialogueSaver, dexBattleLabeller, dexRegionLabeller, eventLabeller, ffcCreatureLabeller, hmlNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 		case imageReparser, modelReparser, spriteReparser
 		case imageExporter, modelExporter, spriteExporter, textureExporter
 		
@@ -241,6 +245,14 @@ public enum Processor: String, Hashable, Sendable {
 					try file.runProcessor(
 						dbsNameLabellerF,
 						on: "battle/**",
+						in: &environment,
+						at: [],
+						configuration: configuration
+					)
+				case .depEventLabeller:
+					try file.runProcessor(
+						depEventLabellerF,
+						on: "episode/*",
 						in: &environment,
 						at: [],
 						configuration: configuration

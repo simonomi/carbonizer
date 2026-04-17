@@ -71,6 +71,10 @@ extension Set<Processor> {
 			result.insert(.eventLabeller)
 		}
 		
+		if cli.depEventLabeller {
+			result.insert(.depEventLabeller)
+		}
+		
 		if cli.battleFighterNameLabeller {
 			result.insert(.battleFighterNameLabeller)
 		}

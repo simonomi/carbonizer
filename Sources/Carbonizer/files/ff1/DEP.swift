@@ -16,7 +16,7 @@ enum DEP {
 		
 		@BinaryConvertible
 		struct Event {
-			var id: Int32
+			var id: UInt32
 			
 			var requires: Criteria
 			var unknown2: UInt32
@@ -126,7 +126,7 @@ enum DEP {
 		]
 		
 		struct Event {
-			var id: Int32
+			var id: UInt32
 			var requires: Criteria
 			var unknown2: Bool // is true and false for diggins dialogue responses after cleaning tutorial
 							   // mark as played or smthn ?
@@ -312,6 +312,17 @@ extension DEP.Unpacked.Event.Requirement {
 			.map { arguments[$0] }
 			.map { Int32($0.id) }
 	}
+	
+	func events() -> [UInt32] {
+		guard case .known(_, let definition, let arguments) = self else { return [] }
+		
+		return definition.argumentTypes
+			.indices { $0 == .event }
+			.ranges
+			.map(\.lowerBound)
+			.map { arguments[$0] }
+			.map { UInt32($0.id) }
+	}
 }
 
 extension DEP.Unpacked.Event.Requirement.Argument {
@@ -323,16 +334,27 @@ extension DEP.Unpacked.Event.Requirement.Argument {
 
 extension DEP.Unpacked.Event {
 	init(_ text: Substring, configuration: Configuration) throws(DEP.Unpacked.ParseError) {
-		let lines = text.split(separator: "\n")
-		let firstLine = lines.first!
+		var lines = text.split(separator: "\n")
 		
-		if firstLine.hasPrefix("// event") {
-			isComment = true
-		} else if firstLine.hasPrefix("event") {
-			isComment = false
-		} else {
+		guard let headerLineIndex = lines.firstIndex(where: {
+			$0.hasPrefix("event <") || $0.hasPrefix("// event <")
+		}) else {
 			throw .eventMissingID(eventText: text)
 		}
+		
+		let firstLine = lines[headerLineIndex]
+		
+		let linesBeforeHeader = headerLineIndex - lines.startIndex
+		
+		for line in lines.prefix(linesBeforeHeader) {
+			if !line.hasPrefix("//") {
+				configuration.log(.warning, "DEP requirement comes before event line, will be skipped: \(.red)'\(line)'\(.normal)")
+			}
+		}
+		
+		lines.removeFirst(linesBeforeHeader + 1)
+		
+		isComment = firstLine.hasPrefix("//")
 		
 		guard let (eventArguments, _) = extractAngleBrackets(from: firstLine) else {
 			throw .mismatchedAngleBrackets(requirement: text)
@@ -348,7 +370,7 @@ extension DEP.Unpacked.Event {
 		
 		typealias ParseError = DEP.Unpacked.ParseError
 		
-		id = try Int32(eventArguments[0])
+		id = try UInt32(eventArguments[0])
 			.orElseThrow(ParseError.failedToParse(eventArguments[0], in: text))
 		
 		requires = try Criteria(rawValue: String(eventArguments[1]))
@@ -358,7 +380,6 @@ extension DEP.Unpacked.Event {
 			.orElseThrow(ParseError.failedToParse(eventArguments[2], in: text))
 		
 		requirements = try lines
-			.dropFirst()
 			.map { (line) throws(ParseError) -> Requirement in
 				try Requirement(line, configuration: configuration)
 			}
@@ -450,9 +471,11 @@ extension DEP.Unpacked.Event.Requirement {
 
 extension String {
 	init(_ event: DEP.Unpacked.Event, configuration: Configuration) {
+		let labelPrefix = eventLabels[event.id].map { "// \($0)\n" } ?? ""
+		
 		let commentPrefix = event.isComment ? "// " : ""
 		
-		let header = "\(commentPrefix)event <\(event.id)>, requires: <\(event.requires)>, unknown: <\(event.unknown2)>"
+		let header = "\(labelPrefix)\(commentPrefix)event <\(event.id)>, requires: <\(event.requires)>, unknown: <\(event.unknown2)>"
 		
 		let requirements = event.requirements.map {
 			String($0, configuration: configuration, isInComment: event.isComment)

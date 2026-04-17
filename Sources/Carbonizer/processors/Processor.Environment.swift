@@ -2,7 +2,7 @@ extension Processor {
 	struct Environment {
 		var text: [String: [String]]?
 		var dialogue: [UInt32: String]?
-		var eventIDs: [String: [Int32]]?
+		var eventIDs: [String: [UInt32]]?
 		var regionMaps: [Int32: UInt16]?
 		var battles: [UInt32: Battle]?
 		
