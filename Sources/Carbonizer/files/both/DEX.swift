@@ -40,13 +40,7 @@ enum DEX {
 		var commands: [[Command]]
 		
 		enum ArgumentType {
-			case boolean, entity, degrees, dialogue, effect, fixedPoint, flag, fossil, frames, image, integer, map, movement, music, soundEffect, unknown, vivosaur
-			
-			// TODO: region type (regionNames)
-			// - processor to label map if no name
-			// TODO: battle type
-			// - processor 'level # So-and-So with V1, V2, and V3'
-			
+			case battle, boolean, entity, degrees, dialogue, effect, fixedPoint, flag, fossil, frames, image, integer, map, movement, music, region, soundEffect, unknown, vivosaur
 			// notes on flags:
 			// - two numbers, a u24 and u8
 			// - i list them u24 u8, should i swap that?
@@ -165,10 +159,8 @@ enum DEX {
 			//     set false?
 			//     memory types 5, 6, 10
 			7:   "spawn \(0, .entity) in \(1, .map) at \(2, 3, .vector) facing \(4, .degrees)",
-			// 8:   (entity, #)
-			// spawn region thing?
-			8:   "spawn \(0, .entity) at region \(1, .integer)",
-			9:   "spawn \(0, .entity) at region \(1, .integer) facing \(2, .degrees)",
+			8:   "spawn \(0, .entity) at \(1, .region)",
+			9:   "spawn \(0, .entity) at \(1, .region) facing \(2, .degrees)",
 			10:  "teleport \(0, .entity) to \(1, .entity)",
 			// 11: (#, #, fp, fp, #)
 			//   - (#, #, vector, #)
@@ -209,7 +201,7 @@ enum DEX {
 			// 52: (#, #)
 			55:  "dialogue \(2, .dialogue) with choice, storing result at \(1, .flag), unknown: \(0, .unknown)",
 			56:  "delay \(0, .frames)",
-			57:  "battle \(1, .integer), storing result at \(0, .flag)",
+			57:  "start \(1, .battle), storing result at \(0, .flag)",
 			58:  "clean1 \(1, .fossil), unknown: \(0, .unknown)",
 			59:  "clean2 \(1, .fossil), unknown: \(0, .unknown)",
 			// unknown is which flag to save the result in (type 5)
@@ -700,28 +692,31 @@ extension String {
 extension DEX.Unpacked.ArgumentType {
 	func parse(_ text: Substring, for game: Configuration.Game) -> Int32? {
 		switch self {
-			case .boolean:         parseBoolean(text)
-			case .entity:          entityIDs[text.lowercased()] ?? parsePrefix(text)
-			case .degrees:         parseSuffix(text)
-			case .flag:            parseFlag(text, for: game)
-			case .dialogue:        parsePrefix(text)
-			case .effect:          effectIDs[text.lowercased()] ?? parsePrefix(text)
-			case .fixedPoint:      parseFixedPoint(text)
-			case .fossil:          fossilIDs[text.lowercased()] ?? parsePrefix(text)
-			case .frames:          parseSuffix(text)
-			case .image:           imageIDs[text.lowercased()] ?? parsePrefix(text)
-			case .integer:         Int32(text)
-			case .map:             mapIDs[text.lowercased()] ?? parsePrefix(text)
-			case .movement:        movementIDs[text.lowercased()] ?? parsePrefix(text)
-			case .music:           parsePrefix(text)
-			case .soundEffect:     soundEffectIDs[text.lowercased()] ?? parsePrefix(text)
-			case .unknown:         parseUnknown(text)
-			case .vivosaur:        vivosaurIDs[text.lowercased()] ?? parsePrefix(text)
+			case .battle:      parsePrefix(text)
+			case .boolean:     parseBoolean(text)
+			case .entity:      entityIDs[text.lowercased()] ?? parsePrefix(text)
+			case .degrees:     parseSuffix(text)
+			case .flag:        parseFlag(text, for: game)
+			case .dialogue:    parsePrefix(text)
+			case .effect:      effectIDs[text.lowercased()] ?? parsePrefix(text)
+			case .fixedPoint:  parseFixedPoint(text)
+			case .fossil:      fossilIDs[text.lowercased()] ?? parsePrefix(text)
+			case .frames:      parseSuffix(text)
+			case .image:       imageIDs[text.lowercased()] ?? parsePrefix(text)
+			case .integer:     Int32(text)
+			case .map:         mapIDs[text.lowercased()] ?? parsePrefix(text)
+			case .movement:    movementIDs[text.lowercased()] ?? parsePrefix(text)
+			case .music:       parsePrefix(text)
+			case .region:      regionIDs[text.lowercased()] ?? parsePrefix(text)
+			case .soundEffect: soundEffectIDs[text.lowercased()] ?? parsePrefix(text)
+			case .unknown:     parseUnknown(text)
+			case .vivosaur:    vivosaurIDs[text.lowercased()] ?? parsePrefix(text)
 		}
 	}
 	
 	func format(_ number: Int32, for game: Configuration.Game) -> String {
 		switch self {
+			case .battle:      "battle \(number)"
 			case .boolean:     formatBoolean(number)
 			case .entity:      entityNames[number] ?? "entity \(number)"
 			case .degrees:     "\(number) degrees"
@@ -736,6 +731,7 @@ extension DEX.Unpacked.ArgumentType {
 			case .map:         mapNames[number] ?? "map \(number)"
 			case .movement:    movementNames[number] ?? "movement \(number)"
 			case .music:       "music \(number)"
+			case .region:      regionNames[number] ?? "region \(number)"
 			case .soundEffect: soundEffectNames[number] ?? "sound effect \(number)"
 			case .unknown:     formatUnknown(number)
 			case .vivosaur:    vivosaurNames[number] ?? "vivosaur \(number)"

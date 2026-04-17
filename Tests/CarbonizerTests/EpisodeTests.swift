@@ -83,6 +83,7 @@ extension DEX.Unpacked.CommandDefinition {
 extension DEX.Unpacked.ArgumentType {
 	var name: StaticString {
 		switch self {
+			case .battle: "battle"
 			case .boolean: "boolean"
 			case .entity: "entity"
 			case .degrees: "degrees"
@@ -97,6 +98,7 @@ extension DEX.Unpacked.ArgumentType {
 			case .map: "map"
 			case .movement: "movement"
 			case .music: "music"
+			case .region: "region"
 			case .soundEffect: "sound effect"
 			case .unknown: "unknown"
 			case .vivosaur: "vivosaur"
