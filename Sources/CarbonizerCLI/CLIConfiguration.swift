@@ -89,7 +89,7 @@ struct CLIConfiguration : Sendable {
 			// make the output ROM much smaller, but will take a good amount of time
 			// to run. it's good when creating patches so the modded ROM matches the
 			// original as much as possible
-			compression: false,
+			"compression": false,
 			
 			// limit the files carbonizer will unpack. any files included in this list will 
 			// be skipped by carbonizer when unpacking, which will make carbonizer run faster 
@@ -102,108 +102,108 @@ struct CLIConfiguration : Sendable {
 			// these options accept globs within an nds' contents ("text/japanese", "episode/*", 
 			// "model/**", "**/arc*"). file names in globs may contain one wildcard ("arc*"), 
 			// but not two ("*arc*").
-			onlyUnpack: [],
-			skipUnpacking: [],
-			// skipUnpacking: ["model"], // most of the largest files are in model, so if you're not editing model files, skipping it can save time
-			// skipUnpacking: ["**/arc*", "**/*arc", "**/*archive"], // without compression, ffc needs to skip some large files, otherwise the output ROM is too big and doesn't work
+			"onlyUnpack": [],
+			"skipUnpacking": [],
+			// "skipUnpacking": ["model"], // most of the largest files are in model, so if you're not editing model files, skipping it can save time
+			// "skipUnpacking": ["**/arc*", "**/*arc", "**/*archive"], // without compression, ffc needs to skip some large files, otherwise the output ROM is too big and doesn't work
 			
-			processors: {
+			"processors": {
 				// extract non-vivosaur 3D model files
 				// required file types: MAR, MM3
-				exportModels: true,
+				"exportModels": true,
 				
 				// extract vivosaur 3D model files
 				// required file types: MAR, 3CL
-				exportVivosaurModels: true,
+				"exportVivosaurModels": true,
 				
 				// extract images (image folder)
 				// required file types: MAR, MPM
-				exportImages: true,
+				"exportImages": true,
 				
 				// extract sprites (motion folder)
 				// required file types: MAR, MMS
-				exportSprites: true,
+				"exportSprites": true,
 				
 				// adds comments to DEX files that show the dialogue used in a given command
 				// required file types: MAR, DEX, DMG
-				episodeDialogueLabeller: true,
+				"episodeDialogueLabeller": true,
 				
 				// allows editing the comments made by episodeDialogueLabeller, which will be
 				// saved to the correct MSG file. new lines of dialogue cannot be added
 				// required file types: MAR, DEX, DMG 
-				episodeDialogueSaver: false,
+				"episodeDialogueSaver": false,
 				
 				// adds comments to DEX files that describe the battle used in a given command
 				// required file types: MAR, DBS, DEX 
-				episodeBattleLabeller: true,
+				"episodeBattleLabeller": true,
 				
 				// adds comments to DEX files that describe the regions used in a given command
 				// required file types: MAR, _match, and either DEX or DEP 
-				episodeRegionLabeller: true,
+				"episodeRegionLabeller": true,
 				
 				// labels the events of commands in DEX files with their event number. this number
 				// is used by DEP files to control when an event triggers
 				// required file types: MAR, DEX, DEP
-				eventLabeller: true,
+				"eventLabeller": true,
 				
 				// adds labels for the names of fighters in DBS files (battle folder)
 				// required file types: MAR, DBS, DTX
-				battleFighterNameLabeller: true,
+				"battleFighterNameLabeller": true,
 				
 				// adds labels for the names of vivosaurs in creature_defs
 				// required file types: MAR, DCL, DTX
-				ffcCreatureLabeller: true,
+				"ffcCreatureLabeller": true,
 				
 				// adds labels for the names of masks in `etc/headmask_defs`
 				// required file types: MAR, HML, DTX
-				maskNameLabeller: true,
+				"maskNameLabeller": true,
 				
 				// adds labels for the text in `etc/keyitem_defs`
 				// required file types: MAR, KIL, DTX
-				keyItemLabeller: true,
+				"keyItemLabeller": true,
 				
 				// adds labels for the names of maps in MAP files (`map/m/` folder)
 				// required file types: MAR, MAP, DTX
-				mapLabeller: true,
+				"mapLabeller": true,
 				
 				// adds labels for the descriptions in `etc/museum_defs`
 				// required file types: MAR, DML, DTX
-				museumLabeller: true
+				"museumLabeller": true
 			},
 			
 			// this option can be overridden by a command-line flag
-			compressionMode: "auto", // auto, pack, unpack
+			"compressionMode": "auto", // auto, pack, unpack
 			
 			// any files passed as command-line arguments are run first
-			inputFiles: [],
+			"inputFiles": [],
 			
 			// where any output files will be placed
-			outputFolder: null,
+			"outputFolder": null,
 			
 			// whether to overwrite any already-existing output files
-			overwriteOutput: false,
+			"overwriteOutput": false,
 			
-			showProgress: true,
+			"showProgress": true,
 			
-			keepWindowOpen: "onError", // always, never, onError
+			"keepWindowOpen": "onError", // always, never, onError
 			
 			// enables pretty colorful output! not all terminals support colors though :(
 			// turn this off if you see weird stuff like "�[33;1mwarning:�[0m"
-			useColor: \(defaultUseColor),
+			"useColor": \(defaultUseColor),
 			
 			// stores metadata for MAR files in a separate file, rather than the creation
 			// date. this can avoid some problems, but creates a bunch of annoying extra files.
 			// it's also a lot slower, but is required to make MAR packing work on linux.
-			externalMetadata: \(defaultExternalMetadata),
+			"externalMetadata": \(defaultExternalMetadata),
 			
-			hotReloading: false, // macOS only
+			"hotReloading": false, // macOS only
 			
 			// ff1 and ffc have different formats for the "same" files (DEX, DCL, etc).
 			// by default, carbonizer will try to guess which game you're running it on, 
 			// but you can manually override it with this option
 			// (if the auto-detect is getting it wrong, make sure the game's file name
 			//  has some variation of "Champions" or "champions" in it) 
-			game: "auto", // ff1, ffc, auto
+			"game": "auto", // ff1, ffc, auto
 			
 			// the file types to pack/unpack. if null, all file types for selected game are enabled
 			//
@@ -212,8 +212,8 @@ struct CLIConfiguration : Sendable {
 			// both ff1/ffc: _match, DCL, DEX, DMG, DMS, DTX, GRD, KIL, MM3, MMS, MPM
 			// ff1-only: 3BA, 3CL, BBG, BCO, CHR, DAL, DBA, DBS, DBT, DEP, DML, DSL, ECS, HML, KPS, MAP, RLS, SHP
 			// ffc-only: 3CM, 3CN
-			fileTypes: null,
-			// fileTypes: ["MAR", "DMG", "DTX"], // only dialogue/text
+			"fileTypes": null,
+			// "fileTypes": ["MAR", "DMG", "DTX"], // only dialogue/text
 		}
 		"""
 	
