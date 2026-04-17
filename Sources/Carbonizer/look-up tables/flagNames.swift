@@ -75,7 +75,7 @@ let ff1FlagNames: [UInt8: [UInt32: String]] = [
 		25: "successful cleanings",
 		26: "oasis growth timer",
 		28: "gems cleaned by KL-33N",
-		29: "gem sell value by KL-33N",
+		29: "gem sell value by KL-33N", // TODO: clarify ?
 		30: "sonar monitor upgrade level", // (2 is 800 G, 3 is 3500 G)
 		31: "sonar fossil chip upgrade level", // (2 is 10000 G, 3 is 35000 G)
 		32: "sonar fossil filter upgrade level", // (2 is 5000 G, 3 is 8000 G)
@@ -87,8 +87,8 @@ let ff1FlagNames: [UInt8: [UInt32: String]] = [
 		28: "status menu unlocked",
 		30: "multiplayer unlocked",
 		32: "Dino Medal screen unlocked",
-		33: "super drill unlocked",
-		34: "hyper hammer unlocked",
+		33: "super drill unlocked", // TODO: capitalize
+		34: "hyper hammer unlocked", // TODO: capitalize
 	]
 ]
 
