@@ -152,6 +152,10 @@ struct CarbonizerCLI: AsyncParsableCommand {
 			}
 		}
 		
+		if cliConfiguration.keepWindowOpen == .always {
+			waitForInput()
+		}
+		
 #if !IN_CI
 		print("\(.green)total", -start.timeIntervalSinceNow, "\(.normal)")
 #endif
