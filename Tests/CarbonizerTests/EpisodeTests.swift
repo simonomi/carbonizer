@@ -157,7 +157,7 @@ extension DEP.Unpacked.ArgumentType {
 }
 
 @Test(
-//	.disabled("only enable when needed")
+	.disabled("only enable when needed")
 )
 func exportFlags() throws {
 	typealias Flags = [Types]

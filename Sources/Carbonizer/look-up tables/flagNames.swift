@@ -34,7 +34,6 @@ let ff1FlagNames: [UInt8: [UInt32: String]] = [
 		11511: "player is in Parchment Desert",
 	],
 	8: [
-		// <51 8>
 		56: "chapter number",
 		// <59 8> might be mask shop result? or maybe previous mask?
 		// <59 8> is used to read a dialogue choice (temp variable?)
@@ -75,20 +74,20 @@ let ff1FlagNames: [UInt8: [UInt32: String]] = [
 		25: "successful cleanings",
 		26: "oasis growth timer",
 		28: "gems cleaned by KL-33N",
-		29: "gem sell value by KL-33N", // TODO: clarify ?
+		29: "value of gems just sold by KL-33N",
 		30: "sonar monitor upgrade level", // (2 is 800 G, 3 is 3500 G)
 		31: "sonar fossil chip upgrade level", // (2 is 10000 G, 3 is 35000 G)
 		32: "sonar fossil filter upgrade level", // (2 is 5000 G, 3 is 8000 G)
 		39: "cleaning time bonus",
-//		41: something that can be sold in the shop
+//		41: something that can be sold in the shop (possibly beta?)
 		46: "donation points just added",
 	],
 	10: [
 		28: "status menu unlocked",
 		30: "multiplayer unlocked",
 		32: "Dino Medal screen unlocked",
-		33: "super drill unlocked", // TODO: capitalize
-		34: "hyper hammer unlocked", // TODO: capitalize
+		33: "Super Drill unlocked",
+		34: "Hyper Hammer unlocked",
 	]
 ]
 
