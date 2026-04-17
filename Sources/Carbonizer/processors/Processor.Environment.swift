@@ -4,6 +4,7 @@ extension Processor {
 		var dialogue: [UInt32: String]?
 		var eventIDs: [String: [Int32]]?
 		var regionMaps: [Int32: UInt16]?
+		var battles: [UInt32: Battle]?
 		
 		// dialogue ripped from DEX files
 		var conflictedDexDialogue: [UInt32: WithPossibleMergeConflict<String>]?
@@ -20,6 +21,12 @@ extension Processor {
 		var spriteAnimationFiles: [[String]: Set<Int>]?
 		var spritePaletteFiles: [[String]: Set<Int>]?
 		var spriteBitmapFiles: [[String]: Set<Int>]?
+		
+		struct Battle {
+			var enemyName: String
+			var enemyLevel: Int32
+			var enemyVivosaurs: [String]
+		}
 		
 		var _modelTableNameCache: Set<[String]>?
 		mutating func modelTableNames() throws -> Set<[String]> {

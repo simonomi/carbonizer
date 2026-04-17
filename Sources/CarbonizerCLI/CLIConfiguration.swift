@@ -31,6 +31,7 @@ struct CLIConfiguration : Sendable {
 		var exportImages: Bool
 		var episodeDialogueLabeller: Bool
 		var episodeDialogueSaver: Bool
+		var episodeBattleLabeller: Bool
 		var episodeRegionLabeller: Bool
 		var eventLabeller: Bool
 		var battleFighterNameLabeller: Bool
@@ -135,7 +136,11 @@ struct CLIConfiguration : Sendable {
 				// required file types: MAR, DEX, DMG 
 				episodeDialogueSaver: false,
 				
-				// adds comments to DEX files that describes the regions used in a given command
+				// adds comments to DEX files that describe the battle used in a given command
+				// required file types: MAR, DBS, DEX 
+				episodeBattleLabeller: true,
+				
+				// adds comments to DEX files that describe the regions used in a given command
 				// required file types: MAR, _match, and either DEX or DEP 
 				episodeRegionLabeller: true,
 				
@@ -276,7 +281,7 @@ struct UnknownOptions: Error, CustomStringConvertible {
 
 extension CLIConfiguration.Processors: Decodable {
 	enum CodingKeys: CodingKey, CaseIterable {
-		case exportVivosaurModels, exportModels, exportSprites, exportImages, episodeDialogueLabeller, episodeDialogueSaver, episodeRegionLabeller, eventLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
+		case exportVivosaurModels, exportModels, exportSprites, exportImages, episodeDialogueLabeller, episodeDialogueSaver, episodeBattleLabeller, episodeRegionLabeller, eventLabeller, battleFighterNameLabeller, ffcCreatureLabeller, maskNameLabeller, keyItemLabeller, mapLabeller, museumLabeller
 	}
 	
 	init(from decoder: any Decoder) throws {
@@ -305,6 +310,8 @@ extension CLIConfiguration.Processors: Decodable {
 			fallback.episodeDialogueLabeller
 		episodeDialogueSaver =      try container.decodeIfPresent(Bool.self, forKey: .episodeDialogueSaver) ??
 			fallback.episodeDialogueSaver
+		episodeBattleLabeller =     try container.decodeIfPresent(Bool.self, forKey: .episodeBattleLabeller) ??
+			fallback.episodeBattleLabeller
 		episodeRegionLabeller =     try container.decodeIfPresent(Bool.self, forKey: .episodeRegionLabeller) ??
 			fallback.episodeRegionLabeller
 		eventLabeller =             try container.decodeIfPresent(Bool.self, forKey: .eventLabeller) ??

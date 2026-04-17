@@ -628,6 +628,16 @@ extension DEX.Unpacked.Command {
 			.map(\.lowerBound)
 			.map { arguments[$0] }
 	}
+	
+	func battles() -> [UInt32] {
+		guard case .known(_, let definition, let arguments) = self else { return [] }
+		
+		return definition.argumentTypes
+			.indices { $0 == .battle }
+			.ranges
+			.map(\.lowerBound)
+			.map { UInt32(arguments[$0]) }
+	}
 }
 
 extension DEX.Unpacked.Command.ParseError: CustomStringConvertible {

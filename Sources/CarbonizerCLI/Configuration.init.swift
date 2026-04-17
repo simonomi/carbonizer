@@ -59,6 +59,10 @@ extension Set<Processor> {
 			result.insert(.episodeDialogueSaver)
 		}
 		
+		if cli.episodeBattleLabeller {
+			result.insert(.episodeBattleLabeller)
+		}
+		
 		if cli.episodeRegionLabeller {
 			result.insert(.episodeRegionLabeller)
 		}

@@ -1,11 +1,10 @@
 import Foundation
 
 // TODO: warning if output file is too large (ffc)
-// TODO: processor 'level # So-and-So with V1, V2, and V3'
 
 public enum Carbonizer {
 	// if run manually, CI will check for the string "main", so here you go :)
-	public static let version = "v2.22"
+	public static let version = "v2.23"
 	
 	public static func auto(
 		_ filePath: URL,
