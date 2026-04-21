@@ -178,6 +178,8 @@ func parseCommands(
 		}.result
 }
 
+// TODO: possibly see https://github.com/Gericom/EveryFileExplorer/blob/master/NDS/GPU/CommandContext.cs
+
 fileprivate func parseCommand(
 	state: inout CommandParsingState,
 	result: inout CommandParsingResult,

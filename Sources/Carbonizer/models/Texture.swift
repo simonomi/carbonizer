@@ -431,6 +431,7 @@ extension Texture.Unpacked.Image {
 							)
 					}
 			case .compressed:
+				// TODO: see https://github.com/Gericom/EveryFileExplorer/blob/master/NDS/GPU/Textures.cs
 				fatalError("i dont wanna do 4x4 compressed texture format")
 			case .a5i3:
 				pixels = try pixelData

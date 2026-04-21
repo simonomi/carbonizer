@@ -23,6 +23,11 @@ enum NDS {
 			@Offset(givenBy: \Self.header.arm9OverlayOffset)
 			var arm9OverlayTable: [OverlayTableEntry]
 			
+			// TODO: arm9 has 12 extra bytes
+			// https://github.com/Gericom/EveryFileExplorer/blob/f9f00d193c9608d71c9a23d9f3ab7e752f4ada2a/NDS/Nitro/ARM9.cs#L26
+			// - contains offset to "module params" ?
+			//   - https://github.com/Gericom/EveryFileExplorer/blob/master/NDS/Nitro/CRT0.cs#L12
+			
 			@Offset(givenBy: \Self.header.arm7Offset)
 			@Length(givenBy: \Self.header.arm7Size)
 			var arm7: Data
