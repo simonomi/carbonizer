@@ -5,6 +5,10 @@ enum MPM {
 	struct Packed {
 		@Include
 		static let magicBytes = "MPM"
+		
+		// something to do with bg maps
+		// if bg map, 5/0/8 or 4/0/4
+		// if no bg map, 0/3/0
 		var unknown1: UInt32
 		var unknown2: UInt32
 		var unknown3: UInt32
@@ -13,6 +17,9 @@ enum MPM {
 		var height: UInt32
 		
 		var colorCountDividedBy16: UInt32
+		// something to do with bg maps
+		// if no bg map, 5 is bitmap file size, 6 is 0
+		// if bg map... ?
 		var unknown5: UInt32
 		var unknown6: UInt32
 		
@@ -41,7 +48,9 @@ enum MPM {
 	
 	struct Unpacked: Codable {
 		// always either 030, 404, or 508
-		// 030 means 8-bit texture with no bgmaps
+		// 404 means 4-bit texture with bg maps
+		// 508 means 8-bit texture with bg maps
+		// 030 means 8-bit texture with no bg maps
 		var unknown1: UInt32
 		var unknown2: UInt32
 		var unknown3: UInt32
@@ -50,7 +59,7 @@ enum MPM {
 		var height: UInt32
 		
 		var colorCount: UInt32
-		var unknown5: UInt32 // 2 u16s ?
+		var unknown5: UInt32
 		var unknown6: UInt32
 		
 		var palette: TableEntry

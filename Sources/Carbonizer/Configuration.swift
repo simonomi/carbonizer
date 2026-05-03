@@ -67,7 +67,11 @@ public struct Configuration: Sendable {
 				Mesh_FF1.Unpacked.self as any ProprietaryFileData.Type,
 				Mesh_FFC.Unpacked.self as any ProprietaryFileData.Type,
 				Texture.Unpacked.self,
-				Animation.Unpacked.self
+				Animation.Unpacked.self,
+				SpriteAnimation.Unpacked.self,
+				SpritePalette.Unpacked.self,
+				SpriteBitmap.Unpacked.self,
+				Palette.Unpacked.self,
 			]
 			.flatMap { $0.unpackedAndPacked() }
 			

@@ -3,7 +3,7 @@ import BinaryParser
 enum SpriteBitmap {
 	@BinaryConvertible
 	struct Packed {
-		var widthAndHeight: UInt8
+		var widthAndHeight: UInt8 // see p116
 		var pixelCountDividedBy64: UInt8
 		var colorPaletteType: MMS.Packed.ColorPaletteType
 		
@@ -84,22 +84,41 @@ extension SpriteBitmap.Packed: ProprietaryFileData {
 	}
 	
 	fileprivate init(_ unpacked: SpriteBitmap.Unpacked, configuration: Configuration) {
-		todo()
+		widthAndHeight = switch (unpacked.width, unpacked.height) {
+			case (8, 8): 0
+			case (16, 8): 1
+			case (8, 16): 2
+			
+			case (16, 16): 4
+			case (32, 8): 5
+			case (8, 32): 6
+			
+			case (32, 32): 8
+			case (32, 16): 9
+			case (16, 32): 10
+			
+			case (64, 64): 12
+			case (64, 32): 13
+			case (32, 64): 14
+			
+			default: todo("prohibited sprite size, see page 116")
+		}
 		
-////		widthAndHeight =
-//		
-//		pixelCountDividedBy64 = UInt8(unpacked.colorIndices.count / 64)
-//		
-//		colorPaletteType = MMS.Packed.ColorPaletteType(unpacked.colorPaletteType)
-//		
-//		switch colorPaletteType {
-//			case .sixteenColors:
-////				colorIndices16 = unpacked.colorIndices // TODO: join 4-bit indices into 8-bit ones
-//				colorsIndices256 = nil
-//			case .twoFiftySixColors:
-//				colorIndices16 = nil
-//				colorsIndices256 = unpacked.colorIndices
-//		}
+		pixelCountDividedBy64 = UInt8(unpacked.colorIndices.count / 64)
+		
+		colorPaletteType = MMS.Packed.ColorPaletteType(unpacked.colorPaletteType)
+		
+		switch colorPaletteType {
+			case .sixteenColors:
+				precondition(unpacked.colorIndices.count.isMultiple(of: 2), "odd number of pixels in image")
+				colorIndices16 = unpacked.colorIndices
+					.chunked(exactSize: 2)
+					.map { $0.first! | $0.last! << 4 }
+				colorsIndices256 = nil
+			case .twoFiftySixColors:
+				colorIndices16 = nil
+				colorsIndices256 = unpacked.colorIndices
+		}
 	}
 }
 

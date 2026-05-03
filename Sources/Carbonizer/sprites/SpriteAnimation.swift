@@ -1,19 +1,48 @@
 import BinaryParser
+import Foundation
 
 enum SpriteAnimation {
 	struct Packed: BinaryConvertible {
 		var commands: [Command]
+		var leftoverBytesIsDoubled: UInt16?
+		var leftoverBytes: Data?
 		
 		init(_ data: inout Datastream) throws {
 			commands = [Command]()
 			repeat {
 				commands.append(try data.read(Command.self))
 			} while !commands.last!.isStop
+			
+			guard case .stop(let count) = commands.last! else {
+				fatalError("unreachable")
+			}
+			
+			if count > 0 {
+				// kinda hacky bc i dont understand how this works yet
+				leftoverBytesIsDoubled = try data.read(UInt16.self)
+				
+				// isDoubled == 0: count * 32 items
+				// isDoubled == 1: 2 * count * 32 items
+				let length = Int(leftoverBytesIsDoubled! + 1) * Int(count) * 32
+				leftoverBytes = try data.read(Data.self, length: length)
+			} else {
+				leftoverBytesIsDoubled = nil
+				leftoverBytes = nil
+			}
 		}
 		
 		func write(to data: Datawriter) {
 			commands.forEach(data.write)
-			// TODO: pad to multiple of 4
+			
+			if let leftoverBytesIsDoubled {
+				data.write(leftoverBytesIsDoubled)
+			}
+			
+			if let leftoverBytes  {
+				data.write(leftoverBytes)
+			}
+			
+			data.fourByteAlign()
 		}
 		
 		enum Command: BinaryConvertible {
@@ -34,7 +63,7 @@ enum SpriteAnimation {
 			case jumpToLoop(UInt8, Int16)
 			case unknown10(UInt8)
 			case markLoop(UInt8)
-			case stop(UInt8) // 0
+			case stop(UInt8)
 			case transform(UInt8, Int16, Int16, Int16, Int16)
 			// nonexistant 14
 			case unknown15(UInt8, UInt16)
@@ -111,13 +140,69 @@ enum SpriteAnimation {
 			}
 			
 			func write(to data: Datawriter) {
-				todo()
+				switch self {
+					case .palette(let image, let number):
+						data.write(UInt8(0))
+						data.write(image)
+						data.write(number)
+					case .bitmap(let image, let number):
+						data.write(UInt8(1))
+						data.write(image)
+						data.write(number)
+					case .show(let image):
+						data.write(UInt8(2))
+						data.write(image)
+					case .hide(let image):
+						data.write(UInt8(3))
+						data.write(image)
+					case .unknown4(let arg, let arg2):
+						data.write(UInt8(4))
+						data.write(arg)
+						data.write(arg2)
+					case .position(let image, let width, let height):
+						data.write(UInt8(5))
+						data.write(image)
+						data.write(width)
+						data.write(height)
+					case .unknown7(let arg):
+						data.write(UInt8(7))
+						data.write(arg)
+					case .commit(let frames):
+						data.write(UInt8(8))
+						data.write(frames)
+					case .jumpToLoop(let arg, let arg2):
+						data.write(UInt8(9))
+						data.write(arg)
+						data.write(arg2)
+					case .unknown10(let arg):
+						data.write(UInt8(10))
+						data.write(arg)
+					case .markLoop(let arg):
+						data.write(UInt8(11))
+						data.write(arg)
+					case .stop(let arg):
+						data.write(UInt8(12))
+						data.write(arg)
+					case .transform(let arg, let arg1, let arg2, let arg3, let arg4):
+						data.write(UInt8(13))
+						data.write(arg)
+						data.write(arg1)
+						data.write(arg2)
+						data.write(arg3)
+						data.write(arg4)
+					case .unknown15(let arg, let arg2):
+						data.write(UInt8(15))
+						data.write(arg)
+						data.write(arg2)
+				}
 			}
 		}
 	}
 	
-	struct Unpacked {
+	struct Unpacked: Codable {
 		var commands: [Command]
+		var leftoverBytesIsDoubled: UInt16?
+		var leftoverBytes: Data?
 		
 		enum Command {
 			case palette(image: UInt8, number: UInt16)
@@ -137,7 +222,7 @@ enum SpriteAnimation {
 			case jumpToLoop(UInt8, Int16)
 			case unknown10(UInt8)
 			case markLoop(UInt8)
-			case stop(UInt8) // 0
+			case stop(UInt8)
 			case transform(UInt8, Int16, Int16, Int16, Int16)
 			// nonexistant 14
 			case unknown15(UInt8, UInt16)
@@ -317,6 +402,8 @@ extension SpriteAnimation.Packed: ProprietaryFileData {
 	
 	fileprivate init(_ unpacked: SpriteAnimation.Unpacked, configuration: Configuration) {
 		commands = unpacked.commands.map(Command.init)
+		leftoverBytesIsDoubled = unpacked.leftoverBytesIsDoubled
+		leftoverBytes = unpacked.leftoverBytes
 	}
 }
 
@@ -368,6 +455,8 @@ extension SpriteAnimation.Unpacked: ProprietaryFileData {
 	
 	fileprivate init(_ packed: SpriteAnimation.Packed, configuration: Configuration) {
 		commands = packed.commands.map(Command.init)
+		leftoverBytesIsDoubled = packed.leftoverBytesIsDoubled
+		leftoverBytes = packed.leftoverBytes
 	}
 }
 
@@ -406,17 +495,27 @@ extension SpriteAnimation.Unpacked.Command {
 	}
 }
 
-extension SpriteAnimation.Unpacked: Codable {
-	init(from decoder: any Decoder) throws {
-		commands = try [Command](from: decoder)
+extension SpriteAnimation.Unpacked.Command: Codable {
+	enum ParsingError: Error, CustomStringConvertible {
+		case invalidCommand(String)
+		case missingArgument(in: String)
+		case invalidArgument(in: String, Substring)
+		case argumentOutOfRange(Int, expected: Any.Type, in: String)
+		
+		var description: String {
+			switch self {
+				case .invalidCommand(let command):
+					"invalid command: \(.red)'\(command)'\(.normal)"
+				case .missingArgument(in: let command):
+					"invalid command: \(.red)'\(command)'\(.normal): missing argument"
+				case .invalidArgument(in: let command, let argument):
+					"invalid command: \(.red)'\(command)'\(.normal): invalid argument: \(.red)'\(argument)'\(.normal)"
+				case .argumentOutOfRange(let int, let expectedType, in: let command):
+					"invalid command: \(.red)'\(command)'\(.normal): argument \(.red)\(int)\(.normal) out of range (expected \(.green)\(expectedType)\(.normal))"
+			}
+		}
 	}
 	
-	func encode(to encoder: any Encoder) throws {
-		try commands.encode(to: encoder)
-	}
-}
-
-extension SpriteAnimation.Unpacked.Command: Codable {
 	init(from decoder: any Decoder) throws {
 		try self.init(String(from: decoder))
 	}
@@ -425,8 +524,79 @@ extension SpriteAnimation.Unpacked.Command: Codable {
 		try String(self).encode(to: encoder)
 	}
 	
-	init(_ raw: String) {
-		todo()
+	init(_ command: String) throws(ParsingError) {
+		let components = command.split(separator: #/[ x]/#)
+		
+		func argument<Result: BinaryInteger & SendableMetatype>(
+			_ index: Int
+		) throws(ParsingError) -> Result {
+			guard components.indices.contains(index) else {
+				throw .missingArgument(in: command)
+			}
+			
+			let argumentNumber = try Int(components[index])
+				.orElseThrow(ParsingError.invalidArgument(in: command, components[index]))
+			
+			return try Result(exactly: argumentNumber)
+				.orElseThrow(ParsingError.argumentOutOfRange(argumentNumber, expected: Result.self, in: command))
+		}
+		
+		self = switch try components.first.orElseThrow(ParsingError.invalidCommand(command)) {
+			case "palette":
+				.palette(
+					image: try argument(1),
+					number: try argument(2)
+				)
+			case "bitmap":
+				.bitmap(
+					image: try argument(1),
+					number: try argument(2)
+				)
+			case "show":
+				.show(image: try argument(1))
+			case "hide":
+				.hide(image: try argument(1))
+			case "unknown4":
+				.unknown4(
+					try argument(1),
+					try argument(2)
+				)
+			case "position":
+				.position(
+					image: try argument(1),
+					width: try argument(2),
+					height: try argument(3)
+				)
+			case "unknown7":
+				.unknown7(try argument(1))
+			case "commit":
+				.commit(frames: try argument(1))
+			case "jump-to-loop":
+				.jumpToLoop(
+					try argument(1),
+					try argument(2)
+				)
+			case "unknown10":
+				.unknown10(try argument(1))
+			case "mark-loop":
+				.markLoop(try argument(1))
+			case "stop":
+				.stop(try argument(1))
+			case "transform":
+				.transform(
+					try argument(1),
+					try argument(2),
+					try argument(3),
+					try argument(4),
+					try argument(5)
+				)
+			case "unknown15":
+				.unknown15(
+					try argument(1),
+					try argument(2)
+				)
+			default: throw .invalidCommand(command)
+		}
 	}
 }
 
@@ -450,11 +620,11 @@ extension String {
 			case .commit(let frames):
 				"commit \(frames)"
 			case .jumpToLoop(let arg, let number):
-				"jump to loop \(arg) \(number)"
+				"jump-to-loop \(arg) \(number)"
 			case .unknown10(let arg):
 				"unknown10 \(arg)"
 			case .markLoop(let arg):
-				"mark loop \(arg)"
+				"mark-loop \(arg)"
 			case .stop(let arg):
 				"stop \(arg)"
 			case .transform(let arg, let one, let two, let three, let four):

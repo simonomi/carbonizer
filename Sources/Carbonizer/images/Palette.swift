@@ -2,7 +2,7 @@ import BinaryParser
 
 enum Palette {
 	struct Packed: BinaryConvertible {
-		var colors: [Color555]
+		var colors: [Color555] // TODO: actually like,,, 5551 ?? idk what that last bit is but radar_back uses it
 		
 		init(_ data: inout Datastream) throws {
 			do {
