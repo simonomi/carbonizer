@@ -103,11 +103,11 @@ public enum Processor: String, Hashable, Sendable {
 		
 		let (allWarn, allDontWarn) = requiredFileTypes
 		
-		let thisGamesFileTypes = Configuration.fileTypes(for: configuration.game)
+		let thisGamesFileTypes = Configuration.fileTypes(for: configuration.game).keys + ["MAR", "_match"]
 		
 		let (warn, dontWarn) = (
-			allWarn.filter(thisGamesFileTypes.keys.contains),
-			allDontWarn.filter(thisGamesFileTypes.keys.contains)
+			allWarn.filter(thisGamesFileTypes.contains),
+			allDontWarn.filter(thisGamesFileTypes.contains)
 		)
 		
 		if !dontWarn.isSubset(of: configuration.fileTypes) {

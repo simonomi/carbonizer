@@ -141,13 +141,11 @@ struct RoundTrips {
 	func roundTripROM() async throws {
 		guard let wholeROMPath = URL.wholeROMPath else { return }
 		
-		let fileTypes = Set(Configuration.fileTypes(for: .ff1).keys)
-		
 		let configuration = try Configuration(
 			overwriteOutput: true,
 			game: .ff1,
 			externalMetadata: false,
-			fileTypes: fileTypes,
+			fileTypes: nil,
 			onlyUnpack: [],
 			skipUnpacking: [],
 			compression: false,
