@@ -81,7 +81,11 @@ struct CarbonizerCLI: AsyncParsableCommand {
 						print("\(shortenedMessage)...\(.clearToEndOfLine)", terminator: "\r")
 						fflush(stdout)
 					case .warning:
-						print("\(.yellow, .bold)warning:\(.normal)", message + "\(.clearToEndOfLine)", to: &.standardError)
+						if cliConfiguration.useColor {
+							print("\(.yellow, .bold)warning:\(.normal)", message + "\(.clearToEndOfLine)", to: &.standardError)
+						} else {
+							print("warning:", message, to: &.standardError)
+						}
 				}
 			}
 		} else {
