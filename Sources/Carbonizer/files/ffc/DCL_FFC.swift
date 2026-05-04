@@ -317,10 +317,10 @@ enum DCL_FFC {
 			
 			var element: Element
 			
-			var statAttack: Stat
-			var statDefense: Stat
-			var statAccuracy: Stat
-			var statSpeed: Stat
+			var stat1Attack: Stat
+			var stat2Defense: Stat
+			var stat3Accuracy: Stat
+			var stat4Speed: Stat
 			
 			var critRate: UInt8
 			var critRateForTypeAdvantage: UInt8
@@ -335,7 +335,7 @@ enum DCL_FFC {
 			
 			var sortOrderDigsite: Digsite
 			
-			var staticBlueMove: BlueMove
+			var staticBlueAbility: BlueAbility
 			
 			var range: Range
 			
@@ -365,7 +365,7 @@ enum DCL_FFC {
 			
 			var unknown05: UInt16
 			
-			var id: UInt16
+			var _id: UInt16
 			var superEvolvesIntoID: UInt16
 			var superEvolvesFromID: UInt16
 			
@@ -397,7 +397,7 @@ enum DCL_FFC {
 			var unknown10: UInt16
 			var unknown11: UInt16
 			
-			var teams: [Team]
+			var teamGroups: [Team]
 			
 			var positionInFormationScreen: Position
 			var positionInStatsScreen: Position
@@ -406,15 +406,15 @@ enum DCL_FFC {
 			
 			var shadowSize: Double
 			
-			var moves: [UInt16]
+			var skillIDs: [UInt16]
 			
-			var moveLearningLevels: [UInt16]
+			var skillLearningLevels: [UInt16]
 			
-			var allySupportEffects: SupportEffects?
+			var supportEffectsForAlly: SupportEffects?
 			
-			var enemySupportEffects: SupportEffects?
+			var supportEffectsForEnemy: SupportEffects?
 			
-			var moveListOrder: [UInt8]
+			var skillListOrder: [UInt8]
 			
 			var healthAtEachRank: [UInt16]
 			
@@ -441,7 +441,7 @@ enum DCL_FFC {
 				case none, bonusDataAndDebugs, zongazongaRematch, lolaFight, lesterFight, coleFight, robinsonFight, sideMission, superRevival, donationPointsVivosaur, seabedCavern, bbBrigadeBase, unused, bonehemoth, icegripPlateau, hotSpringHeights, dustyDunes, rainbowCanyon, mtKrakanak, petrifiedWoods, stonePyramid, jungleLabyrinth, treasureLake
 			}
 			
-			enum BlueMove: String, Codable {
+			enum BlueAbility: String, Codable {
 				case none, nothing, japaneseForViewEnemyDetailsDuringBattle, japaneseForDinosaurPlacementRandomization, fpPlus, partingBlow, autoLPRecovery, autoCounter, japaneseForStatusEffectAbilityChangeDisabled, japaneseForSupportAttackRateUp, japaneseForMakesItEasierToObtainCertainKindsOfRocks, japaneseForIncreasedMovementSpeed, japaneseForCanOvercomeObstacles, elementalBoost, positionLock, fpAbsorb, soloPower, berserker, startWithAStatus, japaneseForIncreasedDamageAgainstSpecificAttributes, resurrect
 			}
 			
@@ -551,10 +551,10 @@ extension DCL_FFC.Packed.Vivosaur {
 		
 		element = Element(unpacked.element)
 		
-		statAttack = Stat(unpacked.statAttack)
-		statDefense = Stat(unpacked.statDefense)
-		statAccuracy = Stat(unpacked.statAccuracy)
-		statSpeed = Stat(unpacked.statSpeed)
+		statAttack = Stat(unpacked.stat1Attack)
+		statDefense = Stat(unpacked.stat2Defense)
+		statAccuracy = Stat(unpacked.stat3Accuracy)
+		statSpeed = Stat(unpacked.stat4Speed)
 		
 		critRate = unpacked.critRate
 		critRateForTypeAdvantage = unpacked.critRateForTypeAdvantage
@@ -569,7 +569,7 @@ extension DCL_FFC.Packed.Vivosaur {
 		
 		sortOrderDigsite = Digsite(unpacked.sortOrderDigsite)
 		
-		staticBlueMove = BlueMove(unpacked.staticBlueMove)
+		staticBlueMove = BlueMove(unpacked.staticBlueAbility)
 		
 		range = Range(unpacked.range)
 		
@@ -599,7 +599,7 @@ extension DCL_FFC.Packed.Vivosaur {
 		
 		unknown05 = unpacked.unknown05
 		
-		id = unpacked.id
+		id = unpacked._id
 		superEvolvesIntoID = unpacked.superEvolvesIntoID
 		superEvolvesFromID = unpacked.superEvolvesFromID
 		
@@ -631,7 +631,7 @@ extension DCL_FFC.Packed.Vivosaur {
 		unknown10 = unpacked.unknown10
 		unknown11 = unpacked.unknown11
 		
-		teams = unpacked.teams
+		teams = unpacked.teamGroups
 			.map(Teams.init)
 			.reduce([]) { $0.union($1) }
 		
@@ -642,15 +642,15 @@ extension DCL_FFC.Packed.Vivosaur {
 		
 		shadowSize = FixedPoint2012(unpacked.shadowSize)
 		
-		moveCount = UInt32(unpacked.moves.count)
+		moveCount = UInt32(unpacked.skillIDs.count)
 		
-		moveLearningLevelCount = UInt32(unpacked.moveLearningLevels.count)
+		moveLearningLevelCount = UInt32(unpacked.skillLearningLevels.count)
 		moveLearningLevelsOffset = movesOffset + (moveCount * 2).roundedUpToTheNearest(4)
 		
 		let moveLearningLevelsEndOffset = moveLearningLevelsOffset + (moveLearningLevelCount * 2).roundedUpToTheNearest(4)
 		
 		let allySupportEffectsEndOffset: UInt32
-		if unpacked.allySupportEffects == nil {
+		if unpacked.supportEffectsForAlly == nil {
 			allySupportEffectsOffset = 0
 			allySupportEffectsEndOffset = 0
 		} else {
@@ -659,7 +659,7 @@ extension DCL_FFC.Packed.Vivosaur {
 		}
 		
 		let enemySupportEffectsEndOffset: UInt32
-		if unpacked.enemySupportEffects == nil {
+		if unpacked.supportEffectsForEnemy == nil {
 			enemySupportEffectsOffset = 0
 			enemySupportEffectsEndOffset = 0
 		} else {
@@ -667,21 +667,21 @@ extension DCL_FFC.Packed.Vivosaur {
 			enemySupportEffectsEndOffset = enemySupportEffectsOffset + 4
 		}
 		
-		moveListOrderCount = UInt32(unpacked.moveListOrder.count)
+		moveListOrderCount = UInt32(unpacked.skillListOrder.count)
 		moveListOrderOffset = max(moveLearningLevelsEndOffset, allySupportEffectsEndOffset, enemySupportEffectsEndOffset)
 		
 		rankCount = UInt32(unpacked.healthAtEachRank.count)
 		healthAtEachRankOffset = moveListOrderOffset + moveListOrderCount.roundedUpToTheNearest(4)
 		
-		moves = unpacked.moves
+		moves = unpacked.skillIDs
 		
-		moveLearningLevels = unpacked.moveLearningLevels
+		moveLearningLevels = unpacked.skillLearningLevels
 		
-		allySupportEffects = unpacked.allySupportEffects.map(SupportEffects.init)
+		allySupportEffects = unpacked.supportEffectsForAlly.map(SupportEffects.init)
 		
-		enemySupportEffects = unpacked.enemySupportEffects.map(SupportEffects.init)
+		enemySupportEffects = unpacked.supportEffectsForEnemy.map(SupportEffects.init)
 		
-		moveListOrder = unpacked.moveListOrder
+		moveListOrder = unpacked.skillListOrder
 		
 		healthAtEachRank = unpacked.healthAtEachRank
 	}
@@ -779,7 +779,7 @@ extension DCL_FFC.Packed.Vivosaur.Digsite {
 }
 
 extension DCL_FFC.Packed.Vivosaur.BlueMove {
-	fileprivate init(_ unpacked: DCL_FFC.Unpacked.Vivosaur.BlueMove) {
+	fileprivate init(_ unpacked: DCL_FFC.Unpacked.Vivosaur.BlueAbility) {
 		self = switch unpacked {
 			case .none: .none
 			case .nothing: .nothing
@@ -914,10 +914,10 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		
 		element = Element(packed.element)
 		
-		statAttack = Stat(packed.statAttack)
-		statDefense = Stat(packed.statDefense)
-		statAccuracy = Stat(packed.statAccuracy)
-		statSpeed = Stat(packed.statSpeed)
+		stat1Attack = Stat(packed.statAttack)
+		stat2Defense = Stat(packed.statDefense)
+		stat3Accuracy = Stat(packed.statAccuracy)
+		stat4Speed = Stat(packed.statSpeed)
 		
 		critRate = packed.critRate
 		critRateForTypeAdvantage = packed.critRateForTypeAdvantage
@@ -932,7 +932,7 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		
 		sortOrderDigsite = Digsite(packed.sortOrderDigsite)
 		
-		staticBlueMove = BlueMove(packed.staticBlueMove)
+		staticBlueAbility = BlueAbility(packed.staticBlueMove)
 		
 		range = Range(packed.range)
 		
@@ -962,7 +962,7 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		
 		unknown05 = packed.unknown05
 		
-		id = packed.id
+		_id = packed.id
 		superEvolvesIntoID = packed.superEvolvesIntoID
 		superEvolvesFromID = packed.superEvolvesFromID
 		
@@ -994,7 +994,7 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		unknown10 = packed.unknown10
 		unknown11 = packed.unknown11
 		
-		teams = [Team](packed.teams)
+		teamGroups = [Team](packed.teams)
 		
 		positionInFormationScreen = Position(packed.positionInFormationScreen)
 		positionInStatsScreen = Position(packed.positionInStatsScreen)
@@ -1003,15 +1003,15 @@ extension DCL_FFC.Unpacked.Vivosaur {
 		
 		shadowSize = Double(packed.shadowSize)
 		
-		moves = packed.moves
+		skillIDs = packed.moves
 		
-		moveLearningLevels = packed.moveLearningLevels
+		skillLearningLevels = packed.moveLearningLevels
 		
-		allySupportEffects = packed.allySupportEffects.map(SupportEffects.init)
+		supportEffectsForAlly = packed.allySupportEffects.map(SupportEffects.init)
 		
-		enemySupportEffects = packed.enemySupportEffects.map(SupportEffects.init)
+		supportEffectsForEnemy = packed.enemySupportEffects.map(SupportEffects.init)
 		
-		moveListOrder = packed.moveListOrder
+		skillListOrder = packed.moveListOrder
 		
 		healthAtEachRank = packed.healthAtEachRank
 	}
@@ -1102,7 +1102,7 @@ extension DCL_FFC.Unpacked.Vivosaur.Digsite {
 	}
 }
 
-extension DCL_FFC.Unpacked.Vivosaur.BlueMove {
+extension DCL_FFC.Unpacked.Vivosaur.BlueAbility {
 	fileprivate init(_ packed: DCL_FFC.Packed.Vivosaur.BlueMove) {
 		self = switch packed {
 			case .none: .none

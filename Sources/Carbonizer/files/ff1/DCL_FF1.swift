@@ -325,16 +325,16 @@ enum DCL_FF1 {
 		struct Vivosaur: Codable {
 			var _label: String?
 			
-			var id: Int32
+			var _id: Int32
 			
 			var length: UInt8
 			var element: Element?
 			var rank12HealthDividedBy2: UInt16
 			
-			var statAttack: Stat
-			var statDefense: Stat
-			var statAccuracy: Stat
-			var statEvasion: Stat
+			var stat1Attack: Stat
+			var stat2Defense: Stat
+			var stat3Accuracy: Stat
+			var stat4Evasion: Stat
 			
 			var critRate: UInt8
 			var critRateForTypeAdvantage: UInt8
@@ -343,10 +343,10 @@ enum DCL_FF1 {
 			
 			var unknown03: UInt8
 			
-			var teams: [Team]
+			var teamGroups: [Team]
 			
-			var teamSkill: UInt32
-			var linkSkill: UInt32
+			var teamSkillID: UInt32
+			var linkSkillID: UInt32
 			
 			var unknown04: UInt32
 			
@@ -366,15 +366,16 @@ enum DCL_FF1 {
 			var displayNumber: UInt32
 			var alphabeticalOrder: UInt32
 			
-			var skillIds: [UInt32]
+			var skillIDs: [UInt32]
 			
 			var skillNames: [String?]?
 			
-			// what fossil you learn the move at (123/1234 for normal, 1111 for chickens)
-			var long1234: [UInt32]
+			var skillLearningLevels: [UInt32]
 			
 			var allySupportEffects: SupportEffects
 			var enemySupportEffects: SupportEffects
+			
+			var statusChanceExplanation = "chances to receive poison, sleep, scare, excite, confusion, enrage, counter, enflame, harden, and quicken respectively"
 			
 			// chances to receive poison, sleep, scare, excite, confusion, enrage, counter, enflame, harden, and quicken respectively
 			var statusChances: [UInt8]
@@ -490,16 +491,16 @@ extension DCL_FF1.Packed.Vivosaur {
 	static let null = Self(id: 0, unknown01: 0, unknown02: 0, length: 0, rank12HealthDividedBy2: 0, statAttack: .null, statDefense: .null, statAccuracy: .null, statEvasion: .null, critRate: 0, critRateForTypeAdvantage: 0, linkChance: 0, unknown03: 0, teams: [], moveCount: 0, skillIdsOffset: 0x8c, teamSkill: 0, linkSkill: 0, long1234Count: 0, long1234Offset: 0x8c, unknown04: 0, unknown05: 0, unknown06: 0, unknown07: 0, unknown08: 0, allySupportEffectsOffset: 0, enemySupportEffectsOffset: 0, teamSkillRequiredFossils: 0, unknown10: 0, unknown11: 0, unknown12: 0, unknown13: 0, passiveAbility: .none, statusChancesCount: 0, statusChancesOffset: 0x8c, szDamageMultiplier: 0, unknown16: 0, moveCountAgainAgain: 0, moveListOrderOffset: 0x8C, rankCount: 0, healthAtEachRankOffset: 0x8c, displayNumber: 0, alphabeticalOrder: 0, skillIds: [], long1234: [], allySupportEffects: .null, enemySupportEffects: .null, statusChances: [], moveListOrder: [], healthAtEachRank: [])
 	
 	fileprivate init(_ unpacked: DCL_FF1.Unpacked.Vivosaur) {
-		id = unpacked.id
+		id = unpacked._id
 		
 		length = unpacked.length
 		element = unpacked.element.map(Element.init)
 		rank12HealthDividedBy2 = unpacked.rank12HealthDividedBy2
 		
-		statAttack = Stat(unpacked.statAttack)
-		statDefense = Stat(unpacked.statDefense)
-		statAccuracy = Stat(unpacked.statAccuracy)
-		statEvasion = Stat(unpacked.statEvasion)
+		statAttack = Stat(unpacked.stat1Attack)
+		statDefense = Stat(unpacked.stat2Defense)
+		statAccuracy = Stat(unpacked.stat3Accuracy)
+		statEvasion = Stat(unpacked.stat4Evasion)
 		
 		critRate = unpacked.critRate
 		critRateForTypeAdvantage = unpacked.critRateForTypeAdvantage
@@ -508,16 +509,16 @@ extension DCL_FF1.Packed.Vivosaur {
 		
 		unknown03 = unpacked.unknown03
 		
-		teams = unpacked.teams
+		teams = unpacked.teamGroups
 			.map(Teams.init)
 			.reduce([]) { $0.union($1) }
 		
-		moveCount = UInt32(unpacked.skillIds.count)
+		moveCount = UInt32(unpacked.skillIDs.count)
 		
-		teamSkill = unpacked.teamSkill
-		linkSkill = unpacked.linkSkill
+		teamSkill = unpacked.teamSkillID
+		linkSkill = unpacked.linkSkillID
 		
-		long1234Count = UInt32(unpacked.long1234.count)
+		long1234Count = UInt32(unpacked.skillLearningLevels.count)
 		long1234Offset = skillIdsOffset + moveCount * 4
 		
 		unknown04 = unpacked.unknown04
@@ -550,9 +551,9 @@ extension DCL_FF1.Packed.Vivosaur {
 		displayNumber = unpacked.displayNumber
 		alphabeticalOrder = unpacked.alphabeticalOrder
 		
-		skillIds = unpacked.skillIds
+		skillIds = unpacked.skillIDs
 		
-		long1234 = unpacked.long1234
+		long1234 = unpacked.skillLearningLevels
 		
 		allySupportEffects = SupportEffects(unpacked.allySupportEffects)
 		enemySupportEffects = SupportEffects(unpacked.enemySupportEffects)
@@ -683,16 +684,16 @@ extension DCL_FF1.Unpacked.Vivosaur {
 		
 		_label = vivosaurNames[packed.id]
 		
-		id = packed.id
+		_id = packed.id
 		
 		length = packed.length
 		element = packed.element.map(Element.init)
 		rank12HealthDividedBy2 = packed.rank12HealthDividedBy2
 		
-		statAttack = Stat(packed.statAttack)
-		statDefense = Stat(packed.statDefense)
-		statAccuracy = Stat(packed.statAccuracy)
-		statEvasion = Stat(packed.statEvasion)
+		stat1Attack = Stat(packed.statAttack)
+		stat2Defense = Stat(packed.statDefense)
+		stat3Accuracy = Stat(packed.statAccuracy)
+		stat4Evasion = Stat(packed.statEvasion)
 		
 		critRate = packed.critRate
 		critRateForTypeAdvantage = packed.critRateForTypeAdvantage
@@ -701,10 +702,10 @@ extension DCL_FF1.Unpacked.Vivosaur {
 		
 		unknown03 = packed.unknown03
 		
-		teams = [Team](packed.teams)
+		teamGroups = [Team](packed.teams)
 		
-		teamSkill = packed.teamSkill
-		linkSkill = packed.linkSkill
+		teamSkillID = packed.teamSkill
+		linkSkillID = packed.linkSkill
 		
 		unknown04 = packed.unknown04
 		
@@ -724,11 +725,11 @@ extension DCL_FF1.Unpacked.Vivosaur {
 		displayNumber = packed.displayNumber
 		alphabeticalOrder = packed.alphabeticalOrder
 		
-		skillIds = packed.skillIds
+		skillIDs = packed.skillIds
 		
-		skillNames = skillIds.map { attackNames[$0] }
+		skillNames = skillIDs.map { attackNames[$0] }
 		
-		long1234 = packed.long1234
+		skillLearningLevels = packed.long1234
 		
 		allySupportEffects = SupportEffects(packed.allySupportEffects)
 		enemySupportEffects = SupportEffects(packed.enemySupportEffects)
