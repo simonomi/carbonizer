@@ -75,7 +75,7 @@ extension CompleteFNT {
 		}
 		
 		guard let parent else {
-			todo("invalid fnt")
+			todo("invalid fnt: no parent for folder \(folderID)")
 		}
 		
 		let parentID = parent.key

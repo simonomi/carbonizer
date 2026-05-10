@@ -21,6 +21,7 @@ extension Color555 {
 	init(_ color: Color) {
 		func fiveBit(_ color: UInt8) -> UInt16 {
 			// 8 is the ratio between the number of colors in each (256:32)
+			// converting the other way is more complex, but this works fine
 			UInt16(color / 8)
 		}
 		

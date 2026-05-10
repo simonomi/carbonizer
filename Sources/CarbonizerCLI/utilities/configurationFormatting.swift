@@ -30,7 +30,7 @@ extension DecodingError {
 				
 				return "\(path.path(percentEncoded: false))>\(fullKeyPath.formatted()): missing value for option"
 			default:
-				return "\(path.path(percentEncoded: false)): \(self)"
+				return "\(path.path(percentEncoded: false)): \(self.localizedDescription)"
 		}
 	}
 }

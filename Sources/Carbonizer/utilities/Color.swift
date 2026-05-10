@@ -14,10 +14,10 @@ struct Color: Codable {
 	}
 	
 	init(_ rgb555: Color555) {
-		// 8 is the ratio between the number of colors in each (32:256)
-		red = rgb555.red * 8
-		green = rgb555.green * 8
-		blue = rgb555.blue * 8
+		// * 8 doesn't map the entire range, it misses the highest 7 output values
+		red = rgb555.red * 255 / 31
+		green = rgb555.green * 255 / 31
+		blue = rgb555.blue * 255 / 31
 	}
 	
 	enum ParseError: Error, CustomStringConvertible {
