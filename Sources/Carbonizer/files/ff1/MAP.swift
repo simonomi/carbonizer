@@ -173,7 +173,7 @@ enum MAP {
 		struct FossilSpawn { // map/e
 			var unknown1: Int32
 			var zone: Int32
-			var sonarUpgrades: Int32 // idk the type for this, maybe a flag?
+			var sonarUpgrades: Int32 // this is a flag (type 5 ?)
 			var maxSpawns: Int32
 			
 			var unknown2: Int32
@@ -182,7 +182,7 @@ enum MAP {
 			var thingAOffset: UInt32 = 0x30
 			
 			var thingBCount: UInt32
-			var thingBOffset: UInt32
+			var thingBOffsetsOffset: UInt32
 			var thingCCount: UInt32
 			var thingCOffsetsOffset: UInt32
 			
@@ -191,7 +191,10 @@ enum MAP {
 			var thingAs: [Int32]
 			
 			@Count(givenBy: \Self.thingBCount)
-			@Offset(givenBy: \Self.thingBOffset)
+			@Offset(givenBy: \Self.thingBOffsetsOffset)
+			var thingBOffsets: [UInt32]
+			
+			@Offsets(givenBy: \Self.thingBOffsets)
 			var thingBs: [ThingB]
 			
 			@Count(givenBy: \Self.thingCCount)
@@ -203,18 +206,14 @@ enum MAP {
 			
 			@BinaryConvertible
 			struct ThingB {
-				var unknown01: Int32
-				var unknown02: Int32
-				var unknown03: Int32
-				var unknown04: Int32
-				var unknown05: Int32 // these are (at least sometimes) incrementing
-				var unknown06: Int32 // these are (at least sometimes) incrementing
-				var unknown07: Int32 // these are (at least sometimes) incrementing
-				var unknown08: Int32 // these are (at least sometimes) incrementing
-				var unknown09: Int32 // these are (at least sometimes) incrementing
-				var unknown10: Int32 // these are (at least sometimes) incrementing
-				var unknown11: Int32 // these are (at least sometimes) incrementing
-				var unknown12: Int32 // these are (at least sometimes) incrementing
+				var unknown: Int32
+				
+				var count: UInt32
+				var offset: UInt32 = 0xc
+				
+				@Count(givenBy: \Self.count)
+				@Offset(givenBy: \Self.offset)
+				var values: [Int32]
 			}
 			
 			@BinaryConvertible
@@ -344,18 +343,9 @@ enum MAP {
 			var thingCs: [ThingC]
 			
 			struct ThingB: Codable {
-				var unknown01: Int32
-				var unknown02: Int32
-				var unknown03: Int32
-				var unknown04: Int32
-				var unknown05: Int32
-				var unknown06: Int32
-				var unknown07: Int32
-				var unknown08: Int32
-				var unknown09: Int32
-				var unknown10: Int32
-				var unknown11: Int32
-				var unknown12: Int32
+				var unknown: Int32
+				
+				var values: [Int32]
 			}
 			
 			struct ThingC: Codable {
@@ -534,14 +524,21 @@ extension MAP.Packed.FossilSpawn {
 		thingACount = UInt32(unpacked.thingAs.count)
 		
 		thingBCount = UInt32(unpacked.thingBs.count)
-		thingBOffset = thingAOffset + thingACount * 4
-		
-		thingCCount = UInt32(unpacked.thingCs.count)
-		thingCOffsetsOffset = thingBOffset + thingBCount * 0x30
-		
-		thingAs = unpacked.thingAs
+		thingBOffsetsOffset = thingAOffset + thingACount * 4
 		
 		thingBs = unpacked.thingBs.map(ThingB.init)
+		
+		thingBOffsets = makeOffsets(
+			start: thingBOffsetsOffset + thingBCount * 4,
+			sizes: thingBs.map { $0.size() }
+		)
+		
+		thingCCount = UInt32(unpacked.thingCs.count)
+		// ThingBs are always 0x2c, plus 0x4 for the index
+		// - this is a bit hacky but i cant think of a cleaner solution and this works *okay*
+		thingCOffsetsOffset = thingBOffsetsOffset + thingBCount * 0x30
+		
+		thingAs = unpacked.thingAs
 		
 		// TODO: is this size right? are they all 0x20???
 		thingCOffsets = makeOffsets(
@@ -563,18 +560,15 @@ extension MAP.Packed.FossilSpawn {
 
 extension MAP.Packed.FossilSpawn.ThingB {
 	init(_ unpacked: MAP.Unpacked.FossilSpawn.ThingB) {
-		unknown01 = unpacked.unknown01
-		unknown02 = unpacked.unknown02
-		unknown03 = unpacked.unknown03
-		unknown04 = unpacked.unknown04
-		unknown05 = unpacked.unknown05
-		unknown06 = unpacked.unknown06
-		unknown07 = unpacked.unknown07
-		unknown08 = unpacked.unknown08
-		unknown09 = unpacked.unknown09
-		unknown10 = unpacked.unknown10
-		unknown11 = unpacked.unknown11
-		unknown12 = unpacked.unknown12
+		unknown = unpacked.unknown
+		
+		count = UInt32(unpacked.values.count)
+		
+		values = unpacked.values
+	}
+	
+	func size() -> UInt32 {
+		16 + UInt32(values.count * 4)
 	}
 }
 
@@ -720,18 +714,9 @@ extension MAP.Unpacked.FossilSpawn {
 
 extension MAP.Unpacked.FossilSpawn.ThingB {
 	init(_ packed: MAP.Packed.FossilSpawn.ThingB) {
-		unknown01 = packed.unknown01
-		unknown02 = packed.unknown02
-		unknown03 = packed.unknown03
-		unknown04 = packed.unknown04
-		unknown05 = packed.unknown05
-		unknown06 = packed.unknown06
-		unknown07 = packed.unknown07
-		unknown08 = packed.unknown08
-		unknown09 = packed.unknown09
-		unknown10 = packed.unknown10
-		unknown11 = packed.unknown11
-		unknown12 = packed.unknown12
+		unknown = packed.unknown
+		
+		values = packed.values
 	}
 }
 
