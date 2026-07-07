@@ -111,19 +111,19 @@ struct CLIConfiguration : Sendable {
 			"processors": {
 				// extract non-vivosaur 3D model files
 				// required file types: MAR, MM3
-				"exportModels": true,
+				"exportModels": false,
 				
 				// extract vivosaur 3D model files
 				// required file types: MAR, 3CL
-				"exportVivosaurModels": true,
+				"exportVivosaurModels": false,
 				
 				// extract images (image folder)
 				// required file types: MAR, MPM
-				"exportImages": true,
+				"exportImages": false,
 				
 				// extract sprites (motion folder)
 				// required file types: MAR, MMS
-				"exportSprites": true,
+				"exportSprites": false,
 				
 				// adds comments to DEX files that show the dialogue used in a given command
 				// required file types: MAR, DEX, DMG
