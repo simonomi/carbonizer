@@ -22,7 +22,7 @@ jobs:
     - name: Set up Swift
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.2"
+        swift-version: "6.3"
     - name: Build
       run: >
         swift build -c release
@@ -48,8 +48,8 @@ jobs:
     - name: Set up Swift
       uses: compnerd/gha-setup-swift@main
       with: # when changing this, make sure to change the package step too
-        swift-version: swift-6.2.3-release
-        swift-build: 6.2.3-RELEASE
+        swift-version: swift-6.3.3-release
+        swift-build: 6.3.3-RELEASE
     - name: Build
       run: >
         swift build -c release
@@ -62,7 +62,7 @@ jobs:
         LICENSE.txt
         -C "$(swift build -c release --show-bin-path)"
         carbonizer.exe
-        -C "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\6.2.3\\usr\\bin"
+        -C "$env:LOCALAPPDATA\\Programs\\Swift\\Runtimes\\6.3.3\\usr\\bin"
         swiftCore.dll swift_Concurrency.dll swiftWinSDK.dll swift_StringProcessing.dll swiftCRT.dll Foundation.dll swift_RegexParser.dll dispatch.dll BlocksRuntime.dll swiftDispatch.dll FoundationEssentials.dll FoundationInternationalization.dll _FoundationICU.dll swiftSynchronization.dll
     - name: Release
       uses: softprops/action-gh-release@v2
@@ -84,7 +84,7 @@ jobs:
       id: swift-setup
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.2"
+        swift-version: "6.3"
     - name: Build
       run: >
         swift build -c release
@@ -112,7 +112,7 @@ jobs:
       id: swift-setup
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.2"
+        swift-version: "6.3"
     - name: Build
       run: >
         swift build -c release
