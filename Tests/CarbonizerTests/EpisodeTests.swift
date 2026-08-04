@@ -157,7 +157,7 @@ extension DEP.Unpacked.ArgumentType {
 }
 
 @Test(
-	.disabled("only enable when needed")
+//	.disabled("only enable when needed")
 )
 func exportFlags() throws {
 	typealias Flags = [Types]
@@ -183,7 +183,7 @@ func exportFlags() throws {
 			)
 		}
 	
-	let ff1OutputPath = URL(filePath: "/tmp/ff1Flags.json")
+	let ff1OutputPath = URL(filePath: "~/Documents/programming/websites/fftechwiki/_data/flags/ff1Flags.json")
 	try JSONEncoder(.sortedKeys, .prettyPrinted).encode(ff1Result).write(to: ff1OutputPath)
 	
 	print("\(.cyan)ff1 flags written to \(ff1OutputPath.path(percentEncoded: false))\(.normal)")
@@ -199,7 +199,7 @@ func exportFlags() throws {
 			)
 		}
 	
-	let ffcOutputPath = URL(filePath: "/tmp/ffcFlags.json")
+	let ffcOutputPath = URL(filePath: "~/Documents/programming/websites/fftechwiki/_data/flags/ffcFlags.json")
 	try JSONEncoder(.sortedKeys, .prettyPrinted).encode(ffcResult).write(to: ffcOutputPath)
 	
 	print("\(.cyan)ffc flags written to \(ffcOutputPath.path(percentEncoded: false))\(.normal)")

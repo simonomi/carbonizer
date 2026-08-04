@@ -108,12 +108,33 @@ let ff1FlagNames: [UInt8: [UInt32: String]] = [
 	10: [
 		4:  "case is full",
 		28: "status menu unlocked",
+		13: "Greenhorn Plains unlocked",
+		14: "Knotwood Forest unlocked",
+		15: "Rivet Ravine unlocked",
+		16: "Bottomsup Bay unlocked",
+		17: "BB Base unlocked",
+		18: "Mt. Lavaflow unlocked",
+		19: "unused dinaurian ship digsite unlocked",
+		20: "Parchment Desert unlocked",
+		21: "Secret Island unlocked",
+		22: "Coldfeet Glacier unlocked",
+		// 25 - post-credits
+		// 26 - picked rosie
+		// 27 - picked duna
+		// 29 - only ever set to true, arriving at vivosaur island and then when being revived from stone sleep
 		30: "multiplayer unlocked",
-//		31: "tool upgrades available", // maybe to do with the shop dialogue ?
+//		31: "", // maybe to do with the shop dialogue ?
+		// set to true when various upgrades are purchased
+		// set to false if sonar upgrade, cleaning upgrades left bitmask, and case upgrade level are all 0 (max purchases unlocked) 
 		32: "Dino Medal screen unlocked",
 		33: "Super Drill unlocked",
 		34: "Hyper Hammer unlocked",
+		35: "revived all vivosaurs",
+		36: "all vivosaurs max rank",
+		// 37/38 - something to do with the fossil cannon, set by DinoEventCanon(PutIn|TakeOut)::dtor
+		40: "team skills unlocked",
 		41: "shop is sold out",
+		// 47: set when receiving fighter license
 	]
 ]
 

@@ -149,7 +149,7 @@ enum DEX {
 			// its basically a smoothing (ease in/out) effect
 			50:  "smoothes out movement or something for \(0, .entity)",
 			51:  "control \(0, .entity)",
-			// 52: (#, #)
+			// 52: (#, #) - go to dig site
 			55:  "dialogue \(2, .dialogue) with choice, storing result at \(0, .flag), unknown: \(1, .flag)",
 			56:  "delay \(0, .frames)",
 			57:  "start \(1, .battle), storing result at \(0, .flag)",
@@ -215,7 +215,7 @@ enum DEX {
 			//   1 24 - makes hunter blush
 			137: "unknown 137: \(0, .entity)",
 			138: "shake screen for \(2, .frames) with intensity: \(0, .integer), gradual intensity: \(1, .integer)",
-			// 141: (#)
+			// 141: (#) - go to dig site
 			142: "modify player name", // has back button
 			143: "set player name",
 			144: "dialogue \(0, .dialogue) with choice \(2, .dialogue), storing result at \(1, .flag)",
