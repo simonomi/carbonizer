@@ -119,6 +119,14 @@ enum NDS {
 				var staticInitializerEndAddress: UInt32
 				var fileId: UInt32
 				var reserved: UInt32
+				
+				var isCompressed: Bool {
+					reserved >> 24 > 0
+				}
+				
+				var compressedSize: UInt32 {
+					reserved & 0xFF_FF_FF
+				}
 			}
 			
 			@BinaryConvertible

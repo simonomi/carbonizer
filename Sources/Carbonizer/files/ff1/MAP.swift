@@ -48,8 +48,8 @@ enum MAP {
 		var fossilSpawnCount: UInt32
 		var fossilSpawnOffsetsOffset: UInt32
 		
-		var breakableRockCount: UInt32
-		var breakableRockOffsetsOffset: UInt32
+		var objectCount: UInt32
+		var objectOffsetsOffset: UInt32
 		
 		// 0x60
 		var backgroundGradientTopOffset: UInt32
@@ -90,12 +90,12 @@ enum MAP {
 		@Offsets(givenBy: \Self.fossilSpawnOffsets)
 		var fossilSpawns: [FossilSpawn]
 		
-		@Count(givenBy: \Self.breakableRockCount)
-		@Offset(givenBy: \Self.breakableRockOffsetsOffset)
-		var breakableRockOffsets: [UInt32]
+		@Count(givenBy: \Self.objectCount)
+		@Offset(givenBy: \Self.objectOffsetsOffset)
+		var objectOffsets: [UInt32]
 		
-		@Offsets(givenBy: \Self.breakableRockOffsets)
-		var breakableRocks: [BreakableRock]
+		@Offsets(givenBy: \Self.objectOffsets)
+		var objects: [Object]
 		
 		@Count(3)
 		@Offset(givenBy: \Self.backgroundGradientTopOffset)
@@ -183,8 +183,8 @@ enum MAP {
 			
 			var thingBCount: UInt32
 			var thingBOffsetsOffset: UInt32
-			var thingCCount: UInt32
-			var thingCOffsetsOffset: UInt32
+			var vivosaurCount: UInt32
+			var vivosaurOffsetsOffset: UInt32
 			
 			@Count(givenBy: \Self.thingACount)
 			@Offset(givenBy: \Self.thingAOffset)
@@ -197,12 +197,12 @@ enum MAP {
 			@Offsets(givenBy: \Self.thingBOffsets)
 			var thingBs: [ThingB]
 			
-			@Count(givenBy: \Self.thingCCount)
-			@Offset(givenBy: \Self.thingCOffsetsOffset)
-			var thingCOffsets: [UInt32]
+			@Count(givenBy: \Self.vivosaurCount)
+			@Offset(givenBy: \Self.vivosaurOffsetsOffset)
+			var vivosaurOffsets: [UInt32]
 			
-			@Offsets(givenBy: \Self.thingCOffsets)
-			var thingCs: [ThingC]
+			@Offsets(givenBy: \Self.vivosaurOffsets)
+			var vivosaurs: [Vivosaur]
 			
 			@BinaryConvertible
 			struct ThingB {
@@ -217,10 +217,10 @@ enum MAP {
 			}
 			
 			@BinaryConvertible
-			struct ThingC {
+			struct Vivosaur {
 				var vivosaurID: Int32
 				
-				var unknown2: Int32
+				var chance: Int32
 				var unknown3: Int32
 				var unknown4: Int32
 				
@@ -233,7 +233,7 @@ enum MAP {
 		}
 		
 		@BinaryConvertible
-		struct BreakableRock { // map/g
+		struct Object { // map/g
 			var unknown1: Int32 // often 0, otherwise seems like an index?
 			                    // not dialogue, not event
 			                    // like in the ~5000s range
@@ -293,7 +293,7 @@ enum MAP {
 		
 		var fossilSpawns: [FossilSpawn]
 		
-		var breakableRocks: [BreakableRock]
+		var objects: [Object]
 		
 		var backgroundGradientTop: Color
 		
@@ -305,6 +305,7 @@ enum MAP {
 		}
 		
 		struct Region: Codable {
+			var _grd_label: String
 			var id: Int32
 			var x: Int32
 			var y: Int32
@@ -340,7 +341,7 @@ enum MAP {
 			
 			var thingBs: [ThingB]
 			
-			var thingCs: [ThingC]
+			var vivosaurs: [Vivosaur]
 			
 			struct ThingB: Codable {
 				var unknown: Int32
@@ -348,11 +349,11 @@ enum MAP {
 				var values: [Int32]
 			}
 			
-			struct ThingC: Codable {
+			struct Vivosaur: Codable {
 				var vivosaurID: Int32
 				var _vivosaur: String?
 				
-				var unknown2: Int32 // chance of getting this vivo (within the thingc list)
+				var chance: Int32
 				var unknown3: Int32
 				var unknown4: Int32
 				
@@ -363,7 +364,7 @@ enum MAP {
 			}
 		}
 		
-		struct BreakableRock: Codable {
+		struct Object: Codable {
 			var unknown1: Int32
 			var spawnCount: Int32
 			
@@ -437,17 +438,17 @@ extension MAP.Packed: ProprietaryFileData {
 			sizes: fossilSpawns.map { $0.size() }
 		)
 		
-		breakableRockCount = UInt32(unpacked.breakableRocks.count)
-		breakableRockOffsetsOffset = fossilSpawnOffsetsOffset + fossilSpawnCount * 4 + fossilSpawns.map { $0.size() }.sum()
+		objectCount = UInt32(unpacked.objects.count)
+		objectOffsetsOffset = fossilSpawnOffsetsOffset + fossilSpawnCount * 4 + fossilSpawns.map { $0.size() }.sum()
 		
-		breakableRocks = unpacked.breakableRocks.map(BreakableRock.init)
+		objects = unpacked.objects.map(Object.init)
 		
-		breakableRockOffsets = makeOffsets(
-			start: breakableRockOffsetsOffset + breakableRockCount * 4,
-			sizes: breakableRocks.map { $0.size() }
+		objectOffsets = makeOffsets(
+			start: objectOffsetsOffset + objectCount * 4,
+			sizes: objects.map { $0.size() }
 		)
 		
-		backgroundGradientTopOffset = breakableRockOffsetsOffset + breakableRockCount * 4 + breakableRocks.map { $0.size() }.sum()
+		backgroundGradientTopOffset = objectOffsetsOffset + objectCount * 4 + objects.map { $0.size() }.sum()
 		backgroundGradientBottomOffset = backgroundGradientTopOffset + 4
 		
 		unknown24 = unpacked.unknown24
@@ -533,28 +534,28 @@ extension MAP.Packed.FossilSpawn {
 			sizes: thingBs.map { $0.size() }
 		)
 		
-		thingCCount = UInt32(unpacked.thingCs.count)
+		vivosaurCount = UInt32(unpacked.vivosaurs.count)
 		// ThingBs are always 0x2c, plus 0x4 for the index
 		// - this is a bit hacky but i cant think of a cleaner solution and this works *okay*
-		thingCOffsetsOffset = thingBOffsetsOffset + thingBCount * 0x30
+		vivosaurOffsetsOffset = thingBOffsetsOffset + thingBCount * 0x30
 		
 		thingAs = unpacked.thingAs
 		
 		// TODO: is this size right? are they all 0x20???
-		thingCOffsets = makeOffsets(
-			start: thingCOffsetsOffset + thingCCount * 4,
-			sizes: repeatElement(0x20, count: Int(thingCCount))
+		vivosaurOffsets = makeOffsets(
+			start: vivosaurOffsetsOffset + vivosaurCount * 4,
+			sizes: repeatElement(0x20, count: Int(vivosaurCount))
 		)
 		
-		thingCs = unpacked.thingCs.map(ThingC.init)
+		vivosaurs = unpacked.vivosaurs.map(Vivosaur.init)
 	}
 	
 	func size() -> UInt32 {
 		0x30 +
 		(thingACount * 4) +
 		(thingBCount * 0x30) +
-		(thingCCount * 4) + // offsets
-		(thingCCount * 0x20)
+		(vivosaurCount * 4) + // offsets
+		(vivosaurCount * 0x20)
 	}
 }
 
@@ -572,12 +573,14 @@ extension MAP.Packed.FossilSpawn.ThingB {
 	}
 }
 
-extension MAP.Packed.FossilSpawn.ThingC {
-	init(_ unpacked: MAP.Unpacked.FossilSpawn.ThingC) {
+extension MAP.Packed.FossilSpawn.Vivosaur {
+	init(_ unpacked: MAP.Unpacked.FossilSpawn.Vivosaur) {
 		vivosaurID = unpacked.vivosaurID
-		unknown2 = unpacked.unknown2
+		
+		chance = unpacked.chance
 		unknown3 = unpacked.unknown3
 		unknown4 = unpacked.unknown4
+		
 		fossil1Chance = unpacked.fossil1Chance
 		fossil2Chance = unpacked.fossil2Chance
 		fossil3Chance = unpacked.fossil3Chance
@@ -585,8 +588,8 @@ extension MAP.Packed.FossilSpawn.ThingC {
 	}
 }
 
-extension MAP.Packed.BreakableRock {
-	init(_ unpacked: MAP.Unpacked.BreakableRock) {
+extension MAP.Packed.Object {
+	init(_ unpacked: MAP.Unpacked.Object) {
 		unknown1 = unpacked.unknown1
 		spawnCount = unpacked.spawnCount
 		entityID = unpacked.entityID
@@ -603,8 +606,8 @@ extension MAP.Packed.BreakableRock {
 	}
 }
 
-extension MAP.Packed.BreakableRock.Thing {
-	init(_ unpacked: MAP.Unpacked.BreakableRock.Thing) {
+extension MAP.Packed.Object.Thing {
+	init(_ unpacked: MAP.Unpacked.Object.Thing) {
 		unknown1 = FixedPoint2012(unpacked.unknown1)
 		unknown2 = FixedPoint2012(unpacked.unknown2)
 	}
@@ -642,7 +645,7 @@ extension MAP.Unpacked: ProprietaryFileData {
 		
 		topScreenImages = packed.topScreenImages.map(TopScreenImage.init)
 		
-		regions = packed.regions.map(Region.init)
+		regions = packed.regions.enumerated().map(Region.init)
 		
 		cameraPositions = packed.cameraPositions.map(CameraPosition.init)
 		
@@ -650,7 +653,7 @@ extension MAP.Unpacked: ProprietaryFileData {
 		
 		fossilSpawns = packed.fossilSpawns.map(FossilSpawn.init)
 		
-		breakableRocks = packed.breakableRocks.map(BreakableRock.init)
+		objects = packed.objects.map(Object.init)
 		
 		backgroundGradientTop = Color(packed.backgroundGradientTop)
 		
@@ -666,7 +669,9 @@ extension MAP.Unpacked.TopScreenImage {
 }
 
 extension MAP.Unpacked.Region {
-	init(_ packed: MAP.Packed.Region) {
+	init(index: Int, _ packed: MAP.Packed.Region) {
+		_grd_label = String(GRD.Unpacked.letterLookup[index]) 
+		
 		id = packed.id
 		x = packed.x
 		y = packed.y
@@ -708,7 +713,7 @@ extension MAP.Unpacked.FossilSpawn {
 		
 		thingBs = packed.thingBs.map(ThingB.init)
 		
-		thingCs = packed.thingCs.map(ThingC.init)
+		vivosaurs = packed.vivosaurs.map(Vivosaur.init)
 	}
 }
 
@@ -720,14 +725,15 @@ extension MAP.Unpacked.FossilSpawn.ThingB {
 	}
 }
 
-extension MAP.Unpacked.FossilSpawn.ThingC {
-	init(_ packed: MAP.Packed.FossilSpawn.ThingC) {
+extension MAP.Unpacked.FossilSpawn.Vivosaur {
+	init(_ packed: MAP.Packed.FossilSpawn.Vivosaur) {
 		vivosaurID = packed.vivosaurID
 		_vivosaur = vivosaurNames[vivosaurID]
 		
-		unknown2 = packed.unknown2
+		chance = packed.chance
 		unknown3 = packed.unknown3
 		unknown4 = packed.unknown4
+		
 		fossil1Chance = packed.fossil1Chance
 		fossil2Chance = packed.fossil2Chance
 		fossil3Chance = packed.fossil3Chance
@@ -735,8 +741,8 @@ extension MAP.Unpacked.FossilSpawn.ThingC {
 	}
 }
 
-extension MAP.Unpacked.BreakableRock {
-	init(_ packed: MAP.Packed.BreakableRock) {
+extension MAP.Unpacked.Object {
+	init(_ packed: MAP.Packed.Object) {
 		unknown1 = packed.unknown1
 		spawnCount = packed.spawnCount
 		
@@ -749,8 +755,8 @@ extension MAP.Unpacked.BreakableRock {
 	}
 }
 
-extension MAP.Unpacked.BreakableRock.Thing {
-	init(_ packed: MAP.Packed.BreakableRock.Thing) {
+extension MAP.Unpacked.Object.Thing {
+	init(_ packed: MAP.Packed.Object.Thing) {
 		unknown1 = Double(packed.unknown1)
 		unknown2 = Double(packed.unknown2)
 	}

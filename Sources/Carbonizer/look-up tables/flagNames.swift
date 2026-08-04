@@ -118,6 +118,7 @@ let ff1FlagNames: [UInt8: [UInt32: String]] = [
 		20: "Parchment Desert unlocked",
 		21: "Secret Island unlocked",
 		22: "Coldfeet Glacier unlocked",
+		24: "swap screens",
 		// 25 - post-credits
 		// 26 - picked rosie
 		// 27 - picked duna

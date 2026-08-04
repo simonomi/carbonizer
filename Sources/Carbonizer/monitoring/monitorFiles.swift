@@ -1,7 +1,7 @@
 import Foundation
 
 #if os(macOS)
-typealias EventHandler = @MainActor (URL) async throws -> Void
+@preconcurrency typealias EventHandler = @MainActor (URL) async throws -> Void
 
 struct PathMonitor {
 	var sources: [any DispatchSourceFileSystemObject]
@@ -15,7 +15,7 @@ struct PathMonitor {
 
 func monitorFiles(
 	in path: URL,
-	with eventHandler: sending @escaping @isolated(any) EventHandler
+	with eventHandler: sending @escaping EventHandler
 ) throws -> PathMonitor {
 	guard try path.isDirectory() else {
 		fatalError("cannot monitor file")
