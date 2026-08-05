@@ -60,11 +60,15 @@ enum TCL { // 3CL
 		var vivosaurs: [Vivosaur?]
 		
 		struct Vivosaur: Codable {
+			var _id: Int
+			var _label: String?
 			var animations: [Animation?]
 			
-			init?(animations: [Animation?]) {
+			init?(id: Int, animations: [Animation?]) {
 				if animations.allSatisfy({ $0 == nil }) { return nil }
 				
+				_id = id
+				_label = vivosaurNames[Int32(id)]
 				self.animations = animations
 			}
 			
@@ -180,29 +184,32 @@ extension TCL.Unpacked: ProprietaryFileData {
 	func unpacked(configuration: Configuration) -> Self { self }
 	
 	fileprivate init(_ packed: TCL.Packed, configuration: Configuration) {
-		vivosaurs = packed.vivosaurs.map {
-			Vivosaur(
-				animations: $0.animations.map {
-					if $0.isValid > 0 {
-						Vivosaur.Animation(
-							mesh: Vivosaur.Animation.TableEntry(
-								index: $0.meshIndex,
-								tableName: $0.meshTableName
-							),
-							animation: Vivosaur.Animation.TableEntry(
-								index: $0.animationIndex,
-								tableName: $0.animationTableName
-							),
-							texture: Vivosaur.Animation.TableEntry(
-								index: $0.textureIndex,
-								tableName: $0.textureTableName
+		vivosaurs = packed.vivosaurs
+			.enumerated()
+			.map {
+				Vivosaur(
+					id: $0,
+					animations: $1.animations.map {
+						if $0.isValid > 0 {
+							Vivosaur.Animation(
+								mesh: Vivosaur.Animation.TableEntry(
+									index: $0.meshIndex,
+									tableName: $0.meshTableName
+								),
+								animation: Vivosaur.Animation.TableEntry(
+									index: $0.animationIndex,
+									tableName: $0.animationTableName
+								),
+								texture: Vivosaur.Animation.TableEntry(
+									index: $0.textureIndex,
+									tableName: $0.textureTableName
+								)
 							)
-						)
-					} else {
-						nil
+						} else {
+							nil
+						}
 					}
-				}
-			)
-		}
+				)
+			}
 	}
 }

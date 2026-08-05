@@ -1,8 +1,8 @@
 import BinaryParser
 
 // c - camera
-// e - excavate
-// g - breakable rocks and stuff
+// e - excavate (fossils)
+// g - objects
 // m - maps
 // r - regions
 
@@ -25,7 +25,7 @@ enum MAP {
 		var topScreenImagesOffset: UInt32
 		
 		// 0x20
-		var mapDotMoves: Int32
+		var mapDotDoesNotMove: Int32
 		var mapDotX: Int32
 		var mapDotY: Int32
 		var mapDotScale: FixedPoint2012
@@ -173,8 +173,8 @@ enum MAP {
 		struct FossilSpawn { // map/e
 			var unknown1: Int32
 			var zone: Int32
-			var sonarUpgrades: Int32 // this is a flag (type 5 ?)
-			var maxSpawns: Int32
+			var isEnabledFlag: Int32 // (type 5 ?)
+			var spawnCount: Int32
 			
 			var unknown2: Int32
 			var unknown3: Int32
@@ -206,7 +206,7 @@ enum MAP {
 			
 			@BinaryConvertible
 			struct ThingB {
-				var unknown: Int32
+				var unknownFlag: Int32
 				
 				var count: UInt32
 				var offset: UInt32 = 0xc
@@ -234,7 +234,7 @@ enum MAP {
 		
 		@BinaryConvertible
 		struct Object { // map/g
-			var unknown1: Int32 // often 0, otherwise seems like an index?
+			var isEnabledFlag: Int32 // often 0, otherwise seems like an index?
 			                    // not dialogue, not event
 			                    // like in the ~5000s range
 			                    // a flag ?
@@ -320,8 +320,8 @@ enum MAP {
 		}
 		
 		struct ThingD: Codable {
-			var unknown2: Int32
-			var unknown3: Int32
+			var x: Int32
+			var y: Int32
 			var unknown4: Int32
 			var unknown5: Int32
 			
@@ -331,8 +331,8 @@ enum MAP {
 		struct FossilSpawn: Codable {
 			var unknown1: Int32
 			var zone: Int32
-			var sonarUpgrades: Int32
-			var maxSpawns: Int32
+			var isEnabledFlag: Int32
+			var spawnCount: Int32
 			
 			var unknown2: Int32
 			var unknown3: Int32
@@ -344,7 +344,7 @@ enum MAP {
 			var vivosaurs: [Vivosaur]
 			
 			struct ThingB: Codable {
-				var unknown: Int32
+				var unknownFlag: Int32
 				
 				var values: [Int32]
 			}
@@ -365,7 +365,7 @@ enum MAP {
 		}
 		
 		struct Object: Codable {
-			var unknown1: Int32
+			var isEnabledFlag: Int32
 			var spawnCount: Int32
 			
 			var entityID: Int32
@@ -404,7 +404,7 @@ extension MAP.Packed: ProprietaryFileData {
 		topScreenImageCount = UInt32(unpacked.topScreenImages.count)
 		topScreenImagesOffset = mapNameForCollisionOffset + UInt32(unpacked.mapNameForCollision.utf8CString.count.roundedUpToTheNearest(4))
 		
-		mapDotMoves = unpacked.mapDotMoves ? 1 : 0
+		mapDotDoesNotMove = unpacked.mapDotMoves ? 0 : 1
 		mapDotX = unpacked.mapDotX
 		mapDotY = unpacked.mapDotY
 		mapDotScale = FixedPoint2012(unpacked.mapDotScale)
@@ -499,8 +499,8 @@ extension MAP.Packed.ThingD {
 	init(_ unpacked: MAP.Unpacked.ThingD) {
 		cameraPositionOffset = unpacked.cameraPositon == nil ? 0 : 0x14
 		
-		x = unpacked.unknown2
-		y = unpacked.unknown3
+		x = unpacked.x
+		y = unpacked.y
 		unknown4 = unpacked.unknown4
 		unknown5 = unpacked.unknown5
 		
@@ -516,8 +516,8 @@ extension MAP.Packed.FossilSpawn {
 	init(_ unpacked: MAP.Unpacked.FossilSpawn) {
 		unknown1 = unpacked.unknown1
 		zone = unpacked.zone
-		sonarUpgrades = unpacked.sonarUpgrades
-		maxSpawns = unpacked.maxSpawns
+		isEnabledFlag = unpacked.isEnabledFlag
+		spawnCount = unpacked.spawnCount
 		
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
@@ -561,7 +561,7 @@ extension MAP.Packed.FossilSpawn {
 
 extension MAP.Packed.FossilSpawn.ThingB {
 	init(_ unpacked: MAP.Unpacked.FossilSpawn.ThingB) {
-		unknown = unpacked.unknown
+		unknownFlag = unpacked.unknownFlag
 		
 		count = UInt32(unpacked.values.count)
 		
@@ -590,7 +590,7 @@ extension MAP.Packed.FossilSpawn.Vivosaur {
 
 extension MAP.Packed.Object {
 	init(_ unpacked: MAP.Unpacked.Object) {
-		unknown1 = unpacked.unknown1
+		isEnabledFlag = unpacked.isEnabledFlag
 		spawnCount = unpacked.spawnCount
 		entityID = unpacked.entityID
 		rotation = FixedPoint1616(unpacked.rotation
@@ -630,7 +630,7 @@ extension MAP.Unpacked: ProprietaryFileData {
 		unknown02 = packed.unknown02
 		unknown03 = packed.unknown03
 		
-		mapDotMoves = packed.mapDotMoves > 0
+		mapDotMoves = packed.mapDotDoesNotMove == 0
 		mapDotX = packed.mapDotX
 		mapDotY = packed.mapDotY
 		mapDotScale = Double(packed.mapDotScale)
@@ -690,8 +690,8 @@ extension MAP.Unpacked.CameraPosition {
 
 extension MAP.Unpacked.ThingD {
 	init(_ packed: MAP.Packed.ThingD) {
-		unknown2 = packed.x
-		unknown3 = packed.y
+		x = packed.x
+		y = packed.y
 		unknown4 = packed.unknown4
 		unknown5 = packed.unknown5
 		
@@ -703,8 +703,8 @@ extension MAP.Unpacked.FossilSpawn {
 	init(_ packed: MAP.Packed.FossilSpawn) {
 		unknown1 = packed.unknown1
 		zone = packed.zone
-		sonarUpgrades = packed.sonarUpgrades
-		maxSpawns = packed.maxSpawns
+		isEnabledFlag = packed.isEnabledFlag
+		spawnCount = packed.spawnCount
 		
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3
@@ -719,7 +719,7 @@ extension MAP.Unpacked.FossilSpawn {
 
 extension MAP.Unpacked.FossilSpawn.ThingB {
 	init(_ packed: MAP.Packed.FossilSpawn.ThingB) {
-		unknown = packed.unknown
+		unknownFlag = packed.unknownFlag
 		
 		values = packed.values
 	}
@@ -743,7 +743,7 @@ extension MAP.Unpacked.FossilSpawn.Vivosaur {
 
 extension MAP.Unpacked.Object {
 	init(_ packed: MAP.Packed.Object) {
-		unknown1 = packed.unknown1
+		isEnabledFlag = packed.isEnabledFlag
 		spawnCount = packed.spawnCount
 		
 		entityID = packed.entityID
