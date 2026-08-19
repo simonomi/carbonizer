@@ -16,7 +16,7 @@ enum Mesh_FFC {
 		var unknown2: UInt32
 		var unknown3: UInt32
 		var unknown4: UInt32
-		var unknown5: UInt32
+		var keyframeCount: UInt32
 		
 		var unknown6: UInt32
 		
@@ -75,7 +75,7 @@ enum Mesh_FFC {
 		var unknown2: UInt32
 		var unknown3: UInt32
 		var unknown4: UInt32
-		var unknown5: UInt32
+		var keyframeCount: UInt32
 		
 		var unknown6: UInt32
 		
@@ -145,7 +145,7 @@ extension Mesh_FFC.Packed: ProprietaryFileData {
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
 		unknown4 = unpacked.unknown4
-		unknown5 = unpacked.unknown5
+		keyframeCount = unpacked.keyframeCount
 		unknown6 = unpacked.unknown6
 		
 		let writer = Datawriter()
@@ -210,7 +210,7 @@ extension Mesh_FFC.Unpacked: ProprietaryFileData {
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3
 		unknown4 = packed.unknown4
-		unknown5 = packed.unknown5
+		keyframeCount = packed.keyframeCount
 		unknown6 = packed.unknown6
 		
 		if packed.commandsLength == 0 {

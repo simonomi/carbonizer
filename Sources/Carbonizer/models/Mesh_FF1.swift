@@ -17,8 +17,7 @@ enum Mesh_FF1 {
 		var unknown3: UInt32 // no clue what this number means but when its 0 its all funky
 							 // 0, 0x100, 0x101, 0x102
 		var unknown4: UInt32 // 1, 2, 3, 4, 5, 6, 9
-		var unknown5: UInt32 // lots of values 1...300
-							 // number of keyframes?
+		var keyframeCount: UInt32
 		
 		var unknown6: UInt32 // usually half of 0x8 (commandsLength)??
 		
@@ -70,7 +69,7 @@ enum Mesh_FF1 {
 		var unknown2: UInt32
 		var unknown3: UInt32
 		var unknown4: UInt32
-		var unknown5: UInt32
+		var keyframeCount: UInt32
 		
 		var unknown6: UInt32
 		
@@ -137,7 +136,7 @@ extension Mesh_FF1.Packed: ProprietaryFileData {
 		unknown2 = unpacked.unknown2
 		unknown3 = unpacked.unknown3
 		unknown4 = unpacked.unknown4
-		unknown5 = unpacked.unknown5
+		keyframeCount = unpacked.keyframeCount
 		unknown6 = unpacked.unknown6
 		
 		let writer = Datawriter()
@@ -198,7 +197,7 @@ extension Mesh_FF1.Unpacked: ProprietaryFileData {
 		unknown2 = packed.unknown2
 		unknown3 = packed.unknown3
 		unknown4 = packed.unknown4
-		unknown5 = packed.unknown5
+		keyframeCount = packed.keyframeCount
 		unknown6 = packed.unknown6
 		
 		if packed.commandsLength == 0 {
