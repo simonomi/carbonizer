@@ -1,7 +1,11 @@
 - attack defs (DAL_FFC)
-- update DAL file type
 - 3BC `model/battle/arcscenecsv/0000` (extremely simple), FF1/FFC both
 	- magic bytes
 	- indices count
 	- indices offset
 	- table name offset
+- ffc dex commands
+	- https://discord.com/channels/@me/1260855858926190724/1547386270207053945
+- dcl labels
+	- https://discord.com/channels/@me/1260855858926190724/1548803054885806232
+- ffc dep files

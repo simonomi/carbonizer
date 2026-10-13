@@ -37,8 +37,8 @@ enum MFS {
 //			@Offset(givenBy: \Self.colorPaletteOffset)
 //			var colorPalettes: [Palette]
 			
-//			@If(\Self.letterSize, is: .equalTo(16)) // skip every font but font12
-			@If(\Self.letterSize, is: .equalTo(0x44)) // skip every font but font12
+			@If(\Self.letterSize, is: .equalTo(16)) // skip every font but font12
+//			@If(\Self.letterSize, is: .equalTo(0x44)) // skip every font but ?
 													  // font10 seems to fail bc non-ascii
 													  // rv_num seems to fail bc direct color bitmap
 			@Offset(givenBy: \Self.lettersOffset)
@@ -57,7 +57,8 @@ enum MFS {
 				var width: UInt8
 				var height: UInt8
 //				@Count(givenBy: \Self.width, .times(\Self.height), .dividedBy(2)) // uhhh (divided by 8 for b/w)
-				@Count(0x40)
+//				@Count(0x40)
+				@Count(12)
 				var letterData: [UInt8] // if no palette, bitmask one byte per row
 										// if palette, 4 bits per color
 				
@@ -98,37 +99,37 @@ extension MFS.Unpacked: ProprietaryFileData {
 		print()
 		print(packed.someCount)
 		
-		guard packed.someCount == 1 else { return }
-//		guard packed.someCount == 3 else { return }
+		guard packed.someCount == 3 else { return }
+//		guard packed.someCount == 1 else { return }
 		
 		let something = packed.somes.first!
 		
 		print(something.letterSize)
 		
-//		guard something.letterLength == 16 else { return }
-		guard something.letterSize == 0x44 else { return }
+		guard something.letterSize == 16 else { return }
+//		guard something.letterSize == 0x44 else { return }
 		
 		print("here")
 		
 		for letter in something.letters! {
-//			let letterString = letter.letterData
-//				.map { String($0, radix: 2) }
-//				.map { $0.padded(toLength: 8, with: "0") }
-//				.joined(separator: "\n")
-//				.replacing("0", with: " ")
-//				.replacing("1", with: "█")
+			let letterString = letter.letterData
+				.map { String($0, radix: 2) }
+				.map { $0.padded(toLength: 8, with: "0") }
+				.joined(separator: "\n")
+				.replacing("0", with: " ")
+				.replacing("1", with: "█")
 //			
-//			print(letterString)
+			print(letterString)
 			print(String(letter.ascii, radix: 16))
 //			print(letter.letterData)
-			print(
-				letter.letterData
-					.flatMap { [$0 & 0b1111, $0 >> 4] }
-					.map { String($0, radix: 16) }
-					.chunked(exactSize: Int(letter.width))
-					.joined(separator: ["\n"])
-					.joined(separator: "")
-			)
+//			print(
+//				letter.letterData
+//					.flatMap { [$0 & 0b1111, $0 >> 4] }
+//					.map { String($0, radix: 16) }
+//					.chunked(exactSize: Int(letter.width))
+//					.joined(separator: ["\n"])
+//					.joined(separator: "")
+//			)
 			print("---")
 		}
 		

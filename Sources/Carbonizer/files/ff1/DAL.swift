@@ -6,7 +6,9 @@ enum DAL {
 	struct Packed {
 		@Include
 		static let magicBytes = "DAL"
-		var unknown1: UInt32 = 0x659
+		var unknown1: UInt32
+		// - for ff1 and ffc, always 1625
+		// - for jpn rom, 1623
 		var unknown2: UInt32 = 0x7f4
 		var indicesCount: UInt32
 		var indicesOffset: UInt32 = 0x14
